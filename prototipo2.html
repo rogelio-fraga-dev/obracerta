@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Obra Certa — Fluxo do Profissional</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --orange:#E8560A; --orange2:#FF7A3D; --orange3:#FFF0E8;
+  --dark:#18160F; --dark2:#221F16; --dark3:#2E2A1F;
+  --cream:#FAF7F0; --cream2:#F2EDE0; --cream3:#E8E0CC;
+  --text:#6B6455; --text2:#9B9080;
+  --green:#1A9E5C; --green-bg:#E8F7EF;
+  --yellow:#F4C430; --yellow-bg:#FFFBEB;
+}
+body { font-family:'Cabinet Grotesk',sans-serif; background:#E0DBD0; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+.phone { width:390px; height:844px; background:var(--cream); border-radius:50px; overflow:hidden; position:relative; box-shadow:0 40px 80px rgba(0,0,0,0.3),0 0 0 10px var(--dark),0 0 0 12px #444; display:flex; flex-direction:column; }
+.status-bar { height:50px; background:var(--cream); display:flex; align-items:center; justify-content:space-between; padding:0 28px; font-size:12px; font-weight:600; color:var(--dark); flex-shrink:0; position:relative; z-index:10; }
+.notch { width:120px; height:30px; background:var(--dark); border-radius:20px; position:absolute; top:10px; left:50%; transform:translateX(-50%); }
+.screen { display:none; flex-direction:column; flex:1; overflow:hidden; }
+.screen.active { display:flex; flex-direction:column; flex:1; }
+.progress-bar { height:3px; background:var(--cream3); flex-shrink:0; }
+.progress-fill { height:100%; background:var(--orange); transition:width 0.4s ease; }
+.screen-header { padding:20px 24px 0; flex-shrink:0; }
+.back-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.back-btn { background:var(--cream2); border:none; border-radius:10px; width:36px; height:36px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.step-indicator { font-size:12px; font-weight:700; color:var(--text2); background:var(--cream2); padding:6px 12px; border-radius:20px; }
+.screen-title { font-family:'Fraunces',serif; font-size:26px; font-weight:900; color:var(--dark); line-height:1.1; margin-bottom:6px; }
+.screen-title em { font-style:italic; color:var(--orange); }
+.screen-sub { font-size:13px; color:var(--text); margin-bottom:4px; line-height:1.5; }
+.scroll-area { flex:1; overflow-y:auto; padding:16px 24px; scrollbar-width:none; }
+.scroll-area::-webkit-scrollbar { display:none; }
+.bottom-action { padding:12px 24px 24px; background:var(--cream); border-top:1px solid var(--cream3); flex-shrink:0; }
+.btn-next { width:100%; background:var(--orange); color:white; border:none; border-radius:14px; padding:16px; font-size:16px; font-weight:800; font-family:'Cabinet Grotesk',sans-serif; cursor:pointer; transition:all 0.2s; }
+.btn-next:hover { background:var(--orange2); }
+.btn-skip { width:100%; background:transparent; color:var(--text); border:none; padding:10px; font-size:13px; font-weight:600; font-family:'Cabinet Grotesk',sans-serif; cursor:pointer; margin-top:6px; }
+.field { margin-bottom:16px; }
+.field-label { font-size:11px; font-weight:800; color:var(--text); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block; }
+.field-input { width:100%; background:white; border:2px solid var(--cream3); border-radius:12px; padding:14px 16px; font-size:15px; font-family:'Cabinet Grotesk',sans-serif; color:var(--dark); outline:none; transition:border-color 0.2s; }
+.field-input:focus { border-color:var(--orange); }
+.field-input::placeholder { color:var(--text2); }
+.info-box { background:var(--cream2); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--text); line-height:1.5; margin-top:8px; }
+.warn-box { background:var(--yellow-bg); border:1px solid rgba(244,196,48,0.3); border-radius:10px; padding:12px 14px; font-size:12px; color:var(--text); line-height:1.5; margin-top:8px; }
+.spec-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.spec-btn { background:white; border:2px solid var(--cream3); border-radius:14px; padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.2s; }
+.spec-btn.selected { background:var(--orange3); border-color:var(--orange); color:var(--orange); }
+.spec-btn:active { transform:scale(0.95); }
+.spec-icon { font-size:32px; margin-bottom:8px; }
+.spec-name { font-size:14px; font-weight:700; color:var(--dark); }
+.spec-btn.selected .spec-name { color:var(--orange); }
+.plano-option { background:white; border:2px solid var(--cream3); border-radius:16px; padding:18px; cursor:pointer; transition:all 0.2s; position:relative; margin-bottom:10px; }
+.plano-option.selected { border-color:var(--orange); background:var(--orange3); }
+.plano-option-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.plano-option-nome { font-size:17px; font-weight:800; color:var(--dark); }
+.plano-option.selected .plano-option-nome { color:var(--orange); }
+.plano-option-preco { font-family:'Fraunces',serif; font-size:22px; font-weight:900; color:var(--dark); }
+.plano-feature { font-size:12px; color:var(--text); display:flex; gap:6px; margin-bottom:4px; }
+.plano-feature.sim { color:var(--green); font-weight:700; }
+.plano-feature.nao { opacity:0.4; }
+.badge-popular { position:absolute; top:-10px; right:16px; background:var(--orange); color:white; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 10px; border-radius:6px; }
+.success-icon { width:80px; height:80px; background:rgba(26,158,92,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:40px; margin:0 auto 20px; }
+.app-header { background:var(--dark); color:white; padding:20px 24px; border-radius:24px 24px 0 0; }
+.app-header-greeting { font-size:13px; color:rgba(250,247,240,0.6); margin-bottom:4px; }
+.app-header-name { font-size:28px; font-weight:900; margin-bottom:4px; }
+.app-header-spec { font-size:14px; color:var(--orange); font-weight:700; }
+.app-header-city { font-size:12px; color:rgba(250,247,240,0.5); margin-top:2px; }
+.completion-bar { background:var(--dark2); border-radius:12px; padding:16px; margin:16px 0; display:flex; align-items:center; gap:12px; }
+.completion-fill { height:4px; background:var(--orange); border-radius:2px; flex:1; }
+.completion-percent { font-size:13px; font-weight:700; color:white; }
+.completion-alert { color:var(--orange); font-size:12px; margin-top:4px; }
+.complete-section { padding:20px 24px; background:white; }
+.complete-title { font-size:11px; font-weight:800; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+.action-item { background:white; border:1px solid var(--cream3); border-radius:12px; padding:16px; margin-bottom:12px; display:flex; gap:12px; align-items:center; cursor:pointer; transition:all 0.15s; }
+.action-item:hover { border-color:var(--orange); }
+.action-icon { font-size:24px; flex-shrink:0; }
+.action-text { flex:1; }
+.action-name { font-size:15px; font-weight:700; color:var(--dark); margin-bottom:2px; }
+.action-desc { font-size:12px; color:var(--text); }
+.action-arrow { color:var(--orange); font-size:20px; flex-shrink:0; }
+.bottom-nav { display:flex; justify-content:space-around; align-items:flex-end; background:var(--dark); padding:12px 0 20px; flex-shrink:0; border-radius:0 0 50px 50px; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; position:relative; }
+.nav-icon { font-size:24px; }
+.nav-label { font-size:10px; font-weight:600; }
+.nav-item.active { color:var(--orange); }
+.nav-item:not(.active) { color:rgba(250,247,240,0.5); }
+.nav-badge { position:absolute; top:-4px; right:8px; background:var(--orange); color:white; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; }
+.obra-card { background:white; border:1px solid var(--cream3); border-radius:16px; padding:18px; margin-bottom:14px; }
+.obra-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.obra-title { font-size:16px; font-weight:800; color:var(--dark); }
+.obra-badge { background:var(--orange3); color:var(--orange); font-size:10px; font-weight:800; padding:4px 8px; border-radius:6px; }
+.obra-badge.aberta { background:var(--green-bg); color:var(--green); }
+.obra-desc { font-size:13px; color:var(--text); line-height:1.5; margin-bottom:12px; }
+.obra-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.obra-tag { background:var(--cream2); border-radius:8px; padding:6px 12px; font-size:11px; color:var(--text); }
+.obra-lances { font-size:12px; color:var(--text); margin-bottom:10px; }
+.obra-lances strong { color:var(--dark); font-weight:700; }
+.btn-lance { background:var(--orange); color:white; border:none; border-radius:10px; padding:10px 16px; font-size:14px; font-weight:700; cursor:pointer; }
+.pedido-card { background:white; border:1px solid var(--cream3); border-radius:14px; padding:16px; margin-bottom:12px; }
+.pedido-status { font-size:12px; color:var(--green); font-weight:700; }
+.payment-choice { background:white; border:2px solid var(--cream3); border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer; transition:all 0.2s; }
+.payment-choice.selected { background:var(--orange3); border-color:var(--orange); }
+.payment-choice-label { font-size:15px; font-weight:700; color:var(--dark); margin-bottom:4px; }
+.payment-choice-desc { font-size:12px; color:var(--text); }
+.success-box { background:var(--green-bg); border:1px solid rgba(26,158,92,0.2); border-radius:12px; padding:14px; margin-bottom:16px; }
+.success-box-title { font-size:13px; font-weight:700; color:var(--green); }
+.success-box-desc { font-size:12px; color:var(--text); margin-top:4px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="notch"></div>
+    <div style="display:flex;gap:6px">📶🔋</div>
+  </div>
+
+  <!-- TELA 0: ESCOLHA DE PERFIL (Home Landing) -->
+  <div class="screen active" id="p0">
+    <div style="flex:1;display:flex;flex-direction:column;padding:32px 24px;overflow-y:auto;">
+      <div style="margin-bottom:28px;">
+        <div style="font-family:'Fraunces',serif;font-size:30px;font-weight:900;color:var(--dark);line-height:1.1;margin-bottom:10px;">Bem-vindo à<br><em style="font-style:italic;color:var(--orange)">ObraCerta</em></div>
+        <div style="font-size:14px;color:var(--text);line-height:1.6;">O que você quer fazer aqui?</div>
+      </div>
+
+      <div onclick="goTo('p1')" style="background:var(--dark);border-radius:16px;padding:22px;cursor:pointer;margin-bottom:12px;">
+        <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(232,86,10,0.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🔨</div>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:800;color:var(--cream);margin-bottom:2px;">Quero ser contratado</div>
+            <div style="font-size:12px;color:rgba(250,247,240,0.5);">Sou pedreiro, pintor, eletricista...</div>
+          </div>
+          <div style="color:var(--orange);font-size:20px;">→</div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:12px;color:rgba(250,247,240,0.5);">✓ Crie seu perfil e apareça nas buscas</div>
+          <div style="font-size:12px;color:rgba(250,247,240,0.5);">✓ Receba e aprove pedidos de serviço</div>
+          <div style="font-size:12px;color:rgba(250,247,240,0.5);">✓ Dê lances em obras (plano Especialista)</div>
+        </div>
+        <div style="margin-top:12px;background:rgba(232,86,10,0.15);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--orange);font-weight:700;">🎁 7 dias com acesso completo · Planos a partir de R$49/mês</div>
+      </div>
+
+      <div onclick="alert('Fluxo do contratante')" style="background:white;border:2px solid var(--orange);border-radius:16px;padding:22px;cursor:pointer;margin-bottom:20px;">
+        <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--orange3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏠</div>
+          <div style="flex:1;">
+            <div style="font-size:17px;font-weight:800;color:var(--dark);margin-bottom:2px;">Quero contratar</div>
+            <div style="font-size:12px;color:var(--text);">Preciso de profissional para minha obra</div>
+          </div>
+          <div style="color:var(--orange);font-size:20px;">→</div>
+        </div>
+        <div style="border-top:1px solid var(--cream3);padding-top:12px;display:flex;flex-direction:column;gap:5px;">
+          <div style="font-size:12px;color:var(--text);">✓ Busque profissionais verificados</div>
+          <div style="font-size:12px;color:var(--text);">✓ Veja agenda, avaliações e valores</div>
+          <div style="font-size:12px;color:var(--text);">✓ Agende com segurança</div>
+        </div>
+        <div style="margin-top:12px;background:var(--cream2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text);font-weight:700;">💳 Acesso por 30 dias · A partir de R$19</div>
+      </div>
+
+      <div style="background:rgba(232,86,10,0.06);border:1px solid rgba(232,86,10,0.2);border-radius:12px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <div style="font-size:16px;flex-shrink:0;">⚠️</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.5;">
+          <strong style="color:var(--dark);">Atenção:</strong> se você é profissional e quer ser encontrado ou dar lances em obras, escolha <strong>"Quero ser contratado"</strong>.
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:12px;color:var(--text2);margin-top:20px;">Já tem cadastro? <span onclick="alert('Login')" style="color:var(--orange);font-weight:700;cursor:pointer;">Entrar</span></div>
+    </div>
+  </div>
+
+  <!-- TELA 1: DADOS BÁSICOS (Passo 1 de 4) -->
+  <div class="screen" id="p1">
+    <div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div>
+    <div class="screen-header">
+      <div class="back-row">
+        <button class="back-btn" onclick="goTo('p0')">←</button>
+        <div class="step-indicator">Passo 1 de 4</div>
+      </div>
+      <div class="screen-title">Seus dados <em>básicos</em></div>
+      <div class="screen-sub">Só o essencial por enquanto. Você completa o restante depois.</div>
+    </div>
+    <div class="scroll-area">
+      <div class="field">
+        <label class="field-label">Seu nome</label>
+        <input type="text" class="field-input" placeholder="Ex: Carlos Mendes">
+      </div>
+      <div class="field">
+        <label class="field-label">WhatsApp</label>
+        <input type="tel" class="field-input" placeholder="(34) 99999-9999">
+      </div>
+      <div class="field">
+        <label class="field-label">Cidade onde você trabalha</label>
+        <input type="text" class="field-input" placeholder="Uberlândia, MG">
+      </div>
+      <div class="info-box">
+        🔒 Seu número fica escondido até você aceitar um pedido de serviço. O cliente só recebe depois da sua confirmação.
+      </div>
+    </div>
+    <div class="bottom-action">
+      <button class="btn-next" onclick="goTo('p2')">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- TELA 2: ESPECIALIDADES (Passo 2 de 4) -->
+  <div class="screen" id="p2">
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+    <div class="screen-header">
+      <div class="back-row">
+        <button class="back-btn" onclick="goTo('p1')">←</button>
+        <div class="step-indicator">Passo 2 de 4</div>
+      </div>
+      <div class="screen-title">O que você <em>faz?</em></div>
+      <div class="screen-sub">Selecione sua especialidade. Pode escolher mais de uma.</div>
+    </div>
+    <div class="scroll-area">
+      <div class="spec-grid">
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🔨</div><div class="spec-name">Pedreiro</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🎨</div><div class="spec-name">Pintor</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">⚡</div><div class="spec-name">Eletricista</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🚰</div><div class="spec-name">Encanador</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🪛</div><div class="spec-name">Marceneiro</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🪟</div><div class="spec-name">Gesseeiro</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🔧</div><div class="spec-name">Serralheiro</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🧱</div><div class="spec-name">Azulejista</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">💧</div><div class="spec-name">Impermeabiliz.</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🏊</div><div class="spec-name">Piscineiro</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🔨</div><div class="spec-name">Soldador</div></div>
+        <div class="spec-btn" onclick="toggleSpec(this)"><div class="spec-icon">🌱</div><div class="spec-name">Paisagista</div></div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Outra especialidade?</label>
+        <input type="text" class="field-input" placeholder="Ex: Vidraceiro, Limpeza pós-obra...">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Há quantos anos você trabalha nisso?</label>
+        <input type="text" class="field-input" placeholder="3 a 5 anos">
+      </div>
+    </div>
+    <div class="bottom-action">
+      <button class="btn-next" onclick="goTo('p3')">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- TELA 3: PLANOS (Passo 3 de 4) -->
+  <div class="screen" id="p3">
+    <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+    <div class="screen-header">
+      <div class="back-row">
+        <button class="back-btn" onclick="goTo('p2')">←</button>
+        <div class="step-indicator">Passo 3 de 4</div>
+      </div>
+      <div class="screen-title">Escolha seu <em>plano</em></div>
+      <div class="screen-sub">Durante 7 dias, você terá acesso completo a TODOS os benefícios como degustação. Após isso, seus benefícios mudarão conforme o plano escolhido.</div>
+    </div>
+    <div class="scroll-area">
+      <div class="plano-option" onclick="selectPlano(this, 'gratuito')">
+        <div class="plano-option-top">
+          <div class="plano-option-nome">Iniciante</div>
+          <div class="plano-option-preco">R$0</div>
+        </div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:8px;">para sempre</div>
+        <div class="plano-feature sim">✓ Perfil básico visível</div>
+        <div class="plano-feature sim">✓ Sua nota e número de obras aparecem</div>
+        <div class="plano-feature nao">✗ Foto e cidade ficam escondidas</div>
+        <div class="plano-feature nao">✗ Não recebe pedidos de serviço</div>
+      </div>
+
+      <div class="plano-option" onclick="selectPlano(this, 'pro')">
+        <div class="badge-popular">MAIS ESCOLHIDO</div>
+        <div class="plano-option-top">
+          <div class="plano-option-nome">Profissional</div>
+          <div class="plano-option-preco">R$49</div>
+        </div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:8px;">/mês</div>
+        <div class="plano-feature sim">✓ Perfil completo — foto, cidade, valores</div>
+        <div class="plano-feature sim">✓ Recebe pedidos de serviço</div>
+        <div class="plano-feature sim">✓ Aparece mais alto nas buscas</div>
+        <div class="plano-feature sim">✓ Vê quantas pessoas visitaram seu perfil</div>
+        <div style="background:var(--green-bg);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:11px;color:var(--green);font-weight:700;">🎁 7 dias com acesso completo</div>
+      </div>
+
+      <div class="plano-option" onclick="selectPlano(this, 'equipe')">
+        <div class="plano-option-top">
+          <div class="plano-option-nome">Especialista</div>
+          <div class="plano-option-preco">R$99</div>
+        </div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:8px;">/mês</div>
+        <div class="plano-feature sim">✓ Tudo do plano Profissional</div>
+        <div class="plano-feature sim">✓ Cadastra sua equipe inteira</div>
+        <div class="plano-feature sim">✓ Dá lances em obras postadas</div>
+        <div class="plano-feature sim">✓ Aparece no topo das buscas</div>
+        <div class="plano-feature sim">✓ Recebe aviso quando alguém busca na sua cidade</div>
+        <div style="background:var(--green-bg);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:11px;color:var(--green);font-weight:700;">🎁 7 dias com acesso completo</div>
+      </div>
+    </div>
+    <div class="bottom-action">
+      <button class="btn-next" onclick="goTo('p4')">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- TELA 4: PAGAMENTO (Passo 4 de 4) -->
+  <div class="screen" id="p4">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="screen-header">
+      <div class="back-row">
+        <button class="back-btn" onclick="goTo('p3')">←</button>
+        <div class="step-indicator">Passo 4 de 4</div>
+      </div>
+      <div class="screen-title">Como quer <em>pagar?</em></div>
+      <div class="screen-sub">Plano Profissional · R$49/mês · Cartão cobrado agora.</div>
+    </div>
+    <div class="scroll-area">
+      <div class="success-box">
+        <div class="success-box-title">🎁 7 dias com todos os benefícios!</div>
+        <div class="success-box-desc">Durante 7 dias, você tem acesso a TODOS os benefícios do plano Especialista como degustação. Após isso, suas funcionalidades mudarão conforme o plano escolhido. O pagamento é cobrado agora.</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Forma de pagamento</label>
+      </div>
+
+      <div class="payment-choice selected" onclick="selectPayment(this, 'cartao')">
+        <div class="payment-choice-label">💳 Cartão de crédito</div>
+        <div class="payment-choice-desc">Cobrança imediata, acesso de 7 dias ao plano completo</div>
+      </div>
+
+      <div class="payment-choice" onclick="selectPayment(this, 'pix')">
+        <div class="payment-choice-label">⚡ PIX</div>
+        <div class="payment-choice-desc">Pague mês a mês, sem cobrança automática</div>
+      </div>
+
+      <div id="cartao-fields" style="margin-top:16px;">
+        <div class="field">
+          <label class="field-label">Número do cartão</label>
+          <input type="text" class="field-input" placeholder="0000 0000 0000 0000">
+        </div>
+        <div class="field">
+          <label class="field-label">Nome no cartão</label>
+          <input type="text" class="field-input" placeholder="Como está escrito no cartão">
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label">Validade</label>
+            <input type="text" class="field-input" placeholder="MM/AA">
+          </div>
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label">Código (CVV)</label>
+            <input type="text" class="field-input" placeholder="123">
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        🔒 Pagamento seguro. Você pode cancelar quando quiser, sem multa.
+      </div>
+    </div>
+    <div class="bottom-action">
+      <button class="btn-next" onclick="goTo('p5')">Finalizar cadastro →</button>
+    </div>
+  </div>
+
+  <!-- TELA 4-UPGRADE: PAGAMENTO PARA UPGRADE -->
+  <div class="screen" id="p4-upgrade">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="screen-header">
+      <div class="back-row">
+        <button class="back-btn" onclick="goTo('app-home')">←</button>
+        <div class="step-indicator">Upgrade de plano</div>
+      </div>
+      <div class="screen-title">Atualizar para <em>Especialista</em></div>
+      <div class="screen-sub">Plano Especialista · R$99/mês · Cartão cobrado agora.</div>
+    </div>
+    <div class="scroll-area">
+      <div class="success-box">
+        <div class="success-box-title">⚡ Upgrade imediato!</div>
+        <div class="success-box-desc">Você será cobrado agora e terá acesso imediato a TODOS os benefícios do plano Especialista, incluindo dar lances em obras.</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label class="field-label">Forma de pagamento</label>
+      </div>
+
+      <div class="payment-choice selected" onclick="selectPayment(this, 'cartao')">
+        <div class="payment-choice-label">💳 Cartão de crédito</div>
+        <div class="payment-choice-desc">Cobrança imediata, acesso instantâneo</div>
+      </div>
+
+      <div class="payment-choice" onclick="selectPayment(this, 'pix')">
+        <div class="payment-choice-label">⚡ PIX</div>
+        <div class="payment-choice-desc">Pague à vista, acesso instantâneo</div>
+      </div>
+
+      <div id="cartao-fields" style="margin-top:16px;">
+        <div class="field">
+          <label class="field-label">Número do cartão</label>
+          <input type="text" class="field-input" placeholder="0000 0000 0000 0000">
+        </div>
+        <div class="field">
+          <label class="field-label">Nome no cartão</label>
+          <input type="text" class="field-input" placeholder="Como está escrito no cartão">
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label">Validade</label>
+            <input type="text" class="field-input" placeholder="MM/AA">
+          </div>
+          <div class="field" style="flex:1;margin-bottom:0;">
+            <label class="field-label">Código (CVV)</label>
+            <input type="text" class="field-input" placeholder="123">
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        🔒 Pagamento seguro. A diferença será descontada da sua próxima fatura mensal.
+      </div>
+    </div>
+    <div class="bottom-action">
+      <button class="btn-next" onclick="alert('Upgrade realizado com sucesso! ✅'); goTo('app-home');">Confirmar upgrade →</button>
+    </div>
+  </div>
+
+  <!-- TELA 5: SUCCESS -->
+  <div class="screen" id="p5">
+    <div style="flex:1;display:flex;flex-direction:column;padding:40px 24px;overflow-y:auto;align-items:center;justify-content:center;text-align:center;">
+      <div class="success-icon">🎉</div>
+      <div style="font-family:'Fraunces',serif;font-size:28px;font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:12px;">Cadastro feito<br>com <em style="font-style:italic;color:var(--orange);">sucesso!</em></div>
+      <div style="font-size:14px;color:var(--text);line-height:1.6;margin-bottom:24px;">Seu perfil já está no ar. Você tem 7 dias com acesso completo a todos os benefícios.</div>
+
+      <div class="success-box" style="width:100%;margin-bottom:20px;">
+        <div class="success-box-title">🎁 7 dias com acesso completo — ativo agora</div>
+        <div class="success-box-desc">Você só paga depois dos 7 dias. Pode cancelar antes sem custo nenhum.</div>
+      </div>
+
+      <div style="background:var(--cream2);border-radius:12px;padding:16px;margin-bottom:24px;width:100%;">
+        <div style="font-weight:700;color:var(--dark);margin-bottom:12px;">O que fazer agora:</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.8;text-align:left;">
+          📸 Adicionar foto ao perfil<br>
+          💰 Informar quanto você cobra<br>
+          📅 Configurar seus dias disponíveis<br>
+          📞 Adicionar referências
+        </div>
+      </div>
+
+      <button class="btn-next" onclick="goTo('app-home')">Entrar no app →</button>
+    </div>
+  </div>
+
+  <!-- APP: HOME / PERFIL -->
+  <div class="screen" id="app-home">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div class="app-header">
+        <div class="app-header-greeting">Bom dia 👋</div>
+        <div class="app-header-name">Carlos Mendes</div>
+        <div class="app-header-spec">Pedreiro</div>
+        <div class="app-header-city">Uberlândia, MG</div>
+      </div>
+
+      <div class="completion-bar">
+        <div style="flex:1;">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+            <div style="font-size:12px;color:white;font-weight:700;">Seu perfil está 35% completo</div>
+            <div style="color:var(--orange);font-size:12px;">⚠️ Complete agora</div>
+          </div>
+          <div class="completion-fill" style="width:35%;height:4px;background:var(--orange);border-radius:2px;"></div>
+          <div style="font-size:11px;color:rgba(250,247,240,0.6);margin-top:6px;">Perfis completos recebem 3x mais pedidos</div>
+        </div>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:0;">
+        <!-- STATS RELEVANTES -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:16px 24px;margin-bottom:12px;">
+          <div style="background:white;border:1px solid var(--cream3);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:24px;font-weight:900;color:var(--dark);margin-bottom:4px;">12</div>
+            <div style="font-size:10px;color:var(--text);">Visitas</div>
+          </div>
+          <div style="background:white;border:1px solid var(--cream3);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:24px;font-weight:900;color:var(--orange);margin-bottom:4px;">1</div>
+            <div style="font-size:10px;color:var(--text);">Pedidos<br>pendentes</div>
+          </div>
+          <div style="background:white;border:1px solid var(--cream3);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:24px;font-weight:900;color:var(--dark);margin-bottom:4px;">0</div>
+            <div style="font-size:10px;color:var(--text);">Obras<br>avaliação</div>
+          </div>
+        </div>
+
+        <!-- ALERTA DE AÇÃO -->
+        <div style="background:var(--orange);color:white;padding:14px 24px;display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+          <div style="font-size:20px;flex-shrink:0;">🔔</div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:13px;">1 pedido esperando</div>
+            <div style="font-size:11px;opacity:0.9;">Você tem até 24h para aceitar ou recusar</div>
+          </div>
+        </div>
+
+        <!-- OBRAS DISPONÍVEIS PARA DAR LANCE (BLOQUEADAS - REQUER ESPECIALISTA) -->
+        <div class="complete-section">
+          <div class="complete-title">Obras disponíveis</div>
+          
+          <div style="background:rgba(232,86,10,0.06);border:1px solid rgba(232,86,10,0.2);border-radius:12px;padding:12px;margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--text);line-height:1.5;text-align:center;">
+              <strong style="color:var(--orange);">🔒 Dar lances está disponível apenas no plano Especialista</strong>
+            </div>
+          </div>
+
+          <!-- OBRA 1 - BLOQUEADA -->
+          <div style="background:rgba(0,0,0,0.05);border:1px solid var(--cream3);border-radius:12px;padding:14px;margin-bottom:10px;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px;">Reforma de cozinha</div>
+                <div style="font-size:11px;color:var(--text);">São Paulo, SP</div>
+              </div>
+              <div style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;font-weight:700;">3 lances</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">📍 3 km</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">⏰ 5 dias</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">💰 R$800-1200</span>
+            </div>
+            <button style="width:100%;background:var(--text2);color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;" onclick="openModalGerenciarPlano()">Fazer upgrade →</button>
+          </div>
+
+          <!-- OBRA 2 - BLOQUEADA -->
+          <div style="background:rgba(0,0,0,0.05);border:1px solid var(--cream3);border-radius:12px;padding:14px;margin-bottom:10px;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px;">Pintura de fachada</div>
+                <div style="font-size:11px;color:var(--text);">Uberlândia, MG</div>
+              </div>
+              <div style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;font-weight:700;">7 lances</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">📍 0,5 km</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">⏰ 2 dias</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">💰 R$1500-2000</span>
+            </div>
+            <button style="width:100%;background:var(--text2);color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;" onclick="openModalGerenciarPlano()">Fazer upgrade →</button>
+          </div>
+
+          <!-- OBRA 3 - BLOQUEADA -->
+          <div style="background:rgba(0,0,0,0.05);border:1px solid var(--cream3);border-radius:12px;padding:14px;margin-bottom:10px;opacity:0.7;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px;">Encanamento residencial</div>
+                <div style="font-size:11px;color:var(--text);">Belo Horizonte, MG</div>
+              </div>
+              <div style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;font-weight:700;">12 lances</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">📍 420 km</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">⏰ 7 dias</span>
+              <span style="background:var(--cream2);color:var(--text);padding:4px 8px;border-radius:6px;font-size:9px;">💰 R$3000+</span>
+            </div>
+            <button style="width:100%;background:var(--text2);color:white;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;" onclick="openModalGerenciarPlano()">Fazer upgrade →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item active" onclick="switchTab('home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Início</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('pedidos')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Pedidos</div>
+        <div class="nav-badge">1</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('obras')">
+        <div class="nav-icon">⚖️</div>
+        <div class="nav-label">Obras</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('perfil')">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Perfil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP: PEDIDOS -->
+  <div class="screen" id="app-pedidos">
+    <div class="screen-header" style="padding:16px 24px 0;">
+      <div class="step-indicator" style="margin-bottom:12px;">Pedidos</div>
+      <div class="screen-title">Meus <em>pedidos</em></div>
+      <div class="screen-sub">1 pedido esperando você</div>
+    </div>
+    <div class="scroll-area">
+      <div class="pedido-card">
+        <div style="margin-bottom:12px;">
+          <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px;">João Silva</div>
+          <div style="font-size:13px;color:var(--text);margin-bottom:8px;">Reforma cozinha — Uberlândia</div>
+          <div class="pedido-status">✓ Cliente verificado</div>
+        </div>
+        <div style="display:flex;gap:12px;font-size:12px;color:var(--text);margin-bottom:12px;">
+          <div>📅 5 de junho</div>
+          <div>💰 R$ 3.200</div>
+        </div>
+        <button class="btn-lance" onclick="alert('Aceitar ou recusar pedido')">Ver detalhes</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Início</div>
+      </div>
+      <div class="nav-item active" onclick="switchTab('pedidos')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Pedidos</div>
+        <div class="nav-badge">1</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('obras')">
+        <div class="nav-icon">⚖️</div>
+        <div class="nav-label">Obras</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('perfil')">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Perfil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP: OBRAS (Propostas) -->
+  <div class="screen" id="app-obras">
+    <div class="screen-header" style="padding:16px 24px 0;">
+      <div style="background:var(--dark);color:white;padding:16px;border-radius:14px;margin-bottom:16px;">
+        <div style="font-size:13px;color:rgba(250,247,240,0.7);margin-bottom:4px;">Obras 🏗️ Lances</div>
+        <div style="font-size:13px;color:rgba(250,247,240,0.6);">Obras postadas por clientes na sua cidade</div>
+      </div>
+
+      <!-- FILTRO DE ESPECIALIDADES -->
+      <div style="margin-bottom:16px;">
+        <select style="width:100%;background:white;border:1px solid var(--cream3);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--dark);cursor:pointer;">
+          <option value="pedreiro">🔨 Pedreiro (sua especialidade)</option>
+          <option value="eletricista">⚡ Eletricista</option>
+          <option value="encanador">🔧 Encanador</option>
+          <option value="pintor">🎨 Pintor</option>
+          <option value="carpinteiro">🪵 Carpinteiro</option>
+          <option value="vidraceiro">🪟 Vidraceiro</option>
+          <option value="todas">📋 Ver todas as especialidades</option>
+        </select>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <div class="obra-card">
+        <div class="obra-header">
+          <div class="obra-title">Servente para reforma</div>
+          <div class="obra-badge">URGENTE</div>
+        </div>
+        <div class="obra-desc">Reforma de banheiro e cozinha. Apartamento de 75m². Início imediato.</div>
+        <div class="obra-tags">
+          <div class="obra-tag">📍 Umuarama</div>
+          <div class="obra-tag">📅 15 dias</div>
+          <div class="obra-tag">💰 até R$3.500</div>
+        </div>
+        <div class="obra-lances"><strong>7 lances</strong> recebidos<br>Encerra em 2 dias</div>
+        <button class="btn-lance" onclick="openModalLanceNaoDisponivel()">Dar lance</button>
+      </div>
+
+      <div class="obra-card">
+        <div class="obra-header">
+          <div class="obra-title">Pintura de casa completa</div>
+          <div class="obra-badge aberta">ABERTA</div>
+        </div>
+        <div class="obra-desc">Casa de 180m² — pintura interna e externa. Tinta já comprada.</div>
+        <div class="obra-tags">
+          <div class="obra-tag">📍 Tibery</div>
+          <div class="obra-tag">📅 10 dias</div>
+          <div class="obra-tag">💰 até R$2.800</div>
+        </div>
+        <div class="obra-lances"><strong>3 lances</strong> recebidos<br>Encerra em 5 dias</div>
+        <button class="btn-lance" onclick="openModalLanceNaoDisponivel()">Dar lance</button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Início</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('pedidos')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Pedidos</div>
+        <div class="nav-badge">1</div>
+      </div>
+      <div class="nav-item active" onclick="switchTab('obras')">
+        <div class="nav-icon">⚖️</div>
+        <div class="nav-label">Obras</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('perfil')">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Perfil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP: PERFIL -->
+  <div class="screen" id="app-perfil">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div class="app-header">
+        <div style="margin-bottom:12px;">
+          <div style="width:64px;height:64px;background:rgba(250,247,240,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px;">🔨</div>
+        </div>
+        <div class="app-header-name" style="text-align:left;">Carlos Mendes</div>
+        <div class="app-header-spec" style="text-align:left;">Pedreiro</div>
+        <div class="app-header-city" style="text-align:left;">Uberlândia, MG</div>
+      </div>
+
+      <div class="completion-bar">
+        <div style="flex:1;">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+            <div style="font-size:12px;color:white;font-weight:700;">Seu perfil está 35% completo</div>
+            <div style="color:var(--orange);font-size:12px;">⚠️ Complete agora</div>
+          </div>
+          <div style="height:4px;background:var(--dark3);border-radius:2px;overflow:hidden;">
+            <div style="width:35%;height:100%;background:var(--orange);"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(250,247,240,0.6);margin-top:6px;">Perfis completos recebem 3x mais pedidos</div>
+        </div>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;">
+        <!-- MINHA ASSINATURA -->
+        <div class="complete-section">
+          <div class="complete-title">Minha assinatura</div>
+          <div style="background:var(--orange3);border:1px solid rgba(232,86,10,0.3);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--orange);">Plano Profissional</div>
+              <div style="font-size:11px;color:var(--text);margin-top:2px;">7 dias com acesso completo · R$49/mês depois</div>
+            </div>
+            <button style="background:var(--dark);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;" onclick="openModalGerenciarPlano()">Gerenciar</button>
+          </div>
+        </div>
+
+        <!-- DADOS DO CADASTRO -->
+        <div class="complete-section">
+          <div class="complete-title">Dados do cadastro</div>
+          <div class="action-item" onclick="alert('Editar nome e WhatsApp')">
+            <div class="action-icon">👤</div>
+            <div class="action-text">
+              <div class="action-name">Nome e WhatsApp</div>
+              <div class="action-desc">Carlos Mendes · (34) 99999-9999</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Editar especialidades')">
+            <div class="action-icon">🔨</div>
+            <div class="action-text">
+              <div class="action-name">Especialidades</div>
+              <div class="action-desc">Pedreiro · 3 a 5 anos</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Editar cidade')">
+            <div class="action-icon">📍</div>
+            <div class="action-text">
+              <div class="action-name">Cidade</div>
+              <div class="action-desc">Uberlândia, MG</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Editar CPF')">
+            <div class="action-icon">🪪</div>
+            <div class="action-text">
+              <div class="action-name">CPF</div>
+              <div class="action-desc">000.000.000-00</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+        </div>
+
+        <!-- PERFIL PÚBLICO -->
+        <div class="complete-section">
+          <div class="complete-title">Perfil público</div>
+          <div class="action-item" onclick="alert('Copiar link do perfil')">
+            <div class="action-icon">🔗</div>
+            <div class="action-text">
+              <div class="action-name">Compartilhar meu perfil</div>
+              <div class="action-desc">obracerta.com.br/carlos-pedreiro-uberlandia</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+        </div>
+
+        <!-- SEGURANÇA E PRIVACIDADE -->
+        <div class="complete-section">
+          <div class="complete-title">Segurança e privacidade</div>
+          <div class="action-item" onclick="alert('Ver política de privacidade')">
+            <div class="action-icon">🔒</div>
+            <div class="action-text">
+              <div class="action-name">Política de privacidade</div>
+              <div class="action-desc">LGPD e proteção de dados</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Ver termos de uso')">
+            <div class="action-icon">⚖️</div>
+            <div class="action-text">
+              <div class="action-name">Termos de uso</div>
+              <div class="action-desc">Regras e responsabilidades</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Abrir suporte')">
+            <div class="action-icon">💬</div>
+            <div class="action-text">
+              <div class="action-name">Suporte via WhatsApp</div>
+              <div class="action-desc">Dúvidas ou problemas?</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+          <div class="action-item" onclick="alert('Desativar conta?')">
+            <div class="action-icon">🚪</div>
+            <div class="action-text">
+              <div class="action-name">Desativar conta</div>
+              <div class="action-desc">Seus dados serão preservados</div>
+            </div>
+            <div class="action-arrow">→</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item" onclick="switchTab('home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Início</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('pedidos')">
+        <div class="nav-icon">📋</div>
+        <div class="nav-label">Pedidos</div>
+        <div class="nav-badge">1</div>
+      </div>
+      <div class="nav-item" onclick="switchTab('obras')">
+        <div class="nav-icon">⚖️</div>
+        <div class="nav-label">Obras</div>
+      </div>
+      <div class="nav-item active" onclick="switchTab('perfil')">
+        <div class="nav-icon">👤</div>
+        <div class="nav-label">Perfil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LANCE NÃO DISPONÍVEL (DENTRO DO PHONE) -->
+  <div id="modal-lance-nao-disponivel" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:none;z-index:1000;border-radius:50px;overflow:hidden;flex-direction:column;">
+    <div style="flex:1;background:white;overflow-y:auto;display:flex;flex-direction:column;">
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--cream3);flex-shrink:0;">
+        <h2 style="margin:0;font-size:16px;font-weight:900;color:var(--dark);">Recurso exclusivo</h2>
+        <button onclick="closeModalLanceNaoDisponivel()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--dark);">✕</button>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+        <div style="font-size:16px;font-weight:900;color:var(--dark);margin-bottom:8px;">Dar lances requer plano Especialista</div>
+        <div style="font-size:12px;color:var(--text);line-height:1.6;margin-bottom:24px;">
+          Para dar lances em obras, você precisa fazer upgrade para o plano Especialista. Desbloqueie esta e outras funcionalidades!
+        </div>
+
+        <div style="background:var(--orange3);border:2px solid var(--orange);border-radius:12px;padding:14px;width:100%;margin-bottom:16px;">
+          <div style="font-size:12px;color:var(--text);line-height:1.5;">
+            <strong style="color:var(--orange);">Plano Especialista — R$99/mês</strong><br>
+            ✓ Dar lances ilimitados<br>
+            ✓ Acesso a todas as obras<br>
+            ✓ Prioridade nas buscas
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeModalLanceNaoDisponivel(); openModalGerenciarPlano();" style="width:calc(100% - 32px);background:var(--orange);color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;margin:16px;">Fazer upgrade →</button>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHE OBRA (DENTRO DO PHONE) -->
+  <div id="modal-detalhe-obra" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:none;z-index:1000;border-radius:50px;overflow:hidden;flex-direction:column;">
+    <div style="flex:1;background:white;overflow-y:auto;display:flex;flex-direction:column;">
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--cream3);flex-shrink:0;">
+        <h2 style="margin:0;font-size:16px;font-weight:900;color:var(--dark);">Detalhes da obra</h2>
+        <button onclick="closeModalDetalheObra()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--dark);">✕</button>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:16px;">
+        <div style="background:var(--orange3);border:2px solid var(--orange);border-radius:12px;padding:12px;margin-bottom:16px;">
+          <div style="font-size:14px;font-weight:900;color:var(--orange);margin-bottom:2px;" id="obra-titulo">Reforma de cozinha</div>
+          <div style="font-size:11px;color:var(--text);margin-bottom:10px;" id="obra-localizacao">São Paulo, SP</div>
+          
+          <div style="background:white;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid rgba(232,86,10,0.2);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+              <span style="color:var(--text);">Orçamento:</span>
+              <span style="font-weight:900;color:var(--dark);" id="obra-valor">R$ 800-1200</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+              <span style="color:var(--text);">Lances recebidos:</span>
+              <span style="font-weight:700;color:var(--dark);">7</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+              <span style="color:var(--text);">Encerra em:</span>
+              <span style="font-weight:700;color:var(--dark);">2 dias</span>
+            </div>
+          </div>
+
+          <div style="background:white;border-radius:8px;padding:10px;border:1px solid rgba(232,86,10,0.2);">
+            <div style="font-size:11px;font-weight:700;color:var(--dark);margin-bottom:6px;">Descrição:</div>
+            <div style="font-size:10px;color:var(--text);line-height:1.5;">
+              Reforma de cozinha e banheiro. Apartamento de 75m². Início imediato. Cliente verificado.
+            </div>
+          </div>
+        </div>
+
+        <div style="background:rgba(232,86,10,0.06);border:1px solid rgba(232,86,10,0.2);border-radius:12px;padding:10px;margin-bottom:16px;">
+          <div style="font-size:10px;color:var(--text);line-height:1.5;">
+            <strong style="color:var(--dark);">Dica:</strong> Revise bem o escopo da obra antes de enviar seu lance. Você pode adicionar fotos e descrição do seu orçamento.
+          </div>
+        </div>
+      </div>
+
+      <button onclick="submitLance()" style="width:calc(100% - 32px);background:var(--orange);color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;margin:16px;">Enviar meu lance →</button>
+    </div>
+  </div>
+
+  <!-- MODAL: GERENCIAR PLANO (DENTRO DO PHONE) -->
+  <div id="modal-gerenciar-plano" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:none;z-index:1000;border-radius:50px;overflow:hidden;flex-direction:column;">
+    <div style="flex:1;background:white;overflow-y:auto;display:flex;flex-direction:column;">
+      <div style="padding:16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--cream3);flex-shrink:0;">
+        <h2 style="margin:0;font-size:16px;font-weight:900;color:var(--dark);">Gerenciar plano</h2>
+        <button onclick="closeModalGerenciarPlano()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--dark);">✕</button>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:16px;">
+        <!-- PLANO ATIVO -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;text-transform:uppercase;">Plano ativo</div>
+          <div style="background:var(--orange3);border:2px solid var(--orange);border-radius:12px;padding:12px;">
+            <div style="font-size:14px;font-weight:900;color:var(--orange);margin-bottom:2px;">Plano Profissional</div>
+            <div style="font-size:11px;color:var(--text);margin-bottom:10px;">Cobrança mensal recorrente</div>
+            
+            <div style="background:white;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid rgba(232,86,10,0.2);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                <span style="color:var(--text);">Valor:</span>
+                <span style="font-weight:900;color:var(--dark);">R$ 49,00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px;">
+                <span style="color:var(--text);">Próxima:</span>
+                <span style="font-weight:700;color:var(--dark);">22 jun 2026</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;">
+                <span style="color:var(--text);">Status:</span>
+                <span style="font-weight:700;color:var(--green);">✓ Ativo</span>
+              </div>
+            </div>
+
+            <div style="background:white;border-radius:8px;padding:10px;border:1px solid rgba(232,86,10,0.2);">
+              <div style="font-size:11px;font-weight:700;color:var(--dark);margin-bottom:6px;">Benefícios:</div>
+              <div style="font-size:10px;color:var(--text);line-height:1.5;">
+                ✓ Perfil completo visível<br>
+                ✓ Agendamentos ativos<br>
+                ✓ Destaque nas buscas<br>
+                ✓ Analytics<br>
+                ✓ Vê obras disponíveis
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTÓRICO DE FATURAS -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;text-transform:uppercase;">Faturas</div>
+          
+          <div style="background:white;border:1px solid var(--cream3);border-radius:12px;padding:10px;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--dark);">22 mai 2026</div>
+                <div style="font-size:10px;color:var(--text);">Profissional</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:12px;font-weight:900;color:var(--dark);">R$ 49,00</div>
+                <div style="font-size:9px;color:var(--green);font-weight:700;">✓ Pago</div>
+              </div>
+            </div>
+            <button onclick="alert('Baixando recibo...')" style="width:100%;background:var(--cream2);border:none;border-radius:6px;padding:6px;font-size:10px;font-weight:700;color:var(--dark);cursor:pointer;">Baixar recibo</button>
+          </div>
+
+          <div style="background:white;border:1px solid var(--cream3);border-radius:12px;padding:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:var(--dark);">22 jun 2026</div>
+                <div style="font-size:10px;color:var(--text);">Profissional</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:12px;font-weight:900;color:var(--dark);">R$ 49,00</div>
+                <div style="font-size:9px;color:var(--text2);font-weight:700;">Prevista</div>
+              </div>
+            </div>
+            <button onclick="alert('Boleto será gerado em breve...')" style="width:100%;background:var(--cream2);border:none;border-radius:6px;padding:6px;font-size:10px;font-weight:700;color:var(--dark);cursor:pointer;" disabled>Boleto indisponível</button>
+          </div>
+        </div>
+
+        <!-- COMPARATIVO -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;color:var(--text2);font-weight:700;margin-bottom:8px;text-transform:uppercase;">Mudar de plano</div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div style="background:var(--cream2);border:1px solid var(--cream3);border-radius:12px;padding:10px;text-align:center;">
+              <div style="font-size:11px;font-weight:900;color:var(--dark);margin-bottom:4px;">Iniciante</div>
+              <div style="font-size:12px;font-weight:900;color:var(--dark);margin-bottom:8px;">R$ 0<span style="font-size:9px;color:var(--text);">/mês</span></div>
+              <button onclick="alert('Fazer downgrade?')" style="width:100%;background:white;border:1px solid var(--cream3);color:var(--text);border-radius:6px;padding:6px;font-size:10px;font-weight:700;cursor:pointer;">Downgrade</button>
+            </div>
+
+            <div style="background:var(--orange3);border:2px solid var(--orange);border-radius:12px;padding:10px;text-align:center;">
+              <div style="font-size:11px;font-weight:900;color:var(--orange);margin-bottom:4px;">Especialista</div>
+              <div style="font-size:12px;font-weight:900;color:var(--dark);margin-bottom:8px;">R$ 99<span style="font-size:9px;color:var(--text);">/mês</span></div>
+              <button onclick="closeModalGerenciarPlano(); goTo('p4-upgrade');" style="width:100%;background:var(--dark);border:none;color:white;border-radius:6px;padding:6px;font-size:10px;font-weight:700;cursor:pointer;">Upgrade</button>
+            </div>
+          </div>
+
+          <div style="background:rgba(232,86,10,0.06);border:1px solid rgba(232,86,10,0.2);border-radius:12px;padding:10px;">
+            <div style="font-size:10px;color:var(--text);line-height:1.5;">
+              <strong style="color:var(--dark);">Sem compromisso:</strong> você pode cancelar a qualquer momento. Mudança no próximo ciclo.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeModalGerenciarPlano()" style="width:calc(100% - 32px);background:var(--dark);color:white;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;margin:16px;">Fechar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+function switchTab(tab) {
+  const tabMap = {
+    'home': 'app-home',
+    'pedidos': 'app-pedidos',
+    'obras': 'app-obras',
+    'perfil': 'app-perfil'
+  };
+  goTo(tabMap[tab]);
+}
+
+function toggleSpec(el) {
+  el.classList.toggle('selected');
+}
+
+function selectPlano(el, plano) {
+  document.querySelectorAll('.plano-option').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function openModalGerenciarPlano() {
+  const modal = document.getElementById('modal-gerenciar-plano');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeModalGerenciarPlano() {
+  const modal = document.getElementById('modal-gerenciar-plano');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function openModalDetalheObra(titulo, localizacao, valor) {
+  const modal = document.getElementById('modal-detalhe-obra');
+  if (modal) {
+    document.getElementById('obra-titulo').textContent = titulo;
+    document.getElementById('obra-localizacao').textContent = localizacao;
+    document.getElementById('obra-valor').textContent = valor;
+    modal.style.display = 'flex';
+  }
+}
+
+function closeModalDetalheObra() {
+  const modal = document.getElementById('modal-detalhe-obra');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function submitLance() {
+  alert('Lance enviado com sucesso! ✅');
+  closeModalDetalheObra();
+}
+
+function openModalLanceNaoDisponivel() {
+  const modal = document.getElementById('modal-lance-nao-disponivel');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeModalLanceNaoDisponivel() {
+  const modal = document.getElementById('modal-lance-nao-disponivel');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function selectPayment(el, tipo) {
+  document.querySelectorAll('.payment-choice').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  
+  const cartaoFields = document.getElementById('cartao-fields');
+  if (tipo === 'cartao') {
+    cartaoFields.style.display = 'block';
+  } else {
+    cartaoFields.style.display = 'none';
+  }
+}
+</script></script>
+</body>
+</html>

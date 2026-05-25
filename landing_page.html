@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obra Certa — O jeito certo de contratar profissionais</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --orange: #E8560A; --orange2: #FF7A3D; --orange3: #FFF0E8;
+  --dark: #18160F; --dark2: #221F16; --dark3: #2E2A1F;
+  --cream: #FAF7F0; --cream2: #F2EDE0; --cream3: #E8E0CC;
+  --text: #6B6455; --text2: #9B9080;
+  --green: #1A9E5C; --green-bg: #E8F7EF;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Cabinet Grotesk', sans-serif; background: var(--cream); color: var(--dark); overflow-x: hidden; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(250,247,240,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--cream3);
+}
+.logo { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 900; color: var(--dark); text-decoration: none; }
+.logo span { color: var(--orange); }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--text); text-decoration: none; transition: color 0.2s; }
+.nav-links a:hover { color: var(--dark); }
+.nav-cta { background: var(--dark); color: var(--cream) !important; padding: 10px 22px; border-radius: 8px; font-weight: 700 !important; }
+.nav-cta:hover { background: var(--orange) !important; color: white !important; }
+
+/* HERO */
+.hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 60px 80px; position: relative; overflow: hidden; }
+.hero-content { position: relative; z-index: 2; max-width: 680px; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 40%, rgba(232,86,10,0.08) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 20% 80%, rgba(232,86,10,0.05) 0%, transparent 60%); }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--cream3) 1px, transparent 1px), linear-gradient(90deg, var(--cream3) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.4; mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%); }
+.hero-content { position: relative; z-index: 2; max-width: 680px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--orange3); border: 1px solid rgba(232,86,10,0.2); border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 700; color: var(--orange); margin-bottom: 32px; }
+.hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.hero h1 { font-family: 'Fraunces', serif; font-size: clamp(48px, 7vw, 80px); font-weight: 900; line-height: 1; letter-spacing: -2px; margin-bottom: 24px; }
+.hero h1 em { font-style: italic; color: var(--orange); }
+.hero p { font-size: 18px; color: var(--text); line-height: 1.6; max-width: 520px; margin-bottom: 40px; }
+.hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.btn-primary { background: var(--orange); color: white; border: none; border-radius: 12px; padding: 16px 32px; font-size: 16px; font-weight: 800; font-family: 'Cabinet Grotesk', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 24px rgba(232,86,10,0.3); }
+.btn-primary:hover { background: var(--orange2); transform: translateY(-2px); }
+.btn-secondary { background: transparent; color: var(--dark); border: 2px solid var(--cream3); border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 700; font-family: 'Cabinet Grotesk', sans-serif; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.btn-secondary:hover { border-color: var(--dark); background: var(--dark); color: var(--cream); }
+.hero-trial { font-size: 13px; color: var(--text2); margin-top: 16px; }
+.hero-trial strong { color: var(--dark); }
+.hero-stats { display: flex; gap: 40px; margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--cream3); flex-wrap: wrap; }
+.hero-stat .num { font-family: 'Fraunces', serif; font-size: 36px; font-weight: 900; color: var(--dark); display: block; line-height: 1; margin-bottom: 4px; }
+.hero-stat .lbl { font-size: 13px; color: var(--text2); }
+.hero-visual { position: absolute; right: 60px; top: 50%; transform: translateY(-50%); width: 360px; }
+.floating-card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.1); display: flex; gap: 12px; align-items: center; margin-bottom: 12px; animation: float 4s ease-in-out infinite; }
+.floating-card:nth-child(2) { animation-delay: -1.3s; margin-left: 32px; }
+.floating-card:nth-child(3) { animation-delay: -2.6s; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.fc-avatar { width: 44px; height: 44px; border-radius: 12px; background: var(--dark); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.fc-info { flex: 1; }
+.fc-name { font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 2px; }
+.fc-role { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.fc-rating { font-size: 12px; color: var(--orange); font-weight: 700; }
+.fc-badge { background: var(--green-bg); color: var(--green); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+
+/* SEÇÕES */
+.section-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; display: block; }
+
+/* DOR */
+.dor-section { padding: 100px 60px; background: var(--cream2); }
+.dor-section h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -1px; line-height: 1.1; margin-bottom: 60px; max-width: 540px; }
+.dor-section h2 em { font-style: italic; color: var(--orange); }
+.dor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.dor-card { background: white; border-radius: 16px; padding: 28px; border: 1.5px solid var(--cream3); transition: all 0.2s; }
+.dor-card:hover { border-color: var(--orange); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+.dor-emoji { font-size: 32px; margin-bottom: 16px; display: block; }
+.dor-card h3 { font-size: 17px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+.dor-card p { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+/* COMO FUNCIONA */
+.como-funciona { padding: 100px 60px; background: var(--dark); position: relative; overflow: hidden; }
+.como-funciona::before { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(232,86,10,0.15) 0%, transparent 70%); }
+.como-funciona h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,56px); font-weight: 900; color: var(--cream); margin-bottom: 64px; letter-spacing: -1px; line-height: 1.1; max-width: 500px; }
+.como-funciona h2 em { font-style: italic; color: var(--orange); }
+.perfis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.perfil-col { padding: 40px; background: var(--dark2); }
+.perfil-col:first-child { border-radius: 16px 0 0 16px; }
+.perfil-col:last-child { border-radius: 0 16px 16px 0; }
+.perfil-titulo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.perfil-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--dark3); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.perfil-titulo h3 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 800; color: var(--cream); }
+.perfil-titulo p { font-size: 13px; color: var(--text2); }
+.steps-list { display: flex; flex-direction: column; gap: 24px; }
+.step-item { display: flex; gap: 16px; }
+.step-num { width: 32px; height: 32px; border-radius: 8px; background: rgba(232,86,10,0.15); border: 1px solid rgba(232,86,10,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--orange); flex-shrink: 0; }
+.step-content h4 { font-size: 15px; font-weight: 700; color: var(--cream); margin-bottom: 4px; }
+.step-content p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+/* FLUXO AGENDAMENTO */
+.fluxo-section { padding: 100px 60px; background: var(--cream); }
+.fluxo-section h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -1px; line-height: 1.1; margin-bottom: 16px; }
+.fluxo-section h2 em { font-style: italic; color: var(--orange); }
+.fluxo-section > p { font-size: 16px; color: var(--text); margin-bottom: 56px; max-width: 520px; }
+.fluxo-steps { display: flex; flex-direction: column; gap: 2px; max-width: 680px; }
+.fluxo-item { background: var(--cream2); border-radius: 12px; padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; transition: all 0.2s; border: 1.5px solid transparent; }
+.fluxo-item:hover { border-color: var(--orange); background: white; }
+.fluxo-icon { font-size: 28px; flex-shrink: 0; width: 48px; text-align: center; }
+.fluxo-content h4 { font-size: 16px; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
+.fluxo-content p { font-size: 13px; color: var(--text); line-height: 1.5; }
+.fluxo-arrow { text-align: center; font-size: 20px; color: var(--orange); opacity: 0.4; padding: 4px 0; }
+
+/* PLANOS */
+.planos-section { padding: 100px 60px; background: var(--cream2); }
+.planos-section > h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -1px; line-height: 1.1; margin-bottom: 12px; }
+.planos-section > h2 em { font-style: italic; color: var(--orange); }
+.planos-section > p { font-size: 16px; color: var(--text); margin-bottom: 16px; }
+.planos-toggle { display: inline-flex; background: var(--cream3); border-radius: 10px; padding: 4px; margin-bottom: 48px; }
+.toggle-btn { padding: 8px 20px; border-radius: 7px; border: none; font-size: 13px; font-weight: 700; font-family: 'Cabinet Grotesk', sans-serif; cursor: pointer; background: transparent; color: var(--text); transition: all 0.2s; }
+.toggle-btn.active { background: var(--dark); color: var(--cream); }
+.planos-grid { display: grid; gap: 16px; }
+.planos-grid.tres { grid-template-columns: repeat(3, 1fr); }
+.plano-card { background: white; border-radius: 20px; padding: 32px; border: 2px solid var(--cream3); position: relative; transition: all 0.2s; }
+.plano-card:hover { border-color: var(--orange); box-shadow: 0 12px 40px rgba(232,86,10,0.1); }
+.plano-card.destaque { background: var(--dark); border-color: var(--dark); }
+.plano-popular { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--orange); color: white; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 5px 14px; border-radius: 6px; white-space: nowrap; }
+.plano-nome { font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 8px; }
+.plano-card.destaque .plano-nome { color: rgba(250,247,240,0.5); }
+.plano-preco { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 900; color: var(--dark); line-height: 1; margin-bottom: 4px; }
+.plano-card.destaque .plano-preco { color: var(--cream); }
+.plano-periodo { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+.plano-desc { font-size: 13px; color: var(--text); margin-bottom: 24px; line-height: 1.5; border-bottom: 1px solid var(--cream3); padding-bottom: 20px; }
+.plano-card.destaque .plano-desc { color: rgba(250,247,240,0.6); border-color: rgba(255,255,255,0.1); }
+.plano-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.feature-item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text); }
+.plano-card.destaque .feature-item { color: rgba(250,247,240,0.7); }
+.feature-item.sim .fi-icon { color: #1A9E5C; }
+.feature-item.nao .fi-icon { color: var(--cream3); }
+.feature-item.nao { opacity: 0.5; }
+.fi-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.plano-btn { width: 100%; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; font-family: 'Cabinet Grotesk', sans-serif; cursor: pointer; border: 2px solid var(--dark); background: transparent; color: var(--dark); transition: all 0.2s; }
+.plano-btn:hover { background: var(--dark); color: var(--cream); }
+.plano-card.destaque .plano-btn { background: var(--orange); border-color: var(--orange); color: white; }
+.plano-card.destaque .plano-btn:hover { background: var(--orange2); border-color: var(--orange2); }
+.trial-note { font-size: 12px; color: var(--text2); text-align: center; margin-top: 8px; }
+
+/* DEPOIMENTOS */
+.depoimentos { padding: 100px 60px; }
+.depoimentos h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -1px; line-height: 1.1; margin-bottom: 56px; }
+.depoimentos h2 em { font-style: italic; color: var(--orange); }
+.depo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.depo-card { background: var(--cream2); border-radius: 16px; padding: 28px; border: 1.5px solid var(--cream3); }
+.depo-stars { font-size: 14px; margin-bottom: 16px; color: var(--orange); }
+.depo-texto { font-size: 15px; color: var(--dark); line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+.depo-autor { display: flex; align-items: center; gap: 12px; }
+.depo-avatar { width: 40px; height: 40px; border-radius: 10px; background: var(--dark); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.depo-nome { font-size: 13px; font-weight: 800; color: var(--dark); }
+.depo-info { font-size: 12px; color: var(--text2); }
+
+/* FAQ */
+.faq-section { padding: 100px 60px; background: var(--cream2); }
+.faq-section h2 { font-family: 'Fraunces', serif; font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -1px; line-height: 1.1; margin-bottom: 56px; }
+.faq-section h2 em { font-style: italic; color: var(--orange); }
+.faq-list { max-width: 720px; display: flex; flex-direction: column; gap: 2px; }
+.faq-item { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 2px; }
+.faq-q { width: 100%; text-align: left; padding: 20px 24px; background: transparent; border: none; font-size: 15px; font-weight: 700; font-family: 'Cabinet Grotesk', sans-serif; color: var(--dark); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.faq-q .arrow { font-size: 18px; transition: transform 0.2s; color: var(--orange); }
+.faq-item.open .faq-q .arrow { transform: rotate(45deg); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; font-size: 14px; color: var(--text); line-height: 1.7; }
+.faq-item.open .faq-a { max-height: 200px; }
+.faq-a-inner { padding: 0 24px 20px; }
+
+/* CTA FINAL */
+.cta-final { padding: 100px 60px; background: var(--dark); text-align: center; position: relative; overflow: hidden; }
+.cta-final::before { content: ''; position: absolute; top: -150px; left: 50%; transform: translateX(-50%); width: 600px; height: 400px; background: radial-gradient(ellipse, rgba(232,86,10,0.2) 0%, transparent 70%); pointer-events: none; }
+.cta-final h2 { font-family: 'Fraunces', serif; font-size: clamp(36px,6vw,64px); font-weight: 900; color: var(--cream); letter-spacing: -2px; line-height: 1; margin-bottom: 20px; position: relative; }
+.cta-final h2 em { font-style: italic; color: var(--orange); }
+.cta-final p { font-size: 16px; color: rgba(250,247,240,0.6); margin-bottom: 40px; position: relative; }
+.cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; }
+
+footer { padding: 40px 60px; background: var(--dark2); display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--dark3); }
+.footer-logo { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 900; color: var(--cream); }
+.footer-logo span { color: var(--orange); }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 13px; color: var(--text2); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--cream); }
+.footer-copy { font-size: 12px; color: var(--text2); }
+
+.planos-contratante { display: none; }
+
+@media(max-width:900px){
+  nav{padding:16px 24px;} .nav-links{display:none;}
+  .hero{padding:100px 24px 60px; flex-direction:column; align-items:flex-start;}
+  .dor-section,.como-funciona,.fluxo-section,.planos-section,.depoimentos,.faq-section,.cta-final{padding:60px 24px;}
+  .hero-visual{display:none!important;}
+  .hero-content{max-width:100%; position:relative; z-index:2;}
+  .perfis-grid{display:none;}
+  .dor-grid,.depo-grid,.planos-grid.tres{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:20px;text-align:center;padding:32px 24px;}
+  .hero-stats{gap:24px; flex-wrap:wrap;}
+  .hero h1{font-size:clamp(36px,10vw,56px);}
+  .hero-bg,.hero-grid{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">Obra<span>Certa</span></a>
+  <div class="nav-links">
+    <a href="#problema">O problema</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#planos">Planos</a>
+    <a href="#faq">FAQ</a>
+    <a href="#planos" class="nav-cta">Começar grátis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <h1>O profissional<br><em>certo</em> para<br>sua obra</h1>
+    <p>Encontre pedreiros, pintores, marceneiros e muito mais — com histórico real, agenda transparente e reputação verificada. Sem boca a boca, sem surpresas.</p>
+    <div class="hero-actions">
+      <a href="#planos" class="btn-primary">Quero contratar →</a>
+      <a href="#planos" class="btn-secondary">Sou profissional</a>
+    </div>
+    <p class="hero-trial">✓ <strong>7 dias grátis</strong> para profissionais · Sem cartão de crédito</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="num">4.200+</span><span class="lbl">Profissionais cadastrados</span></div>
+      <div class="hero-stat"><span class="num">18.000+</span><span class="lbl">Obras realizadas</span></div>
+      <div class="hero-stat"><span class="num">4.8⭐</span><span class="lbl">Avaliação média</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="floating-card"><div class="fc-avatar">👷</div><div class="fc-info"><div class="fc-name">Carlos Mendes</div><div class="fc-role">Pedreiro · Uberlândia, MG</div><div class="fc-rating">⭐ 4.9 · 87 obras</div></div><div class="fc-badge">Livre</div></div>
+    <div class="floating-card"><div class="fc-avatar">🎨</div><div class="fc-info"><div class="fc-name">Ana Paula Costa</div><div class="fc-role">Pintora · Uberlândia, MG</div><div class="fc-rating">⭐ 4.8 · 54 obras</div></div><div class="fc-badge">Livre</div></div>
+    <div class="floating-card"><div class="fc-avatar">⚡</div><div class="fc-info"><div class="fc-name">Roberto Silva</div><div class="fc-role">Eletricista · Uberlândia, MG</div><div class="fc-rating">⭐ 4.7 · 63 obras</div></div><div class="fc-badge">Livre</div></div>
+  </div>
+</section>
+
+<!-- DOR — AGORA É A 2ª SEÇÃO -->
+<section class="dor-section" id="problema">
+  <span class="section-label">Entenda quais são as dores que nosso produto resolve</span>
+  <h2>Você ainda depende de indicação para encontrar os <em>melhores profissionais?</em></h2>
+  <div class="dor-grid">
+    <div class="dor-card"><span class="dor-emoji">😰</span><h3>"Indiquei um conhecido e ele sumiu no meio da obra"</h3><p>Sem histórico verificado, você só descobre que errou quando o estrago já está feito.</p></div>
+    <div class="dor-card"><span class="dor-emoji">📅</span><h3>"Precisava de alguém pra semana que vem e não achei ninguém disponível"</h3><p>Descobrir a disponibilidade de um profissional ainda exige ligar um por um, sem nenhuma agenda visível.</p></div>
+    <div class="dor-card"><span class="dor-emoji">💸</span><h3>"Paguei caro demais porque não sabia quanto devia custar"</h3><p>Sem referência de preço, quem contrata sempre leva desvantagem na negociação.</p></div>
+    <div class="dor-card"><span class="dor-emoji">👻</span><h3>"Não sabia se podia confiar — nunca vi o trabalho dele antes"</h3><p>Contratar sem ver portfólio ou avaliações reais é sempre um ato de fé.</p></div>
+    <div class="dor-card"><span class="dor-emoji">⏳</span><h3>"Perdi duas semanas só procurando um pedreiro de confiança"</h3><p>O tempo gasto só na busca já atrasa a obra antes mesmo de ela começar.</p></div>
+    <div class="dor-card"><span class="dor-emoji">🤷</span><h3>"A indicação era boa, mas ele não atendia na minha data"</h3><p>Mesmo com uma boa indicação, encontrar alguém disponível no momento certo continua sendo um problema.</p></div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA — AGORA É A 3ª SEÇÃO -->
+<section class="como-funciona" id="como-funciona">
+  <span class="section-label">Como funciona</span>
+  <h2>Simples para os <em>dois lados</em></h2>
+  <div class="perfis-grid">
+    <div class="perfil-col">
+      <div class="perfil-titulo"><div class="perfil-icon">🏠</div><div><h3>Quem contrata</h3><p style="font-size:13px;color:var(--text2)">Pessoa física ou empresa</p></div></div>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Escolha seu plano</h4><p>Acesso por 30 dias a partir de R$19. Quanto mais completo, mais filtros e informações você vê.</p></div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>Busque e escolha</h4><p>Filtre por especialidade, cidade e avaliação. Veja agenda e valores direto no perfil.</p></div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>Selecione uma data</h4><p>Escolha um dia disponível na agenda do profissional e solicite o agendamento.</p></div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-content"><h4>Profissional aprova</h4><p>Em até 24h ele confirma. Após aprovação, telefone e WhatsApp dele são liberados pra você.</p></div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-content"><h4>Confirme e avalie</h4><p>Volte na plataforma para confirmar o início do serviço. Ao final, avalie e construa o histórico da plataforma.</p></div></div>
+      </div>
+    </div>
+    <div class="perfil-col">
+      <div class="perfil-titulo"><div class="perfil-icon">🔨</div><div><h3>Profissional</h3><p style="font-size:13px;color:var(--text2)">Autônomo ou empreiteira</p></div></div>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-content"><h4>Crie seu perfil</h4><p>7 dias grátis no plano Pro. Adicione especialidades, fotos do portfólio e configure sua agenda.</p></div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-content"><h4>Apareça nas buscas</h4><p>Clientes da sua cidade encontram você por especialidade e disponibilidade. Quanto melhor sua reputação, mais alto você aparece.</p></div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-content"><h4>Aprove ou recuse</h4><p>Receba notificação de solicitação de agendamento. Você tem 24h para aprovar. Após aprovação, seus contatos são liberados.</p></div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-content"><h4>Execute e seja avaliado</h4><p>Cada obra concluída vira avaliação e badge no seu perfil. Sua reputação digital vale mais que qualquer indicação.</p></div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-content"><h4>Dê lances em obras</h4><p>No plano Equipe, acesse obras postadas por clientes e envie sua proposta sigilosa.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLUXO DE AGENDAMENTO -->
+<section class="fluxo-section">
+  <span class="section-label">Agendamento</span>
+  <h2>Do clique <em>à obra</em></h2>
+
+  <div class="planos-toggle" style="margin-bottom:36px;">
+    <button class="toggle-btn active" id="btn-fluxo-contratante" onclick="toggleFluxo('contratante')">Quero contratar</button>
+    <button class="toggle-btn" id="btn-fluxo-profissional" onclick="toggleFluxo('profissional')">Sou profissional</button>
+  </div>
+
+  <div id="fluxo-contratante" class="fluxo-steps" style="flex-direction:column;">
+    <div class="fluxo-item"><div class="fluxo-icon">🔍</div><div class="fluxo-content"><h4>Busco o profissional ideal</h4><p>Filtro por especialidade, cidade e avaliação. Vejo agenda e valores direto no perfil antes de decidir.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">📅</div><div class="fluxo-content"><h4>Seleciono uma data disponível</h4><p>A agenda do profissional fica visível no perfil. Escolho o dia que me atende e solicito o agendamento.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">⏳</div><div class="fluxo-content"><h4>Aguardo a aprovação</h4><p>O profissional tem até 24 horas para aprovar ou recusar. Sou notificado assim que ele responde.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">📲</div><div class="fluxo-content"><h4>Recebo os contatos do profissional</h4><p>Após aprovação, telefone, e-mail e WhatsApp são liberados. Combinamos os detalhes por conta própria.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">🏗️</div><div class="fluxo-content"><h4>Confirmo o início na plataforma</h4><p>Volto ao app para registrar a data de início combinada. A agenda do profissional é bloqueada automaticamente.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">⭐</div><div class="fluxo-content"><h4>Avalio após a conclusão</h4><p>Obra concluída? Avalio o profissional e ele me avalia. Avaliação dupla e cega — ninguém influencia o outro.</p></div></div>
+  </div>
+
+  <div id="fluxo-profissional" class="fluxo-steps" style="display:none;flex-direction:column;">
+    <div class="fluxo-item"><div class="fluxo-icon">👤</div><div class="fluxo-content"><h4>Crio meu perfil completo</h4><p>Adiciono especialidade, portfólio, valores cobrados e configuro minha agenda de disponibilidade.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">🔍</div><div class="fluxo-content"><h4>Apareço nas buscas</h4><p>Clientes da minha cidade me encontram por especialidade e disponibilidade. Quanto melhor minha reputação, mais alto apareço.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">🔔</div><div class="fluxo-content"><h4>Recebo solicitação de agendamento</h4><p>Alerta imediato por push e e-mail. Tenho até 24 horas para aprovar ou recusar.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">✅</div><div class="fluxo-content"><h4>Aprovo e meus contatos são liberados</h4><p>Após minha aprovação, telefone, e-mail e WhatsApp são liberados para o cliente combinar os detalhes.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">🏗️</div><div class="fluxo-content"><h4>Executo o serviço</h4><p>Minha agenda é bloqueada automaticamente na data confirmada. Foco total na entrega.</p></div></div>
+    <div class="fluxo-arrow">↓</div>
+    <div class="fluxo-item"><div class="fluxo-icon">⭐</div><div class="fluxo-content"><h4>Sou avaliado e construo reputação</h4><p>Cada obra concluída vira avaliação e badge no meu perfil. Minha reputação digital cresce a cada trabalho.</p></div></div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section class="planos-section" id="planos">
+  <span class="section-label">Planos e preços</span>
+  <h2>Transparente para <em>todo mundo</em></h2>
+  <p>Escolha seu perfil e veja os planos disponíveis</p>
+  <div class="planos-toggle">
+    <button class="toggle-btn active" onclick="togglePlanos('profissional')">Sou profissional</button>
+    <button class="toggle-btn" onclick="togglePlanos('contratante')">Quero contratar</button>
+  </div>
+
+  <div class="planos-profissional">
+    <div class="planos-grid tres">
+      <div class="plano-card">
+        <div class="plano-nome">Gratuito</div>
+        <div class="plano-preco">R$0</div>
+        <div class="plano-periodo">para sempre · inclui 7 dias do Pro</div>
+        <div class="plano-desc">Perfil básico para conhecer a plataforma. Visibilidade mínima — gera interesse, mas não entrega contato.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Especialidade exibida</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Nota geral visível</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Nº de obras concluídas</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Foto (oculta)</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Nome completo (só "João P.")</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Cidade e localização</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Agenda detalhada</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Valores cobrados</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Receber agendamentos</div>
+        </div>
+        <button class="plano-btn">Começar grátis</button>
+        <div class="trial-note">Inclui 7 dias do plano Pro</div>
+      </div>
+
+      <div class="plano-card destaque">
+        <div class="plano-popular">Mais popular</div>
+        <div class="plano-nome">Pro</div>
+        <div class="plano-preco">R$49</div>
+        <div class="plano-periodo">/mês · cancele quando quiser</div>
+        <div class="plano-desc">Perfil completo. Você aparece nas buscas com tudo desbloqueado e recebe solicitações de agendamento.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Foto de perfil visível</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Nome completo visível</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Cidade e raio de atuação</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Agenda detalhada</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Valores cobrados</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Portfólio de obras</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Receber agendamentos</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Contatos liberados após aprovação</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Analytics do perfil</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Dar lances em obras</div>
+        </div>
+        <button class="plano-btn">Testar 7 dias grátis</button>
+        <div class="trial-note" style="color:rgba(250,247,240,0.4)">Sem cartão · cancele antes e não paga</div>
+      </div>
+
+      <div class="plano-card">
+        <div class="plano-nome">Equipe</div>
+        <div class="plano-preco">R$99</div>
+        <div class="plano-periodo">/mês · para empreiteiras</div>
+        <div class="plano-desc">Para quem tem equipe e quer ir atrás das obras. Mini marketplace interno + lances exclusivos.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Tudo do plano Pro</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Até 10 profissionais</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Perfil com CNPJ</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Agenda unificada da equipe</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Cliente escolhe quem da equipe</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Notificação de buscas na cidade</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Topo absoluto nas buscas</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Dar lances em obras</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Badge "Equipe Verificada"</div>
+        </div>
+        <button class="plano-btn">Testar 7 dias grátis</button>
+        <div class="trial-note">Trial completo sem cartão</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="planos-contratante">
+    <div class="planos-grid tres">
+      <div class="plano-card">
+        <div class="plano-nome">Básico</div>
+        <div class="plano-preco">R$19</div>
+        <div class="plano-periodo">acesso por 30 dias</div>
+        <div class="plano-desc">Para explorar profissionais disponíveis na cidade sem precisar de muitos detalhes.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Ver todos os profissionais</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Filtro por especialidade</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Disponibilidade geral</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Ranking e recomendados</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Filtro por avaliação</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Agenda detalhada</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Valores cobrados</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Solicitar agendamento</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Referências liberadas após aprovação</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Postar obra para lances</div>
+        </div>
+        <button class="plano-btn">Escolher Básico</button>
+      </div>
+
+      <div class="plano-card destaque">
+        <div class="plano-popular">Mais popular</div>
+        <div class="plano-nome">Completo</div>
+        <div class="plano-preco">R$39</div>
+        <div class="plano-periodo">acesso por 30 dias</div>
+        <div class="plano-desc">Para contratar o melhor profissional com segurança, vendo todos os dados antes de decidir.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Tudo do Básico</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Ranking e recomendados</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Filtro por avaliação</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Top da cidade visível</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Agenda detalhada</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Valores cobrados</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Solicitar agendamento</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Contatos liberados após aprovação</div>
+          <div class="feature-item nao"><span class="fi-icon">✕</span> Postar obra para lances</div>
+        </div>
+        <button class="plano-btn">Escolher Completo</button>
+      </div>
+
+      <div class="plano-card">
+        <div class="plano-nome">Lance</div>
+        <div class="plano-preco">R$69</div>
+        <div class="plano-periodo">acesso por 30 dias</div>
+        <div class="plano-desc">Para quem quer que os melhores profissionais compitam pela sua obra.</div>
+        <div class="plano-features">
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Tudo do Completo</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Postar obra para lances</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Receber propostas sigilosas</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Comparar propostas lado a lado</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Referências liberadas após aprovação</div>
+          <div class="feature-item sim"><span class="fi-icon">✓</span> Lances de profissionais verificados</div>
+          
+        </div>
+        <button class="plano-btn">Escolher Lance</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="depoimentos" id="depoimentos">
+  <span class="section-label">Depoimentos</span>
+  <h2>Quem já usou <em>aprovou</em></h2>
+  <div class="depo-grid">
+    <div class="depo-card"><div class="depo-stars">⭐⭐⭐⭐⭐</div><div class="depo-texto">"Encontrei um pedreiro excelente em menos de 10 minutos. Antes eu ficava uma semana pedindo indicação pra todo mundo."</div><div class="depo-autor"><div class="depo-avatar">👩</div><div><div class="depo-nome">Mariana Figueiredo</div><div class="depo-info">Reforma de apartamento · Uberlândia</div></div></div></div>
+    <div class="depo-card"><div class="depo-stars">⭐⭐⭐⭐⭐</div><div class="depo-texto">"Como pedreiro, minha agenda nunca esteve tão cheia. Em dois meses no plano Pro já paguei o investimento muitas vezes."</div><div class="depo-autor"><div class="depo-avatar">👷</div><div><div class="depo-nome">Carlos Mendes</div><div class="depo-info">Pedreiro · 87 obras na plataforma</div></div></div></div>
+    <div class="depo-card"><div class="depo-stars">⭐⭐⭐⭐⭐</div><div class="depo-texto">"Postei minha obra e recebi 11 propostas em 48 horas. Contratei por 30% menos do que esperava pagar."</div><div class="depo-autor"><div class="depo-avatar">🧑</div><div><div class="depo-nome">Ricardo Alves</div><div class="depo-info">Construção residencial · Uberlândia</div></div></div></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <span class="section-label">Perguntas frequentes</span>
+  <h2>Ficou com <em>dúvida?</em></h2>
+  <div class="faq-list">
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">O trial de 7 dias é gratuito mesmo? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">Sim, 100% gratuito. Não pedimos cartão de crédito para ativar o trial. Você experimenta o plano Pro ou Equipe por 7 dias completos e só decide se quer continuar depois disso.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Como funciona o sistema de lances? Os profissionais veem as propostas dos concorrentes? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">Não. O sistema de lances é sigiloso — cada profissional vê apenas sua própria proposta. Isso garante que a competição seja pelo mérito real, não por uma guerra de preços.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Por que o contato só é liberado após aprovação? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">Para garantir que o contato aconteça só quando há compromisso real dos dois lados. O profissional aprova a solicitação em até 24h e, após isso, telefone, e-mail e WhatsApp são liberados para o cliente. Eles combinam os detalhes por conta própria.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">O Obra Certa garante a qualidade do serviço contratado? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">O Obra Certa é uma plataforma de conexão e não é parte do contrato entre cliente e profissional. Oferecemos transparência máxima: histórico verificado, avaliações reais e agenda visível para que você tome a melhor decisão possível antes de contratar.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Como as avaliações são verificadas? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">Somente clientes que registraram uma obra na plataforma podem avaliar. O sistema usa avaliação dupla e cega — cliente e profissional só veem a avaliação um do outro depois que os dois avaliam.</div></div></div>
+    <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Posso cancelar minha assinatura quando quiser? <span class="arrow">+</span></button><div class="faq-a"><div class="faq-a-inner">Sim. Sem fidelidade, sem multa. Você cancela quando quiser pelo próprio app. Seu perfil e histórico de avaliações ficam salvos caso queira voltar.</div></div></div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <h2>Pronto para achar o profissional <em>certo?</em></h2>
+  
+  <div class="cta-btns">
+    <a href="#planos" class="btn-primary">Quero contratar →</a>
+    <a href="#planos" class="btn-secondary" style="border-color:rgba(255,255,255,0.2);color:var(--cream);">Sou profissional</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Obra<span>Certa</span></div>
+  <div class="footer-links"><a href="#">Termos de uso</a><a href="#">Privacidade</a><a href="#">Contato</a></div>
+  <div class="footer-copy">© 2026 Obra Certa. Todos os direitos reservados.</div>
+</footer>
+
+<script>
+function toggleFluxo(tipo) {
+  var bc = document.getElementById("btn-fluxo-contratante");
+  var bp = document.getElementById("btn-fluxo-profissional");
+  var fc = document.getElementById("fluxo-contratante");
+  var fp = document.getElementById("fluxo-profissional");
+  if (tipo === "contratante") {
+    bc.classList.add("active"); bp.classList.remove("active");
+    fc.style.display = "flex"; fp.style.display = "none";
+  } else {
+    bp.classList.add("active"); bc.classList.remove("active");
+    fp.style.display = "flex"; fc.style.display = "none";
+  }
+}
+
+function togglePlanos(tipo) {
+  var pp = document.querySelector(".planos-profissional");
+  var pc = document.querySelector(".planos-contratante");
+  var btns = document.querySelectorAll(".planos-toggle .toggle-btn");
+  if (tipo === "profissional") {
+    btns[0].classList.add("active"); btns[1].classList.remove("active");
+    pp.style.display = "block"; pc.style.display = "none";
+  } else {
+    btns[1].classList.add("active"); btns[0].classList.remove("active");
+    pc.style.display = "block"; pp.style.display = "none";
+  }
+}
+
+function toggleFaq(btn) {
+  var item = btn.parentElement;
+  var isOpen = item.classList.contains("open");
+  document.querySelectorAll(".faq-item").forEach(function(i) { i.classList.remove("open"); });
+  if (!isOpen) item.classList.add("open");
+}
+</script>
+</body>
+</html>
