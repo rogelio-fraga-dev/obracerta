@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObraCerta — Apresentação para Thais</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,800;0,9..144,900;1,9..144,700;1,9..144,900&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ─────────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+/* ── TOKENS ─────────────────────────────────────────── */
+:root {
+  --orange:   #E8560A;
+  --orange2:  #FF7A3D;
+  --orangeL:  #FFF0E8;
+  --dark:     #18160F;
+  --dark2:    #221F16;
+  --dark3:    #2E2A1F;
+  --cream:    #FAF7F0;
+  --cream2:   #F2EDE0;
+  --cream3:   #E8E0CC;
+  --text:     #6B6455;
+  --text2:    #9B9080;
+  --green:    #1A9E5C;
+  --greenBg:  #E8F7EF;
+  --blue:     #4A90D9;
+  --purple:   #9B59B6;
+  --white:    #FFFFFF;
+}
+
+/* ── WRAPPER ─────────────────────────────────────────── */
+body {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  background: #111;
+  color: var(--dark);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── SLIDE ENGINE ─────────────────────────────────────── */
+.deck {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateX(40px);
+  display: flex;
+  flex-direction: column;
+}
+.slide.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.slide.exit {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+/* ── NAV BAR ─────────────────────────────────────────── */
+.nav-bar {
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  border-top: 1px solid #222;
+  flex-shrink: 0;
+  gap: 16px;
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--cream);
+  white-space: nowrap;
+}
+.nav-logo span { color: var(--orange); }
+.nav-dots {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dot.active { background: var(--orange); transform: scale(1.3); }
+.dot:hover { background: #555; }
+.nav-btns { display: flex; gap: 8px; white-space: nowrap; }
+.nav-btn {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #aaa;
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn:hover { background: #2a2a2a; color: #fff; border-color: #444; }
+.nav-btn.primary { background: var(--orange); border-color: var(--orange); color: white; }
+.nav-btn.primary:hover { background: var(--orange2); }
+.slide-counter {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────
+   SLIDES
+───────────────────────────────────────────────────── */
+
+/* ── UTILS ── */
+.label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 12px;
+  display: block;
+}
+.serif { font-family: 'Fraunces', serif; }
+.top-bar {
+  height: 6px;
+  background: var(--orange);
+  flex-shrink: 0;
+}
+
+/* ══ S1 — CAPA ══════════════════════════════════════════ */
+#s1 {
+  background: var(--dark);
+  overflow: hidden;
+}
+#s1 .inner {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  padding: 52px 64px 40px;
+  position: relative;
+}
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--dark3) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dark3) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.5;
+}
+.glow-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.08;
+  pointer-events: none;
+}
+.glow-1 { width: 480px; height: 480px; right: -80px; top: -100px; }
+.glow-2 { width: 300px; height: 300px; left: -80px; bottom: -80px; }
+
+#s1 .left {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--orangeL);
+  border: 1px solid rgba(232,86,10,0.25);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 28px;
+  width: fit-content;
+}
+.badge-pill .dot-pulse {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+#s1 h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  color: var(--cream);
+  margin-bottom: 24px;
+}
+#s1 h1 em { font-style: italic; color: var(--orange); }
+#s1 .sub {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+  max-width: 440px;
+  margin-bottom: 36px;
+}
+.author-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.author-bar {
+  width: 4px; height: 40px;
+  background: var(--orange);
+  border-radius: 2px;
+}
+.author-line p {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+#s1 .right {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+.prof-card {
+  background: var(--dark2);
+  border: 1px solid var(--dark3);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.prof-card:hover { transform: translateX(-4px); border-color: var(--orange); }
+.prof-avatar {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--dark3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.prof-name { font-size: 14px; font-weight: 800; color: var(--cream); margin-bottom: 3px; }
+.prof-meta { font-size: 12px; color: var(--green); font-weight: 600; }
+
+/* ══ S2 — O QUE JÁ TEM ══════════════════════════════════ */
+#s2 { background: var(--cream); }
+#s2 .inner {
+  flex: 1;
+  padding: 40px 60px 32px;
+  display: flex;
+  flex-direction: column;
+}
+#s2 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  margin-bottom: 32px;
+}
+#s2 h2 em { font-style: italic; color: var(--orange); }
+.assets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex: 1;
+}
+.asset-card {
+  background: white;
+  border: 1px solid var(--cream3);
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.asset-card:hover { border-color: var(--orange); box-shadow: 0 8px 32px rgba(232,86,10,0.08); }
+.asset-card-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  border-radius: 14px 0 0 14px;
+}
+.asset-icon { font-size: 26px; margin-bottom: 10px; }
+.asset-title { font-size: 15px; font-weight: 800; color: var(--dark); margin-bottom: 4px; }
+.asset-sub { font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.asset-body { font-size: 13px; color: var(--text); line-height: 1.55; }
+.verdict-bar {
+  background: var(--greenBg);
+  border: 1px solid #A8D5BB;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+/* ══ S3 — JORNADA ══════════════════════════════════════ */
+#s3 { background: var(--dark); }
+#s3 .inner {
+  flex: 1;
+  padding: 36px 60px 36px;
+  display: flex;
+  flex-direction: column;
+}
+#s3 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--cream);
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+}
+#s3 h2 em { font-style: italic; color: var(--orange); }
+.journey-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+}
+.journey-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.journey-header {
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.journey-header.orange {
+  background: rgba(232,86,10,0.12);
+  border: 1px solid rgba(232,86,10,0.3);
+  color: var(--orange);
+}
+.journey-header.blue {
+  background: rgba(74,144,217,0.12);
+  border: 1px solid rgba(74,144,217,0.3);
+  color: var(--blue);
+}
+.journey-step {
+  background: var(--dark2);
+  border: 1px solid var(--dark3);
+  border-radius: 10px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.journey-step:hover { border-color: #444; }
+.step-num {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-num.orange { background: rgba(232,86,10,0.15); color: var(--orange); }
+.step-num.blue { background: rgba(74,144,217,0.15); color: var(--blue); }
+.step-body { flex: 1; }
+.step-title { font-size: 13px; font-weight: 800; color: var(--cream); margin-bottom: 3px; }
+.step-desc { font-size: 11.5px; color: var(--text2); line-height: 1.4; }
+
+/* ══ S4 — MELHORIAS ═════════════════════════════════════ */
+#s4 { background: var(--cream2); }
+#s4 .inner {
+  flex: 1;
+  padding: 40px 60px 32px;
+  display: flex;
+  flex-direction: column;
+}
+#s4 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  margin-bottom: 28px;
+}
+#s4 h2 em { font-style: italic; color: var(--orange); }
+.melhorias-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  flex: 1;
+}
+.melhoria-card {
+  background: white;
+  border: 1px solid var(--cream3);
+  border-radius: 14px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.melhoria-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+.melhoria-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  border-radius: 14px 0 0 14px;
+}
+.melhoria-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.melhoria-num {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 5px;
+  opacity: 0.9;
+}
+.melhoria-icon { font-size: 20px; }
+.melhoria-title { font-size: 14px; font-weight: 800; color: var(--dark); flex: 1; }
+.melhoria-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+.melhoria-atual {
+  font-size: 11.5px;
+  color: var(--text2);
+  font-style: italic;
+  margin-bottom: 6px;
+}
+.melhoria-desc { font-size: 12.5px; color: var(--text); line-height: 1.5; }
+
+/* ══ S5 — INFRA ══════════════════════════════════════════ */
+#s5 { background: var(--dark); }
+#s5 .inner {
+  flex: 1;
+  padding: 36px 60px 32px;
+  display: flex;
+  flex-direction: column;
+}
+#s5 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--cream);
+  letter-spacing: -0.8px;
+  margin-bottom: 28px;
+}
+#s5 h2 em { font-style: italic; color: var(--orange); }
+.infra-layout {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: center;
+  flex: 1;
+  margin-bottom: 0;
+}
+.infra-services {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.infra-svc {
+  background: var(--dark2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+.infra-svc-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.infra-svc-icon { font-size: 20px; }
+.infra-svc-name { font-size: 13px; font-weight: 800; color: var(--cream); }
+.infra-svc-sub { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.infra-price {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 5px;
+}
+.infra-vps {
+  background: var(--dark2);
+  border: 2px solid rgba(232,86,10,0.4);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  flex-shrink: 0;
+  width: 220px;
+}
+.infra-vps-icon { font-size: 32px; margin-bottom: 12px; }
+.infra-vps-name {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--cream);
+  margin-bottom: 8px;
+}
+.infra-vps-spec {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.infra-vps-price {
+  background: var(--orange);
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 8px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.infra-vps-note { font-size: 11px; color: var(--text2); }
+.infra-total {
+  background: var(--dark2);
+  border: 1px solid rgba(232,86,10,0.3);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+.infra-total-big {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--orange);
+  white-space: nowrap;
+}
+.infra-total-big span { font-size: 16px; color: var(--text2); font-family: 'Cabinet Grotesk', sans-serif; font-weight: 500; }
+.infra-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 24px;
+  flex: 1;
+}
+.infra-breakdown p { font-size: 12px; color: var(--text2); }
+.infra-note { font-size: 12px; font-weight: 700; color: var(--green); }
+
+/* ══ S6 — STACK ══════════════════════════════════════════ */
+#s6 { background: var(--cream); }
+#s6 .inner {
+  flex: 1;
+  padding: 38px 60px 32px;
+  display: flex;
+  flex-direction: column;
+}
+#s6 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  margin-bottom: 28px;
+}
+#s6 h2 em { font-style: italic; color: var(--orange); }
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  flex: 1;
+}
+.stack-col { display: flex; flex-direction: column; gap: 8px; }
+.stack-header {
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+.stack-item {
+  background: #F5F5F5;
+  border: 1px solid var(--cream3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.stack-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.stack-item-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.stack-name { font-size: 13px; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
+.stack-why { font-size: 11.5px; color: var(--text); line-height: 1.4; }
+.identity-bar {
+  background: var(--orangeL);
+  border: 1px solid rgba(232,86,10,0.25);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 14px;
+  flex-shrink: 0;
+}
+.identity-bar strong { color: var(--orange); font-weight: 800; }
+
+/* ══ S7 — VISÃO ══════════════════════════════════════════ */
+#s7 { background: var(--dark); overflow: hidden; }
+#s7 .inner {
+  flex: 1;
+  padding: 36px 60px 36px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.vision-glow-1 {
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.06;
+  right: -100px; top: -100px;
+  pointer-events: none;
+}
+.vision-glow-2 {
+  position: absolute;
+  width: 350px; height: 350px;
+  border-radius: 50%;
+  background: var(--blue);
+  opacity: 0.06;
+  left: -80px; bottom: -80px;
+  pointer-events: none;
+}
+#s7 .top-row {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 24px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 2;
+}
+#s7 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--cream);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  align-self: center;
+}
+#s7 h2 em { font-style: italic; color: var(--orange); }
+.vision-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+.stat-card {
+  background: var(--dark2);
+  border: 1px solid var(--dark3);
+  border-radius: 10px;
+  padding: 11px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--orange);
+  white-space: nowrap;
+}
+.stat-lbl { font-size: 11px; color: var(--text2); line-height: 1.3; }
+.visions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+.vision-card {
+  background: var(--dark2);
+  border: 1px solid var(--dark3);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  gap: 14px;
+  transition: border-color 0.2s;
+}
+.vision-card:hover { border-color: #333; }
+.vision-icon { font-size: 26px; flex-shrink: 0; }
+.vision-body {}
+.vision-title { font-size: 14px; font-weight: 800; color: var(--cream); margin-bottom: 6px; }
+.vision-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* ══ S8 — PRÓXIMO PASSO ══════════════════════════════════ */
+#s8 {
+  background: var(--orange);
+  overflow: hidden;
+}
+#s8 .inner {
+  flex: 1;
+  padding: 44px 64px 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.next-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.next-glow-1 { width: 420px; height: 420px; background: white; opacity: 0.08; left: -120px; top: -100px; }
+.next-glow-2 { width: 320px; height: 320px; background: var(--dark); opacity: 0.1; right: -60px; bottom: -60px; }
+#s8 .label { color: rgba(255,255,255,0.6); }
+#s8 h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+#s8 h2 em { font-style: italic; color: var(--dark); }
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+.next-step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.step-circle {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--dark);
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step-when {
+  font-size: 13px;
+  font-weight: 800;
+  color: white;
+  width: 130px;
+  flex-shrink: 0;
+}
+.step-sep { color: rgba(255,255,255,0.3); font-size: 14px; }
+.step-what { font-size: 13px; color: rgba(255,240,220,0.9); line-height: 1.4; flex: 1; }
+.footer-bar {
+  background: var(--dark);
+  border-radius: 10px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.footer-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: white;
+}
+.footer-logo span { color: var(--orange); }
+.footer-sep { color: #444; }
+.footer-info { font-size: 12px; color: #777; }
+
+/* ── KEYBOARD HINT ── */
+.kbd-hint {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  background: rgba(0,0,0,0.6);
+  color: #666;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+  animation: fadeOut 4s 2s forwards;
+}
+@keyframes fadeOut { to { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ DECK ═══════════════════════════════════════════════ -->
+<div class="deck">
+
+  <!-- ── S1 — CAPA ─────────────────────────────────────── -->
+  <div class="slide active" id="s1">
+    <div class="inner">
+      <div class="grid-bg"></div>
+      <div class="glow-circle glow-1"></div>
+      <div class="glow-circle glow-2"></div>
+
+      <div class="left">
+        <div class="badge-pill">
+          <span class="dot-pulse"></span>
+          Construindo o futuro da obra
+        </div>
+        <h1>O profissional certo,<br><em>para a obra certa.</em></h1>
+        <p class="sub">Uma análise completa do produto, melhorias propostas e estratégia técnica para o lançamento do ObraCerta em Uberlândia.</p>
+        <div class="author-line">
+          <div class="author-bar"></div>
+          <p>Apresentado por <strong style="color:var(--cream)">Rogélio Claro</strong><br>Desenvolvedor de Software · Maio 2026</p>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="prof-card">
+          <div class="prof-avatar">🏗️</div>
+          <div>
+            <div class="prof-name">Carlos M. · Pedreiro</div>
+            <div class="prof-meta">⭐ 4.9 · 47 obras concluídas · Livre</div>
+          </div>
+        </div>
+        <div class="prof-card">
+          <div class="prof-avatar">🎨</div>
+          <div>
+            <div class="prof-name">Ana P. · Pintora</div>
+            <div class="prof-meta">⭐ 4.8 · Agenda aberta hoje</div>
+          </div>
+        </div>
+        <div class="prof-card">
+          <div class="prof-avatar">⚡</div>
+          <div>
+            <div class="prof-name">Roberto S. · Eletricista</div>
+            <div class="prof-meta">⭐ 4.7 · Respondeu em 2h</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S2 — O QUE JÁ TEM ─────────────────────────────── -->
+  <div class="slide" id="s2">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <span class="label">O QUE VOCÊ JÁ TEM</span>
+      <h2>Você fez <em>muito mais</em> do que imagina.</h2>
+      <div class="assets-grid">
+        <div class="asset-card">
+          <div class="asset-card-bar" style="background:var(--orange)"></div>
+          <div class="asset-icon" style="margin-left:8px">📋</div>
+          <div class="asset-title" style="margin-left:8px">PRD v0.1 — 26 seções</div>
+          <div class="asset-sub" style="margin-left:8px;color:var(--orange)">Regras de negócio completas</div>
+          <div class="asset-body" style="margin-left:8px">Fluxo de agendamento bilateral, penalidades por inatividade, planos monetizados, agenda com bloqueio automático, cancelamento com termo jurídico. Documentação acima da média para um projeto pré-seed.</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-bar" style="background:var(--blue)"></div>
+          <div class="asset-icon" style="margin-left:8px">🎨</div>
+          <div class="asset-title" style="margin-left:8px">Design System definido</div>
+          <div class="asset-sub" style="margin-left:8px;color:var(--blue)">Fraunces + Cabinet Grotesk</div>
+          <div class="asset-body" style="margin-left:8px">Paleta orange/dark/cream, tipografia de marca, botões, cards, badges, gradientes. Identidade visual profissional e consistente — pronta para ser transposta em código.</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-bar" style="background:var(--green)"></div>
+          <div class="asset-icon" style="margin-left:8px">🌐</div>
+          <div class="asset-title" style="margin-left:8px">Landing Page completa</div>
+          <div class="asset-sub" style="margin-left:8px;color:var(--green)">8 seções de conversão</div>
+          <div class="asset-body" style="margin-left:8px">Hero com stats, seção de dores do usuário, como funciona, fluxos, planos com toggle profissional/contratante, FAQ e CTA final. Estrutura de conversão madura desde o MVP.</div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-bar" style="background:var(--purple)"></div>
+          <div class="asset-icon" style="margin-left:8px">📱</div>
+          <div class="asset-title" style="margin-left:8px">Protótipos HTML funcionais</div>
+          <div class="asset-sub" style="margin-left:8px;color:var(--purple)">Fluxos de cadastro + app</div>
+          <div class="asset-body" style="margin-left:8px">Onboarding do profissional em 4 passos, escolha de plano, painel com completude de perfil gamificada, sistema de pedidos. Fluxo de UX já pensado e validado visualmente.</div>
+        </div>
+      </div>
+      <div class="verdict-bar">✅ Base de produto sólida. O trabalho de discovery e definição já está feito — o que falta é construir.</div>
+    </div>
+  </div>
+
+  <!-- ── S3 — JORNADA ──────────────────────────────────── -->
+  <div class="slide" id="s3">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <span class="label" style="color:var(--orange)">JORNADA DO USUÁRIO</span>
+      <h2>Dois mundos. <em>Uma plataforma.</em></h2>
+      <div class="journey-grid">
+        <div class="journey-col">
+          <div class="journey-header orange">🔨 PROFISSIONAL — quer ser encontrado</div>
+          <div class="journey-step">
+            <div class="step-num orange">1</div>
+            <div class="step-body">
+              <div class="step-title">Cadastro em 4 passos</div>
+              <div class="step-desc">Nome, WhatsApp, especialidade, plano. "7 dias de graça" — nunca "trial". Código OTP pelo WhatsApp.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num orange">2</div>
+            <div class="step-body">
+              <div class="step-title">Perfil + barra de completude</div>
+              <div class="step-desc">Cada item completo sobe o ranking. Foto, especialidades, valores, agenda — cada campo tem impacto visível.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num orange">3</div>
+            <div class="step-body">
+              <div class="step-title">Recebe pedido de agendamento</div>
+              <div class="step-desc">Notificação WhatsApp. Card mostra: bairro, serviço, reputação do cliente. Cronômetro de 24h visível.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num orange">4</div>
+            <div class="step-body">
+              <div class="step-title">Agenda bloqueada automaticamente</div>
+              <div class="step-desc">Contatos do cliente liberados. Período inteiro bloqueado. Ambos confirmam início e conclusão.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num orange">5</div>
+            <div class="step-body">
+              <div class="step-title">Avaliação dupla e cega</div>
+              <div class="step-desc">Ambos avaliam sem ver a nota do outro. Revelação simultânea. Histórico imutável no perfil.</div>
+            </div>
+          </div>
+        </div>
+        <div class="journey-col">
+          <div class="journey-header blue">🏠 CONTRATANTE — quer contratar certo</div>
+          <div class="journey-step">
+            <div class="step-num blue">1</div>
+            <div class="step-body">
+              <div class="step-title">Cadastro simplificado</div>
+              <div class="step-desc">Nome, WhatsApp, e-mail, cidade. Plano de 30 dias sem recorrência automática. Código OTP.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num blue">2</div>
+            <div class="step-body">
+              <div class="step-title">Busca com filtros inteligentes</div>
+              <div class="step-desc">Especialidade, cidade, disponibilidade, avaliação mínima. Só aparecem profissionais com agenda aberta.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num blue">3</div>
+            <div class="step-body">
+              <div class="step-title">Solicita agendamento</div>
+              <div class="step-desc">Escolhe data disponível. Descreve o serviço. Aguarda resposta em até 24h. Recebe notificação.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num blue">4</div>
+            <div class="step-body">
+              <div class="step-title">Contatos liberados após aprovação</div>
+              <div class="step-desc">Só após aceitar: telefone + WhatsApp + referências do profissional. Nunca antes.</div>
+            </div>
+          </div>
+          <div class="journey-step">
+            <div class="step-num blue">5</div>
+            <div class="step-body">
+              <div class="step-title">Avaliação dupla e cega</div>
+              <div class="step-desc">Nota revelada somente quando os dois avaliarem. Ninguém influencia o outro antes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S4 — MELHORIAS ────────────────────────────────── -->
+  <div class="slide" id="s4">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <span class="label">MELHORIAS PROPOSTAS</span>
+      <h2>Pequenos detalhes que fazem<br><em>uma diferença enorme.</em></h2>
+      <div class="melhorias-grid">
+        <div class="melhoria-card">
+          <div class="melhoria-bar" style="background:var(--orange)"></div>
+          <div class="melhoria-top" style="margin-left:8px">
+            <span class="melhoria-num" style="background:rgba(232,86,10,0.12);color:var(--orange)">01</span>
+            <span class="melhoria-icon">🔗</span>
+            <span class="melhoria-title">URL pública do profissional</span>
+          </div>
+          <div class="melhoria-tag" style="background:rgba(232,86,10,0.1);color:var(--orange);margin-left:8px">Aquisição orgânica</div>
+          <div class="melhoria-atual" style="margin-left:8px">Hoje: perfil só acessível com login</div>
+          <div class="melhoria-desc" style="margin-left:8px"><strong>obracerta.com.br/carlos-pedreiro-uberlandia</strong> — o profissional compartilha no WhatsApp. O link abre o perfil público com CTA para contratar. SEO gratuito, boca a boca digital desde o dia 1.</div>
+        </div>
+        <div class="melhoria-card">
+          <div class="melhoria-bar" style="background:var(--blue)"></div>
+          <div class="melhoria-top" style="margin-left:8px">
+            <span class="melhoria-num" style="background:rgba(74,144,217,0.12);color:var(--blue)">02</span>
+            <span class="melhoria-icon">📊</span>
+            <span class="melhoria-title">Completude gamificada com ranking</span>
+          </div>
+          <div class="melhoria-tag" style="background:rgba(74,144,217,0.1);color:var(--blue);margin-left:8px">Retenção na ativação</div>
+          <div class="melhoria-atual" style="margin-left:8px">Hoje: checklist estático de perfil</div>
+          <div class="melhoria-desc" style="margin-left:8px">Perfis acima de 80% aparecem primeiro na busca. Badge desbloqueável "Perfil Destaque". Animação de progresso no painel. O profissional tem <strong>incentivo concreto</strong> para completar — não só instrução.</div>
+        </div>
+        <div class="melhoria-card">
+          <div class="melhoria-bar" style="background:var(--green)"></div>
+          <div class="melhoria-top" style="margin-left:8px">
+            <span class="melhoria-num" style="background:rgba(26,158,92,0.12);color:var(--green)">03</span>
+            <span class="melhoria-icon">📲</span>
+            <span class="melhoria-title">PWA instalável — experiência de app</span>
+          </div>
+          <div class="melhoria-tag" style="background:rgba(26,158,92,0.1);color:var(--green);margin-left:8px">Engajamento recorrente</div>
+          <div class="melhoria-atual" style="margin-left:8px">Hoje: site web sem experiência de app</div>
+          <div class="melhoria-desc" style="margin-left:8px">No 1º acesso: banner "Adicionar à tela inicial". Funciona no Android e iOS <strong>sem App Store</strong>. Ícone na home do celular, splash screen, notificações push reais — sem custo de publicação.</div>
+        </div>
+        <div class="melhoria-card">
+          <div class="melhoria-bar" style="background:var(--purple)"></div>
+          <div class="melhoria-top" style="margin-left:8px">
+            <span class="melhoria-num" style="background:rgba(155,89,182,0.12);color:var(--purple)">04</span>
+            <span class="melhoria-icon">📈</span>
+            <span class="melhoria-title">Dashboard de saúde da plataforma</span>
+          </div>
+          <div class="melhoria-tag" style="background:rgba(155,89,182,0.1);color:var(--purple);margin-left:8px">Dados desde o dia 1</div>
+          <div class="melhoria-atual" style="margin-left:8px">Hoje: nenhuma visibilidade de métricas</div>
+          <div class="melhoria-desc" style="margin-left:8px">Admin com taxa de ativação, churn mensal, obras postadas vs propostas enviadas, NPS por profissional. Decisões baseadas em <strong>dados reais</strong> — não no feeling.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S5 — INFRA ─────────────────────────────────────── -->
+  <div class="slide" id="s5">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <span class="label" style="color:var(--orange)">INFRAESTRUTURA PROPOSTA</span>
+      <h2><em>R$ 107/mês.</em> Tudo que precisa para rodar.</h2>
+      <div class="infra-layout">
+        <div class="infra-services">
+          <div class="infra-svc" style="border:1px solid rgba(74,144,217,0.3)">
+            <div class="infra-svc-top">
+              <span class="infra-svc-icon">🌐</span>
+              <span class="infra-svc-name">registro.br</span>
+            </div>
+            <div class="infra-svc-sub">Domínio .com.br — identidade oficial brasileira</div>
+            <span class="infra-price" style="background:rgba(74,144,217,0.15);color:var(--blue)">R$ 40/ano ≈ R$ 3,33/mês</span>
+          </div>
+          <div class="infra-svc" style="border:1px solid rgba(26,158,92,0.3)">
+            <div class="infra-svc-top">
+              <span class="infra-svc-icon">📧</span>
+              <span class="infra-svc-name">Titan Mail</span>
+            </div>
+            <div class="infra-svc-sub">Caixa de email — contato@obracerta.com.br</div>
+            <span class="infra-price" style="background:rgba(26,158,92,0.15);color:var(--green)">R$ 13/mês · 2 caixas incluídas</span>
+          </div>
+        </div>
+
+        <div class="infra-vps">
+          <div class="infra-vps-icon">🖥️</div>
+          <div class="infra-vps-name">VPS Hetzner CX22</div>
+          <div class="infra-vps-spec">4 vCPU · 4 GB RAM · 80 GB SSD<br>Spring Boot + PostgreSQL<br>Redis + WhatsApp API</div>
+          <div class="infra-vps-price">~R$ 57/mês</div>
+          <div class="infra-vps-note">Pago em BRL · Hetzner</div>
+        </div>
+
+        <div class="infra-services">
+          <div class="infra-svc" style="border:1px solid rgba(155,89,182,0.3)">
+            <div class="infra-svc-top">
+              <span class="infra-svc-icon">🔒</span>
+              <span class="infra-svc-name">Let's Encrypt</span>
+            </div>
+            <div class="infra-svc-sub">SSL gratuito — renovação automática</div>
+            <span class="infra-price" style="background:rgba(155,89,182,0.15);color:var(--purple)">R$ 0 — 100% gratuito</span>
+          </div>
+          <div class="infra-svc" style="border:1px solid rgba(232,86,10,0.3)">
+            <div class="infra-svc-top">
+              <span class="infra-svc-icon">🚀</span>
+              <span class="infra-svc-name">Coolify + Docker</span>
+            </div>
+            <div class="infra-svc-sub">Deploy automático na VPS · zero-downtime</div>
+            <span class="infra-price" style="background:rgba(232,86,10,0.12);color:var(--orange)">R$ 0 — self-hosted na VPS</span>
+          </div>
+        </div>
+      </div>
+      <div class="infra-total">
+        <div>
+          <div class="infra-total-big">~R$ 107<span>/mês</span></div>
+          <div class="infra-note">💡 Com 50 profissionais pagando R$49/mês → R$2.450 de receita. Infra = 4,4% do faturamento.</div>
+        </div>
+        <div class="infra-breakdown">
+          <p>· VPS Hetzner: R$ 57</p>
+          <p>· Titan Mail: R$ 13</p>
+          <p>· Domínio registro.br: R$ 3,33</p>
+          <p>· SSL + Coolify: R$ 0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S6 — STACK ─────────────────────────────────────── -->
+  <div class="slide" id="s6">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <span class="label">TECNOLOGIA & IDENTIDADE DIGITAL</span>
+      <h2>Stack que escala. <em>Identidade que convence.</em></h2>
+      <div class="stack-grid">
+        <div class="stack-col">
+          <div class="stack-header" style="background:var(--orange)">FRONTEND</div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--orange)"></div>
+            <div class="stack-name" style="margin-left:8px">Next.js 14</div>
+            <div class="stack-why" style="margin-left:8px">Landing page com SSR nativo — SEO orgânico gratuito desde o dia 1</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--orange)"></div>
+            <div class="stack-name" style="margin-left:8px">React + TypeScript</div>
+            <div class="stack-why" style="margin-left:8px">PWA do app — tipagem elimina classe inteira de bugs em produção</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--orange)"></div>
+            <div class="stack-name" style="margin-left:8px">Tailwind CSS</div>
+            <div class="stack-why" style="margin-left:8px">Mesmo design system da landing — consistência visual total entre as telas</div>
+          </div>
+        </div>
+        <div class="stack-col">
+          <div class="stack-header" style="background:var(--blue)">BACKEND</div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--blue)"></div>
+            <div class="stack-name" style="margin-left:8px">Spring Boot 3</div>
+            <div class="stack-why" style="margin-left:8px">Arquitetura robusta, testada em produção, amplo ecossistema de bibliotecas</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--blue)"></div>
+            <div class="stack-name" style="margin-left:8px">PostgreSQL 16</div>
+            <div class="stack-why" style="margin-left:8px">Dados transacionais + full-text search nativo para busca de profissionais</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--blue)"></div>
+            <div class="stack-name" style="margin-left:8px">Redis</div>
+            <div class="stack-why" style="margin-left:8px">Cache de buscas, sessões e filas de notificação com baixa latência</div>
+          </div>
+        </div>
+        <div class="stack-col">
+          <div class="stack-header" style="background:var(--green)">SERVIÇOS</div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--green)"></div>
+            <div class="stack-name" style="margin-left:8px">Pagar.me</div>
+            <div class="stack-why" style="margin-left:8px">Gateway BR com recorrência mensal + Pix nativo — zero fricção no pagamento</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--green)"></div>
+            <div class="stack-name" style="margin-left:8px">Evolution API</div>
+            <div class="stack-why" style="margin-left:8px">WhatsApp Business self-hosted — todas as notificações sem custo adicional</div>
+          </div>
+          <div class="stack-item">
+            <div class="stack-item-bar" style="background:var(--green)"></div>
+            <div class="stack-name" style="margin-left:8px">Coolify + Docker</div>
+            <div class="stack-why" style="margin-left:8px">Deploy zero-downtime com 1 clique. Rollback em segundos. CI/CD nativo.</div>
+          </div>
+        </div>
+      </div>
+      <div class="identity-bar">
+        📧 <strong>contato@obracerta.com.br</strong> &nbsp;·&nbsp; <strong>obracerta.com.br</strong> &nbsp;—&nbsp; identidade digital completa desde o primeiro dia de funcionamento.
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S7 — VISÃO ─────────────────────────────────────── -->
+  <div class="slide" id="s7">
+    <div class="top-bar"></div>
+    <div class="inner">
+      <div class="vision-glow-1"></div>
+      <div class="vision-glow-2"></div>
+      <span class="label" style="color:var(--orange)">A VISÃO DE LONGO PRAZO</span>
+      <div class="top-row">
+        <h2>Não é só um marketplace.<br>É a <em>reputação digital</em><br>de cada profissional no Brasil.</h2>
+        <div class="vision-stats">
+          <div class="stat-card">
+            <div class="stat-num">700k</div>
+            <div class="stat-lbl">habitantes em Uberlândia</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">R$75M</div>
+            <div class="stat-lbl">mercado local endereçável/ano</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">0</div>
+            <div class="stat-lbl">concorrentes verticais hoje</div>
+          </div>
+        </div>
+      </div>
+      <div class="visions-grid">
+        <div class="vision-card">
+          <div class="vision-icon">🏙️</div>
+          <div class="vision-body">
+            <div class="vision-title">Expansão por cidade</div>
+            <div class="vision-desc">Uberlândia → Triângulo Mineiro → MG → Brasil. O profissional leva a reputação consigo — não começa do zero em cada cidade nova.</div>
+          </div>
+        </div>
+        <div class="vision-card">
+          <div class="vision-icon">🧠</div>
+          <div class="vision-body">
+            <div class="vision-title">Match inteligente (V2)</div>
+            <div class="vision-desc">IA que sugere o profissional certo com base em histórico, proximidade e taxa de aceitação. Sem busca manual — o app conhece quem você precisa.</div>
+          </div>
+        </div>
+        <div class="vision-card">
+          <div class="vision-icon">📜</div>
+          <div class="vision-body">
+            <div class="vision-title">Portfólio vitalício</div>
+            <div class="vision-desc">Cada obra concluída vira portfólio imutável. O pedreiro que entrar hoje terá um histórico verificado daqui a 10 anos. Isso tem valor real.</div>
+          </div>
+        </div>
+        <div class="vision-card">
+          <div class="vision-icon">🔐</div>
+          <div class="vision-body">
+            <div class="vision-title">Verificação de antecedentes (V2)</div>
+            <div class="vision-desc">Badge premium verificado via parceria com bureau. Contratante paga pelo serviço. Diferencial de confiança único no mercado brasileiro.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── S8 — PRÓXIMO PASSO ─────────────────────────────── -->
+  <div class="slide" id="s8">
+    <div class="inner">
+      <div class="next-glow next-glow-1"></div>
+      <div class="next-glow next-glow-2"></div>
+      <span class="label">PRÓXIMO PASSO</span>
+      <h2>Vamos construir<br><em>isso juntos?</em></h2>
+      <div class="steps-list">
+        <div class="next-step">
+          <div class="step-circle">1</div>
+          <div class="step-when">Esta semana</div>
+          <div class="step-sep">·</div>
+          <div class="step-what">Reunião de alinhamento — equity, pro-labore, dedicação. Carta de Intenções já enviada.</div>
+        </div>
+        <div class="next-step">
+          <div class="step-circle">2</div>
+          <div class="step-when">Junho 2026</div>
+          <div class="step-sep">·</div>
+          <div class="step-what">Formalização com advogado. Constituição da empresa (LTDA ou SAS). Conta empresarial.</div>
+        </div>
+        <div class="next-step">
+          <div class="step-circle">3</div>
+          <div class="step-when">Julho 2026</div>
+          <div class="step-sep">·</div>
+          <div class="step-what">Setup da VPS, domínio registro.br e email. Design system em código. Kick-off do desenvolvimento.</div>
+        </div>
+        <div class="next-step">
+          <div class="step-circle">4</div>
+          <div class="step-when">Fev 2027</div>
+          <div class="step-sep">·</div>
+          <div class="step-what">MVP completo. 50 profissionais pré-cadastrados por especialidade. Lançamento em Uberlândia.</div>
+        </div>
+      </div>
+      <div class="footer-bar">
+        <div class="footer-logo">Obra<span>Certa</span></div>
+        <div class="footer-sep">—</div>
+        <div class="footer-info">Rogélio Claro &nbsp;·&nbsp; rogelio@email.com &nbsp;·&nbsp; Maio 2026</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- ── NAVIGATION BAR ──────────────────────────── -->
+<div class="nav-bar">
+  <div class="nav-logo">Obra<span>Certa</span></div>
+  <div class="nav-dots" id="dots"></div>
+  <div class="nav-btns">
+    <span class="slide-counter" id="counter">1 / 8</span>
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn primary" id="btnNext" onclick="navigate(1)">Próximo →</button>
+  </div>
+</div>
+
+<div class="kbd-hint">Use ← → ou clique nos pontos para navegar</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dotsContainer = document.getElementById('dots');
+const counter = document.getElementById('counter');
+let current = 0;
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsContainer.appendChild(d);
+});
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[current].classList.remove('active');
+  slides[current].classList.add('exit');
+  setTimeout(() => slides[current < 0 ? 0 : current].classList.remove('exit'), 400);
+  current = idx;
+  slides[current].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  counter.textContent = `${current + 1} / ${slides.length}`;
+  document.getElementById('btnPrev').disabled = current === 0;
+  document.getElementById('btnNext').textContent = current === slides.length - 1 ? '✓ Fim' : 'Próximo →';
+}
+
+function navigate(dir) { goTo(current + dir); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+});
+</script>
+</body>
+</html>
