@@ -1,0 +1,55 @@
+/**
+ * Design tokens as CSS custom properties — single source of truth.
+ * Values extracted from the approved prototypes (docs/mockups/landing_page.html / docs/mockups/prototipo.html).
+ * Consumed by the Tailwind preset (@obracerta/config/tailwind) and global styles.
+ */
+:root {
+  /* ── Brand: orange scale (primary, anchored on #E8560A) ── */
+  --color-orange-50: #fff0e8;
+  --color-orange-100: #ffe0cc;
+  --color-orange-200: #ffc9a8;
+  --color-orange-300: #ffa876;
+  --color-orange-400: #ff7a3d;
+  --color-orange-500: #e8560a;
+  --color-orange-600: #cc4708;
+  --color-orange-700: #a53a07;
+  --color-orange-800: #7e2d06;
+  --color-orange-900: #5c2105;
+  --color-orange: var(--color-orange-500);
+
+  /* ── Dark (foreground / dark surfaces) ── */
+  --color-dark: #18160f;
+  --color-dark-soft: #221f16;
+
+  /* ── Cream (backgrounds) ── */
+  --color-cream: #faf7f0;
+  --color-cream-soft: #f2ede0;
+
+  /* ── Semantic tokens ── */
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-dark);
+  --color-primary: var(--color-orange-500);
+  --color-primary-foreground: #ffffff;
+  --color-muted: var(--color-cream-soft);
+  --color-muted-foreground: #6b6455;
+  --color-border: #e8e0cc;
+
+  --color-success: #1a9e5c;
+  --color-warning: #e8a00a;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+
+  /* ── Typography ── */
+  /* apps/web overrides these with next/font variables; these are fallbacks. */
+  --font-display: "Fraunces", serif;
+  --font-sans: "Cabinet Grotesk", system-ui, sans-serif;
+
+  /* ── Radii ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* ── Spacing ── */
+  --space-section: clamp(4rem, 3rem + 5vw, 10rem);
+}

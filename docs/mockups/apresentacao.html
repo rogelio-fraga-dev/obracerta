@@ -291,9 +291,8 @@ body {
 #s2 h2 em { font-style: italic; color: var(--orange); }
 .assets-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  flex: 1;
 }
 .asset-card {
   background: white;
@@ -421,9 +420,8 @@ body {
 #s4 h2 em { font-style: italic; color: var(--orange); }
 .melhorias-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
-  flex: 1;
 }
 .melhoria-card {
   background: white;
@@ -486,7 +484,7 @@ body {
   font-weight: 900;
   color: var(--cream);
   letter-spacing: -0.8px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 #s5 h2 em { font-style: italic; color: var(--orange); }
 .infra-layout {
@@ -566,7 +564,7 @@ body {
   display: flex;
   align-items: center;
   gap: 24px;
-  margin-top: 16px;
+  margin-top: 12px;
   flex-shrink: 0;
 }
 .infra-total-big {
@@ -585,6 +583,56 @@ body {
 }
 .infra-breakdown p { font-size: 12px; color: var(--text2); }
 .infra-note { font-size: 12px; font-weight: 700; color: var(--green); }
+.infra-footnote-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+  flex-shrink: 0;
+}
+.infra-footnote-card {
+  background: var(--dark2);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.5;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.infra-footnote-card:hover {
+  transform: translateY(-2px);
+}
+.infra-footnote-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--cream);
+}
+.infra-footnote-tag {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2.5px 7px;
+  border-radius: 5px;
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.infra-footnote-card p {
+  margin-bottom: 3px;
+}
+.infra-footnote-card strong {
+  color: var(--orange2);
+}
+.infra-footnote-note {
+  font-size: 10px;
+  color: var(--text2);
+  opacity: 0.7;
+  font-style: italic;
+  margin-top: 4px;
+}
 
 /* ══ S6 — STACK ══════════════════════════════════════════ */
 #s6 { background: var(--cream); }
@@ -718,9 +766,8 @@ body {
 .stat-lbl { font-size: 11px; color: var(--text2); line-height: 1.3; }
 .visions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  flex: 1;
   position: relative;
   z-index: 2;
 }
@@ -758,27 +805,30 @@ body {
 }
 .next-glow-1 { width: 420px; height: 420px; background: white; opacity: 0.08; left: -120px; top: -100px; }
 .next-glow-2 { width: 320px; height: 320px; background: var(--dark); opacity: 0.1; right: -60px; bottom: -60px; }
-#s8 .label { color: rgba(255,255,255,0.6); }
-#s8 h2 {
+#s8 .label { color: rgba(255,255,255,0.6); margin-bottom: 0; }
+.s8-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24px;
+}
+.s8-hero h2 {
   font-family: 'Fraunces', serif;
-  font-size: 56px;
+  font-size: 68px;
   font-weight: 900;
   color: white;
   line-height: 1.05;
-  letter-spacing: -1.5px;
-  margin-bottom: 40px;
+  letter-spacing: -2px;
+  margin-top: 18px;
   position: relative;
   z-index: 2;
 }
-#s8 h2 em { font-style: italic; color: var(--dark); }
-.steps-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  flex: 1;
-  position: relative;
-  z-index: 2;
-}
+.s8-hero h2 em { font-style: italic; color: var(--dark); }
 .next-step {
   display: flex;
   align-items: center;
@@ -1037,7 +1087,7 @@ body {
           </div>
           <div class="melhoria-tag" style="background:rgba(232,86,10,0.1);color:var(--orange);margin-left:8px">Aquisição orgânica</div>
           <div class="melhoria-atual" style="margin-left:8px">Hoje: perfil só acessível com login</div>
-          <div class="melhoria-desc" style="margin-left:8px"><strong>obracerta.com.br/carlos-pedreiro-uberlandia</strong> — o profissional compartilha no WhatsApp. O link abre o perfil público com CTA para contratar. SEO gratuito, boca a boca digital desde o dia 1.</div>
+          <div class="melhoria-desc" style="margin-left:8px"><strong>obracerta.com.br/carlos-pedreiro-uberlandia</strong> — o profissional compartilha no WhatsApp. Abre o perfil com CTA direto. SEO gratuito e boca a boca digital desde o dia 1.</div>
         </div>
         <div class="melhoria-card">
           <div class="melhoria-bar" style="background:var(--blue)"></div>
@@ -1048,7 +1098,7 @@ body {
           </div>
           <div class="melhoria-tag" style="background:rgba(74,144,217,0.1);color:var(--blue);margin-left:8px">Retenção na ativação</div>
           <div class="melhoria-atual" style="margin-left:8px">Hoje: checklist estático de perfil</div>
-          <div class="melhoria-desc" style="margin-left:8px">Perfis acima de 80% aparecem primeiro na busca. Badge desbloqueável "Perfil Destaque". Animação de progresso no painel. O profissional tem <strong>incentivo concreto</strong> para completar — não só instrução.</div>
+          <div class="melhoria-desc" style="margin-left:8px">Perfis acima de 80% aparecem primeiro na busca. Badge "Perfil Destaque" e animação de progresso no painel. O profissional tem <strong>incentivo concreto</strong> para preencher.</div>
         </div>
         <div class="melhoria-card">
           <div class="melhoria-bar" style="background:var(--green)"></div>
@@ -1059,7 +1109,7 @@ body {
           </div>
           <div class="melhoria-tag" style="background:rgba(26,158,92,0.1);color:var(--green);margin-left:8px">Engajamento recorrente</div>
           <div class="melhoria-atual" style="margin-left:8px">Hoje: site web sem experiência de app</div>
-          <div class="melhoria-desc" style="margin-left:8px">No 1º acesso: banner "Adicionar à tela inicial". Funciona no Android e iOS <strong>sem App Store</strong>. Ícone na home do celular, splash screen, notificações push reais — sem custo de publicação.</div>
+          <div class="melhoria-desc" style="margin-left:8px">Banner "Adicionar à tela inicial" no 1º acesso. Funciona no Android/iOS <strong>sem App Store</strong>. Ícone na home, splash screen e push real sem custo de publicação.</div>
         </div>
         <div class="melhoria-card">
           <div class="melhoria-bar" style="background:var(--purple)"></div>
@@ -1070,7 +1120,7 @@ body {
           </div>
           <div class="melhoria-tag" style="background:rgba(155,89,182,0.1);color:var(--purple);margin-left:8px">Dados desde o dia 1</div>
           <div class="melhoria-atual" style="margin-left:8px">Hoje: nenhuma visibilidade de métricas</div>
-          <div class="melhoria-desc" style="margin-left:8px">Admin com taxa de ativação, churn mensal, obras postadas vs propostas enviadas, NPS por profissional. Decisões baseadas em <strong>dados reais</strong> — não no feeling.</div>
+          <div class="melhoria-desc" style="margin-left:8px">Admin com taxa de ativação, churn, obras postadas vs propostas, e NPS por profissional. Decisões baseadas em <strong>dados reais e analíticos</strong> — não no feeling.</div>
         </div>
       </div>
     </div>
@@ -1141,6 +1191,29 @@ body {
           <p>· SSL + Coolify: R$ 0</p>
         </div>
       </div>
+      <div class="infra-footnote-container">
+        <div class="infra-footnote-card" style="border: 1px solid rgba(232,86,10,0.3)">
+          <div class="infra-footnote-header">
+            <span>💳</span>
+            <span>Gateway Financeiro (Pagar.me)</span>
+            <span class="infra-footnote-tag" style="background:rgba(232,86,10,0.15);color:var(--orange2)">Taxas de Escala</span>
+          </div>
+          <p>Custos transacionais que incidem sobre cada assinatura:</p>
+          <p>· <strong>Pix:</strong> ~1,19% + R$ 0,99 por transação líquida.</p>
+          <p>· <strong>Cartão de Crédito:</strong> ~3,99% + R$ 1,49 por cobrança recorrente.</p>
+          <p class="infra-footnote-note">💡 Custos não computados no fixo; deduzidos diretamente da receita gerada pelos planos.</p>
+        </div>
+        
+        <div class="infra-footnote-card" style="border: 1px solid rgba(74,144,217,0.3)">
+          <div class="infra-footnote-header">
+            <span>💬</span>
+            <span>Notificações & WhatsApp (Meta)</span>
+            <span class="infra-footnote-tag" style="background:rgba(74,144,217,0.15);color:var(--blue)">Mensageria</span>
+          </div>
+          <p>· <strong>Fase Inicial:</strong> Evolution API (Self-hosted) — <strong>R$ 0/mês</strong>. Requer algoritmo de rate-limiting estrito e variação de strings para mitigar banimento de spam em chips comuns.</p>
+          <p>· <strong>Fase Oficial:</strong> WhatsApp Business API oficial (Meta) — custo de <strong>~R$ 0,30</strong> por conversa iniciada pela empresa, repassados/absorvidos na mensalidade.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1152,21 +1225,21 @@ body {
       <h2>Stack que escala. <em>Identidade que convence.</em></h2>
       <div class="stack-grid">
         <div class="stack-col">
-          <div class="stack-header" style="background:var(--orange)">FRONTEND</div>
+          <div class="stack-header" style="background:var(--orange)">FRONTEND (MONOREPO)</div>
           <div class="stack-item">
             <div class="stack-item-bar" style="background:var(--orange)"></div>
-            <div class="stack-name" style="margin-left:8px">Next.js 14</div>
-            <div class="stack-why" style="margin-left:8px">Landing page com SSR nativo — SEO orgânico gratuito desde o dia 1</div>
+            <div class="stack-name" style="margin-left:8px">Next.js 14 (Camada Pública)</div>
+            <div class="stack-why" style="margin-left:8px">Landing page, SEO e Perfil Público. Atuação estrita na camada externa com SSR para indexação orgânica.</div>
           </div>
           <div class="stack-item">
             <div class="stack-item-bar" style="background:var(--orange)"></div>
-            <div class="stack-name" style="margin-left:8px">React + TypeScript</div>
-            <div class="stack-why" style="margin-left:8px">PWA do app — tipagem elimina classe inteira de bugs em produção</div>
+            <div class="stack-name" style="margin-left:8px">React SPA (Camada Interna)</div>
+            <div class="stack-why" style="margin-left:8px">PWA isolado operando como SPA client-side otimizada dentro de Service Worker, reduzindo banda e CPU da VPS.</div>
           </div>
           <div class="stack-item">
             <div class="stack-item-bar" style="background:var(--orange)"></div>
-            <div class="stack-name" style="margin-left:8px">Tailwind CSS</div>
-            <div class="stack-why" style="margin-left:8px">Mesmo design system da landing — consistência visual total entre as telas</div>
+            <div class="stack-name" style="margin-left:8px">Monorepo & Tailwind</div>
+            <div class="stack-why" style="margin-left:8px">Organização em monorepo com reutilização completa de Design System e tipos entre a camada pública e a SPA interna.</div>
           </div>
         </div>
         <div class="stack-col">
@@ -1258,13 +1331,6 @@ body {
             <div class="vision-desc">Cada obra concluída vira portfólio imutável. O pedreiro que entrar hoje terá um histórico verificado daqui a 10 anos. Isso tem valor real.</div>
           </div>
         </div>
-        <div class="vision-card">
-          <div class="vision-icon">🔐</div>
-          <div class="vision-body">
-            <div class="vision-title">Verificação de antecedentes (V2)</div>
-            <div class="vision-desc">Badge premium verificado via parceria com bureau. Contratante paga pelo serviço. Diferencial de confiança único no mercado brasileiro.</div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -1274,33 +1340,9 @@ body {
     <div class="inner">
       <div class="next-glow next-glow-1"></div>
       <div class="next-glow next-glow-2"></div>
-      <span class="label">PRÓXIMO PASSO</span>
-      <h2>Vamos construir<br><em>isso juntos?</em></h2>
-      <div class="steps-list">
-        <div class="next-step">
-          <div class="step-circle">1</div>
-          <div class="step-when">Esta semana</div>
-          <div class="step-sep">·</div>
-          <div class="step-what">Reunião de alinhamento — equity, pro-labore, dedicação. Carta de Intenções já enviada.</div>
-        </div>
-        <div class="next-step">
-          <div class="step-circle">2</div>
-          <div class="step-when">Junho 2026</div>
-          <div class="step-sep">·</div>
-          <div class="step-what">Formalização com advogado. Constituição da empresa (LTDA ou SAS). Conta empresarial.</div>
-        </div>
-        <div class="next-step">
-          <div class="step-circle">3</div>
-          <div class="step-when">Julho 2026</div>
-          <div class="step-sep">·</div>
-          <div class="step-what">Setup da VPS, domínio registro.br e email. Design system em código. Kick-off do desenvolvimento.</div>
-        </div>
-        <div class="next-step">
-          <div class="step-circle">4</div>
-          <div class="step-when">Fev 2027</div>
-          <div class="step-sep">·</div>
-          <div class="step-what">MVP completo. 50 profissionais pré-cadastrados por especialidade. Lançamento em Uberlândia.</div>
-        </div>
+      <div class="s8-hero">
+        <span class="label">PRÓXIMO PASSO</span>
+        <h2>Vamos construir<br><em>isso juntos?</em></h2>
       </div>
       <div class="footer-bar">
         <div class="footer-logo">Obra<span>Certa</span></div>

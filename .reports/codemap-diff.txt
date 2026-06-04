@@ -1,0 +1,49 @@
+Codemap scan — 2026-06-03
+=========================
+Previous codemaps: none (initial generation).
+
+Generated:
+  docs/CODEMAPS/architecture.md
+  docs/CODEMAPS/backend.md
+  docs/CODEMAPS/frontend.md
+  docs/CODEMAPS/data.md
+  docs/CODEMAPS/dependencies.md
+
+Project: Turborepo + pnpm monorepo (QuemFaz/ObraCerta). Stage: Fase 0 (foundation).
+
+Workspaces detected (6):
+  apps/api            NestJS modular monolith (hexagonal/DDD)
+  apps/web            Next.js 15 App Router — (public) + (app) route groups
+  packages/shared     Zod schemas + inferred types (front<->back contract)
+  packages/ui         Design System (Button + cn)
+  packages/design-tokens  tokens.css (CSS vars) + typed tokens
+  packages/config     eslint/prettier/tsconfig/tailwind preset
+
+Entry points:
+  apps/api/src/main.ts
+  apps/web/src/app/layout.tsx
+  packages/*/src/index.ts
+
+Routes:
+  API:  GET /health (200 ok / 503 degraded)
+  Web:  / , /[slug] (SSR), /dashboard
+
+New dependencies (initial): nestjs 11, next 15, react 19, zod, pg, ioredis,
+  tsup, turbo, tailwindcss, jest/ts-jest, vitest, eslint 9 (flat).
+
+External integrations: NONE wired yet (Asaas/WhatsApp/SMS/object storage are Fase 1+,
+  to live behind hexagonal ports).
+
+Data layer: NO schema/migrations — ORM choice (Prisma vs Drizzle) is an open ADR (plan §13).
+
+Architecture notes:
+  - End-to-end type-safety via packages/shared (POC in web /dashboard).
+  - Global API response envelope (interceptor + filter via APP_* DI).
+  - Zod-validated env at boot (fail-fast).
+
+Verification at scan time: build / typecheck / lint / test all green.
+
+Mockups: protótipos HTML aprovados consolidados em docs/mockups/
+  (landing_page, prototipo, prototipo2, apresentacao, carta_intencoes).
+
+Staleness: n/a (first generation).

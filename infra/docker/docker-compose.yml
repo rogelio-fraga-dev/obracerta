@@ -1,0 +1,42 @@
+name: obracerta
+
+services:
+  postgres:
+    # PostgreSQL 16 + PostGIS. pg_trgm and unaccent ship as contrib modules and
+    # are enabled by the init script (plan §3.2).
+    image: postgis/postgis:16-3.4
+    container_name: obracerta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: obracerta
+      POSTGRES_PASSWORD: obracerta
+      POSTGRES_DB: obracerta
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obracerta -d obracerta"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: obracerta-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
