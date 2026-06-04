@@ -1,4 +1,17 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import {
   type JwtClaims,
   type ProfessionalProfile,
@@ -9,6 +22,12 @@ import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js"
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { ProfilesService } from "../application/profiles.service.js";
+
+/** Subconjunto do arquivo multipart que usamos (evita depender de @types/multer global). */
+interface MultipartFile {
+  buffer: Buffer;
+  mimetype: string;
+}
 
 @Controller("profiles")
 export class ProfilesController {
@@ -32,6 +51,23 @@ export class ProfilesController {
     patch: UpdateProfessionalProfileInput,
   ): Promise<ProfessionalProfile> {
     const updated = await this.profiles.updateProfessional(user.sub, patch);
+    if (!updated) throw new NotFoundException("Perfil profissional não encontrado.");
+    return updated;
+  }
+
+  /** Upload da foto de perfil (multipart, campo `file`). Recalcula completude. */
+  @Post("professional/me/foto")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadFoto(
+    @CurrentUser() user: JwtClaims,
+    @UploadedFile() file: MultipartFile | undefined,
+  ): Promise<ProfessionalProfile> {
+    if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
+    const updated = await this.profiles.uploadFoto(user.sub, {
+      buffer: file.buffer,
+      mimetype: file.mimetype,
+    });
     if (!updated) throw new NotFoundException("Perfil profissional não encontrado.");
     return updated;
   }

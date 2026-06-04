@@ -12,6 +12,7 @@ import { UsersModule } from "./modules/users/users.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { EntitlementsModule } from "./modules/entitlements/entitlements.module.js";
 import { ProfilesModule } from "./modules/profiles/profiles.module.js";
+import { StorageModule } from "./modules/storage/storage.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -32,6 +33,7 @@ import { ProfilesModule } from "./modules/profiles/profiles.module.js";
     }),
     DatabaseModule,
     RedisModule,
+    StorageModule,
     HealthModule,
     UsersModule,
     AuthModule,

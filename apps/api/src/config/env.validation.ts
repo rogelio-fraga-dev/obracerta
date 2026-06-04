@@ -25,6 +25,14 @@ export const envSchema = z.object({
   JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  // Object storage S3-compatível (roadmap §4.2)
+  S3_ENDPOINT: z.string().url().default("http://localhost:9000"),
+  S3_REGION: z.string().default("us-east-1"),
+  S3_BUCKET: z.string().default("obracerta"),
+  S3_ACCESS_KEY: z.string().default("obracerta"),
+  S3_SECRET_KEY: z.string().default("obracerta123"),
+  S3_PUBLIC_URL: z.string().url().default("http://localhost:9000"),
 });
 
 export type Env = z.infer<typeof envSchema>;

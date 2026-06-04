@@ -37,6 +37,28 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    # Object storage S3-compatível (fotos de perfil — roadmap §4.2).
+    # API compatível com S3: em produção troca por Cloudflare R2 sem mudar código.
+    image: minio/minio:latest
+    container_name: obracerta-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: obracerta
+      MINIO_ROOT_PASSWORD: obracerta123
+    ports:
+      - "9000:9000" # API S3
+      - "9001:9001" # Console web
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
   redisdata:
+  miniodata:

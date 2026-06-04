@@ -95,4 +95,20 @@ export class DrizzleProfilesRepository implements ProfilesRepository {
       .returning();
     return row ? rowToProfessionalProfile(row) : null;
   }
+
+  async setFotoUrl(userId: string, url: string): Promise<ProfessionalProfile | null> {
+    const [row] = await this.db
+      .update(professionalProfiles)
+      .set({ fotoUrl: url })
+      .where(eq(professionalProfiles.userId, userId))
+      .returning();
+    return row ? rowToProfessionalProfile(row) : null;
+  }
+
+  async setCompletude(userId: string, pct: number): Promise<void> {
+    await this.db
+      .update(professionalProfiles)
+      .set({ completudePct: pct })
+      .where(eq(professionalProfiles.userId, userId));
+  }
 }

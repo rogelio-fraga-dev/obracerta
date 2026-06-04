@@ -15,6 +15,8 @@ export interface ProfilesRepository {
     userId: string,
     patch: UpdateProfessionalProfileInput,
   ): Promise<ProfessionalProfile | null>;
+  setFotoUrl(userId: string, url: string): Promise<ProfessionalProfile | null>;
+  setCompletude(userId: string, pct: number): Promise<void>;
 }
 
 export const PROFILES_REPOSITORY = Symbol("PROFILES_REPOSITORY");

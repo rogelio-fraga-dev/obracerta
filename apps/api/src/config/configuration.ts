@@ -15,6 +15,14 @@ export interface AppConfig {
   jwtRefreshTtlDays: number;
   otpTtlSeconds: number;
   otpMaxAttempts: number;
+  s3: {
+    endpoint: string;
+    region: string;
+    bucket: string;
+    accessKey: string;
+    secretKey: string;
+    publicUrl: string;
+  };
 }
 
 /**
@@ -35,5 +43,13 @@ export function configuration(): AppConfig {
     jwtRefreshTtlDays: env.JWT_REFRESH_TTL_DAYS,
     otpTtlSeconds: env.OTP_TTL_SECONDS,
     otpMaxAttempts: env.OTP_MAX_ATTEMPTS,
+    s3: {
+      endpoint: env.S3_ENDPOINT,
+      region: env.S3_REGION,
+      bucket: env.S3_BUCKET,
+      accessKey: env.S3_ACCESS_KEY,
+      secretKey: env.S3_SECRET_KEY,
+      publicUrl: env.S3_PUBLIC_URL,
+    },
   };
 }
