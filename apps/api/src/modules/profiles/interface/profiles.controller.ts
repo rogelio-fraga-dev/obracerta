@@ -72,6 +72,13 @@ export class ProfilesController {
     return updated;
   }
 
+  /** Checklist de onboarding do usuário autenticado (roadmap §5). */
+  @Get("onboarding/me")
+  @UseGuards(JwtAuthGuard)
+  getOnboarding(@CurrentUser() user: JwtClaims) {
+    return this.profiles.getChecklist(user.sub);
+  }
+
   /** Perfil público por slug (anti-desintermediação completa na Fase 5). */
   @Get("p/:slug")
   async publicBySlug(@Param("slug") slug: string): Promise<ProfessionalProfile> {

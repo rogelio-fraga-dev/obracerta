@@ -7,8 +7,6 @@ import { UsersModule } from "../users/users.module.js";
 import { AuthService } from "./application/auth.service.js";
 import { OtpService } from "./application/otp.service.js";
 import { TokenService } from "./application/token.service.js";
-import { NOTIFICATION_PROVIDER } from "./domain/ports/notification.provider.js";
-import { ConsoleNotificationProvider } from "./infrastructure/console-notification.provider.js";
 import { AuthController } from "./interface/auth.controller.js";
 import { JwtAuthGuard } from "./interface/jwt-auth.guard.js";
 
@@ -29,13 +27,7 @@ import { JwtAuthGuard } from "./interface/jwt-auth.guard.js";
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    OtpService,
-    TokenService,
-    JwtAuthGuard,
-    { provide: NOTIFICATION_PROVIDER, useClass: ConsoleNotificationProvider },
-  ],
+  providers: [AuthService, OtpService, TokenService, JwtAuthGuard],
   exports: [JwtModule, JwtAuthGuard, AuthService, OtpService],
 })
 export class AuthModule {}

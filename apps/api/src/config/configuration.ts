@@ -23,6 +23,7 @@ export interface AppConfig {
     secretKey: string;
     publicUrl: string;
   };
+  onboardingSpeedup: number;
 }
 
 /**
@@ -51,5 +52,6 @@ export function configuration(): AppConfig {
       secretKey: env.S3_SECRET_KEY,
       publicUrl: env.S3_PUBLIC_URL,
     },
+    onboardingSpeedup: env.ONBOARDING_SPEEDUP,
   };
 }

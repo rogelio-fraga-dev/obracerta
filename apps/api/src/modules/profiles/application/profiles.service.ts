@@ -7,6 +7,7 @@ import type {
 } from "@obracerta/shared";
 import { UserType } from "@obracerta/shared";
 import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
+import { buildChecklist, type ChecklistItem } from "../../onboarding/domain/onboarding.js";
 import { slugify, slugWithSuffix } from "../domain/slug.js";
 import { computeProfessionalCompletude } from "../domain/completude.js";
 import { PROFILES_REPOSITORY, type ProfilesRepository } from "../domain/ports/profiles.repository.js";
@@ -53,6 +54,19 @@ export class ProfilesService {
 
   getProfessionalBySlug(slug: string): Promise<ProfessionalProfile | null> {
     return this.profiles.findProfessionalBySlug(slug);
+  }
+
+  /** Checklist de onboarding derivado do estado do perfil profissional. */
+  async getChecklist(userId: string): Promise<{ items: ChecklistItem[]; completudePct: number }> {
+    const profile = await this.profiles.findProfessionalByUserId(userId);
+    const completudePct = profile?.completudePct ?? 0;
+    const items = buildChecklist({
+      temPerfil: Boolean(profile),
+      temEspecialidades: (profile?.especialidades.length ?? 0) > 0,
+      temFoto: Boolean(profile?.fotoUrl),
+      completudePct,
+    });
+    return { items, completudePct };
   }
 
   async updateProfessional(

@@ -33,6 +33,9 @@ export const envSchema = z.object({
   S3_ACCESS_KEY: z.string().default("obracerta"),
   S3_SECRET_KEY: z.string().default("obracerta123"),
   S3_PUBLIC_URL: z.string().url().default("http://localhost:9000"),
+
+  // Onboarding (roadmap §5). speedup>1 acelera as mensagens em dev (1 = dias reais).
+  ONBOARDING_SPEEDUP: z.coerce.number().positive().default(1),
 });
 
 export type Env = z.infer<typeof envSchema>;

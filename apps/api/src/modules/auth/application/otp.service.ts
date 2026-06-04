@@ -7,7 +7,7 @@ import { generateOtpCode, otpKeys } from "../domain/otp.js";
 import {
   NOTIFICATION_PROVIDER,
   type NotificationProvider,
-} from "../domain/ports/notification.provider.js";
+} from "../../notifications/domain/notification.provider.js";
 
 /**
  * Fluxo de OTP sobre Redis (TTL curto) + provedor de notificação.

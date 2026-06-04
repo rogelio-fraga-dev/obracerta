@@ -1,7 +1,8 @@
+import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
-import { configuration } from "./config/configuration.js";
+import { type AppConfig, configuration } from "./config/configuration.js";
 import { validateEnv } from "./config/env.validation.js";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
 import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-envelope.interceptor.js";
@@ -13,6 +14,8 @@ import { AuthModule } from "./modules/auth/auth.module.js";
 import { EntitlementsModule } from "./modules/entitlements/entitlements.module.js";
 import { ProfilesModule } from "./modules/profiles/profiles.module.js";
 import { StorageModule } from "./modules/storage/storage.module.js";
+import { NotificationsModule } from "./modules/notifications/notifications.module.js";
+import { OnboardingModule } from "./modules/onboarding/onboarding.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -31,14 +34,30 @@ import { StorageModule } from "./modules/storage/storage.module.js";
       load: [configuration],
       validate: validateEnv,
     }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<AppConfig, true>) => {
+        const url = new URL(config.get("redisUrl", { infer: true }));
+        return {
+          // Opções (não instância) evitam acoplar a versão do ioredis do bullmq.
+          connection: {
+            host: url.hostname,
+            port: Number(url.port) || 6379,
+            maxRetriesPerRequest: null,
+          },
+        };
+      },
+    }),
     DatabaseModule,
     RedisModule,
     StorageModule,
+    NotificationsModule,
     HealthModule,
     UsersModule,
     AuthModule,
     EntitlementsModule,
     ProfilesModule,
+    OnboardingModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

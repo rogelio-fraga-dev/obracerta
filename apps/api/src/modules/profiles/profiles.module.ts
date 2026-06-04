@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
+import { OnboardingModule } from "../onboarding/onboarding.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { CadastroService } from "./application/cadastro.service.js";
 import { ProfilesService } from "./application/profiles.service.js";
@@ -13,7 +14,7 @@ import { ProfilesController } from "./interface/profiles.controller.js";
  * auto-login) e UsersModule (criação de usuário). JwtAuthGuard vem do AuthModule.
  */
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [AuthModule, UsersModule, OnboardingModule],
   controllers: [CadastroController, ProfilesController],
   providers: [
     CadastroService,
