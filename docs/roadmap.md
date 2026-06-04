@@ -240,12 +240,18 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - [x] **ADR-0001** (stack) + diagrama **C4** inicial.
 - **Entregável:** ambiente reproduzível, deploy verde, type-safety provada.
 
-### Fase 1 — Identidade e perfis (Sprint 2–3)
-- [ ] `auth` (OTP multicanal + JWT/Redis + SMS fallback). `entitlements` base.
-- [ ] Cadastro 4 passos (profissional/contratante) + tela de escolha de perfil.
-- [ ] Perfil + **completude gamificada** (§4.2). Object storage para foto.
-- [ ] Onboarding: tour + checklist + notificações progressivas.
-- **Entregável:** usuário se cadastra, loga e completa perfil.
+### Fase 1 — Identidade e perfis (Sprint 2–3) ✅
+- [x] **Fatia 1.0 — Camada de dados (Drizzle):** schema `cities`/`users` + enums derivados do shared, migrations (`drizzle-kit`), seed, `UsersRepository` (porta) + adapter. _(adiado da Fase 0.)_
+- [x] `auth` (OTP + JWT + sessões Redis + rate-limit). `entitlements` base. _SMS/WhatsApp reais via porta — em dev, adapter de console (NotificationsModule); provedores reais quando houver contas sandbox._
+- [x] Cadastro 4 passos (profissional/contratante) + escolha de perfil. _Wizard web (`apps/web/(public)/cadastro`) + API `/cadastro`; slug público gerado._
+- [x] Perfil + **completude gamificada** (§4.2). Object storage (MinIO/S3) para foto.
+- [x] Onboarding: checklist + notificações progressivas D1/D3/D5/D7 (BullMQ). _Tour visual no front é polimento adiado; backend + checklist prontos._
+- **Entregável:** usuário se cadastra, loga e completa perfil. ✅ _Verificado ao vivo em localhost (OTP→login, cadastro→perfil+slug, PATCH→completude, upload foto→MinIO, fila de onboarding processada)._
+
+**Decisões/pendências da Fase 1 (para fases seguintes):**
+- Coluna `geo` (PostGIS) do `professional_profiles` adiada para a Fase 5 (busca geográfica).
+- Persistência de sessão no front (cookie httpOnly) é hardening da Fase 6 — hoje o token fica em memória no wizard.
+- Provedores reais de WhatsApp/SMS atrás da porta `NotificationProvider` (trocar adapter, sem mexer no domínio).
 
 ### Fase 2 — Agenda e agendamento (Sprint 4–6)
 - [ ] `availability` (6 meses, bloqueio bilateral, §10).
