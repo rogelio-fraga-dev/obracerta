@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
-import type { User, CreateUserInput } from "@obracerta/shared";
+import type { User } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { users } from "../../../infrastructure/database/schema/users.js";
-import type { UsersRepository } from "../domain/ports/users.repository.js";
+import type { CreateUserData, UsersRepository } from "../domain/ports/users.repository.js";
 
 /** Linha crua da tabela `users` (o que o Drizzle devolve no `select`). */
 type UserRow = typeof users.$inferSelect;
@@ -31,7 +31,7 @@ export function rowToUser(row: UserRow): User {
 export class DrizzleUsersRepository implements UsersRepository {
   constructor(@Inject(DRIZZLE) private readonly db: Database) {}
 
-  async create(input: CreateUserInput): Promise<User> {
+  async create(input: CreateUserData): Promise<User> {
     const [row] = await this.db
       .insert(users)
       .values({
@@ -39,6 +39,7 @@ export class DrizzleUsersRepository implements UsersRepository {
         whatsapp: input.whatsapp,
         email: input.email,
         tipo: input.tipo,
+        cidadeId: input.cidadeId,
       })
       .returning();
     if (!row) {

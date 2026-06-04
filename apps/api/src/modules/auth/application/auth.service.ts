@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import type { AuthResult, AuthTokens, OtpRequestResult } from "@obracerta/shared";
+import type { AuthResult, AuthTokens, OtpRequestResult, User } from "@obracerta/shared";
 import { UsersService } from "../../users/application/users.service.js";
 import { OtpService } from "./otp.service.js";
 import { TokenService } from "./token.service.js";
@@ -18,6 +18,11 @@ export class AuthService {
 
   requestOtp(whatsapp: string): Promise<OtpRequestResult> {
     return this.otp.request(whatsapp);
+  }
+
+  /** Emite tokens para um usuário (ex.: auto-login após o cadastro). */
+  login(user: User): Promise<AuthTokens> {
+    return this.tokens.issue(user);
   }
 
   /**

@@ -11,6 +11,7 @@ import { HealthModule } from "./modules/health/health.module.js";
 import { UsersModule } from "./modules/users/users.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { EntitlementsModule } from "./modules/entitlements/entitlements.module.js";
+import { ProfilesModule } from "./modules/profiles/profiles.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -35,6 +36,7 @@ import { EntitlementsModule } from "./modules/entitlements/entitlements.module.j
     UsersModule,
     AuthModule,
     EntitlementsModule,
+    ProfilesModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

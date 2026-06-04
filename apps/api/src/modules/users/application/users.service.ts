@@ -1,6 +1,10 @@
 import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import type { User, CreateUserInput } from "@obracerta/shared";
-import { USERS_REPOSITORY, type UsersRepository } from "../domain/ports/users.repository.js";
+import type { User } from "@obracerta/shared";
+import {
+  USERS_REPOSITORY,
+  type CreateUserData,
+  type UsersRepository,
+} from "../domain/ports/users.repository.js";
 
 /**
  * Casos de uso de usuário. Orquestra o domínio sobre a porta `UsersRepository`
@@ -12,7 +16,7 @@ export class UsersService {
   constructor(@Inject(USERS_REPOSITORY) private readonly users: UsersRepository) {}
 
   /** Cria um usuário, garantindo unicidade de WhatsApp (regra de aplicação). */
-  async create(input: CreateUserInput): Promise<User> {
+  async create(input: CreateUserData): Promise<User> {
     const existing = await this.users.findByWhatsapp(input.whatsapp);
     if (existing) {
       throw new ConflictException("Já existe um usuário com este WhatsApp.");

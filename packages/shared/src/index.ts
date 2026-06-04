@@ -11,3 +11,4 @@ export * from "./pagination.js";
 export * from "./api-response.js";
 export * from "./user.js";
 export * from "./auth.js";
+export * from "./profiles.js";

@@ -5,3 +5,5 @@
 export * from "./enums.js";
 export * from "./cities.js";
 export * from "./users.js";
+export * from "./professional-profiles.js";
+export * from "./contractor-profiles.js";
