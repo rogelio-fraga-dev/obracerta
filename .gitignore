@@ -35,3 +35,8 @@ Thumbs.db
 
 # Docker volumes (local data)
 infra/docker/.data/
+
+# Arquivos do Claude / Claude Code (não versionar nada do assistente)
+estudo.md
+CLAUDE.md
+.claude/

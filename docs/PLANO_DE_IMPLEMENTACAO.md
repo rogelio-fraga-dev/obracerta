@@ -130,7 +130,7 @@ obracerta/
 
 ## 4. Modelo de Dados (entidades principais)
 
-Derivado do PRD. Detalhar em migrations (Prisma ou Drizzle como ORM — decisão de Fase 0; ambos com bom suporte a Postgres/PostGIS).
+Derivado do PRD. Detalhar em migrations com **Drizzle** (ORM escolhido na Fase 0 — ver ADR-0001). Motivo: SQL-first com suporte natural a PostGIS (busca geo) e `pg_trgm` (full-text), inferência de tipos alinhada à filosofia do Zod já usado no `packages/shared`, e leveza (sem query engine). Migrations via `drizzle-kit`.
 
 ### 4.1 Identidade e perfis
 - **`users`** — `id`, `nome_completo`, `whatsapp`, `email?`, `cidade_id` (FK — cidade como 1ª classe), `tipo` (PROFISSIONAL | CONTRATANTE), `cpf?` (nunca público), `criado_em`, `status` (ATIVO | SUSPENSO | REMOVIDO).
@@ -337,7 +337,7 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 3. Provisionar **VPS São Paulo (8GB) + Coolify + domínio + Cloudflare**; medir latência real vs. Hetzner.
 4. Contas sandbox: **WhatsApp Cloud API (Meta)**, **Asaas**, provedor **SMS** — validar OTP ponta a ponta.
 5. POC `packages/shared` (tipos+Zod) consumido por `apps/web` e `apps/api` (type-safety end-to-end).
-6. Escolher ORM (Prisma vs Drizzle) e registrar **ADR**.
+6. ✅ ORM decidido: **Drizzle** (SQL-first, PostGIS/`pg_trgm` nativos via `sql`, tipos inferidos do schema, leve). Registrar em **ADR-0001**.
 
 ---
 
