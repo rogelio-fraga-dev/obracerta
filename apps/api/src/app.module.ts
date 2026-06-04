@@ -8,6 +8,7 @@ import { ResponseEnvelopeInterceptor } from "./common/interceptors/response-enve
 import { DatabaseModule } from "./infrastructure/database/database.module.js";
 import { RedisModule } from "./infrastructure/cache/redis.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
+import { UsersModule } from "./modules/users/users.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -29,6 +30,7 @@ import { HealthModule } from "./modules/health/health.module.js";
     DatabaseModule,
     RedisModule,
     HealthModule,
+    UsersModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

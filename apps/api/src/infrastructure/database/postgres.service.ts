@@ -1,29 +1,19 @@
-import {
-  Injectable,
-  Logger,
-  type OnModuleDestroy,
-  type OnModuleInit,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { Pool } from "pg";
-import type { AppConfig } from "../../config/configuration.js";
+import { PG_POOL } from "./database.tokens.js";
 
 /**
- * Thin PostgreSQL adapter (connection pool).
+ * Gerencia o ciclo de vida do pool de conexões e expõe um health ping.
  *
- * Fase 0: provides connectivity + a health ping only. The ORM (Prisma vs
- * Drizzle) is an open ADR decision (plan §13), so no schema/query layer is
- * committed yet — the rest of the app must depend on repository ports, not on
- * this client directly.
+ * O pool é provido por `DatabaseModule` (token `PG_POOL`) e compartilhado com o
+ * client Drizzle (token `DRIZZLE`) — uma única fonte de conexões. As queries de
+ * negócio passam pelo Drizzle atrás de repository ports, não por este serviço.
  */
 @Injectable()
 export class PostgresService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PostgresService.name);
-  private readonly pool: Pool;
 
-  constructor(config: ConfigService<AppConfig, true>) {
-    this.pool = new Pool({ connectionString: config.get("databaseUrl", { infer: true }) });
-  }
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async onModuleInit(): Promise<void> {
     if (!(await this.ping())) {

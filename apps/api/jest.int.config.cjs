@@ -1,16 +1,19 @@
+/**
+ * Config de testes de INTEGRAÇÃO (exigem Postgres/Redis do Docker rodando).
+ * Rodam com `pnpm --filter @obracerta/api test:int`, fora do `pnpm test` padrão
+ * (e do CI), que não tem infra. Arquivos: `*.int-spec.ts`.
+ */
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   moduleFileExtensions: ["js", "json", "ts"],
   rootDir: "src",
-  testRegex: ".*\\.spec\\.ts$",
+  testRegex: ".*\\.int-spec\\.ts$",
   transform: {
     "^.+\\.ts$": ["ts-jest", { tsconfig: "<rootDir>/../tsconfig.spec.json" }],
   },
-  collectCoverageFrom: ["**/*.(t|j)s"],
-  coverageDirectory: "../coverage",
   testEnvironment: "node",
+  testTimeout: 15000,
   moduleNameMapper: {
-    // NodeNext uses .js specifiers for .ts sources — strip for Jest resolution.
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@obracerta/shared$": "<rootDir>/../../../packages/shared/src/index.ts",
   },
