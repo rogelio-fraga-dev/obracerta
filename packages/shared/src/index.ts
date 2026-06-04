@@ -12,3 +12,7 @@ export * from "./api-response.js";
 export * from "./user.js";
 export * from "./auth.js";
 export * from "./profiles.js";
+export * from "./availability.js";
+export * from "./booking.js";
+export * from "./terms.js";
+export * from "./penalties.js";
