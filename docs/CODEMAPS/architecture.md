@@ -46,4 +46,4 @@ config → design-tokens → shared → ui → api / web
 
 `pnpm build` · `pnpm typecheck` · `pnpm lint` · `pnpm test`
 
-See `docs/PLANO_DE_IMPLEMENTACAO.md` for the full plan and phase roadmap.
+See `docs/roadmap.md` for the full plan and phase roadmap.

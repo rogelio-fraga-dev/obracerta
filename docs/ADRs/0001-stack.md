@@ -3,7 +3,7 @@
 - **Status:** Aceito
 - **Data:** 2026-06-04
 - **Decisores:** Time de engenharia (dono do produto + engenharia)
-- **Contexto do roadmap:** Fase 0 — Fundação (`docs/PLANO_DE_IMPLEMENTACAO.md` §8)
+- **Contexto do roadmap:** Fase 0 — Fundação (`docs/roadmap.md` §8)
 
 > ADR (Architecture Decision Record): registro curto e durável de uma decisão
 > arquitetural relevante — o **contexto**, a **decisão** e as **consequências** —
@@ -115,6 +115,6 @@ de uma eventual troca futura fica contido à camada de infraestrutura.
 
 ## 7. Referências
 
-- `docs/PLANO_DE_IMPLEMENTACAO.md` (§4 Modelo de Dados, §8 Roadmap, §13 Próximos passos)
+- `docs/roadmap.md` (§4 Modelo de Dados, §8 Roadmap, §13 Próximos passos)
 - `apps/api/README.md` (convenção de camadas hexagonais)
 - Diagrama C4 inicial (a criar — segundo artefato restante da Fase 0)

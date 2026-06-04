@@ -1,6 +1,6 @@
 # Diagrama C4 — ObraCerta / QuemFaz (inicial)
 
-> Artefato da Fase 0 (`docs/PLANO_DE_IMPLEMENTACAO.md` §8). Níveis 1 (Contexto) e 2
+> Artefato da Fase 0 (`docs/roadmap.md` §8). Níveis 1 (Contexto) e 2
 > (Container). Níveis 3 (Componente) e 4 (Código) entram quando os domínios forem
 > implementados (Fase 1+).
 
@@ -117,5 +117,5 @@ C4Container
 ## Referências
 
 - `docs/ADRs/0001-stack.md` — decisões de stack (inclui escolha do Drizzle).
-- `docs/PLANO_DE_IMPLEMENTACAO.md` — §4 (modelo de dados), §8 (roadmap).
+- `docs/roadmap.md` — §4 (modelo de dados), §8 (roadmap).
 - `apps/api/README.md` — convenção de camadas hexagonais.

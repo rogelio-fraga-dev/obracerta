@@ -2,7 +2,7 @@
 
 Marketplace vertical bilateral de profissionais da construção civil — reputação verificada, agenda em tempo real, avaliação dupla-cega e lances sigilosos. Web responsivo (mobile-first) + PWA — **sem app nativo**.
 
-> ⚠️ O nome final ainda está em definição. A marca (nome, cores, domínio, e-mail) é **desacoplada** via config + design tokens (env vars + tokens), nunca hardcoded. `ObraCerta` é placeholder. Ver `docs/PLANO_DE_IMPLEMENTACAO.md` §1.
+> ⚠️ O nome final ainda está em definição. A marca (nome, cores, domínio, e-mail) é **desacoplada** via config + design tokens (env vars + tokens), nunca hardcoded. `ObraCerta` é placeholder. Ver `docs/roadmap.md` §1.
 
 ## Estado atual — Fase 0 (Fundação)
 
@@ -76,5 +76,5 @@ pnpm dev
 
 ## Documentação
 
-- Plano de implementação: [`docs/PLANO_DE_IMPLEMENTACAO.md`](docs/PLANO_DE_IMPLEMENTACAO.md)
-- ADRs e diagramas C4: `docs/` (a adicionar — ADR-0001 stack, C4 inicial)
+- Roadmap (fonte única de organização das fases): [`docs/roadmap.md`](docs/roadmap.md)
+- ADRs: [`docs/ADRs/0001-stack.md`](docs/ADRs/0001-stack.md) · Diagrama C4: [`docs/c4-model.md`](docs/c4-model.md)
