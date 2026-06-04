@@ -9,6 +9,8 @@ import { DatabaseModule } from "./infrastructure/database/database.module.js";
 import { RedisModule } from "./infrastructure/cache/redis.module.js";
 import { HealthModule } from "./modules/health/health.module.js";
 import { UsersModule } from "./modules/users/users.module.js";
+import { AuthModule } from "./modules/auth/auth.module.js";
+import { EntitlementsModule } from "./modules/entitlements/entitlements.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -31,6 +33,8 @@ import { UsersModule } from "./modules/users/users.module.js";
     RedisModule,
     HealthModule,
     UsersModule,
+    AuthModule,
+    EntitlementsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

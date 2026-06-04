@@ -10,6 +10,11 @@ export interface AppConfig {
   corsOrigins: string[];
   databaseUrl: string;
   redisUrl: string;
+  jwtSecret: string;
+  jwtAccessTtl: string;
+  jwtRefreshTtlDays: number;
+  otpTtlSeconds: number;
+  otpMaxAttempts: number;
 }
 
 /**
@@ -25,5 +30,10 @@ export function configuration(): AppConfig {
     corsOrigins: env.API_CORS_ORIGINS,
     databaseUrl: env.DATABASE_URL,
     redisUrl: env.REDIS_URL,
+    jwtSecret: env.JWT_SECRET,
+    jwtAccessTtl: env.JWT_ACCESS_TTL,
+    jwtRefreshTtlDays: env.JWT_REFRESH_TTL_DAYS,
+    otpTtlSeconds: env.OTP_TTL_SECONDS,
+    otpMaxAttempts: env.OTP_MAX_ATTEMPTS,
   };
 }

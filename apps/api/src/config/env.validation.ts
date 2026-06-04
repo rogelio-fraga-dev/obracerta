@@ -18,6 +18,13 @@ export const envSchema = z.object({
     ),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
+
+  // Auth (roadmap §6)
+  JWT_SECRET: z.string().min(16, "JWT_SECRET deve ter ao menos 16 caracteres"),
+  JWT_ACCESS_TTL: z.string().default("15m"),
+  JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
+  OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
+  OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 });
 
 export type Env = z.infer<typeof envSchema>;
