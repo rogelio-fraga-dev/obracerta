@@ -232,12 +232,12 @@ Cada módulo com fronteira explícita (porta/adapter, hexagonal), controller/ser
 Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regras críticas.**
 
 ### Fase 0 — Fundação (Sprint 0–1)
-- [ ] Monorepo (Turborepo + pnpm), lint/format, `packages/config`.
-- [ ] `apps/api` NestJS (estrutura hexagonal) + `apps/web` Next.js 15 + `packages/shared` (tipos+Zod) — **POC de type-safety end-to-end**.
-- [ ] PostgreSQL 16 + PostGIS + Redis + ORM/migrations; Docker Compose local.
-- [ ] Design tokens + Design System base (`packages/ui`).
-- [ ] CI (GitHub Actions: lint+test+build) + Coolify na VPS SP; domínio + SSL + Cloudflare; deploy end-to-end "hello world".
-- [ ] **ADR-0001** (stack) + diagrama **C4** inicial.
+- [x] Monorepo (Turborepo + pnpm), lint/format, `packages/config`.
+- [x] `apps/api` NestJS (estrutura hexagonal) + `apps/web` Next.js 15 + `packages/shared` (tipos+Zod) — **POC de type-safety end-to-end**.
+- [x] PostgreSQL 16 + PostGIS + Redis; Docker Compose local (smoke test `/health` 200, deps `up`, extensões postgis/pg_trgm/unaccent OK). _ORM=Drizzle decidido; migrations na Fase 1._
+- [x] Design tokens + Design System base (`packages/ui`).
+- [ ] CI (GitHub Actions: lint+test+build) ✅ + Coolify na VPS SP; domínio + SSL + Cloudflare; deploy end-to-end "hello world" _(deploy adiado — validando em localhost primeiro)_.
+- [x] **ADR-0001** (stack) + diagrama **C4** inicial.
 - **Entregável:** ambiente reproduzível, deploy verde, type-safety provada.
 
 ### Fase 1 — Identidade e perfis (Sprint 2–3)
