@@ -24,3 +24,5 @@ export * from "./purchases.js";
 export * from "./invoices.js";
 export * from "./refunds.js";
 export * from "./payment-events.js";
+export * from "./work-orders.js";
+export * from "./proposals.js";

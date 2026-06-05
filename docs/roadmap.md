@@ -311,9 +311,10 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - **`refunds.status` APROVADO** não é usado (fluxo direto SOLICITADO→CONCLUIDO/RECUSADO); reservado para processamento assíncrono futuro.
 
 ### Fase 5 — Busca, perfil público e obras (Sprint 11–13) — **API**
-- [ ] `search` (pg_trgm + **PostGIS geo** + filtros por plano, §17; cache Redis).
-- [ ] `public-profile` (contrato/dados do perfil público; a página SSR polida entra na Fase 7).
-- [ ] `work-orders` (urgência + lances sigilosos + piso de dignidade, §16).
+- [x] **5.0 — Camada de dados** (2 tabelas + coluna geo + contratos Zod + migration 0007). _`work_orders` (obra/pedido de orçamento, urgência, geo, piso de dignidade) e `proposals` (lances sigilosos, 1 por profissional/obra); coluna **`geo` (PostGIS point 4326)** + `raio_atendimento_km` no `professional_profiles` (pendência da Fase 1) com índice **GIST**; enums espelhados `WorkUrgency`/`WorkOrderStatus`/`ProposalStatus`; `geoPointSchema` no shared. SRID 4326 aplicado na escrita/consulta (coluna `geometry(point)` genérica). pg_trgm/GIN da busca entram na 5.1._
+- [ ] **5.1 — `search`** (pg_trgm + **PostGIS geo** + filtros por plano, §17; cache Redis).
+- [ ] **5.2 — `public-profile`** (contrato/dados do perfil público; a página SSR polida entra na Fase 7).
+- [ ] **5.3 — `work-orders`** (urgência → expiração; lances sigilosos; piso de dignidade pela média, §16).
 - **Entregável:** descoberta orgânica + FOMO de obras (API), pronta para o front consumir.
 
 ### Fase 6 — Admin, hardening e observabilidade (Sprint 14) — **backend**

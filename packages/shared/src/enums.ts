@@ -83,6 +83,27 @@ export const WorkUrgency = {
 export const workUrgencySchema = z.nativeEnum(WorkUrgency);
 export type WorkUrgency = z.infer<typeof workUrgencySchema>;
 
+/** Estados de uma obra/pedido de orçamento (roadmap §4.4/§16). */
+export const WorkOrderStatus = {
+  ABERTA: "ABERTA",
+  ADJUDICADA: "ADJUDICADA",
+  CONCLUIDA: "CONCLUIDA",
+  CANCELADA: "CANCELADA",
+  EXPIRADA: "EXPIRADA",
+} as const;
+export const workOrderStatusSchema = z.nativeEnum(WorkOrderStatus);
+export type WorkOrderStatus = z.infer<typeof workOrderStatusSchema>;
+
+/** Estados de uma proposta/lance sigiloso (roadmap §16). */
+export const ProposalStatus = {
+  ENVIADA: "ENVIADA",
+  ACEITA: "ACEITA",
+  RECUSADA: "RECUSADA",
+  RETIRADA: "RETIRADA",
+} as const;
+export const proposalStatusSchema = z.nativeEnum(ProposalStatus);
+export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
+
 /**
  * Visibilidade de uma avaliação dupla-cega (roadmap §4.3/§12). PENDENTE enquanto
  * a contraparte não avalia e a janela de 7d não fecha; REVELADA quando ambas as

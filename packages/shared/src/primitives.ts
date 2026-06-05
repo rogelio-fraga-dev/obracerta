@@ -43,6 +43,16 @@ export const slugSchema = z
 /** ISO-8601 timestamp string. */
 export const isoTimestampSchema = z.string().datetime();
 
+/**
+ * Ponto geográfico (WGS84 / SRID 4326). `lng`/`lat` em graus decimais — base da
+ * busca por raio (PostGIS). Ordem lng,lat segue a convenção GeoJSON/PostGIS (x,y).
+ */
+export const geoPointSchema = z.object({
+  lng: z.number().min(-180).max(180),
+  lat: z.number().min(-90).max(90),
+});
+export type GeoPoint = z.infer<typeof geoPointSchema>;
+
 export type Uuid = z.infer<typeof uuidSchema>;
 export type Email = z.infer<typeof emailSchema>;
 export type Whatsapp = z.infer<typeof whatsappSchema>;

@@ -13,6 +13,9 @@ import {
   InvoiceStatus,
   RefundStatus,
   PaymentMethod,
+  WorkUrgency,
+  WorkOrderStatus,
+  ProposalStatus,
 } from "@obracerta/shared";
 
 /**
@@ -65,4 +68,16 @@ export const refundStatusEnum = pgEnum(
 export const paymentMethodEnum = pgEnum(
   "payment_method",
   Object.values(PaymentMethod) as [string, ...string[]],
+);
+export const workUrgencyEnum = pgEnum(
+  "work_urgency",
+  Object.values(WorkUrgency) as [string, ...string[]],
+);
+export const workOrderStatusEnum = pgEnum(
+  "work_order_status",
+  Object.values(WorkOrderStatus) as [string, ...string[]],
+);
+export const proposalStatusEnum = pgEnum(
+  "proposal_status",
+  Object.values(ProposalStatus) as [string, ...string[]],
 );
