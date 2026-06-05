@@ -271,7 +271,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 3 — Reputação (Sprint 7–8) 🚧 _(API; front adiado, como na Fase 2)_
 - [x] **3.0 — Camada de dados** (6 tabelas + contratos Zod + migration 0005). _Pré-requisito das etapas abaixo: `reviews` (dupla-cega), `review_responses` (resposta), `badges`, `reputation_events` (trilha append-only por-usuário), `reports` (denúncias), `account_suspensions` (suspensão + apelação). Enums espelhados `ReviewStatus`/`ReportStatus`/`SuspensionStatus`; catálogos que evoluem (`badges.codigo`, `reputation_events.tipo`, `reports.motivo`) ficam em `varchar`._
-- [ ] **3.1 — `reputation`** (dupla-cega, revelação simultânea, janela 7d + lembretes via BullMQ, §12).
+- [x] **3.1 — `reputation`** (avaliação dupla-cega; nota nasce PENDENTE; revelação simultânea no par OU por janela de 7d via BullMQ; média só conta REVELADA; §12). _Domínio puro com TDD (participante/papel, elegibilidade CONCLUIDO, revelar-no-par, média, janela); aplica via BookingService (autorização + estado) e audita (AVALIACAO_CRIADA)._
 - [ ] **3.2 — Badges + direito de resposta pública.**
 - [ ] **3.3 — `moderation`** (denúncia→ocultar+48h; suspensão automática + apelação, §13).
 - **Entregável:** North Star mensurável.

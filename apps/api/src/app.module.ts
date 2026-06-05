@@ -21,6 +21,7 @@ import { BookingModule } from "./modules/booking/booking.module.js";
 import { AuditModule } from "./modules/audit/audit.module.js";
 import { TermsModule } from "./modules/terms/terms.module.js";
 import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.module.js";
+import { ReputationModule } from "./modules/reputation/reputation.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -68,6 +69,7 @@ import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.
     AuditModule,
     TermsModule,
     DeclinePenaltyModule,
+    ReputationModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
