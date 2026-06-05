@@ -8,15 +8,19 @@ import { users } from "../../../infrastructure/database/schema/users.js";
 import { subscriptions } from "../../../infrastructure/database/schema/subscriptions.js";
 import { purchases } from "../../../infrastructure/database/schema/purchases.js";
 import { invoices } from "../../../infrastructure/database/schema/invoices.js";
+import { refunds } from "../../../infrastructure/database/schema/refunds.js";
 import { paymentEvents } from "../../../infrastructure/database/schema/payment-events.js";
 import { DrizzleUsersRepository } from "../../users/infrastructure/drizzle-users.repository.js";
 import type { UsersService } from "../../users/application/users.service.js";
 import type { AuditService } from "../../audit/application/audit.service.js";
+import { EntitlementsService } from "../../entitlements/application/entitlements.service.js";
 import { BillingService } from "../application/billing.service.js";
+import type { BillingScheduler } from "../application/billing.scheduler.js";
 import { FakePaymentGateway } from "./fake-payment-gateway.js";
 import { DrizzleSubscriptionRepository } from "./drizzle-subscription.repository.js";
 import { DrizzlePurchaseRepository } from "./drizzle-purchase.repository.js";
 import { DrizzleInvoiceRepository } from "./drizzle-invoice.repository.js";
+import { DrizzleRefundRepository } from "./drizzle-refund.repository.js";
 import { DrizzlePaymentEventRepository } from "./drizzle-payment-event.repository.js";
 
 config({ path: "../../.env" });
@@ -33,18 +37,28 @@ describe("BillingService (integração)", () => {
   const subRepo = new DrizzleSubscriptionRepository(db);
   const purchaseRepo = new DrizzlePurchaseRepository(db);
   const invoiceRepo = new DrizzleInvoiceRepository(db);
+  const refundRepo = new DrizzleRefundRepository(db);
   const eventRepo = new DrizzlePaymentEventRepository(db);
   const gateway = new FakePaymentGateway();
+  const entitlements = new EntitlementsService();
 
   const usersById = new Map<string, User>();
   const usersStub = { findById: (id: string) => Promise.resolve(usersById.get(id) ?? null) } as unknown as UsersService;
   const auditStub = { record: () => Promise.resolve(undefined) } as unknown as AuditService;
+  // sem BullMQ no teste: o agendamento é no-op (a vigência/expiração é testada por transição direta)
+  const schedulerStub = {
+    scheduleInvoiceDue: () => Promise.resolve(),
+    schedulePurchaseExpiry: () => Promise.resolve(),
+  } as unknown as BillingScheduler;
   const billing = new BillingService(
     subRepo,
     purchaseRepo,
     invoiceRepo,
+    refundRepo,
     eventRepo,
     gateway,
+    schedulerStub,
+    entitlements,
     usersStub,
     auditStub,
   );
@@ -74,6 +88,7 @@ describe("BillingService (integração)", () => {
 
   afterAll(async () => {
     await db.delete(paymentEvents).where(inArray(paymentEvents.eventId, [`evt-${sufixo}-1`, `evt-${sufixo}-2`, `evt-${sufixo}-3`]));
+    await db.delete(refunds).where(or(eq(refunds.userId, profId), eq(refunds.userId, contratanteId)));
     await db.delete(invoices).where(or(eq(invoices.userId, profId), eq(invoices.userId, contratanteId)));
     await db.delete(subscriptions).where(eq(subscriptions.userId, profId));
     await db.delete(purchases).where(eq(purchases.userId, contratanteId));
@@ -128,5 +143,26 @@ describe("BillingService (integração)", () => {
     const ativo = await purchaseRepo.findById(purchase.id);
     expect(ativo?.status).toBe("ATIVO");
     expect(ativo?.expiraEm).not.toBeNull();
+  });
+
+  it("entitlements refletem o plano vigente (profissional ATIVA)", async () => {
+    const ent = await billing.getEntitlements(profId);
+    expect(ent.plano).toBe("PRO");
+    expect(ent.features).toEqual(expect.arrayContaining(["profile.public", "search.geo"]));
+  });
+
+  it("reembolso CDC: solicita (ARREPENDIMENTO integral) e aprova → fatura ESTORNADA + compra EXPIRADO", async () => {
+    const invoice = (await invoiceRepo.listForUser(contratanteId)).find((i) => i.status === "PAGA");
+    const refund = await billing.requestRefund(contratanteId, invoice!.id, "ARREPENDIMENTO");
+    expect(refund.status).toBe("SOLICITADO");
+    expect(refund.valorCentavos).toBe(3900); // integral dentro de 7 dias
+
+    const concluido = await billing.resolveRefund(refund.id, true);
+    expect(concluido.status).toBe("CONCLUIDO");
+
+    expect((await invoiceRepo.findById(invoice!.id))?.status).toBe("ESTORNADA");
+    expect((await purchaseRepo.findActiveByUser(contratanteId))).toBeNull(); // compra revogada
+    // sem plano vigente após o estorno
+    expect((await billing.getEntitlements(contratanteId)).plano).toBeNull();
   });
 });

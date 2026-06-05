@@ -284,11 +284,18 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - **Checar suspensão no login** (bloquear acesso de conta suspensa) é um hook a ligar no `auth` — o `ModerationService.isSuspended` já existe. Expiração da suspensão é **preguiçosa** (avaliada na leitura); um job de varredura é opcional.
 - **Front da Fase 2 e 3 inexistente** — tudo é API.
 
-### Fase 4 — Monetização (Sprint 9–10) 🚧 _(API; front adiado, como nas Fases 2/3)_
+### Fase 4 — Monetização (Sprint 9–10) ✅ _(API; front adiado, como nas Fases 2/3)_
 - [x] **4.0 — Camada de dados** (5 tabelas + contratos Zod + migration 0006). _Pré-requisito das etapas abaixo: `subscriptions` (assinatura recorrente do profissional), `purchases` (compra avulsa do contratante), `invoices` (faturas, vínculo exclusivo assinatura×compra via CHECK), `refunds` (estornos CDC), `payment_events` (idempotência de webhook). Enums espelhados `SubscriptionStatus`/`PurchaseStatus`/`InvoiceStatus`/`RefundStatus`/`PaymentMethod`; **dinheiro em centavos (inteiro)**; FKs RESTRICT na cadeia financeira (evidência fiscal); índice único parcial de assinatura vigente por usuário e de (gateway, gateway_id) p/ ligar webhooks. `entitlements` segue como módulo de domínio (sem tabela)._
 - [x] **4.1 — `billing`** (recorrência + avulso atrás da porta `PaymentGateway`; webhooks idempotentes). _Domínio puro com TDD (preços por plano em centavos, graça 7d/próxima cobrança/validade avulso, máquina de estados da fatura, reconhecer evento de pagamento); assinar (EM_GRACA + 1ª fatura) e comprar avulso via gateway (dev: adapter fake; prod: Asaas); webhook idempotente (UNIQUE gateway+event_id via `payment_events`) marca fatura PAGA e ativa a origem; valida tipo do usuário e audita. Webhook sem JWT (validação por assinatura HMAC fica na 4.2)._
-- [ ] **4.2 — Faturas, expiração de avulso** (D25/D28/D30 + bloqueio, §19), gestão de plano (§20), reembolso CDC (§21).
-- **Entregável:** receita real; planos com gating correto via `entitlements`.
+- [x] **4.2 — Reembolso CDC, expiração e plano efetivo** (§19/§20/§21). _Domínio puro com TDD (4 cenários CDC: arrependimento 7d/cobrança indevida/falha integrais + cancelamento proporcional pro-rata); reembolso solicitar→aprovar (estorna no gateway, fatura ESTORNADA, revoga acesso) ou recusar; jobs BullMQ vencem fatura PENDENTE→VENCIDA e expiram avulso ATIVO→EXPIRADO (transições guardadas); `GET /me/entitlements` resolve o plano vigente (assinatura EM_GRACA/ATIVA ou avulso não-expirado) e lista features via `entitlements`._
+- **Entregável:** receita real; planos com gating correto via `entitlements`. ✅ _API verificada ao vivo (typecheck, unit + integração contra Postgres real incl. fluxo de pagamento, idempotência de webhook e reembolso CDC; boot mapeando as rotas)._
+
+**Decisões/pendências da Fase 4 (para fases seguintes):**
+- **Asaas real** atrás da porta `PaymentGateway` (hoje adapter fake/console); trocar o provider sem mexer no domínio.
+- **Assinatura HMAC do webhook** (hoje aberto, só validação de shape) — hardening (Fase 6).
+- **Lembretes de plano D25/D28/D30** (§19) e cobrança recorrente automática (renovação) — jobs ainda não existem; só a expiração da 1ª fatura/avulso.
+- **Gating por papel financeiro/admin** das ações de resolver reembolso — adiado para a Fase 6 (módulo `admin`).
+- **`refunds.status` APROVADO** não é usado (fluxo direto SOLICITADO→CONCLUIDO/RECUSADO); reservado para processamento assíncrono futuro.
 
 ### Fase 5 — Busca, perfil público e obras (Sprint 11–13)
 - [ ] `search` (pg_trgm + **PostGIS geo** + filtros por plano, §17; cache Redis).

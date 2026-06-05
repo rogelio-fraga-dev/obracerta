@@ -50,6 +50,11 @@ export class DrizzleInvoiceRepository implements InvoiceRepository {
     return rowToInvoice(row);
   }
 
+  async findById(id: string): Promise<Invoice | null> {
+    const [row] = await this.db.select().from(invoices).where(eq(invoices.id, id)).limit(1);
+    return row ? rowToInvoice(row) : null;
+  }
+
   async findByGatewayCharge(gateway: string, gatewayId: string): Promise<Invoice | null> {
     const [row] = await this.db
       .select()
@@ -64,6 +69,15 @@ export class DrizzleInvoiceRepository implements InvoiceRepository {
       .update(invoices)
       .set({ status: "PAGA", metodo, pagoEm: new Date(), atualizadoEm: new Date() })
       .where(eq(invoices.id, id))
+      .returning();
+    return row ? rowToInvoice(row) : null;
+  }
+
+  async transition(id: string, from: InvoiceStatus, to: InvoiceStatus): Promise<Invoice | null> {
+    const [row] = await this.db
+      .update(invoices)
+      .set({ status: to, atualizadoEm: new Date() })
+      .where(and(eq(invoices.id, id), eq(invoices.status, from)))
       .returning();
     return row ? rowToInvoice(row) : null;
   }

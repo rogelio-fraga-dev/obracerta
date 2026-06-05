@@ -33,3 +33,8 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
 export function planAllows(plan: Plan, feature: Feature): boolean {
   return ENTITLEMENTS[plan]?.includes(feature) ?? false;
 }
+
+/** Features liberadas por um plano (vazio se o plano não tem entrada). */
+export function featuresForPlan(plan: Plan | null): readonly Feature[] {
+  return plan ? (ENTITLEMENTS[plan] ?? []) : [];
+}

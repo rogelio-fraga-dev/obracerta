@@ -5,6 +5,7 @@ import type {
   CreateSubscriptionParams,
   GatewayRef,
   PaymentGateway,
+  RefundChargeParams,
 } from "../domain/ports/payment-gateway.js";
 
 /**
@@ -31,6 +32,12 @@ export class FakePaymentGateway implements PaymentGateway {
     this.logger.log(
       `[fake] cobrança ${gatewayId} (${params.valorCentavos}c, vence ${params.vencimento}) p/ ${params.userId}`,
     );
+    return Promise.resolve({ gatewayId });
+  }
+
+  refund(params: RefundChargeParams): Promise<GatewayRef> {
+    const gatewayId = `ref_${randomUUID()}`;
+    this.logger.log(`[fake] estorno ${gatewayId} (${params.valorCentavos}c) da cobrança ${params.chargeId}`);
     return Promise.resolve({ gatewayId });
   }
 }

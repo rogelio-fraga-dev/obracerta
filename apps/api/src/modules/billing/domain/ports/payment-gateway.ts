@@ -14,6 +14,12 @@ export interface CreateChargeParams {
   descricao: string;
 }
 
+/** Parâmetros para estornar (total ou parcial) uma cobrança no gateway. */
+export interface RefundChargeParams {
+  chargeId: string;
+  valorCentavos: number;
+}
+
 /** Referência a um recurso criado no gateway (id do provedor). */
 export interface GatewayRef {
   gatewayId: string;
@@ -29,6 +35,7 @@ export interface PaymentGateway {
   readonly name: string;
   createSubscription(params: CreateSubscriptionParams): Promise<GatewayRef>;
   createCharge(params: CreateChargeParams): Promise<GatewayRef>;
+  refund(params: RefundChargeParams): Promise<GatewayRef>;
 }
 
 export const PAYMENT_GATEWAY = Symbol("PAYMENT_GATEWAY");

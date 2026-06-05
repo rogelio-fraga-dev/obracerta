@@ -75,4 +75,14 @@ export class DrizzleSubscriptionRepository implements SubscriptionRepository {
       .returning();
     return row ? rowToSubscription(row) : null;
   }
+
+  async cancel(id: string): Promise<Subscription | null> {
+    const now = new Date();
+    const [row] = await this.db
+      .update(subscriptions)
+      .set({ status: "CANCELADA", canceladoEm: now, atualizadoEm: now })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return row ? rowToSubscription(row) : null;
+  }
 }

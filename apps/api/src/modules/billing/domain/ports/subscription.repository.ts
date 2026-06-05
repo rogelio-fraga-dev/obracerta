@@ -19,6 +19,8 @@ export interface SubscriptionRepository {
   findActiveByUser(userId: string): Promise<Subscription | null>;
   /** Marca como ATIVA (após confirmação do 1º pagamento). */
   activate(id: string): Promise<Subscription | null>;
+  /** Cancela a assinatura (estorno / pedido do usuário): status CANCELADA + data. */
+  cancel(id: string): Promise<Subscription | null>;
 }
 
 export const SUBSCRIPTION_REPOSITORY = Symbol("SUBSCRIPTION_REPOSITORY");

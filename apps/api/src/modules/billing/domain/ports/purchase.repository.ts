@@ -13,8 +13,12 @@ export interface CreatePurchaseData {
 export interface PurchaseRepository {
   create(data: CreatePurchaseData): Promise<Purchase>;
   findById(id: string): Promise<Purchase | null>;
+  /** Compra ATIVO mais recente do usuário (vigência por prazo avaliada no service). */
+  findActiveByUser(userId: string): Promise<Purchase | null>;
   /** Marca como ATIVO e define a expiração (após confirmação do pagamento). */
   activate(id: string, expiraEm: string): Promise<Purchase | null>;
+  /** Expira a compra ATIVO → EXPIRADO (job de expiração / estorno). Guardado. */
+  expire(id: string): Promise<Purchase | null>;
 }
 
 export const PURCHASE_REPOSITORY = Symbol("PURCHASE_REPOSITORY");
