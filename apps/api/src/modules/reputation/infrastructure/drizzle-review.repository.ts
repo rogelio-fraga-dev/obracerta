@@ -76,6 +76,20 @@ export class DrizzleReviewRepository implements ReviewRepository {
     return revealed.map((r) => r.alvoId);
   }
 
+  async hide(id: string): Promise<void> {
+    await this.db
+      .update(reviews)
+      .set({ status: "OCULTA" })
+      .where(and(eq(reviews.id, id), eq(reviews.status, "REVELADA")));
+  }
+
+  async restore(id: string): Promise<void> {
+    await this.db
+      .update(reviews)
+      .set({ status: "REVELADA" })
+      .where(and(eq(reviews.id, id), eq(reviews.status, "OCULTA")));
+  }
+
   async revealedRatingsForTarget(alvoId: string): Promise<number[]> {
     const rows = await this.db
       .select({ nota: reviews.nota })

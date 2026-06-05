@@ -24,6 +24,10 @@ export interface ReviewRepository {
   countForBooking(bookingId: string): Promise<number>;
   /** Revela as avaliações PENDENTE de um pedido; devolve os alvoIds revelados. Idempotente. */
   revealPending(bookingId: string): Promise<string[]>;
+  /** Oculta uma avaliação revelada (moderação). REVELADA → OCULTA. Idempotente. */
+  hide(id: string): Promise<void>;
+  /** Restaura uma avaliação oculta (moderação). OCULTA → REVELADA. Idempotente. */
+  restore(id: string): Promise<void>;
   /** Notas das avaliações REVELADA sobre um alvo (para a média de reputação). */
   revealedRatingsForTarget(alvoId: string): Promise<number[]>;
   /** Avaliações REVELADA sobre um alvo (listagem pública). */

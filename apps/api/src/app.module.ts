@@ -22,6 +22,7 @@ import { AuditModule } from "./modules/audit/audit.module.js";
 import { TermsModule } from "./modules/terms/terms.module.js";
 import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.module.js";
 import { ReputationModule } from "./modules/reputation/reputation.module.js";
+import { ModerationModule } from "./modules/moderation/moderation.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -70,6 +71,7 @@ import { ReputationModule } from "./modules/reputation/reputation.module.js";
     TermsModule,
     DeclinePenaltyModule,
     ReputationModule,
+    ModerationModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

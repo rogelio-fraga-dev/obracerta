@@ -269,17 +269,19 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - Atomicidade cross-tabela na aprovação (status + bloqueio) é uma **saga manual** (bloqueio-primeiro + compensação); endurecer com transação compartilhada é melhoria futura.
 - Auditar também os eventos do `booking` (aprovar/iniciar/concluir/cancelar) via `AuditService` — hoje só aceite de termo e penalidade auditam.
 
-### Fase 3 — Reputação (Sprint 7–8) 🚧 _(API; front adiado, como na Fase 2)_
+### Fase 3 — Reputação (Sprint 7–8) ✅ _(API; front adiado, como na Fase 2)_
 - [x] **3.0 — Camada de dados** (6 tabelas + contratos Zod + migration 0005). _Pré-requisito das etapas abaixo: `reviews` (dupla-cega), `review_responses` (resposta), `badges`, `reputation_events` (trilha append-only por-usuário), `reports` (denúncias), `account_suspensions` (suspensão + apelação). Enums espelhados `ReviewStatus`/`ReportStatus`/`SuspensionStatus`; catálogos que evoluem (`badges.codigo`, `reputation_events.tipo`, `reports.motivo`) ficam em `varchar`._
 - [x] **3.1 — `reputation`** (avaliação dupla-cega; nota nasce PENDENTE; revelação simultânea no par OU por janela de 7d via BullMQ; média só conta REVELADA; §12). _Domínio puro com TDD (participante/papel, elegibilidade CONCLUIDO, revelar-no-par, média, janela); aplica via BookingService (autorização + estado) e audita (AVALIACAO_CRIADA)._
 - [x] **3.2 — Badges + direito de resposta pública** (§12). _Catálogo de badges automáticos no domínio (BEM_AVALIADO, VETERANO) com concessão/revogação reconciliada a cada revelação (preserva badges manuais/legados); direito de resposta 1x/30d do avaliado. badges[] preenchido no `GET /reputation/:userId`; `POST /reviews/responses`. Concessão/revogação/resposta auditadas._
-- [ ] **3.3 — `moderation`** (denúncia→ocultar+48h; suspensão automática + apelação, §13).
-- **Entregável:** North Star mensurável.
+- [x] **3.3 — `moderation`** (denúncia→ocultar avaliação por 48h via BullMQ; decisão procedente/improcedente; suspensão automática por reincidência de strikes + apelação, §13). _Domínio puro com TDD (janela 48h, transição da denúncia, gatilho de suspensão, vigência/apelação); strikes contados cross-tabela (denúncias diretas + avaliações autoradas); oculta/restaura via ReputationService; tudo auditado. Gating por papel admin/moderador adiado para a Fase 6._
+- **Entregável:** North Star mensurável. ✅ _API verificada ao vivo (typecheck, unit + integração contra Postgres real, boot mapeando as rotas das 3 etapas)._
 
 **Decisões/pendências da Fase 3 (para as etapas seguintes):**
 - **`reputation_events` ainda sem writer dedicado** — a 3.1/3.2 auditam pela trilha global (`audit_log` via `AuditService`: AVALIACAO_CRIADA, BADGE_CONCEDIDO/REVOGADO, RESPOSTA_PUBLICADA). A trilha por-usuário (`reputation_events`) será populada quando houver linha do tempo de reputação a exibir.
 - **Janela de avaliação ancorada em `booking.atualizadoEm`** (instante do CONCLUIDO); modelar um `concluido_em` dedicado é refinamento futuro.
 - **Lembretes de avaliação (D1/D5/D7)** via BullMQ (§12) ainda não existem — só a revelação por janela.
+- **Gating por papel admin/moderador** das ações de moderação (resolver denúncia/apelação) está **adiado para a Fase 6** (módulo `admin`) — hoje só sob JwtAuthGuard.
+- **Checar suspensão no login** (bloquear acesso de conta suspensa) é um hook a ligar no `auth` — o `ModerationService.isSuspended` já existe. Expiração da suspensão é **preguiçosa** (avaliada na leitura); um job de varredura é opcional.
 - **Front da Fase 2 e 3 inexistente** — tudo é API.
 
 ### Fase 4 — Monetização (Sprint 9–10)

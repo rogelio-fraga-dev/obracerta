@@ -121,6 +121,21 @@ export class ReputationService {
     return this.repo.listRevealedForTarget(alvoId);
   }
 
+  /** Busca uma avaliação por id (usado pela moderação para achar o ofensor). */
+  getReview(id: string): Promise<Review | null> {
+    return this.repo.findById(id);
+  }
+
+  /** Oculta uma avaliação (moderação: denúncia/decisão procedente). */
+  hideReview(id: string): Promise<void> {
+    return this.repo.hide(id);
+  }
+
+  /** Restaura uma avaliação oculta (moderação: precaução expirada/improcedente). */
+  restoreReview(id: string): Promise<void> {
+    return this.repo.restore(id);
+  }
+
   /**
    * Direito de resposta pública (roadmap §12): o AVALIADO responde 1x à avaliação
    * revelada, dentro de 30 dias da revelação.
