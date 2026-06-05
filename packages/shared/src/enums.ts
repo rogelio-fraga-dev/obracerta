@@ -82,3 +82,37 @@ export const WorkUrgency = {
 } as const;
 export const workUrgencySchema = z.nativeEnum(WorkUrgency);
 export type WorkUrgency = z.infer<typeof workUrgencySchema>;
+
+/**
+ * Visibilidade de uma avaliação dupla-cega (roadmap §4.3/§12). PENDENTE enquanto
+ * a contraparte não avalia e a janela de 7d não fecha; REVELADA quando ambas as
+ * avaliações saem juntas (revelação simultânea) ou a janela expira; OCULTA quando
+ * a moderação esconde após denúncia procedente.
+ */
+export const ReviewStatus = {
+  PENDENTE: "PENDENTE",
+  REVELADA: "REVELADA",
+  OCULTA: "OCULTA",
+} as const;
+export const reviewStatusSchema = z.nativeEnum(ReviewStatus);
+export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+
+/** Estados de uma denúncia de moderação (roadmap §13). */
+export const ReportStatus = {
+  ABERTA: "ABERTA",
+  EM_ANALISE: "EM_ANALISE",
+  PROCEDENTE: "PROCEDENTE",
+  IMPROCEDENTE: "IMPROCEDENTE",
+} as const;
+export const reportStatusSchema = z.nativeEnum(ReportStatus);
+export type ReportStatus = z.infer<typeof reportStatusSchema>;
+
+/** Estados de uma suspensão de conta com direito de apelação (roadmap §13). */
+export const SuspensionStatus = {
+  ATIVA: "ATIVA",
+  APELADA: "APELADA",
+  REVOGADA: "REVOGADA",
+  EXPIRADA: "EXPIRADA",
+} as const;
+export const suspensionStatusSchema = z.nativeEnum(SuspensionStatus);
+export type SuspensionStatus = z.infer<typeof suspensionStatusSchema>;

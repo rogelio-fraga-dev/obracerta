@@ -16,3 +16,6 @@ export * from "./availability.js";
 export * from "./booking.js";
 export * from "./terms.js";
 export * from "./penalties.js";
+export * from "./reviews.js";
+export * from "./reputation.js";
+export * from "./moderation.js";

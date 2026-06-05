@@ -269,10 +269,11 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - Atomicidade cross-tabela na aprovação (status + bloqueio) é uma **saga manual** (bloqueio-primeiro + compensação); endurecer com transação compartilhada é melhoria futura.
 - Auditar também os eventos do `booking` (aprovar/iniciar/concluir/cancelar) via `AuditService` — hoje só aceite de termo e penalidade auditam.
 
-### Fase 3 — Reputação (Sprint 7–8)
-- [ ] `reputation` (dupla-cega, revelação simultânea, janela 7d + lembretes, §12).
-- [ ] Badges + direito de resposta pública.
-- [ ] `moderation` (denúncia→ocultar+48h; suspensão automática + apelação, §13).
+### Fase 3 — Reputação (Sprint 7–8) 🚧 _(API; front adiado, como na Fase 2)_
+- [x] **3.0 — Camada de dados** (6 tabelas + contratos Zod + migration 0005). _Pré-requisito das etapas abaixo: `reviews` (dupla-cega), `review_responses` (resposta), `badges`, `reputation_events` (trilha append-only por-usuário), `reports` (denúncias), `account_suspensions` (suspensão + apelação). Enums espelhados `ReviewStatus`/`ReportStatus`/`SuspensionStatus`; catálogos que evoluem (`badges.codigo`, `reputation_events.tipo`, `reports.motivo`) ficam em `varchar`._
+- [ ] **3.1 — `reputation`** (dupla-cega, revelação simultânea, janela 7d + lembretes via BullMQ, §12).
+- [ ] **3.2 — Badges + direito de resposta pública.**
+- [ ] **3.3 — `moderation`** (denúncia→ocultar+48h; suspensão automática + apelação, §13).
 - **Entregável:** North Star mensurável.
 
 ### Fase 4 — Monetização (Sprint 9–10)

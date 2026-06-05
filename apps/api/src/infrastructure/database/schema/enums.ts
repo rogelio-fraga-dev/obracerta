@@ -1,5 +1,14 @@
 import { pgEnum } from "drizzle-orm/pg-core";
-import { UserType, UserStatus, ProfessionalPlan, ContractorPlan, BookingStatus } from "@obracerta/shared";
+import {
+  UserType,
+  UserStatus,
+  ProfessionalPlan,
+  ContractorPlan,
+  BookingStatus,
+  ReviewStatus,
+  ReportStatus,
+  SuspensionStatus,
+} from "@obracerta/shared";
 
 /**
  * Postgres enums espelhando os enums de domínio do `@obracerta/shared`.
@@ -19,4 +28,16 @@ export const contractorPlanEnum = pgEnum(
 export const bookingStatusEnum = pgEnum(
   "booking_status",
   Object.values(BookingStatus) as [string, ...string[]],
+);
+export const reviewStatusEnum = pgEnum(
+  "review_status",
+  Object.values(ReviewStatus) as [string, ...string[]],
+);
+export const reportStatusEnum = pgEnum(
+  "report_status",
+  Object.values(ReportStatus) as [string, ...string[]],
+);
+export const suspensionStatusEnum = pgEnum(
+  "suspension_status",
+  Object.values(SuspensionStatus) as [string, ...string[]],
 );
