@@ -18,6 +18,8 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { OnboardingModule } from "./modules/onboarding/onboarding.module.js";
 import { AvailabilityModule } from "./modules/availability/availability.module.js";
 import { BookingModule } from "./modules/booking/booking.module.js";
+import { AuditModule } from "./modules/audit/audit.module.js";
+import { TermsModule } from "./modules/terms/terms.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -62,6 +64,8 @@ import { BookingModule } from "./modules/booking/booking.module.js";
     OnboardingModule,
     AvailabilityModule,
     BookingModule,
+    AuditModule,
+    TermsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
