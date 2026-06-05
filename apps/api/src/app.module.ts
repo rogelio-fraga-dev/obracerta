@@ -17,6 +17,7 @@ import { StorageModule } from "./modules/storage/storage.module.js";
 import { NotificationsModule } from "./modules/notifications/notifications.module.js";
 import { OnboardingModule } from "./modules/onboarding/onboarding.module.js";
 import { AvailabilityModule } from "./modules/availability/availability.module.js";
+import { BookingModule } from "./modules/booking/booking.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -60,6 +61,7 @@ import { AvailabilityModule } from "./modules/availability/availability.module.j
     ProfilesModule,
     OnboardingModule,
     AvailabilityModule,
+    BookingModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

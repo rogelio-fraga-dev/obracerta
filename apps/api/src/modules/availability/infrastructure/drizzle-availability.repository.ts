@@ -9,7 +9,10 @@ import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { availability } from "../../../infrastructure/database/schema/availability.js";
 import { scheduleBlocks } from "../../../infrastructure/database/schema/schedule-blocks.js";
-import type { AvailabilityRepository } from "../domain/ports/availability.repository.js";
+import type {
+  AvailabilityRepository,
+  CreateScheduleBlockData,
+} from "../domain/ports/availability.repository.js";
 
 type SlotRow = typeof availability.$inferSelect;
 type BlockRow = typeof scheduleBlocks.$inferSelect;
@@ -70,5 +73,24 @@ export class DrizzleAvailabilityRepository implements AvailabilityRepository {
       .where(eq(scheduleBlocks.professionalId, professionalId))
       .orderBy(asc(scheduleBlocks.inicio));
     return rows.map(rowToBlock);
+  }
+
+  async createBlock(data: CreateScheduleBlockData): Promise<ScheduleBlock> {
+    const [row] = await this.db
+      .insert(scheduleBlocks)
+      .values({
+        professionalId: data.professionalId,
+        inicio: new Date(data.inicio),
+        fim: new Date(data.fim),
+        bookingId: data.bookingId,
+        motivo: data.motivo,
+      })
+      .returning();
+    if (!row) throw new Error("Falha ao criar o bloqueio de agenda.");
+    return rowToBlock(row);
+  }
+
+  async deleteBlocksForBooking(bookingId: string): Promise<void> {
+    await this.db.delete(scheduleBlocks).where(eq(scheduleBlocks.bookingId, bookingId));
   }
 }

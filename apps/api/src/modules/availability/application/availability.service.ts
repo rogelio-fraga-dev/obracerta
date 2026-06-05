@@ -2,9 +2,10 @@ import { Inject, Injectable } from "@nestjs/common";
 import type {
   AvailabilitySlot,
   CalendarDay,
+  ScheduleBlock,
   SetAvailabilityInput,
 } from "@obracerta/shared";
-import { projectCalendar } from "../domain/calendar.js";
+import { hasConflict, projectCalendar } from "../domain/calendar.js";
 import { dedupeSlots } from "../domain/grade.js";
 import {
   AVAILABILITY_REPOSITORY,
@@ -43,5 +44,29 @@ export class AvailabilityService {
       this.repo.listBlocks(professionalId),
     ]);
     return projectCalendar(slots, blocks, fromDate, months);
+  }
+
+  /** True se o intervalo conflita com algum bloqueio já existente do profissional. */
+  async conflictsWith(
+    professionalId: string,
+    interval: { inicio: string; fim: string },
+  ): Promise<boolean> {
+    const blocks = await this.repo.listBlocks(professionalId);
+    return hasConflict(blocks, interval);
+  }
+
+  /** Cria o bloqueio bilateral de uma obra aprovada (booking). */
+  blockForBooking(
+    professionalId: string,
+    inicio: string,
+    fim: string,
+    bookingId: string,
+  ): Promise<ScheduleBlock> {
+    return this.repo.createBlock({ professionalId, inicio, fim, bookingId, motivo: null });
+  }
+
+  /** Remove os bloqueios derivados de um booking (cancelamento/compensação). */
+  removeBlocksForBooking(bookingId: string): Promise<void> {
+    return this.repo.deleteBlocksForBooking(bookingId);
   }
 }
