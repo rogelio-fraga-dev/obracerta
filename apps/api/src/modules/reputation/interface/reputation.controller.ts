@@ -1,10 +1,13 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import {
   createReviewSchema,
+  createReviewResponseSchema,
   type CreateReviewInput,
+  type CreateReviewResponseInput,
   type JwtClaims,
   type ReputationSummary,
   type Review,
+  type ReviewResponse,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
@@ -29,6 +32,15 @@ export class ReputationController {
   @Get("reviews/received")
   received(@CurrentUser() user: JwtClaims): Promise<Review[]> {
     return this.reputation.listReceived(user.sub);
+  }
+
+  /** Avaliado responde (1x, em até 30 dias da revelação). */
+  @Post("reviews/responses")
+  respond(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(createReviewResponseSchema)) input: CreateReviewResponseInput,
+  ): Promise<ReviewResponse> {
+    return this.reputation.respondToReview(user.sub, input);
   }
 
   /** Reputação pública de um usuário (avaliações reveladas + média). */

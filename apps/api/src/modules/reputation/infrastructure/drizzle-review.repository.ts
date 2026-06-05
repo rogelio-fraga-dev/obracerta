@@ -45,6 +45,11 @@ export class DrizzleReviewRepository implements ReviewRepository {
     return rowToReview(row);
   }
 
+  async findById(id: string): Promise<Review | null> {
+    const [row] = await this.db.select().from(reviews).where(eq(reviews.id, id)).limit(1);
+    return row ? rowToReview(row) : null;
+  }
+
   async findByBookingAndAuthor(bookingId: string, autorId: string): Promise<Review | null> {
     const [row] = await this.db
       .select()
@@ -62,13 +67,13 @@ export class DrizzleReviewRepository implements ReviewRepository {
     return row?.total ?? 0;
   }
 
-  async revealPending(bookingId: string): Promise<number> {
+  async revealPending(bookingId: string): Promise<string[]> {
     const revealed = await this.db
       .update(reviews)
       .set({ status: "REVELADA", reveladaEm: new Date() })
       .where(and(eq(reviews.bookingId, bookingId), eq(reviews.status, "PENDENTE")))
-      .returning({ id: reviews.id });
-    return revealed.length;
+      .returning({ alvoId: reviews.alvoId });
+    return revealed.map((r) => r.alvoId);
   }
 
   async revealedRatingsForTarget(alvoId: string): Promise<number[]> {

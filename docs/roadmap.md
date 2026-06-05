@@ -272,9 +272,15 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 ### Fase 3 — Reputação (Sprint 7–8) 🚧 _(API; front adiado, como na Fase 2)_
 - [x] **3.0 — Camada de dados** (6 tabelas + contratos Zod + migration 0005). _Pré-requisito das etapas abaixo: `reviews` (dupla-cega), `review_responses` (resposta), `badges`, `reputation_events` (trilha append-only por-usuário), `reports` (denúncias), `account_suspensions` (suspensão + apelação). Enums espelhados `ReviewStatus`/`ReportStatus`/`SuspensionStatus`; catálogos que evoluem (`badges.codigo`, `reputation_events.tipo`, `reports.motivo`) ficam em `varchar`._
 - [x] **3.1 — `reputation`** (avaliação dupla-cega; nota nasce PENDENTE; revelação simultânea no par OU por janela de 7d via BullMQ; média só conta REVELADA; §12). _Domínio puro com TDD (participante/papel, elegibilidade CONCLUIDO, revelar-no-par, média, janela); aplica via BookingService (autorização + estado) e audita (AVALIACAO_CRIADA)._
-- [ ] **3.2 — Badges + direito de resposta pública.**
+- [x] **3.2 — Badges + direito de resposta pública** (§12). _Catálogo de badges automáticos no domínio (BEM_AVALIADO, VETERANO) com concessão/revogação reconciliada a cada revelação (preserva badges manuais/legados); direito de resposta 1x/30d do avaliado. badges[] preenchido no `GET /reputation/:userId`; `POST /reviews/responses`. Concessão/revogação/resposta auditadas._
 - [ ] **3.3 — `moderation`** (denúncia→ocultar+48h; suspensão automática + apelação, §13).
 - **Entregável:** North Star mensurável.
+
+**Decisões/pendências da Fase 3 (para as etapas seguintes):**
+- **`reputation_events` ainda sem writer dedicado** — a 3.1/3.2 auditam pela trilha global (`audit_log` via `AuditService`: AVALIACAO_CRIADA, BADGE_CONCEDIDO/REVOGADO, RESPOSTA_PUBLICADA). A trilha por-usuário (`reputation_events`) será populada quando houver linha do tempo de reputação a exibir.
+- **Janela de avaliação ancorada em `booking.atualizadoEm`** (instante do CONCLUIDO); modelar um `concluido_em` dedicado é refinamento futuro.
+- **Lembretes de avaliação (D1/D5/D7)** via BullMQ (§12) ainda não existem — só a revelação por janela.
+- **Front da Fase 2 e 3 inexistente** — tudo é API.
 
 ### Fase 4 — Monetização (Sprint 9–10)
 - [ ] `billing` Asaas (recorrência + Pix avulso, webhooks idempotentes).

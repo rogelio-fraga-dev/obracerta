@@ -18,11 +18,12 @@ export interface CreateReviewData {
  */
 export interface ReviewRepository {
   create(data: CreateReviewData): Promise<Review>;
+  findById(id: string): Promise<Review | null>;
   findByBookingAndAuthor(bookingId: string, autorId: string): Promise<Review | null>;
   /** Nº de avaliações já registradas no pedido (1 ou 2). */
   countForBooking(bookingId: string): Promise<number>;
-  /** Revela as avaliações PENDENTE de um pedido; devolve quantas revelou. Idempotente. */
-  revealPending(bookingId: string): Promise<number>;
+  /** Revela as avaliações PENDENTE de um pedido; devolve os alvoIds revelados. Idempotente. */
+  revealPending(bookingId: string): Promise<string[]>;
   /** Notas das avaliações REVELADA sobre um alvo (para a média de reputação). */
   revealedRatingsForTarget(alvoId: string): Promise<number[]>;
   /** Avaliações REVELADA sobre um alvo (listagem pública). */

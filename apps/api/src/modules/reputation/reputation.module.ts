@@ -6,7 +6,11 @@ import { BookingModule } from "../booking/booking.module.js";
 import { ReputationScheduler, REVIEW_REVEAL_QUEUE } from "./application/reputation.scheduler.js";
 import { ReputationService } from "./application/reputation.service.js";
 import { REVIEW_REPOSITORY } from "./domain/ports/review.repository.js";
+import { BADGE_REPOSITORY } from "./domain/ports/badge.repository.js";
+import { REVIEW_RESPONSE_REPOSITORY } from "./domain/ports/review-response.repository.js";
 import { DrizzleReviewRepository } from "./infrastructure/drizzle-review.repository.js";
+import { DrizzleBadgeRepository } from "./infrastructure/drizzle-badge.repository.js";
+import { DrizzleReviewResponseRepository } from "./infrastructure/drizzle-review-response.repository.js";
 import { ReputationRevealProcessor } from "./infrastructure/reputation-reveal.processor.js";
 import { ReputationController } from "./interface/reputation.controller.js";
 
@@ -28,6 +32,8 @@ import { ReputationController } from "./interface/reputation.controller.js";
     ReputationScheduler,
     ReputationRevealProcessor,
     { provide: REVIEW_REPOSITORY, useClass: DrizzleReviewRepository },
+    { provide: BADGE_REPOSITORY, useClass: DrizzleBadgeRepository },
+    { provide: REVIEW_RESPONSE_REPOSITORY, useClass: DrizzleReviewResponseRepository },
   ],
   exports: [ReputationService],
 })

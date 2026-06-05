@@ -112,9 +112,10 @@ describe("DrizzleReviewRepository (integração)", () => {
     expect(await repo.countForBooking(bookingPar)).toBe(2);
 
     const revelados = await repo.revealPending(bookingPar);
-    expect(revelados).toBe(2);
+    expect(revelados).toHaveLength(2);
+    expect(revelados.sort()).toEqual([contractorId, professionalId].sort());
     // idempotente: revelar de novo não revela nada
-    expect(await repo.revealPending(bookingPar)).toBe(0);
+    expect(await repo.revealPending(bookingPar)).toHaveLength(0);
 
     const notasProf = await repo.revealedRatingsForTarget(professionalId);
     expect(notasProf).toEqual([5]);
@@ -131,8 +132,8 @@ describe("DrizzleReviewRepository (integração)", () => {
       comentario: "Ok",
       prazoEm: prazo,
     });
-    // janela fechou: revela o que houver (1 avaliação)
-    expect(await repo.revealPending(bookingJanela)).toBe(1);
+    // janela fechou: revela o que houver (1 avaliação → 1 alvo: o profissional)
+    expect(await repo.revealPending(bookingJanela)).toEqual([professionalId]);
 
     const notasProf = await repo.revealedRatingsForTarget(professionalId);
     expect(notasProf.sort()).toEqual([3, 5]);
