@@ -172,7 +172,7 @@ Cada módulo com fronteira explícita (porta/adapter, hexagonal), controller/ser
 | `auth` | OTP por canal (WhatsApp/SMS/e-mail), JWT, sessões Redis | §6 |
 | `users` & `profiles` | Cadastro 4 passos, completude gamificada, slug público | §2, §4, §14 |
 | `availability` | Agenda 6 meses, bloqueio automático bilateral | §10 |
-| `booking` | Fluxo de agendamento, expiração 24h, limite 2/especialidade | §7, §11 |
+| `booking` | Fluxo de agendamento, expiração 24h, **limite de 2 pedidos PENDENTES por especialidade, por contratante** (anti-spam) | §7, §11 |
 | `terms` | Termos de ciência bilaterais (append-only) | §7.4, §9, §15 |
 | `decline-penalty` | Motivos válidos/bloqueados, escala, taxa de aceitação | §8 |
 | `reputation` | Avaliação dupla-cega, revelação simultânea, badges, resposta pública | §12 |
@@ -255,7 +255,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 2 — Agenda e agendamento (Sprint 4–6)
 - [ ] `availability` (6 meses, bloqueio bilateral, §10).
-- [ ] `booking` (§7, expiração 24h via BullMQ, limite 2/especialidade §11).
+- [ ] `booking` (§7, expiração 24h via BullMQ, **limite 2/especialidade por contratante** §11 — um contratante pode ter no máximo 2 pedidos com status PENDENTE por especialidade ao mesmo tempo; medida anti-spam).
 - [ ] `terms` (termo bilateral, append-only, §7.4/§9) + `audit_log`.
 - [ ] `decline-penalty` (§8).
 - **Entregável:** ciclo agendar→aprovar→iniciar→concluir com proteção jurídica.

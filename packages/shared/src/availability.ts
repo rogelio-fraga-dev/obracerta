@@ -59,3 +59,21 @@ export const scheduleBlockSchema = z.object({
   motivo: z.string().trim().max(200).nullable(),
 });
 export type ScheduleBlock = z.infer<typeof scheduleBlockSchema>;
+
+/** Uma janela livre (HH:MM) dentro de um dia do calendário projetado. */
+export const calendarWindowSchema = z.object({
+  horaInicio: timeOfDaySchema,
+  horaFim: timeOfDaySchema,
+});
+export type CalendarWindow = z.infer<typeof calendarWindowSchema>;
+
+/**
+ * Um dia do calendário de 6 meses PROJETADO a partir da grade semanal menos os
+ * bloqueios. Só aparecem dias com pelo menos uma janela livre (data `YYYY-MM-DD`).
+ */
+export const calendarDaySchema = z.object({
+  data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data deve estar no formato YYYY-MM-DD."),
+  diaSemana: weekDaySchema,
+  janelas: z.array(calendarWindowSchema),
+});
+export type CalendarDay = z.infer<typeof calendarDaySchema>;
