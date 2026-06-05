@@ -73,6 +73,14 @@ export const invoiceSchema = z.object({
 });
 export type Invoice = z.infer<typeof invoiceSchema>;
 
+/** Entrada para o profissional assinar um plano recorrente (INICIANTE é grátis). */
+export const createSubscriptionSchema = z.object({ plano: professionalPlanSchema });
+export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
+
+/** Entrada para o contratante comprar um plano avulso. */
+export const createPurchaseSchema = z.object({ plano: contractorPlanSchema });
+export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;
+
 /** Reembolso de uma fatura paga (total ou parcial, 4 cenários CDC §21). */
 export const refundSchema = z.object({
   id: uuidSchema,

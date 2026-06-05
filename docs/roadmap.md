@@ -286,7 +286,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 4 — Monetização (Sprint 9–10) 🚧 _(API; front adiado, como nas Fases 2/3)_
 - [x] **4.0 — Camada de dados** (5 tabelas + contratos Zod + migration 0006). _Pré-requisito das etapas abaixo: `subscriptions` (assinatura recorrente do profissional), `purchases` (compra avulsa do contratante), `invoices` (faturas, vínculo exclusivo assinatura×compra via CHECK), `refunds` (estornos CDC), `payment_events` (idempotência de webhook). Enums espelhados `SubscriptionStatus`/`PurchaseStatus`/`InvoiceStatus`/`RefundStatus`/`PaymentMethod`; **dinheiro em centavos (inteiro)**; FKs RESTRICT na cadeia financeira (evidência fiscal); índice único parcial de assinatura vigente por usuário e de (gateway, gateway_id) p/ ligar webhooks. `entitlements` segue como módulo de domínio (sem tabela)._
-- [ ] **4.1 — `billing`** Asaas (recorrência + Pix avulso, webhooks idempotentes) atrás da porta `PaymentGateway`.
+- [x] **4.1 — `billing`** (recorrência + avulso atrás da porta `PaymentGateway`; webhooks idempotentes). _Domínio puro com TDD (preços por plano em centavos, graça 7d/próxima cobrança/validade avulso, máquina de estados da fatura, reconhecer evento de pagamento); assinar (EM_GRACA + 1ª fatura) e comprar avulso via gateway (dev: adapter fake; prod: Asaas); webhook idempotente (UNIQUE gateway+event_id via `payment_events`) marca fatura PAGA e ativa a origem; valida tipo do usuário e audita. Webhook sem JWT (validação por assinatura HMAC fica na 4.2)._
 - [ ] **4.2 — Faturas, expiração de avulso** (D25/D28/D30 + bloqueio, §19), gestão de plano (§20), reembolso CDC (§21).
 - **Entregável:** receita real; planos com gating correto via `entitlements`.
 
