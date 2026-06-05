@@ -192,6 +192,10 @@ Cada módulo com fronteira explícita (porta/adapter, hexagonal), controller/ser
 
 ## 6. Frontend (Next.js 15 único)
 
+> **Execução backend-first (ver §8):** esta seção descreve o front-alvo completo, mas a
+> **construção das telas da área logada (PWA) é consolidada na Fase 7**, depois de todo o
+> backend pronto. Hoje só a Fase 1 tem front (landing, perfil público, wizard, shell logado).
+
 ### 6.1 Rotas públicas (SSR/SSG — SEO)
 - **Landing** (de `landing_page.html`): hero+stats, dores, como funciona, fluxos, planos com toggle, FAQ, CTA. Vídeo de onboarding 60–90s (pós-MVP).
 - **Tela de escolha de perfil** (§2) com preços visíveis e aviso obrigatório.
@@ -230,6 +234,15 @@ Cada módulo com fronteira explícita (porta/adapter, hexagonal), controller/ser
 ## 8. Roadmap de Implementação (fases / sprints)
 
 Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regras críticas.**
+
+> **🧭 Estratégia de execução (decisão do dono, Jun/2026): BACKEND-FIRST.**
+> Construímos **todo o backend primeiro** (Fases 2–5 entregues como **API**, com domínio/TDD,
+> integração contra Postgres real e boot verificado) e só **depois** construímos **todo o
+> frontend de uma vez**, numa **Fase de Frontend dedicada (Fase 7)**. Motivo: contratos estáveis
+> no `packages/shared` (type-safety end-to-end) deixam o front ser construído sobre uma API já
+> provada, sem retrabalho. O front existente cobre só a **Fase 1** (landing, perfil público,
+> wizard de cadastro, shell logado). As telas da área logada (PWA) das Fases 2, 3, 4 e 5 estão
+> **adiadas e consolidadas na Fase 7**.
 
 ### Fase 0 — Fundação (Sprint 0–1)
 - [x] Monorepo (Turborepo + pnpm), lint/format, `packages/config`.
@@ -297,17 +310,28 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - **Gating por papel financeiro/admin** das ações de resolver reembolso — adiado para a Fase 6 (módulo `admin`).
 - **`refunds.status` APROVADO** não é usado (fluxo direto SOLICITADO→CONCLUIDO/RECUSADO); reservado para processamento assíncrono futuro.
 
-### Fase 5 — Busca, perfil público e obras (Sprint 11–13)
+### Fase 5 — Busca, perfil público e obras (Sprint 11–13) — **API**
 - [ ] `search` (pg_trgm + **PostGIS geo** + filtros por plano, §17; cache Redis).
-- [ ] `public-profile` SSR (URL compartilhável, anti-desintermediação §18/§24).
+- [ ] `public-profile` (contrato/dados do perfil público; a página SSR polida entra na Fase 7).
 - [ ] `work-orders` (urgência + lances sigilosos + piso de dignidade, §16).
-- **Entregável:** descoberta orgânica (SEO) + FOMO de obras + aquisição por compartilhamento.
+- **Entregável:** descoberta orgânica + FOMO de obras (API), pronta para o front consumir.
 
-### Fase 6 — PWA, admin e hardening (Sprint 14–15)
-- [ ] PWA instalável (manifest, SW, push, banner) — Melhoria #3.
-- [ ] `admin` dashboard de saúde — Melhoria #4.
-- [ ] **Hardening**: auditoria OWASP, rate-limiting, security headers + CSP, scan de deps; **observabilidade** (OpenTelemetry + métricas + logs); **E2E Playwright** + **carga k6**; auditoria WCAG.
-- **Entregável:** produto pronto para piloto com 50 profissionais.
+### Fase 6 — Admin, hardening e observabilidade (Sprint 14) — **backend**
+- [ ] `admin` (API do dashboard de saúde: ativação, churn, NPS) — Melhoria #4.
+- [ ] **Hardening backend**: auditoria OWASP, rate-limiting, **assinatura HMAC dos webhooks**, secrets, gating por papel (admin/moderador/financeiro das Fases 3–4); **observabilidade** (OpenTelemetry + métricas + logs); **carga k6**.
+- [ ] Ligar pendências cruzadas: hook de suspensão no login (`auth`), provedores reais (WhatsApp/SMS/Asaas) atrás das portas, writer de `reputation_events`, lembretes (avaliação D1/D5/D7, plano D25/D28/D30) + renovação recorrente.
+- **Entregável:** backend completo, seguro e observável — **fim do backend**.
+
+### Fase 7 — Frontend completo (área logada / PWA) (Sprint 15–17) — **front consolidado**
+> Construído **de uma vez**, sobre a API já provada das Fases 2–6 (contratos do `packages/shared`).
+- [ ] **Agenda & agendamento** (Fase 2): grade/calendário, criar/gerir pedido, aceite de termos, painel de penalidades/taxa de aceitação.
+- [ ] **Reputação & moderação** (Fase 3): avaliação dupla-cega, badges, direito de resposta, denúncia, painel de suspensão/apelação.
+- [ ] **Monetização** (Fase 4): escolha/contratação de plano, faturas, reembolso; gating visual por `entitlements`.
+- [ ] **Busca, perfil público e obras** (Fase 5): busca com filtros (geo/bairro) + URL como estado, perfil público SSR compartilhável, obras + lances sigilosos.
+- [ ] **PWA** (Melhoria #3): manifest + Service Worker, banner "Adicionar à tela inicial", push, splash.
+- [ ] **Admin UI** (Melhoria #4) consumindo a API da Fase 6.
+- [ ] **Qualidade de front**: **E2E Playwright** (fluxos críticos), auditoria **WCAG AA**, visual/responsivo (320/375/768/1024/1440), reduced-motion.
+- **Entregável:** produto navegável ponta a ponta, instalável (PWA), pronto para piloto com 50 profissionais.
 
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).
