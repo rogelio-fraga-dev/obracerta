@@ -7,8 +7,15 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
-import { BookingStatus, UserType, type BookingRequest, type CreateBookingInput } from "@obracerta/shared";
+import {
+  BookingStatus,
+  UserType,
+  type BookingRequest,
+  type CreateBookingInput,
+  type DeclineReason,
+} from "@obracerta/shared";
 import { AvailabilityService } from "../../availability/application/availability.service.js";
+import { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
 import {
   NOTIFICATION_PROVIDER,
   type NotificationProvider,
@@ -27,6 +34,7 @@ export class BookingService {
     private readonly users: UsersService,
     private readonly availability: AvailabilityService,
     private readonly scheduler: BookingScheduler,
+    private readonly penalties: PenaltyService,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
   ) {}
 
@@ -96,19 +104,30 @@ export class BookingService {
     return updated;
   }
 
-  /** Profissional recusa com motivo (PENDENTE → RECUSADO). */
-  async decline(professionalId: string, id: string, motivo: string): Promise<BookingRequest> {
+  /**
+   * Profissional recusa com motivo categorizado (PENDENTE → RECUSADO). Motivos
+   * não-legítimos geram penalidade (escala por reincidência) + evento na trilha.
+   */
+  async decline(
+    professionalId: string,
+    id: string,
+    reason: DeclineReason,
+    detalhe: string | null,
+  ): Promise<BookingRequest> {
     const booking = await this.getProfessionalBooking(professionalId, id);
     if (booking.status !== BookingStatus.PENDENTE) {
       throw new ConflictException("Só pedidos pendentes podem ser recusados.");
     }
+    const motivoRecusa = detalhe ? `${reason}: ${detalhe}` : reason;
     const updated = await this.repo.transitionStatus(
       id,
       BookingStatus.PENDENTE,
       BookingStatus.RECUSADO,
-      { motivoRecusa: motivo },
+      { motivoRecusa },
     );
     if (!updated) throw new ConflictException("O pedido não está mais pendente.");
+
+    await this.penalties.penalizeDecline(professionalId, id, reason, detalhe);
     await this.notifyUser(updated.contractorId, "Seu pedido de agendamento foi recusado.");
     return updated;
   }
@@ -162,9 +181,20 @@ export class BookingService {
     return updated;
   }
 
-  /** Expira um pedido se ainda estiver PENDENTE (chamado pelo job de 24h). */
-  expireIfPending(id: string): Promise<BookingRequest | null> {
-    return this.repo.transitionStatus(id, BookingStatus.PENDENTE, BookingStatus.EXPIRADO);
+  /**
+   * Expira um pedido se ainda estiver PENDENTE (job de 24h) e penaliza a
+   * não-resposta do profissional.
+   */
+  async expireIfPending(id: string): Promise<BookingRequest | null> {
+    const updated = await this.repo.transitionStatus(
+      id,
+      BookingStatus.PENDENTE,
+      BookingStatus.EXPIRADO,
+    );
+    if (updated) {
+      await this.penalties.penalizeExpiration(updated.professionalId, updated.id);
+    }
+    return updated;
   }
 
   /** Detalhe de um pedido (apenas participantes). */

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { uuidSchema, isoTimestampSchema } from "./primitives.js";
-import { bookingStatusSchema } from "./enums.js";
+import { bookingStatusSchema, declineReasonSchema, DeclineReason } from "./enums.js";
 
 /**
  * Contratos de agendamento (roadmap §4.2/§7/§11). Um `booking_request` é o pedido
@@ -33,8 +33,17 @@ export const createBookingSchema = z.object({
 });
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 
-/** Recusa de um pedido pelo profissional (motivo obrigatório, §8). */
-export const declineBookingSchema = z.object({
-  motivo: z.string().trim().min(3).max(300),
-});
+/**
+ * Recusa de um pedido pelo profissional (roadmap §8). `motivo` é categorizado
+ * (válido/penalizável); `detalhe` é texto livre opcional, obrigatório em OUTRO.
+ */
+export const declineBookingSchema = z
+  .object({
+    motivo: declineReasonSchema,
+    detalhe: z.string().trim().max(300).optional(),
+  })
+  .refine((d) => d.motivo !== DeclineReason.OUTRO || (d.detalhe?.length ?? 0) >= 3, {
+    message: "Descreva o motivo quando escolher OUTRO.",
+    path: ["detalhe"],
+  });
 export type DeclineBookingInput = z.infer<typeof declineBookingSchema>;

@@ -253,12 +253,21 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - Persistência de sessão no front (cookie httpOnly) é hardening da Fase 6 — hoje o token fica em memória no wizard.
 - Provedores reais de WhatsApp/SMS atrás da porta `NotificationProvider` (trocar adapter, sem mexer no domínio).
 
-### Fase 2 — Agenda e agendamento (Sprint 4–6)
-- [ ] `availability` (6 meses, bloqueio bilateral, §10).
-- [ ] `booking` (§7, expiração 24h via BullMQ, **limite 2/especialidade por contratante** §11 — um contratante pode ter no máximo 2 pedidos com status PENDENTE por especialidade ao mesmo tempo; medida anti-spam).
-- [ ] `terms` (termo bilateral, append-only, §7.4/§9) + `audit_log`.
-- [ ] `decline-penalty` (§8).
-- **Entregável:** ciclo agendar→aprovar→iniciar→concluir com proteção jurídica.
+### Fase 2 — Agenda e agendamento (Sprint 4–6) ✅ _(API; front adiado)_
+- [x] **2.1 — `availability`** (grade semanal → calendário de 6 meses **projetado** em código; bloqueio bilateral; §10). _Domínio puro com TDD (projeção + subtração de intervalos + conflito)._
+- [x] **2.2 — `booking`** (máquina de estados agendar→aprovar→iniciar→concluir; expiração 24h via BullMQ; **limite 2/especialidade por contratante** §11; bloqueio bilateral na aprovação reusando `availability`). _Transição guardada e atômica no banco (UPDATE ... WHERE status=esperado)._
+- [x] **2.3 — `terms` + `audit_log`** (aceite bilateral append-only; trilha tamper-evident por **hash-chain sha256** com advisory lock no append; §7.4/§9).
+- [x] **2.4 — `decline-penalty`** (motivos válidos/penalizáveis + escala por reincidência + taxa de aceitação; §8). _Aplicada no decline (motivo penalizável) e na expiração; tudo auditado._
+- [x] **2.0 — Camada de dados** (6 tabelas + contratos Zod + migrations de criação e endurecimento). _Pré-requisito das fatias acima._
+- 🔧 **Migration 0004** — gênese do `audit_log` passou a ser garantido por índice único parcial (no máximo um `hash_prev IS NULL`), no lugar do CHECK `seq=1` (que travava reinício da cadeia).
+- **Entregável:** ciclo agendar→aprovar→iniciar→concluir com proteção jurídica. ✅ _API verificada ao vivo (typecheck 9/9, testes unit + integração contra Postgres real, boot mapeando as rotas)._
+
+**Decisões/pendências da Fase 2 (para fases seguintes):**
+- **Front da Fase 2 ainda não existe** — toda a Fase 2 é **API**. As telas de agenda/pedido/aceite de termos/penalidades entram quando o front desta fase for construído (o front hoje cobre só a Fase 1: landing, perfil público, wizard de cadastro e o shell logado).
+- Calendário projetado em **UTC** no domínio; fuso `America/Sao_Paulo` quando o agendamento real exigir casar instantes com horário local.
+- Duração do bloqueio na aprovação = **2h placeholder** (contrato só tem `dataServico`); modelar duração de serviço depois.
+- Atomicidade cross-tabela na aprovação (status + bloqueio) é uma **saga manual** (bloqueio-primeiro + compensação); endurecer com transação compartilhada é melhoria futura.
+- Auditar também os eventos do `booking` (aprovar/iniciar/concluir/cancelar) via `AuditService` — hoje só aceite de termo e penalidade auditam.
 
 ### Fase 3 — Reputação (Sprint 7–8)
 - [ ] `reputation` (dupla-cega, revelação simultânea, janela 7d + lembretes, §12).

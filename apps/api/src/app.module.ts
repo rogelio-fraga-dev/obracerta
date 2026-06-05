@@ -20,6 +20,7 @@ import { AvailabilityModule } from "./modules/availability/availability.module.j
 import { BookingModule } from "./modules/booking/booking.module.js";
 import { AuditModule } from "./modules/audit/audit.module.js";
 import { TermsModule } from "./modules/terms/terms.module.js";
+import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -66,6 +67,7 @@ import { TermsModule } from "./modules/terms/terms.module.js";
     BookingModule,
     AuditModule,
     TermsModule,
+    DeclinePenaltyModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

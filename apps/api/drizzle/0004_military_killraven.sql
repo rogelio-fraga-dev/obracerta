@@ -1,0 +1,2 @@
+ALTER TABLE "audit_log" DROP CONSTRAINT "audit_chain_continuity_check";--> statement-breakpoint
+CREATE UNIQUE INDEX "audit_single_genesis_idx" ON "audit_log" USING btree (("hash_prev" is null)) WHERE "audit_log"."hash_prev" is null;

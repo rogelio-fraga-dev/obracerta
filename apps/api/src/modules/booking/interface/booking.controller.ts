@@ -50,14 +50,14 @@ export class BookingController {
     return this.bookings.approve(user.sub, id);
   }
 
-  /** Profissional recusa (motivo obrigatório). */
+  /** Profissional recusa (motivo categorizado; OUTRO exige detalhe). */
   @Post(":id/decline")
   decline(
     @CurrentUser() user: JwtClaims,
     @Param("id") id: string,
     @Body(new ZodValidationPipe(declineBookingSchema)) body: DeclineBookingInput,
   ): Promise<BookingRequest> {
-    return this.bookings.decline(user.sub, id, body.motivo);
+    return this.bookings.decline(user.sub, id, body.motivo, body.detalhe ?? null);
   }
 
   /** Profissional inicia a obra. */

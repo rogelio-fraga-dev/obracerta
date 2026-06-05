@@ -40,6 +40,22 @@ export const BookingStatus = {
 export const bookingStatusSchema = z.nativeEnum(BookingStatus);
 export type BookingStatus = z.infer<typeof bookingStatusSchema>;
 
+/**
+ * Motivos de recusa de um pedido (roadmap §8). Os "válidos" não geram penalidade;
+ * `DESISTENCIA` (recusa sem justificativa legítima) é penalizável. A classificação
+ * e a escala vivem no domínio `decline-penalty` da API.
+ */
+export const DeclineReason = {
+  AGENDA_INDISPONIVEL: "AGENDA_INDISPONIVEL",
+  FORA_DA_AREA: "FORA_DA_AREA",
+  ESCOPO_INCOMPATIVEL: "ESCOPO_INCOMPATIVEL",
+  VALOR_INCOMPATIVEL: "VALOR_INCOMPATIVEL",
+  DESISTENCIA: "DESISTENCIA",
+  OUTRO: "OUTRO",
+} as const;
+export const declineReasonSchema = z.nativeEnum(DeclineReason);
+export type DeclineReason = z.infer<typeof declineReasonSchema>;
+
 /** Plano do contratante (avulso). */
 export const ContractorPlan = {
   BASICO: "BASICO",

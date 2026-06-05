@@ -2,6 +2,7 @@ import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
 import { AvailabilityModule } from "../availability/availability.module.js";
+import { DeclinePenaltyModule } from "../decline-penalty/decline-penalty.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { BookingScheduler, BOOKING_EXPIRY_QUEUE } from "./application/booking.scheduler.js";
 import { BookingService } from "./application/booking.service.js";
@@ -20,6 +21,7 @@ import { BookingController } from "./interface/booking.controller.js";
     AuthModule,
     UsersModule,
     AvailabilityModule,
+    DeclinePenaltyModule,
     BullModule.registerQueue({ name: BOOKING_EXPIRY_QUEUE }),
   ],
   controllers: [BookingController],
