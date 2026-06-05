@@ -324,6 +324,9 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 7 — Frontend completo (área logada / PWA) (Sprint 15–17) — **front consolidado**
 > Construído **de uma vez**, sobre a API já provada das Fases 2–6 (contratos do `packages/shared`).
+> **Design vem dos mockups** (`docs/mockups/*.html`), já destilados em `packages/design-tokens`
+> + `packages/ui` — ver **§14**. ⚠️ Os mockups são fonte **só do design** (linguagem visual);
+> as **telas, fluxos e escopo** vêm do **PRD + da API**. Onde divergirem, PRD/API ganha.
 - [ ] **Agenda & agendamento** (Fase 2): grade/calendário, criar/gerir pedido, aceite de termos, painel de penalidades/taxa de aceitação.
 - [ ] **Reputação & moderação** (Fase 3): avaliação dupla-cega, badges, direito de resposta, denúncia, painel de suspensão/apelação.
 - [ ] **Monetização** (Fase 4): escolha/contratação de plano, faturas, reembolso; gating visual por `entitlements`.
@@ -397,4 +400,36 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 
 ---
 
-*Documento de planejamento — derivado do material em `/docs`, dos protótipos HTML e da análise de stack (`~/.claude/plans/voce-acha-que-essa-snappy-island.md`). Atualizar conforme decisões de produto e o plano refinado do Ultraplan.*
+## 14. Base de Design (mockups → Design System)
+
+> **Regra de ouro:** os mockups são a fonte **só do DESIGN** (linguagem visual). As **telas,
+> fluxos, regras e escopo** vêm do **PRD + da API** (contratos do `packages/shared`). Onde um
+> mockup divergir do PRD/API (ex.: rótulos de aba, campos), **o PRD/API ganha** — o mockup
+> informa apenas a estética. Extrair design, **não** copiar comportamento.
+
+O design já foi **destilado** dos protótipos para o código, que é a fonte de verdade visual:
+- **`packages/design-tokens`** (`tokens.css`) — paleta (orange/dark/cream + semânticas), tipografia
+  (**Fraunces** títulos + **Cabinet Grotesk** corpo), espaçamento, raios, sombras, durações.
+- **`packages/ui`** — componentes do Design System (Tailwind mapeado aos tokens), reutilizados
+  entre rotas públicas e PWA.
+
+A Fase 7 (frontend) constrói as telas reais **aplicando esses tokens/componentes**, usando os
+mockups como **referência visual**.
+
+### Inventário dos mockups (`docs/mockups/`)
+
+| Arquivo | O que é | Uso como design |
+|---------|---------|-----------------|
+| `landing_page.html` | Landing pública (hero/dores, como funciona, fluxos contratante×profissional, planos, depoimentos, FAQ, CTA) | Referência visual da **landing** (rotas públicas, §6.1) — já parcialmente construída na Fase 1 |
+| `prototipo.html` | Variante/versão anterior da landing (mesma estrutura e título) | Referência visual da **landing**; consolidar com `landing_page.html` |
+| `prototipo2.html` | **"Fluxo do Profissional"**: cadastro/onboarding (passos: dados → especialidades → escolha de plano → forma de pagamento → upgrade) + **shell da área logada** com abas (Início · Pedidos · Obras · Perfil) | Referência visual da **área logada / PWA** (§6.2, Fase 7) — linguagem visual das telas internas |
+| `apresentacao.html` | Pitch/apresentação de produto | **Não é design de tela** — contexto de produto/narrativa |
+| `carta_intencoes.html` | Carta de intenções | **Não é design de tela** — contexto |
+
+> Nota: as abas do mockup (Início/Pedidos/Obras/Perfil) e a navegação do PRD/§6.2
+> (Pedidos/Agenda/Perfil/Plano) podem divergir — a navegação final segue o **PRD + os domínios
+> de backend já construídos** (Fases 2–4) e o que a API expõe; o mockup define o visual, não o IA.
+
+---
+
+*Documento de planejamento — derivado do material em `/docs`, dos protótipos HTML (`docs/mockups/`, ver §14) e da análise de stack (`~/.claude/plans/voce-acha-que-essa-snappy-island.md`). Atualizar conforme decisões de produto e o plano refinado do Ultraplan.*
