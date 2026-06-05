@@ -116,3 +116,57 @@ export const SuspensionStatus = {
 } as const;
 export const suspensionStatusSchema = z.nativeEnum(SuspensionStatus);
 export type SuspensionStatus = z.infer<typeof suspensionStatusSchema>;
+
+/**
+ * Estados da assinatura recorrente do profissional (roadmap §7.1/§19). EM_GRACA =
+ * "7 dias de graça" (nunca "trial"); INADIMPLENTE = cobrança falhou e aguarda
+ * regularização antes de bloquear/cancelar.
+ */
+export const SubscriptionStatus = {
+  EM_GRACA: "EM_GRACA",
+  ATIVA: "ATIVA",
+  INADIMPLENTE: "INADIMPLENTE",
+  CANCELADA: "CANCELADA",
+} as const;
+export const subscriptionStatusSchema = z.nativeEnum(SubscriptionStatus);
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>;
+
+/** Estados da compra avulsa do contratante (sem recorrência, roadmap §7.1/§19). */
+export const PurchaseStatus = {
+  PENDENTE: "PENDENTE",
+  ATIVO: "ATIVO",
+  EXPIRADO: "EXPIRADO",
+  CANCELADO: "CANCELADO",
+} as const;
+export const purchaseStatusSchema = z.nativeEnum(PurchaseStatus);
+export type PurchaseStatus = z.infer<typeof purchaseStatusSchema>;
+
+/** Estados de uma fatura/cobrança (máquina de estados, roadmap §7.1). */
+export const InvoiceStatus = {
+  PENDENTE: "PENDENTE",
+  PAGA: "PAGA",
+  VENCIDA: "VENCIDA",
+  CANCELADA: "CANCELADA",
+  ESTORNADA: "ESTORNADA",
+} as const;
+export const invoiceStatusSchema = z.nativeEnum(InvoiceStatus);
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
+
+/** Estados de um reembolso (4 cenários CDC, roadmap §21). */
+export const RefundStatus = {
+  SOLICITADO: "SOLICITADO",
+  APROVADO: "APROVADO",
+  RECUSADO: "RECUSADO",
+  CONCLUIDO: "CONCLUIDO",
+} as const;
+export const refundStatusSchema = z.nativeEnum(RefundStatus);
+export type RefundStatus = z.infer<typeof refundStatusSchema>;
+
+/** Método de pagamento (roadmap §7.1). */
+export const PaymentMethod = {
+  PIX: "PIX",
+  CARTAO: "CARTAO",
+  BOLETO: "BOLETO",
+} as const;
+export const paymentMethodSchema = z.nativeEnum(PaymentMethod);
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;

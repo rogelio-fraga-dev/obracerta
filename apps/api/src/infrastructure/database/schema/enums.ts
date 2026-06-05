@@ -8,6 +8,11 @@ import {
   ReviewStatus,
   ReportStatus,
   SuspensionStatus,
+  SubscriptionStatus,
+  PurchaseStatus,
+  InvoiceStatus,
+  RefundStatus,
+  PaymentMethod,
 } from "@obracerta/shared";
 
 /**
@@ -40,4 +45,24 @@ export const reportStatusEnum = pgEnum(
 export const suspensionStatusEnum = pgEnum(
   "suspension_status",
   Object.values(SuspensionStatus) as [string, ...string[]],
+);
+export const subscriptionStatusEnum = pgEnum(
+  "subscription_status",
+  Object.values(SubscriptionStatus) as [string, ...string[]],
+);
+export const purchaseStatusEnum = pgEnum(
+  "purchase_status",
+  Object.values(PurchaseStatus) as [string, ...string[]],
+);
+export const invoiceStatusEnum = pgEnum(
+  "invoice_status",
+  Object.values(InvoiceStatus) as [string, ...string[]],
+);
+export const refundStatusEnum = pgEnum(
+  "refund_status",
+  Object.values(RefundStatus) as [string, ...string[]],
+);
+export const paymentMethodEnum = pgEnum(
+  "payment_method",
+  Object.values(PaymentMethod) as [string, ...string[]],
 );

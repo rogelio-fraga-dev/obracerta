@@ -284,9 +284,10 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - **Checar suspensão no login** (bloquear acesso de conta suspensa) é um hook a ligar no `auth` — o `ModerationService.isSuspended` já existe. Expiração da suspensão é **preguiçosa** (avaliada na leitura); um job de varredura é opcional.
 - **Front da Fase 2 e 3 inexistente** — tudo é API.
 
-### Fase 4 — Monetização (Sprint 9–10)
-- [ ] `billing` Asaas (recorrência + Pix avulso, webhooks idempotentes).
-- [ ] Faturas, expiração de avulso (D25/D28/D30 + bloqueio, §19), gestão de plano (§20), reembolso CDC (§21).
+### Fase 4 — Monetização (Sprint 9–10) 🚧 _(API; front adiado, como nas Fases 2/3)_
+- [x] **4.0 — Camada de dados** (5 tabelas + contratos Zod + migration 0006). _Pré-requisito das etapas abaixo: `subscriptions` (assinatura recorrente do profissional), `purchases` (compra avulsa do contratante), `invoices` (faturas, vínculo exclusivo assinatura×compra via CHECK), `refunds` (estornos CDC), `payment_events` (idempotência de webhook). Enums espelhados `SubscriptionStatus`/`PurchaseStatus`/`InvoiceStatus`/`RefundStatus`/`PaymentMethod`; **dinheiro em centavos (inteiro)**; FKs RESTRICT na cadeia financeira (evidência fiscal); índice único parcial de assinatura vigente por usuário e de (gateway, gateway_id) p/ ligar webhooks. `entitlements` segue como módulo de domínio (sem tabela)._
+- [ ] **4.1 — `billing`** Asaas (recorrência + Pix avulso, webhooks idempotentes) atrás da porta `PaymentGateway`.
+- [ ] **4.2 — Faturas, expiração de avulso** (D25/D28/D30 + bloqueio, §19), gestão de plano (§20), reembolso CDC (§21).
 - **Entregável:** receita real; planos com gating correto via `entitlements`.
 
 ### Fase 5 — Busca, perfil público e obras (Sprint 11–13)
