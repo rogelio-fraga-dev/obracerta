@@ -24,6 +24,7 @@ import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.
 import { ReputationModule } from "./modules/reputation/reputation.module.js";
 import { ModerationModule } from "./modules/moderation/moderation.module.js";
 import { BillingModule } from "./modules/billing/billing.module.js";
+import { SearchModule } from "./modules/search/search.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -74,6 +75,7 @@ import { BillingModule } from "./modules/billing/billing.module.js";
     ReputationModule,
     ModerationModule,
     BillingModule,
+    SearchModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

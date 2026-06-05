@@ -21,3 +21,4 @@ export * from "./reputation.js";
 export * from "./moderation.js";
 export * from "./billing.js";
 export * from "./work-orders.js";
+export * from "./search.js";

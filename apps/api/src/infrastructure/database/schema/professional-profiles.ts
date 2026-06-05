@@ -27,5 +27,9 @@ export const professionalProfiles = pgTable(
     slugPublico: varchar("slug_publico", { length: 80 }).notNull().unique(),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("professional_geo_idx").using("gist", t.geo)],
+  (t) => [
+    index("professional_geo_idx").using("gist", t.geo),
+    // GIN p/ filtro por especialidade (array contains `@>`) na busca (§17)
+    index("professional_especialidades_idx").using("gin", t.especialidades),
+  ],
 );

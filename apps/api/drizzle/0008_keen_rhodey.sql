@@ -1,0 +1,2 @@
+CREATE INDEX "users_nome_trgm_idx" ON "users" USING gin ("nome_completo" gin_trgm_ops);--> statement-breakpoint
+CREATE INDEX "professional_especialidades_idx" ON "professional_profiles" USING gin ("especialidades");
