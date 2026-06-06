@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { uuidSchema, isoTimestampSchema, geoPointSchema } from "./primitives.js";
 import { centavosSchema } from "./billing.js";
+import { paginationMetaSchema } from "./pagination.js";
 import { workUrgencySchema, workOrderStatusSchema, proposalStatusSchema } from "./enums.js";
 
 /**
@@ -63,3 +64,27 @@ export const createProposalSchema = z.object({
   mensagem: z.string().trim().max(1000).optional(),
 });
 export type CreateProposalInput = z.infer<typeof createProposalSchema>;
+
+/** Corpo do lance quando a obra vem na rota (`POST /work-orders/:id/proposals`). */
+export const submitProposalSchema = z.object({
+  valorCentavos: centavosSchema,
+  prazoDias: z.number().int().positive().max(365).optional(),
+  mensagem: z.string().trim().max(1000).optional(),
+});
+export type SubmitProposalInput = z.infer<typeof submitProposalSchema>;
+
+/** Filtros + paginação da descoberta de obras abertas. */
+export const workOrderQuerySchema = z.object({
+  cidadeId: uuidSchema.optional(),
+  especialidade: z.string().trim().min(2).max(60).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(20),
+});
+export type WorkOrderQuery = z.infer<typeof workOrderQuerySchema>;
+
+/** Página de obras (descoberta). */
+export const workOrdersPageSchema = z.object({
+  items: z.array(workOrderSchema),
+  meta: paginationMetaSchema,
+});
+export type WorkOrdersPage = z.infer<typeof workOrdersPageSchema>;

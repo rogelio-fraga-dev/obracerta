@@ -310,12 +310,19 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - **Gating por papel financeiro/admin** das ações de resolver reembolso — adiado para a Fase 6 (módulo `admin`).
 - **`refunds.status` APROVADO** não é usado (fluxo direto SOLICITADO→CONCLUIDO/RECUSADO); reservado para processamento assíncrono futuro.
 
-### Fase 5 — Busca, perfil público e obras (Sprint 11–13) — **API**
+### Fase 5 — Busca, perfil público e obras (Sprint 11–13) — **API** ✅
 - [x] **5.0 — Camada de dados** (2 tabelas + coluna geo + contratos Zod + migration 0007). _`work_orders` (obra/pedido de orçamento, urgência, geo, piso de dignidade) e `proposals` (lances sigilosos, 1 por profissional/obra); coluna **`geo` (PostGIS point 4326)** + `raio_atendimento_km` no `professional_profiles` (pendência da Fase 1) com índice **GIST**; enums espelhados `WorkUrgency`/`WorkOrderStatus`/`ProposalStatus`; `geoPointSchema` no shared. SRID 4326 aplicado na escrita/consulta (coluna `geometry(point)` genérica). pg_trgm/GIN da busca entram na 5.1._
 - [x] **5.1 — `search`** (pg_trgm + **PostGIS geo** + filtros por especialidade/plano, §17). _Domínio puro com TDD (raio/limite/geo/paginação); SearchRepository com SQL combinando GIN `@>` (especialidade), GIN pg_trgm `ILIKE` (nome) e `ST_DWithin` geográfico (índice GIST, metros via `::geography`, SRID 4326); paginado; `GET /search/professionals`. **Geo validado ponta a ponta** (coluna geometry da 5.0). Cache Redis fica como refinamento._
 - [x] **5.2 — `public-profile`** (perfil público com dados limitados, anti-desintermediação §18/§24). _Domínio puro com TDD (nome parcial "João S."; foto/nome ocultos no plano Iniciante — visibilidade reduzida); view pública compõe perfil + identidade + reputação (Fase 3), **nunca** expõe contato/`valores`/agenda/referências; só contas ATIVAS. `GET /public/p/:slug` (sem auth, cacheável). Removido o antigo `/profiles/p/:slug` que vazava `valores`. A página SSR polida é Fase 7._
-- [ ] **5.3 — `work-orders`** (urgência → expiração; lances sigilosos; piso de dignidade pela média, §16).
-- **Entregável:** descoberta orgânica + FOMO de obras (API), pronta para o front consumir.
+- [x] **5.3 — `work-orders`** (urgência → expiração; lances sigilosos; piso de dignidade pela média, §16). _Domínio puro com TDD (deadline por urgência 48h/7d/15d; piso = fração da média a partir de 3 lances; sigilo `visibleProposals`; máquinas de estado obra/lance); abrir obra + job BullMQ de expiração; lance ≥ piso (recusa abaixo); listagem com sigilo (dono vê todos, profissional só o seu); adjudicar (obra ADJUDICADA + lance ACEITA + demais RECUSADA). Auditado._
+- **Entregável:** descoberta orgânica + FOMO de obras (API), pronta para o front consumir. ✅ _API verificada ao vivo (typecheck, unit + integração contra Postgres real, boot mapeando as rotas das 3 etapas)._
+
+**Decisões/pendências da Fase 5 (para fases seguintes):**
+- **Cache Redis** da busca/perfil público (§17) — refinamento adiado.
+- **unaccent no índice** da busca (wrapper IMMUTABLE) — hoje o pg_trgm já tolera digitação.
+- **Geo de `work_orders`** gravado via Drizzle `geometry` mode 'xy' (sem distance-query ainda); validar quando a busca de obras por raio existir. A busca de profissionais já valida geo (5.1).
+- **Piso de dignidade** usa fração (0,7) da média a partir de 3 lances — heurística simples; refinar com dado de mercado depois.
+- **Concluir obra** (ADJUDICADA → CONCLUIDA) e cancelar ficam para quando o fluxo pós-adjudicação for necessário.
 
 ### Fase 6 — Admin, hardening e observabilidade (Sprint 14) — **backend**
 - [ ] `admin` (API do dashboard de saúde: ativação, churn, NPS) — Melhoria #4.
