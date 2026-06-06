@@ -4,6 +4,7 @@ import {
   createSubscriptionSchema,
   paymentMethodSchema,
   uuidSchema,
+  UserRole,
   z,
   type CreatePurchaseInput,
   type CreateSubscriptionInput,
@@ -16,6 +17,8 @@ import {
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
+import { Roles } from "../../auth/interface/roles.decorator.js";
+import { RolesGuard } from "../../auth/interface/roles.guard.js";
 import { RefundReason } from "../domain/refund-rules.js";
 import {
   BillingService,
@@ -102,9 +105,10 @@ export class BillingController {
     return this.billing.listRefunds(user.sub);
   }
 
-  /** Resolve um reembolso (financeiro/moderador — gating por papel na Fase 6). */
+  /** Resolve um reembolso (FINANCEIRO/ADMIN). */
   @Post("refunds/:id/resolve")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.FINANCEIRO)
   resolveRefund(
     @Param("id") id: string,
     @Body(new ZodValidationPipe(resolveRefundSchema)) body: { aprovar: boolean },

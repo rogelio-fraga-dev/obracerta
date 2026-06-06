@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type { User } from "@obracerta/shared";
 import {
   USERS_REPOSITORY,
@@ -30,5 +30,19 @@ export class UsersService {
 
   findById(id: string): Promise<User | null> {
     return this.users.findById(id);
+  }
+
+  /** Papéis administrativos do usuário (vazio se não tem ou não existe). */
+  async getRoles(id: string): Promise<string[]> {
+    return (await this.users.findRoles(id)) ?? [];
+  }
+
+  /** Define os papéis do usuário (ação ADMIN); 404 se o usuário não existe. */
+  async setRoles(id: string, roles: string[]): Promise<void> {
+    const existing = await this.users.findRoles(id);
+    if (existing === null) {
+      throw new NotFoundException("Usuário não encontrado.");
+    }
+    await this.users.setRoles(id, roles);
   }
 }

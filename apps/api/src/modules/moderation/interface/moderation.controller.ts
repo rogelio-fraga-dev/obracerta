@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import {
   appealSuspensionSchema,
   createReportSchema,
+  UserRole,
   z,
   type AppealSuspensionInput,
   type CreateReportInput,
@@ -12,6 +13,8 @@ import {
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
+import { Roles } from "../../auth/interface/roles.decorator.js";
+import { RolesGuard } from "../../auth/interface/roles.guard.js";
 import { ModerationService } from "../application/moderation.service.js";
 
 /** Decisão de denúncia (ação de moderador). */
@@ -20,12 +23,12 @@ const resolveReportSchema = z.object({ procedente: z.boolean() });
 const resolveAppealSchema = z.object({ revogar: z.boolean() });
 
 /**
- * Moderação (roadmap §13). NOTA: as ações de moderador (resolver denúncia/apelação)
- * estão sob JwtAuthGuard apenas — o gating por papel admin/moderador entra com o
- * módulo `admin` (Fase 6). Hoje qualquer usuário autenticado pode chamá-las.
+ * Moderação (roadmap §13). As ações de moderador (resolver denúncia/apelação e ver
+ * a fila) exigem o papel MODERADOR ou ADMIN (RolesGuard, Fase 6); denunciar/apelar/
+ * consultar a própria suspensão são abertas a qualquer usuário autenticado.
  */
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ModerationController {
   constructor(private readonly moderation: ModerationService) {}
 
@@ -38,14 +41,16 @@ export class ModerationController {
     return this.moderation.denunciar(user.sub, input);
   }
 
-  /** Fila de moderação: denúncias abertas. (moderador — ver NOTA do controller) */
+  /** Fila de moderação: denúncias abertas (MODERADOR/ADMIN). */
   @Get("reports/open")
+  @Roles(UserRole.ADMIN, UserRole.MODERADOR)
   openReports(): Promise<Report[]> {
     return this.moderation.listOpenReports();
   }
 
-  /** Decisão da denúncia. (moderador — ver NOTA do controller) */
+  /** Decisão da denúncia (MODERADOR/ADMIN). */
   @Post("reports/:id/resolve")
+  @Roles(UserRole.ADMIN, UserRole.MODERADOR)
   resolveReport(
     @Param("id") id: string,
     @Body(new ZodValidationPipe(resolveReportSchema)) body: { procedente: boolean },
@@ -62,8 +67,9 @@ export class ModerationController {
     return this.moderation.appeal(user.sub, input);
   }
 
-  /** Julgamento da apelação. (moderador — ver NOTA do controller) */
+  /** Julgamento da apelação (MODERADOR/ADMIN). */
   @Post("suspensions/:id/resolve")
+  @Roles(UserRole.ADMIN, UserRole.MODERADOR)
   resolveAppeal(
     @Param("id") id: string,
     @Body(new ZodValidationPipe(resolveAppealSchema)) body: { revogar: boolean },

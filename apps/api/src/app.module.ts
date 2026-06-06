@@ -27,6 +27,7 @@ import { BillingModule } from "./modules/billing/billing.module.js";
 import { SearchModule } from "./modules/search/search.module.js";
 import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
+import { AdminModule } from "./modules/admin/admin.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -80,6 +81,7 @@ import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
     SearchModule,
     PublicProfileModule,
     WorkOrdersModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

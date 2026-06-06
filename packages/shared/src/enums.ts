@@ -18,6 +18,19 @@ export const UserType = {
 export const userTypeSchema = z.nativeEnum(UserType);
 export type UserType = z.infer<typeof userTypeSchema>;
 
+/**
+ * Papéis administrativos (roadmap §13/§21, Fase 6). Ortogonais ao `tipo`: um
+ * usuário comum tem zero papéis; papéis liberam ações privilegiadas (moderar
+ * denúncias, julgar reembolsos, painel admin). Gating via `RolesGuard`.
+ */
+export const UserRole = {
+  ADMIN: "ADMIN",
+  MODERADOR: "MODERADOR",
+  FINANCEIRO: "FINANCEIRO",
+} as const;
+export const userRoleSchema = z.nativeEnum(UserRole);
+export type UserRole = z.infer<typeof userRoleSchema>;
+
 /** Status da conta. */
 export const UserStatus = {
   ATIVO: "ATIVO",

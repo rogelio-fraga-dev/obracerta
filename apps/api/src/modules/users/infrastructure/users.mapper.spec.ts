@@ -12,6 +12,7 @@ function makeRow(overrides: Partial<UserRow> = {}): UserRow {
     tipo: "PROFISSIONAL",
     cpf: "12345678901",
     status: "ATIVO",
+    roles: [],
     criadoEm: new Date("2026-06-04T12:00:00.000Z"),
     ...overrides,
   };

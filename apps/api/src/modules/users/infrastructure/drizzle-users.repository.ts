@@ -57,4 +57,17 @@ export class DrizzleUsersRepository implements UsersRepository {
     const [row] = await this.db.select().from(users).where(eq(users.whatsapp, whatsapp)).limit(1);
     return row ? rowToUser(row) : null;
   }
+
+  async findRoles(id: string): Promise<string[] | null> {
+    const [row] = await this.db
+      .select({ roles: users.roles })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    return row ? row.roles : null;
+  }
+
+  async setRoles(id: string, roles: string[]): Promise<void> {
+    await this.db.update(users).set({ roles }).where(eq(users.id, id));
+  }
 }

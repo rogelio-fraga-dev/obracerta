@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { cities } from "./cities.js";
 import { userTipoEnum, userStatusEnum } from "./enums.js";
@@ -24,6 +24,8 @@ export const users = pgTable(
     tipo: userTipoEnum("tipo").notNull(),
     cpf: varchar("cpf", { length: 11 }),
     status: userStatusEnum("status").notNull().default("ATIVO"),
+    // papéis administrativos (Fase 6); vazio = usuário comum. Catálogo no shared (UserRole).
+    roles: text("roles").array().notNull().default([]),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("users_nome_trgm_idx").using("gin", sql`${t.nomeCompleto} gin_trgm_ops`)],

@@ -9,6 +9,7 @@ import { OtpService } from "./application/otp.service.js";
 import { TokenService } from "./application/token.service.js";
 import { AuthController } from "./interface/auth.controller.js";
 import { JwtAuthGuard } from "./interface/jwt-auth.guard.js";
+import { RolesGuard } from "./interface/roles.guard.js";
 
 /**
  * Módulo de autenticação (roadmap §6). OTP → JWT (access) + refresh em Redis.
@@ -27,7 +28,9 @@ import { JwtAuthGuard } from "./interface/jwt-auth.guard.js";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, TokenService, JwtAuthGuard],
-  exports: [JwtModule, JwtAuthGuard, AuthService, OtpService],
+  providers: [AuthService, OtpService, TokenService, JwtAuthGuard, RolesGuard],
+  // Re-exporta UsersModule: módulos que usam o RolesGuard (via @UseGuards) precisam
+  // do UsersService em escopo, pois o Nest re-resolve o guard no módulo consumidor.
+  exports: [JwtModule, JwtAuthGuard, RolesGuard, AuthService, OtpService, UsersModule],
 })
 export class AuthModule {}
