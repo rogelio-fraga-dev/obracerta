@@ -70,4 +70,8 @@ export class DrizzleUsersRepository implements UsersRepository {
   async setRoles(id: string, roles: string[]): Promise<void> {
     await this.db.update(users).set({ roles }).where(eq(users.id, id));
   }
+
+  async setStatus(id: string, status: string): Promise<void> {
+    await this.db.update(users).set({ status }).where(eq(users.id, id));
+  }
 }

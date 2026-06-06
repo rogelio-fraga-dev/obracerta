@@ -16,6 +16,8 @@ export interface UsersRepository {
   findRoles(id: string): Promise<string[] | null>;
   /** Substitui o conjunto de papéis do usuário (idempotente). */
   setRoles(id: string, roles: string[]): Promise<void>;
+  /** Atualiza o status da conta (ATIVO/SUSPENSO/REMOVIDO) — denormalização da moderação. */
+  setStatus(id: string, status: string): Promise<void>;
 }
 
 /** Token de DI para a porta (a interface some no runtime; o Symbol não). */

@@ -52,4 +52,12 @@ describe("DrizzleUsersRepository — roles (integração)", () => {
   it("findRoles devolve null para usuário inexistente", async () => {
     expect(await repo.findRoles("00000000-0000-0000-0000-000000000000")).toBeNull();
   });
+
+  it("setStatus muda o status da conta (suspender/reativar)", async () => {
+    expect((await repo.findById(userId))?.status).toBe("ATIVO");
+    await repo.setStatus(userId, "SUSPENSO");
+    expect((await repo.findById(userId))?.status).toBe("SUSPENSO");
+    await repo.setStatus(userId, "ATIVO");
+    expect((await repo.findById(userId))?.status).toBe("ATIVO");
+  });
 });

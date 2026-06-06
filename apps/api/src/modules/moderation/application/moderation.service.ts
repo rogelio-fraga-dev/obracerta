@@ -8,6 +8,7 @@ import {
 import {
   ReportStatus,
   SuspensionStatus,
+  UserStatus,
   type AppealSuspensionInput,
   type CreateReportInput,
   type Report,
@@ -15,6 +16,7 @@ import {
 } from "@obracerta/shared";
 import { AuditService } from "../../audit/application/audit.service.js";
 import { ReputationService } from "../../reputation/application/reputation.service.js";
+import { UsersService } from "../../users/application/users.service.js";
 import {
   appealOutcome,
   canAppeal,
@@ -37,6 +39,7 @@ export class ModerationService {
     @Inject(REPORT_REPOSITORY) private readonly reports: ReportRepository,
     @Inject(SUSPENSION_REPOSITORY) private readonly suspensions: SuspensionRepository,
     private readonly reputation: ReputationService,
+    private readonly users: UsersService,
     private readonly scheduler: ModerationScheduler,
     private readonly audit: AuditService,
   ) {}
@@ -154,6 +157,8 @@ export class ModerationService {
       throw new ConflictException("Só uma suspensão apelada pode ser julgada.");
     }
     const updated = await this.suspensions.resolve(suspensionId, appealOutcome(grant), grant);
+    // apelação deferida → revoga a suspensão e reativa a conta (libera o login)
+    if (grant) await this.users.setStatus(suspension.userId, UserStatus.ATIVO);
 
     await this.audit.record({
       atorUserId: null,
@@ -209,6 +214,8 @@ export class ModerationService {
       motivo: `Suspensão automática após ${strikes} denúncias procedentes.`,
       fimEm: suspensionEnd(new Date()).toISOString(),
     });
+    // denormaliza no status da conta: bloqueia login (e tira de busca/perfil público)
+    await this.users.setStatus(offenderId, UserStatus.SUSPENSO);
     await this.audit.record({
       atorUserId: null,
       acao: "SUSPENSAO_APLICADA",

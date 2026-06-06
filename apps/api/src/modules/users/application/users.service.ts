@@ -45,4 +45,9 @@ export class UsersService {
     }
     await this.users.setRoles(id, roles);
   }
+
+  /** Atualiza o status da conta (usado pela moderação para suspender/reativar). */
+  setStatus(id: string, status: string): Promise<void> {
+    return this.users.setStatus(id, status);
+  }
 }

@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 import type { AuthResult, AuthTokens, OtpRequestResult, User } from "@obracerta/shared";
 import { UsersService } from "../../users/application/users.service.js";
+import { canAuthenticate } from "../domain/account-status.js";
 import { OtpService } from "./otp.service.js";
 import { TokenService } from "./token.service.js";
 
@@ -37,6 +38,7 @@ export class AuthService {
     if (!user) {
       return { registered: false };
     }
+    this.assertActive(user);
 
     const tokens = await this.tokens.issue(user);
     return { registered: true, user, tokens };
@@ -51,7 +53,15 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("Usuário não encontrado.");
     }
+    this.assertActive(user);
     return this.tokens.issue(user);
+  }
+
+  /** Bloqueia o login de conta não-ATIVA (suspensa/removida). */
+  private assertActive(user: User): void {
+    if (!canAuthenticate(user.status)) {
+      throw new ForbiddenException("Sua conta está suspensa.");
+    }
   }
 
   logout(refreshToken: string): Promise<void> {
