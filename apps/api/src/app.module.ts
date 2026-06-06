@@ -28,6 +28,8 @@ import { SearchModule } from "./modules/search/search.module.js";
 import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
 import { AdminModule } from "./modules/admin/admin.module.js";
+import { ObservabilityModule } from "./modules/observability/observability.module.js";
+import { MetricsInterceptor } from "./modules/observability/interface/metrics.interceptor.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -82,8 +84,11 @@ import { AdminModule } from "./modules/admin/admin.module.js";
     PublicProfileModule,
     WorkOrdersModule,
     AdminModule,
+    ObservabilityModule,
   ],
   providers: [
+    // Outermost: mede duração total + status final de cada requisição.
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
