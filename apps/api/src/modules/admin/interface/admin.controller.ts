@@ -1,10 +1,16 @@
 import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
-import { setUserRolesSchema, UserRole, type SetUserRolesInput } from "@obracerta/shared";
+import {
+  setUserRolesSchema,
+  UserRole,
+  type HealthSnapshot,
+  type SetUserRolesInput,
+} from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { Roles } from "../../auth/interface/roles.decorator.js";
 import { RolesGuard } from "../../auth/interface/roles.guard.js";
 import { UsersService } from "../../users/application/users.service.js";
+import { AdminService } from "../application/admin.service.js";
 
 /**
  * Painel administrativo (roadmap Fase 6). Todas as rotas exigem o papel ADMIN.
@@ -15,7 +21,16 @@ import { UsersService } from "../../users/application/users.service.js";
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly users: UsersService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly admin: AdminService,
+  ) {}
+
+  /** Snapshot de saúde do produto (ativação, conclusão, North Star, churn, moderação). */
+  @Get("metrics")
+  metrics(): Promise<HealthSnapshot> {
+    return this.admin.healthSnapshot();
+  }
 
   /** Papéis atuais de um usuário. */
   @Get("users/:id/roles")
