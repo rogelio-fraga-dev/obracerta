@@ -24,6 +24,7 @@ export interface AppConfig {
     publicUrl: string;
   };
   onboardingSpeedup: number;
+  paymentWebhookSecret: string;
 }
 
 /**
@@ -53,5 +54,6 @@ export function configuration(): AppConfig {
       publicUrl: env.S3_PUBLIC_URL,
     },
     onboardingSpeedup: env.ONBOARDING_SPEEDUP,
+    paymentWebhookSecret: env.PAYMENT_WEBHOOK_SECRET,
   };
 }

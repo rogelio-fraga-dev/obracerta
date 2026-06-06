@@ -36,6 +36,12 @@ export const envSchema = z.object({
 
   // Onboarding (roadmap §5). speedup>1 acelera as mensagens em dev (1 = dias reais).
   ONBOARDING_SPEEDUP: z.coerce.number().positive().default(1),
+
+  // Billing (roadmap §7.1). Segredo HMAC dos webhooks do gateway de pagamento.
+  PAYMENT_WEBHOOK_SECRET: z
+    .string()
+    .min(16, "PAYMENT_WEBHOOK_SECRET deve ter ao menos 16 caracteres")
+    .default("dev-webhook-secret-change-me"),
 });
 
 export type Env = z.infer<typeof envSchema>;

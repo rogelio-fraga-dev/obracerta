@@ -326,7 +326,8 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 6 — Admin, hardening e observabilidade (Sprint 14) — **backend** 🚧
 - [x] **6.0 — Papéis e autorização (roles + RolesGuard)** (migration 0009). _Coluna `roles` text[] em `users` (catálogo `UserRole` ADMIN/MODERADOR/FINANCEIRO no shared); domínio puro `hasAnyRole`/`isAdmin` (TDD); `@Roles(...)` + `RolesGuard` (consulta papéis frescos no banco — revogar vale na hora). **Gating aplicado**: resolver denúncia/apelação e fila de moderação → MODERADOR/ADMIN; resolver reembolso → FINANCEIRO/ADMIN. `AdminModule` (`GET/PUT /admin/users/:id/roles`, só ADMIN); 1º admin semeado no banco. Fecha as brechas deixadas nas Fases 3–4._
-- [ ] **6.1 — Hardening**: **assinatura HMAC dos webhooks**, hook de suspensão no login (`auth` + `ModerationService.isSuspended`), rate-limiting amplo, security headers + CSP, scan de deps.
+- [x] **6.1 — Hardening (parte 1): assinatura HMAC dos webhooks.** _Segredo `PAYMENT_WEBHOOK_SECRET` na config (env validado); domínio puro `webhookSignature`/`verifyWebhookSignature` (HMAC-SHA256, comparação em tempo constante; TDD); `POST /billing/webhook` valida o header `x-webhook-signature` e recusa (401) chamadas sem assinatura/forjadas. **Provado ao vivo**: sem assinatura → 401, válida → 200, forjada → 401._
+- [ ] **6.1 — Hardening (parte 2)**: hook de suspensão no login (`auth` + `ModerationService.isSuspended` — atenção ao ciclo auth↔moderation), rate-limiting amplo, security headers (helmet) + CSP, scan de deps.
 - [ ] **6.2 — `admin` (dashboard de saúde)**: API de métricas (ativação, churn, NPS) — Melhoria #4.
 - [ ] **6.3 — Observabilidade**: OpenTelemetry + métricas + logs estruturados; **carga k6**.
 - [ ] **6.4 — Pendências cruzadas**: provedores reais (WhatsApp/SMS/Asaas) atrás das portas, writer de `reputation_events`, lembretes (avaliação D1/D5/D7, plano D25/D28/D30) + renovação recorrente.

@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+  UnauthorizedException,
+  UseGuards,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import type { AppConfig } from "../../../config/configuration.js";
+import { verifyWebhookSignature } from "../domain/webhook-signature.js";
 import {
   createPurchaseSchema,
   createSubscriptionSchema,
@@ -52,7 +64,10 @@ const resolveRefundSchema = z.object({ aprovar: z.boolean() });
  */
 @Controller()
 export class BillingController {
-  constructor(private readonly billing: BillingService) {}
+  constructor(
+    private readonly billing: BillingService,
+    private readonly config: ConfigService<AppConfig, true>,
+  ) {}
 
   /** Profissional assina um plano recorrente. */
   @Post("subscriptions")
@@ -116,11 +131,24 @@ export class BillingController {
     return this.billing.resolveRefund(id, body.aprovar);
   }
 
-  /** Webhook de pagamento do gateway (idempotente; sem JWT). */
+  /**
+   * Webhook de pagamento do gateway (idempotente; sem JWT). Autenticado por
+   * **assinatura HMAC** no header `x-webhook-signature` (Fase 6) — uma chamada sem
+   * assinatura válida é recusada (401), impedindo forjar pagamentos.
+   */
   @Post("billing/webhook")
   async webhook(
+    @Headers("x-webhook-signature") signature: string | undefined,
     @Body(new ZodValidationPipe(webhookSchema)) body: WebhookBody,
   ): Promise<{ status: WebhookResult }> {
+    const secret = this.config.get("paymentWebhookSecret", { infer: true });
+    const valid = verifyWebhookSignature(
+      secret,
+      { eventId: body.eventId, tipo: body.tipo, chargeId: body.chargeId },
+      signature,
+    );
+    if (!valid) throw new UnauthorizedException("Assinatura do webhook inválida.");
+
     const status = await this.billing.handleWebhook({
       eventId: body.eventId,
       tipo: body.tipo,
