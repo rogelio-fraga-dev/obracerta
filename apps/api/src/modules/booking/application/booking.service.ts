@@ -24,6 +24,7 @@ import { UsersService } from "../../users/application/users.service.js";
 import { computeExpiry, exceedsPendingLimit, serviceBlockWindow } from "../domain/booking-state.js";
 import { BOOKING_REPOSITORY, type BookingRepository } from "../domain/ports/booking.repository.js";
 import { BookingScheduler } from "./booking.scheduler.js";
+import { ReviewReminderScheduler } from "./review-reminder.scheduler.js";
 
 @Injectable()
 export class BookingService {
@@ -34,6 +35,7 @@ export class BookingService {
     private readonly users: UsersService,
     private readonly availability: AvailabilityService,
     private readonly scheduler: BookingScheduler,
+    private readonly reviewReminders: ReviewReminderScheduler,
     private readonly penalties: PenaltyService,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
   ) {}
@@ -160,6 +162,7 @@ export class BookingService {
     );
     if (!updated) throw new ConflictException("O pedido não está mais iniciado.");
     await this.notifyUser(updated.contractorId, "Sua obra foi marcada como concluída.");
+    await this.scheduleReviewReminders(updated.id, updated.contractorId, updated.professionalId);
     return updated;
   }
 
@@ -230,6 +233,21 @@ export class BookingService {
       throw new ForbiddenException("Este pedido não é seu.");
     }
     return booking;
+  }
+
+  /** Agenda os lembretes de avaliação (D1/D5/D7) para os dois lados da obra. */
+  private async scheduleReviewReminders(
+    bookingId: string,
+    contractorId: string,
+    professionalId: string,
+  ): Promise<void> {
+    const [contractor, professional] = await Promise.all([
+      this.users.findById(contractorId),
+      this.users.findById(professionalId),
+    ]);
+    if (contractor) await this.reviewReminders.schedule(bookingId, contractor.id, contractor.whatsapp);
+    if (professional)
+      await this.reviewReminders.schedule(bookingId, professional.id, professional.whatsapp);
   }
 
   /** Notifica um usuário pelo id (busca o WhatsApp). Best-effort: loga e segue. */

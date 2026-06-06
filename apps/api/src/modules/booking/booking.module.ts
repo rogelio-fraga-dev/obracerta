@@ -5,6 +5,10 @@ import { AvailabilityModule } from "../availability/availability.module.js";
 import { DeclinePenaltyModule } from "../decline-penalty/decline-penalty.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { BookingScheduler, BOOKING_EXPIRY_QUEUE } from "./application/booking.scheduler.js";
+import {
+  ReviewReminderScheduler,
+  REVIEW_REMINDER_QUEUE,
+} from "./application/review-reminder.scheduler.js";
 import { BookingService } from "./application/booking.service.js";
 import { BOOKING_REPOSITORY } from "./domain/ports/booking.repository.js";
 import { BookingExpiryProcessor } from "./infrastructure/booking-expiry.processor.js";
@@ -23,11 +27,13 @@ import { BookingController } from "./interface/booking.controller.js";
     AvailabilityModule,
     DeclinePenaltyModule,
     BullModule.registerQueue({ name: BOOKING_EXPIRY_QUEUE }),
+    BullModule.registerQueue({ name: REVIEW_REMINDER_QUEUE }),
   ],
   controllers: [BookingController],
   providers: [
     BookingService,
     BookingScheduler,
+    ReviewReminderScheduler,
     BookingExpiryProcessor,
     { provide: BOOKING_REPOSITORY, useClass: DrizzleBookingRepository },
   ],

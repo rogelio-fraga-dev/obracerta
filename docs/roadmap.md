@@ -333,7 +333,9 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - [~] **6.4 — Pendências cruzadas** (em andamento):
   - [x] **Auto-lift de suspensão**: job BullMQ agendado no `fim_em`; expira a suspensão (ATIVA→EXPIRADA, guardada) e **reativa a conta** (`users.status=ATIVO`) se não houver outra ATIVA. Fecha o trade-off da 6.1 parte 2. Domínio `canAutoLift` (TDD); processor/fila `suspension-lift`; idempotente.
   - [x] **Writer de `reputation_events`**: ReputationEventRepository (porta+adapter, append-only). O ReputationService grava na trilha por-usuário: `AVALIACAO_REVELADA` (por alvo, na revelação simultânea ou por janela) e `BADGE_CONCEDIDO/REVOGADO` (no recompute). `GET /reputation/:userId/eventos` lê a trilha. Popula a tabela que existia desde a 3.0 sem writer.
-  - [ ] Lembretes (avaliação D1/D5/D7, plano D25/D28/D30) + **renovação recorrente** de assinatura.
+  - [~] Lembretes + renovação:
+    - [x] **Lembretes de avaliação (D1/D5/D7)**: ao concluir a obra, agenda lembretes para os dois lados; o consumidor notifica **só quem ainda não avaliou** (NotificationProvider). Padrão **produtor (booking) / consumidor (reputation)** via fila compartilhada — evita o ciclo booking↔reputation. Domínio `reminderDelayMs` (TDD, reusa `ONBOARDING_SPEEDUP` p/ testar rápido).
+    - [ ] Lembretes de plano (D25/D28/D30) + **renovação recorrente** de assinatura (job que gera a próxima fatura na `proxima_cobranca`).
   - [ ] Provedores reais (WhatsApp/SMS/Asaas) atrás das portas — **bloqueado**: precisa de contas sandbox (decisão: sem deploy/contas reais ainda).
 - **Entregável:** backend completo, seguro e observável — **fim do backend**.
 
