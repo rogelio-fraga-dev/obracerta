@@ -344,6 +344,9 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 > **Design vem dos mockups** (`docs/mockups/*.html`), já destilados em `packages/design-tokens`
 > + `packages/ui` — ver **§14**. ⚠️ Os mockups são fonte **só do design** (linguagem visual);
 > as **telas, fluxos e escopo** vêm do **PRD + da API**. Onde divergirem, PRD/API ganha.
+- [~] **7.0 — Fundação do frontend** (em andamento):
+  - [x] **Padrão BFF + sessão** (parte 1): tokens vivem **só em cookies httpOnly** setados por route handlers do Next (`/api/auth/{request-otp,verify,cadastro,logout}`) — o browser nunca vê token. `lib/session` (cookies `oc_at`/`oc_rt`, `getSession`/`requireSession`); `lib/server-api` (`callApi` público + `serverApi` autenticado com **refresh rotacionado no 401** e retry, persistência best-effort fora do render); `unwrapEnvelope`/`ApiEnvelopeError` no `shared` (TDD, reusado front+back). Fecha a pendência de persistência de sessão adiada da Fase 6. **Provado ao vivo**: request-otp→OTP→verify(novo→registered:false)→cadastro (Set-Cookie httpOnly, user sem tokens)→logout (cookies limpos); validação Zod recusa formato inválido.
+  - [ ] **Login + app shell** (parte 2): página `/entrar` (OTP) consumindo o BFF; shell da área logada com abas (Início · Pedidos · Obras · Perfil, do `prototipo2`), guarda por sessão, logout; primitivos do DS (Input/Field/Card/Badge).
 - [ ] **Agenda & agendamento** (Fase 2): grade/calendário, criar/gerir pedido, aceite de termos, painel de penalidades/taxa de aceitação.
 - [ ] **Reputação & moderação** (Fase 3): avaliação dupla-cega, badges, direito de resposta, denúncia, painel de suspensão/apelação.
 - [ ] **Monetização** (Fase 4): escolha/contratação de plano, faturas, reembolso; gating visual por `entitlements`.
