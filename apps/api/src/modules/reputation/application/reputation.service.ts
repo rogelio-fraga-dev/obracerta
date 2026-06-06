@@ -10,6 +10,7 @@ import {
 import type {
   CreateReviewInput,
   CreateReviewResponseInput,
+  ReputationEvent,
   ReputationSummary,
   Review,
   ReviewResponse,
@@ -31,6 +32,10 @@ import {
   REVIEW_RESPONSE_REPOSITORY,
   type ReviewResponseRepository,
 } from "../domain/ports/review-response.repository.js";
+import {
+  REPUTATION_EVENT_REPOSITORY,
+  type ReputationEventRepository,
+} from "../domain/ports/reputation-event.repository.js";
 import { ReputationScheduler } from "./reputation.scheduler.js";
 
 @Injectable()
@@ -39,6 +44,7 @@ export class ReputationService {
     @Inject(REVIEW_REPOSITORY) private readonly repo: ReviewRepository,
     @Inject(BADGE_REPOSITORY) private readonly badges: BadgeRepository,
     @Inject(REVIEW_RESPONSE_REPOSITORY) private readonly responses: ReviewResponseRepository,
+    @Inject(REPUTATION_EVENT_REPOSITORY) private readonly events: ReputationEventRepository,
     private readonly bookings: BookingService,
     private readonly scheduler: ReputationScheduler,
     private readonly audit: AuditService,
@@ -79,7 +85,7 @@ export class ReputationService {
     const total = await this.repo.countForBooking(input.bookingId);
     if (shouldReveal(total)) {
       const alvos = await this.repo.revealPending(input.bookingId);
-      await this.recomputeBadges(alvos);
+      await this.onRevealed(input.bookingId, alvos);
     }
 
     // garante a revelação por janela mesmo que o outro lado nunca avalie (idempotente)
@@ -99,8 +105,29 @@ export class ReputationService {
   /** Revela as avaliações PENDENTE de um pedido (chamado pelo job de janela). */
   async revealForBooking(bookingId: string): Promise<number> {
     const alvos = await this.repo.revealPending(bookingId);
-    await this.recomputeBadges(alvos);
+    await this.onRevealed(bookingId, alvos);
     return alvos.length;
+  }
+
+  /** Trilha de reputação do usuário (eventos append-only: avaliações, badges). */
+  listEvents(userId: string): Promise<ReputationEvent[]> {
+    return this.events.listForUser(userId);
+  }
+
+  /**
+   * Pós-revelação: registra o evento AVALIACAO_REVELADA por alvo na trilha
+   * (`reputation_events`) e recalcula os badges.
+   */
+  private async onRevealed(bookingId: string, alvoIds: string[]): Promise<void> {
+    for (const alvoId of new Set(alvoIds)) {
+      await this.events.append({
+        userId: alvoId,
+        tipo: "AVALIACAO_REVELADA",
+        referenciaId: bookingId,
+        dados: null,
+      });
+    }
+    await this.recomputeBadges(alvoIds);
   }
 
   /** Reputação pública de um usuário: nº de avaliações reveladas + média + badges. */
@@ -202,6 +229,12 @@ export class ReputationService {
       const { toGrant, toRevoke } = reconcileBadges(active, earned);
       for (const codigo of toGrant) {
         await this.badges.grant(alvoId, codigo);
+        await this.events.append({
+          userId: alvoId,
+          tipo: "BADGE_CONCEDIDO",
+          referenciaId: codigo,
+          dados: null,
+        });
         await this.audit.record({
           atorUserId: null,
           acao: "BADGE_CONCEDIDO",
@@ -212,6 +245,12 @@ export class ReputationService {
       }
       for (const codigo of toRevoke) {
         await this.badges.revoke(alvoId, codigo);
+        await this.events.append({
+          userId: alvoId,
+          tipo: "BADGE_REVOGADO",
+          referenciaId: codigo,
+          dados: null,
+        });
         await this.audit.record({
           atorUserId: null,
           acao: "BADGE_REVOGADO",

@@ -5,6 +5,7 @@ import {
   type CreateReviewInput,
   type CreateReviewResponseInput,
   type JwtClaims,
+  type ReputationEvent,
   type ReputationSummary,
   type Review,
   type ReviewResponse,
@@ -47,5 +48,11 @@ export class ReputationController {
   @Get("reputation/:userId")
   reputationOf(@Param("userId") userId: string): Promise<ReputationSummary> {
     return this.reputation.getReputation(userId);
+  }
+
+  /** Trilha de reputação de um usuário (eventos: avaliações reveladas, badges). */
+  @Get("reputation/:userId/eventos")
+  events(@Param("userId") userId: string): Promise<ReputationEvent[]> {
+    return this.reputation.listEvents(userId);
   }
 }
