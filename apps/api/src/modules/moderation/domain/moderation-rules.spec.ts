@@ -9,7 +9,23 @@ import {
   canAppeal,
   isSuspensionActive,
   appealOutcome,
+  canAutoLift,
 } from "./moderation-rules.js";
+
+describe("canAutoLift", () => {
+  const now = new Date("2026-06-10T00:00:00.000Z");
+
+  it("expira a suspensão ATIVA cujo prazo já passou", () => {
+    expect(canAutoLift("ATIVA", new Date("2026-06-09T00:00:00.000Z"), now)).toBe(true);
+  });
+
+  it("não expira antes do prazo, sem prazo (indeterminada) ou se não está ATIVA", () => {
+    expect(canAutoLift("ATIVA", new Date("2026-06-11T00:00:00.000Z"), now)).toBe(false);
+    expect(canAutoLift("ATIVA", null, now)).toBe(false);
+    expect(canAutoLift("APELADA", new Date("2026-06-09T00:00:00.000Z"), now)).toBe(false);
+    expect(canAutoLift("REVOGADA", new Date("2026-06-09T00:00:00.000Z"), now)).toBe(false);
+  });
+});
 
 describe("precautionaryHideUntil", () => {
   it("oculta por 48h a partir de agora", () => {

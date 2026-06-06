@@ -6,6 +6,7 @@ import { ReputationModule } from "../reputation/reputation.module.js";
 import {
   ModerationScheduler,
   MODERATION_RESTORE_QUEUE,
+  SUSPENSION_LIFT_QUEUE,
 } from "./application/moderation.scheduler.js";
 import { ModerationService } from "./application/moderation.service.js";
 import { REPORT_REPOSITORY } from "./domain/ports/report.repository.js";
@@ -13,6 +14,7 @@ import { SUSPENSION_REPOSITORY } from "./domain/ports/suspension.repository.js";
 import { DrizzleReportRepository } from "./infrastructure/drizzle-report.repository.js";
 import { DrizzleSuspensionRepository } from "./infrastructure/drizzle-suspension.repository.js";
 import { ModerationRestoreProcessor } from "./infrastructure/moderation-restore.processor.js";
+import { SuspensionLiftProcessor } from "./infrastructure/suspension-lift.processor.js";
 import { ModerationController } from "./interface/moderation.controller.js";
 
 /**
@@ -26,12 +28,14 @@ import { ModerationController } from "./interface/moderation.controller.js";
     AuditModule,
     ReputationModule,
     BullModule.registerQueue({ name: MODERATION_RESTORE_QUEUE }),
+    BullModule.registerQueue({ name: SUSPENSION_LIFT_QUEUE }),
   ],
   controllers: [ModerationController],
   providers: [
     ModerationService,
     ModerationScheduler,
     ModerationRestoreProcessor,
+    SuspensionLiftProcessor,
     { provide: REPORT_REPOSITORY, useClass: DrizzleReportRepository },
     { provide: SUSPENSION_REPOSITORY, useClass: DrizzleSuspensionRepository },
   ],

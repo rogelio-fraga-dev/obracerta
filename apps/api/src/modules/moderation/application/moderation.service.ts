@@ -20,6 +20,7 @@ import { UsersService } from "../../users/application/users.service.js";
 import {
   appealOutcome,
   canAppeal,
+  canAutoLift,
   canResolveReport,
   isSuspensionActive,
   precautionaryHideUntil,
@@ -181,6 +182,31 @@ export class ModerationService {
     );
   }
 
+  /**
+   * Auto-lift (job no `fim_em`): expira a suspensão se ATIVA e vencida, e reativa a
+   * conta se não houver outra suspensão ATIVA. Idempotente (só age se ainda cabível).
+   */
+  async liftSuspensionIfDue(suspensionId: string): Promise<boolean> {
+    const suspension = await this.suspensions.findById(suspensionId);
+    if (!suspension) return false;
+    if (!canAutoLift(suspension.status, suspension.fimEm ? new Date(suspension.fimEm) : null, new Date())) {
+      return false;
+    }
+    await this.suspensions.resolve(suspensionId, SuspensionStatus.EXPIRADA, true);
+    // reativa a conta só se não restar outra suspensão ATIVA
+    if (!(await this.suspensions.activeForUser(suspension.userId))) {
+      await this.users.setStatus(suspension.userId, UserStatus.ATIVO);
+    }
+    await this.audit.record({
+      atorUserId: null,
+      acao: "SUSPENSAO_EXPIRADA",
+      entidade: "suspension",
+      entidadeId: suspensionId,
+      dados: { userId: suspension.userId },
+    });
+    return true;
+  }
+
   listOpenReports(): Promise<Report[]> {
     return this.reports.listOpen();
   }
@@ -208,14 +234,17 @@ export class ModerationService {
     const strikes = await this.reports.countProcedenteForOffender(offenderId);
     if (!shouldAutoSuspend(strikes)) return null;
 
+    const fimEm = suspensionEnd(new Date()).toISOString();
     const suspension = await this.suspensions.create({
       userId: offenderId,
       reportId,
       motivo: `Suspensão automática após ${strikes} denúncias procedentes.`,
-      fimEm: suspensionEnd(new Date()).toISOString(),
+      fimEm,
     });
     // denormaliza no status da conta: bloqueia login (e tira de busca/perfil público)
     await this.users.setStatus(offenderId, UserStatus.SUSPENSO);
+    // agenda o auto-lift: no fim do prazo, expira a suspensão e reativa a conta
+    await this.scheduler.scheduleSuspensionLift(suspension.id, fimEm);
     await this.audit.record({
       atorUserId: null,
       acao: "SUSPENSAO_APLICADA",

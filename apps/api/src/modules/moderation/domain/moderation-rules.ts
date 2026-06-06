@@ -61,3 +61,15 @@ export function isSuspensionActive(
 export function appealOutcome(grant: boolean): SuspensionStatus {
   return grant ? SuspensionStatus.REVOGADA : SuspensionStatus.ATIVA;
 }
+
+/**
+ * A suspensão deve expirar automaticamente? Só ATIVA com prazo (`fimEm`) já vencido.
+ * Indeterminada (`fimEm` nulo) nunca expira sozinha; só sai por revogação na apelação.
+ */
+export function canAutoLift(
+  status: SuspensionStatus,
+  fimEm: Date | null,
+  now: Date,
+): boolean {
+  return status === SuspensionStatus.ATIVA && fimEm !== null && now.getTime() >= fimEm.getTime();
+}
