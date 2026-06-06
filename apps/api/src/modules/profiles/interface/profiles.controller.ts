@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   NotFoundException,
-  Param,
   Patch,
   Post,
   UploadedFile,
@@ -79,11 +78,6 @@ export class ProfilesController {
     return this.profiles.getChecklist(user.sub);
   }
 
-  /** Perfil público por slug (anti-desintermediação completa na Fase 5). */
-  @Get("p/:slug")
-  async publicBySlug(@Param("slug") slug: string): Promise<ProfessionalProfile> {
-    const profile = await this.profiles.getProfessionalBySlug(slug);
-    if (!profile) throw new NotFoundException("Perfil não encontrado.");
-    return profile;
-  }
+  // Perfil público movido p/ PublicProfileModule (GET /public/p/:slug) na Etapa 5.2,
+  // com view limitada (anti-desintermediação §24) — o antigo /profiles/p/:slug vazava `valores`.
 }

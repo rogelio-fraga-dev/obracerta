@@ -25,6 +25,7 @@ import { ReputationModule } from "./modules/reputation/reputation.module.js";
 import { ModerationModule } from "./modules/moderation/moderation.module.js";
 import { BillingModule } from "./modules/billing/billing.module.js";
 import { SearchModule } from "./modules/search/search.module.js";
+import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 
 /**
  * Root module of the modular monolith. Feature/domain modules are registered
@@ -76,6 +77,7 @@ import { SearchModule } from "./modules/search/search.module.js";
     ModerationModule,
     BillingModule,
     SearchModule,
+    PublicProfileModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
