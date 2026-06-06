@@ -2,6 +2,7 @@ import {
   SUBSCRIPTION_GRACE_DAYS,
   BILLING_PERIOD_DAYS,
   PURCHASE_VALIDITY_DAYS,
+  PLAN_REMINDER_DAYS_BEFORE,
   professionalPriceCentavos,
   contractorPriceCentavos,
   graceUntil,
@@ -9,7 +10,26 @@ import {
   purchaseExpiry,
   canTransitionInvoice,
   isPaymentConfirmed,
+  canRenew,
+  planReminderDate,
 } from "./billing-rules.js";
+
+describe("canRenew", () => {
+  it("renova assinatura em graça ou ativa; não as encerradas", () => {
+    expect(canRenew("EM_GRACA")).toBe(true);
+    expect(canRenew("ATIVA")).toBe(true);
+    expect(canRenew("INADIMPLENTE")).toBe(false);
+    expect(canRenew("CANCELADA")).toBe(false);
+  });
+});
+
+describe("planReminderDate", () => {
+  it("lembra alguns dias antes da próxima cobrança", () => {
+    expect(PLAN_REMINDER_DAYS_BEFORE).toBe(3);
+    const proxima = new Date("2026-07-08T00:00:00.000Z");
+    expect(planReminderDate(proxima).toISOString()).toBe("2026-07-05T00:00:00.000Z");
+  });
+});
 
 describe("preços por plano (centavos)", () => {
   it("profissional: PRO 4900, ESPECIALISTA 9900, INICIANTE 0", () => {

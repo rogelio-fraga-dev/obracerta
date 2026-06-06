@@ -21,6 +21,8 @@ export interface SubscriptionRepository {
   activate(id: string): Promise<Subscription | null>;
   /** Cancela a assinatura (estorno / pedido do usuário): status CANCELADA + data. */
   cancel(id: string): Promise<Subscription | null>;
+  /** Avança a data da próxima cobrança (renovação recorrente). */
+  setProximaCobranca(id: string, proximaCobranca: string): Promise<void>;
 }
 
 export const SUBSCRIPTION_REPOSITORY = Symbol("SUBSCRIPTION_REPOSITORY");

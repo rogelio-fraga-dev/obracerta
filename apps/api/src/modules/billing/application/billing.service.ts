@@ -26,11 +26,17 @@ import { EntitlementsService } from "../../entitlements/application/entitlements
 import type { Feature, Plan } from "../../entitlements/domain/entitlements.js";
 import { UsersService } from "../../users/application/users.service.js";
 import {
+  NOTIFICATION_PROVIDER,
+  type NotificationProvider,
+} from "../../notifications/domain/notification.provider.js";
+import {
+  canRenew,
   canTransitionInvoice,
   contractorPriceCentavos,
   graceUntil,
   isPaymentConfirmed,
   nextCharge,
+  planReminderDate,
   professionalPriceCentavos,
   purchaseExpiry,
 } from "../domain/billing-rules.js";
@@ -90,6 +96,7 @@ export class BillingService {
     private readonly entitlements: EntitlementsService,
     private readonly users: UsersService,
     private readonly audit: AuditService,
+    @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
   ) {}
 
   /**
@@ -145,6 +152,14 @@ export class BillingService {
     });
     await this.scheduler.scheduleInvoiceDue(invoice.id, venceEm);
 
+    // a 1ª fatura é o 1º ciclo; a renovação recorrente começa no ciclo seguinte
+    const renovaEm = nextCharge(graceUntil(now)).toISOString();
+    await this.scheduler.scheduleSubscriptionRenewal(subscription.id, renovaEm);
+    await this.scheduler.schedulePlanReminder(
+      subscription.id,
+      planReminderDate(new Date(renovaEm)).toISOString(),
+    );
+
     await this.audit.record({
       atorUserId: userId,
       acao: "ASSINATURA_CRIADA",
@@ -153,6 +168,65 @@ export class BillingService {
       dados: { plano: input.plano, valorCentavos },
     });
     return subscription;
+  }
+
+  /**
+   * Renovação recorrente (job na próxima cobrança): se a assinatura ainda vale,
+   * emite a próxima fatura, avança a próxima cobrança (+30d) e reagenda o ciclo.
+   * O pagamento é confirmado pelo webhook (4.1); não pago → fatura VENCIDA (job).
+   */
+  async renewSubscriptionIfDue(subscriptionId: string): Promise<boolean> {
+    const sub = await this.subscriptions.findById(subscriptionId);
+    if (!sub || !canRenew(sub.status)) return false;
+
+    const now = new Date();
+    const venceEm = graceUntil(now).toISOString();
+    const charge = await this.gateway.createCharge({
+      userId: sub.userId,
+      valorCentavos: sub.valorCentavos,
+      vencimento: venceEm,
+      descricao: `Renovação ${sub.plano}`,
+    });
+    const invoice = await this.invoices.create({
+      userId: sub.userId,
+      subscriptionId: sub.id,
+      purchaseId: null,
+      gateway: this.gateway.name,
+      gatewayId: charge.gatewayId,
+      valorCentavos: sub.valorCentavos,
+      vencimentoEm: venceEm,
+    });
+    await this.scheduler.scheduleInvoiceDue(invoice.id, venceEm);
+
+    const renovaEm = nextCharge(now).toISOString();
+    await this.subscriptions.setProximaCobranca(sub.id, renovaEm);
+    await this.scheduler.scheduleSubscriptionRenewal(sub.id, renovaEm);
+    await this.scheduler.schedulePlanReminder(
+      sub.id,
+      planReminderDate(new Date(renovaEm)).toISOString(),
+    );
+
+    await this.audit.record({
+      atorUserId: null,
+      acao: "ASSINATURA_RENOVADA",
+      entidade: "subscription",
+      entidadeId: sub.id,
+      dados: { invoiceId: invoice.id, valorCentavos: sub.valorCentavos },
+    });
+    return true;
+  }
+
+  /** Lembrete de plano (job antes da cobrança): notifica se a assinatura ainda vale. */
+  async remindPlanIfActive(subscriptionId: string): Promise<boolean> {
+    const sub = await this.subscriptions.findById(subscriptionId);
+    if (!sub || !canRenew(sub.status)) return false;
+    const user = await this.users.findById(sub.userId);
+    if (!user) return false;
+    await this.notifications.sendMessage(
+      user.whatsapp,
+      `Sua assinatura ${sub.plano} renova em breve. Garanta que seu pagamento está em dia.`,
+    );
+    return true;
   }
 
   /**

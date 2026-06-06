@@ -6,14 +6,19 @@ import {
   BILLING_QUEUE,
   INVOICE_DUE_JOB,
   PURCHASE_EXPIRY_JOB,
+  SUBSCRIPTION_RENEW_JOB,
+  PLAN_REMINDER_JOB,
   type InvoiceDueJobData,
   type PurchaseExpiryJobData,
+  type SubscriptionRenewJobData,
+  type PlanReminderJobData,
 } from "../application/billing.scheduler.js";
 
 /**
- * Worker dos jobs de cobrança (fila única, dois tipos). Vencer fatura PENDENTE →
- * VENCIDA; expirar compra ATIVO → EXPIRADO. As transições são guardadas no service,
- * então rodar após pagamento/cancelamento é inofensivo (idempotente).
+ * Worker dos jobs de cobrança (fila única, vários tipos). Vencer fatura, expirar
+ * compra, **renovar assinatura** (gera a próxima fatura) e **lembrar do plano**. As
+ * transições são guardadas no service, então rodar após pagamento/cancelamento é
+ * inofensivo (idempotente).
  */
 @Processor(BILLING_QUEUE)
 export class BillingJobsProcessor extends WorkerHost {
@@ -36,6 +41,18 @@ export class BillingJobsProcessor extends WorkerHost {
       if (await this.billing.expirePurchaseIfActive(purchaseId)) {
         this.logger.log(`Compra avulsa ${purchaseId} expirada (fim da vigência).`);
       }
+      return;
+    }
+    if (job.name === SUBSCRIPTION_RENEW_JOB) {
+      const { subscriptionId } = job.data as SubscriptionRenewJobData;
+      if (await this.billing.renewSubscriptionIfDue(subscriptionId)) {
+        this.logger.log(`Assinatura ${subscriptionId} renovada (nova fatura emitida).`);
+      }
+      return;
+    }
+    if (job.name === PLAN_REMINDER_JOB) {
+      const { subscriptionId } = job.data as PlanReminderJobData;
+      await this.billing.remindPlanIfActive(subscriptionId);
       return;
     }
   }

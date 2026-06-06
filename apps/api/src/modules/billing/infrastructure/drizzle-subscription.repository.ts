@@ -85,4 +85,11 @@ export class DrizzleSubscriptionRepository implements SubscriptionRepository {
       .returning();
     return row ? rowToSubscription(row) : null;
   }
+
+  async setProximaCobranca(id: string, proximaCobranca: string): Promise<void> {
+    await this.db
+      .update(subscriptions)
+      .set({ proximaCobranca: new Date(proximaCobranca), atualizadoEm: new Date() })
+      .where(eq(subscriptions.id, id));
+  }
 }

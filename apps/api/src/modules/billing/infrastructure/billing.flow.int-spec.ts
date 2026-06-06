@@ -49,7 +49,10 @@ describe("BillingService (integração)", () => {
   const schedulerStub = {
     scheduleInvoiceDue: () => Promise.resolve(),
     schedulePurchaseExpiry: () => Promise.resolve(),
+    scheduleSubscriptionRenewal: () => Promise.resolve(),
+    schedulePlanReminder: () => Promise.resolve(),
   } as unknown as BillingScheduler;
+  const notifyStub = { sendMessage: () => Promise.resolve(), sendOtp: () => Promise.resolve() };
   const billing = new BillingService(
     subRepo,
     purchaseRepo,
@@ -61,6 +64,7 @@ describe("BillingService (integração)", () => {
     entitlements,
     usersStub,
     auditStub,
+    notifyStub,
   );
 
   const sufixo = Date.now().toString().slice(-9);
@@ -149,6 +153,21 @@ describe("BillingService (integração)", () => {
     const ent = await billing.getEntitlements(profId);
     expect(ent.plano).toBe("PRO");
     expect(ent.features).toEqual(expect.arrayContaining(["profile.public", "search.geo"]));
+  });
+
+  it("renovação recorrente: emite nova fatura e avança a próxima cobrança", async () => {
+    const sub = await subRepo.findActiveByUser(profId);
+    const faturasAntes = (await invoiceRepo.listForUser(profId)).length;
+
+    expect(await billing.renewSubscriptionIfDue(sub!.id)).toBe(true);
+
+    expect((await invoiceRepo.listForUser(profId)).length).toBe(faturasAntes + 1);
+    const depois = await subRepo.findById(sub!.id);
+    expect(depois?.proximaCobranca).not.toBe(sub?.proximaCobranca); // avançou (+30d)
+    expect(Date.parse(depois!.proximaCobranca!)).toBeGreaterThan(Date.now());
+
+    // lembrete de plano só age se a assinatura ainda vale
+    expect(await billing.remindPlanIfActive(sub!.id)).toBe(true);
   });
 
   it("reembolso CDC: solicita (ARREPENDIMENTO integral) e aprova → fatura ESTORNADA + compra EXPIRADO", async () => {

@@ -1,4 +1,9 @@
-import { ContractorPlan, InvoiceStatus, ProfessionalPlan } from "@obracerta/shared";
+import {
+  ContractorPlan,
+  InvoiceStatus,
+  ProfessionalPlan,
+  SubscriptionStatus,
+} from "@obracerta/shared";
 
 /**
  * Domínio puro do billing (roadmap §7.1/§19). Sem framework/ORM: preços por plano
@@ -79,4 +84,17 @@ const PAID_EVENT_TYPES: ReadonlySet<string> = new Set(["PAYMENT_CONFIRMED", "PAY
 /** O evento de webhook confirma um pagamento? */
 export function isPaymentConfirmed(tipo: string): boolean {
   return PAID_EVENT_TYPES.has(tipo);
+}
+
+/** Dias antes da próxima cobrança em que o lembrete de plano é enviado. */
+export const PLAN_REMINDER_DAYS_BEFORE = 3;
+
+/** A assinatura ainda renova? (em graça ou ativa; encerradas/inadimplentes não). */
+export function canRenew(status: SubscriptionStatus): boolean {
+  return status === SubscriptionStatus.EM_GRACA || status === SubscriptionStatus.ATIVA;
+}
+
+/** Quando lembrar o usuário da cobrança: alguns dias antes da próxima cobrança. */
+export function planReminderDate(proximaCobranca: Date): Date {
+  return new Date(proximaCobranca.getTime() - PLAN_REMINDER_DAYS_BEFORE * 24 * 60 * 60 * 1000);
 }

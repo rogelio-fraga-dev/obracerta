@@ -335,9 +335,9 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
   - [x] **Writer de `reputation_events`**: ReputationEventRepository (porta+adapter, append-only). O ReputationService grava na trilha por-usuário: `AVALIACAO_REVELADA` (por alvo, na revelação simultânea ou por janela) e `BADGE_CONCEDIDO/REVOGADO` (no recompute). `GET /reputation/:userId/eventos` lê a trilha. Popula a tabela que existia desde a 3.0 sem writer.
   - [~] Lembretes + renovação:
     - [x] **Lembretes de avaliação (D1/D5/D7)**: ao concluir a obra, agenda lembretes para os dois lados; o consumidor notifica **só quem ainda não avaliou** (NotificationProvider). Padrão **produtor (booking) / consumidor (reputation)** via fila compartilhada — evita o ciclo booking↔reputation. Domínio `reminderDelayMs` (TDD, reusa `ONBOARDING_SPEEDUP` p/ testar rápido).
-    - [ ] Lembretes de plano (D25/D28/D30) + **renovação recorrente** de assinatura (job que gera a próxima fatura na `proxima_cobranca`).
+    - [x] **Renovação recorrente + lembrete de plano**: na assinatura, agenda a renovação no início do ciclo seguinte; o job (na `proxima_cobranca`) emite a próxima fatura (`canRenew`), avança a `proxima_cobranca` (+30d) e **reagenda** o ciclo; lembrete (3 dias antes) notifica via `NotificationProvider`. O webhook (4.1) paga a fatura; não pago → VENCIDA (job). Domínio `canRenew`/`planReminderDate` (TDD).
   - [ ] Provedores reais (WhatsApp/SMS/Asaas) atrás das portas — **bloqueado**: precisa de contas sandbox (decisão: sem deploy/contas reais ainda).
-- **Entregável:** backend completo, seguro e observável — **fim do backend**.
+- **Entregável:** backend completo, seguro e observável — **fim do backend (não-bloqueado)**. ✅ _Só resta a troca dos adapters fake/console por provedores reais (depende de contas) — feita quando houver deploy._
 
 ### Fase 7 — Frontend completo (área logada / PWA) (Sprint 15–17) — **front consolidado**
 > Construído **de uma vez**, sobre a API já provada das Fases 2–6 (contratos do `packages/shared`).

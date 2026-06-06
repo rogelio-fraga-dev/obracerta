@@ -12,9 +12,19 @@ export interface InvoiceDueJobData {
 export interface PurchaseExpiryJobData {
   purchaseId: string;
 }
+/** Job: renovar a assinatura (gerar a próxima fatura) na próxima cobrança. */
+export interface SubscriptionRenewJobData {
+  subscriptionId: string;
+}
+/** Job: lembrar o usuário da cobrança que vem aí. */
+export interface PlanReminderJobData {
+  subscriptionId: string;
+}
 
 export const INVOICE_DUE_JOB = "invoice-due";
 export const PURCHASE_EXPIRY_JOB = "purchase-expire";
+export const SUBSCRIPTION_RENEW_JOB = "subscription-renew";
+export const PLAN_REMINDER_JOB = "plan-reminder";
 
 /**
  * Agenda os jobs de cobrança (BullMQ/Redis) numa fila única com dois tipos. `jobId`
@@ -45,6 +55,33 @@ export class BillingScheduler {
       {
         delay: Math.max(0, Date.parse(expiraEm) - Date.now()),
         jobId: `purchase:expire:${purchaseId}`,
+        removeOnComplete: true,
+        removeOnFail: 100,
+      },
+    );
+  }
+
+  async scheduleSubscriptionRenewal(subscriptionId: string, proximaCobranca: string): Promise<void> {
+    await this.queue.add(
+      SUBSCRIPTION_RENEW_JOB,
+      { subscriptionId } satisfies SubscriptionRenewJobData,
+      {
+        delay: Math.max(0, Date.parse(proximaCobranca) - Date.now()),
+        // sem `:date` no jobId: cada ciclo reagenda; manter id estável evita acúmulo
+        jobId: `subscription:renew:${subscriptionId}`,
+        removeOnComplete: true,
+        removeOnFail: 100,
+      },
+    );
+  }
+
+  async schedulePlanReminder(subscriptionId: string, lembrarEm: string): Promise<void> {
+    await this.queue.add(
+      PLAN_REMINDER_JOB,
+      { subscriptionId } satisfies PlanReminderJobData,
+      {
+        delay: Math.max(0, Date.parse(lembrarEm) - Date.now()),
+        jobId: `subscription:remind:${subscriptionId}`,
         removeOnComplete: true,
         removeOnFail: 100,
       },
