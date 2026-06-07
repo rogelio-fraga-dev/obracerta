@@ -15,7 +15,7 @@ import {
  * **renovar** a sessão (refresh rotacionado) e repete a chamada uma vez.
  */
 
-type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 interface ApiCallOptions {
   body?: unknown;

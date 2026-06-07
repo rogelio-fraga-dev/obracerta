@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { AuthTokens } from "@obracerta/shared";
+import type { AuthTokens, User, UserType } from "@obracerta/shared";
 
 /**
  * Sessão do web no padrão **BFF**: os tokens vivem **só em cookies httpOnly**
@@ -14,6 +14,8 @@ import type { AuthTokens } from "@obracerta/shared";
 
 const ACCESS_COOKIE = "oc_at";
 const REFRESH_COOKIE = "oc_rt";
+/** Dica de perfil (tipo + nome) — NÃO httpOnly: não é segredo e habilita UI ciente de papel. */
+const PROFILE_COOKIE = "oc_pf";
 
 /** Janela do refresh token (30 dias) — o access é renovado a partir dele. */
 const REFRESH_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
@@ -51,6 +53,37 @@ export async function clearSessionCookies(): Promise<void> {
   const store = await cookies();
   store.delete(ACCESS_COOKIE);
   store.delete(REFRESH_COOKIE);
+  store.delete(PROFILE_COOKIE);
+}
+
+export interface ProfileHint {
+  tipo: UserType;
+  nome: string;
+}
+
+/** Grava a dica de perfil (tipo + nome) para UI ciente de papel. Não é segredo. */
+export async function setProfileCookie(user: Pick<User, "tipo" | "nomeCompleto">): Promise<void> {
+  const store = await cookies();
+  const hint: ProfileHint = { tipo: user.tipo, nome: user.nomeCompleto };
+  store.set(PROFILE_COOKIE, JSON.stringify(hint), {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: REFRESH_MAX_AGE_SECONDS,
+  });
+}
+
+/** Lê a dica de perfil dos cookies, ou `null` se ausente/ilegível. */
+export async function getProfileHint(): Promise<ProfileHint | null> {
+  const raw = (await cookies()).get(PROFILE_COOKIE)?.value;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as ProfileHint;
+    return parsed.tipo && parsed.nome ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Lê a sessão atual dos cookies, ou `null` se não houver. */

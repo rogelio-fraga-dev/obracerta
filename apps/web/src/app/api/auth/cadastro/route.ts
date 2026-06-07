@@ -1,7 +1,7 @@
 import { type CadastroResult, cadastroSchema } from "@obracerta/shared";
 import { handle, jsonOk, parseBody } from "@/lib/bff";
 import { callApi } from "@/lib/server-api";
-import { setSessionCookies } from "@/lib/session";
+import { setProfileCookie, setSessionCookies } from "@/lib/session";
 
 /**
  * BFF: cria a conta (WhatsApp já verificado por OTP). Faz auto-login setando os
@@ -12,6 +12,7 @@ export function POST(request: Request) {
     const body = await parseBody(request, cadastroSchema);
     const result = await callApi<CadastroResult>("POST", "/cadastro", { body });
     await setSessionCookies(result.tokens);
+    await setProfileCookie(result.user);
     return jsonOk({ user: result.user });
   });
 }
