@@ -27,11 +27,27 @@ export async function handle(fn: () => Promise<NextResponse>): Promise<NextRespo
   try {
     return await fn();
   } catch (e) {
+    // Sinais de controle do Next (redirect/notFound) são lançados como erros com
+    // `digest` — devem propagar, não virar envelope de erro.
+    if (isNextControlFlow(e)) {
+      throw e;
+    }
     if (e instanceof ApiEnvelopeError) {
       return jsonError(e.code, e.message, e.status && e.status >= 400 ? e.status : 400);
     }
     return jsonError("INTERNAL", "Erro inesperado. Tente novamente.", 500);
   }
+}
+
+function isNextControlFlow(e: unknown): boolean {
+  return (
+    typeof e === "object" &&
+    e !== null &&
+    "digest" in e &&
+    typeof (e as { digest: unknown }).digest === "string" &&
+    ((e as { digest: string }).digest.startsWith("NEXT_REDIRECT") ||
+      (e as { digest: string }).digest === "NEXT_NOT_FOUND")
+  );
 }
 
 /** Lê e valida o corpo JSON com um schema Zod; lança `ApiEnvelopeError` (400) se inválido. */
