@@ -1,19 +1,25 @@
 import type { ReactNode } from "react";
 import { config } from "@/lib/config";
+import { requireSession } from "@/lib/session";
+import { TabBar } from "./_shell/TabBar";
+import { LogoutButton } from "./_shell/LogoutButton";
 
 /**
- * Layout da área logada (route group `(app)`) — será o PWA client-side (Fase 6).
- * Em Fase 0 é apenas um shell.
+ * Shell da área logada (route group `(app)`) — o PWA. **Guarda de sessão no
+ * servidor**: sem cookie válido, `requireSession` redireciona ao login (não é só
+ * esconder UI — a API também exige o token). Abas fixas no rodapé (mobile-first).
  */
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  await requireSession();
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4">
-        <span className="font-display text-xl font-black text-foreground">
-          {config.brand.name}
-        </span>
+    <div className="min-h-screen bg-background pb-16">
+      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-5 py-3.5 backdrop-blur">
+        <span className="font-display text-xl font-black text-foreground">{config.brand.name}</span>
+        <LogoutButton />
       </header>
-      <main className="px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-2xl px-5 py-6">{children}</main>
+      <TabBar />
     </div>
   );
 }

@@ -193,7 +193,7 @@ export default function CadastroPage() {
               Sua conta está ativa. Acesse seu painel para continuar.
             </p>
             <a
-              href="/dashboard"
+              href="/inicio"
               className="mt-4 inline-block rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground"
             >
               Ir para o painel
