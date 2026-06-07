@@ -16,3 +16,11 @@ export function formatDayBR(isoDate: string): string {
   const [, mes, dia] = isoDate.split("-");
   return `${dia}/${mes}`;
 }
+
+/** Formata um timestamp ISO como "DD/MM/AAAA às HH:MM" (horário local). */
+export function formatDateTimeBR(iso: string): string {
+  const d = new Date(iso);
+  const data = d.toLocaleDateString("pt-BR");
+  const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${data} às ${hora}`;
+}

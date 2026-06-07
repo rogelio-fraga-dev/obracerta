@@ -7,6 +7,9 @@ import { userTypeSchema } from "./enums.js";
  * registro é imutável e serve de prova jurídica (vinculado ao `audit_log`).
  */
 
+/** Versão corrente dos termos de ciência (front e back referenciam a mesma). */
+export const TERMO_VERSAO_ATUAL = "1.0";
+
 /** Registro de aceite de termo (imutável). */
 export const termsAcceptanceSchema = z.object({
   id: uuidSchema,
