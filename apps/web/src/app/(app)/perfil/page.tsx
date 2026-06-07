@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { JwtClaims, Penalty, PenaltySummary, Review, Suspension } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
@@ -33,6 +34,17 @@ export default async function PerfilPage() {
         <Row label="WhatsApp" value={claims.whatsapp} />
         <Row label="Tipo" value={hint?.tipo === "PROFISSIONAL" ? "Profissional" : "Contratante"} />
       </Card>
+
+      <Link href="/cobrancas" className="block">
+        <Card className="transition-colors hover:border-primary">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-foreground">Cobranças e reembolsos</span>
+            <span aria-hidden className="text-xl text-primary">
+              →
+            </span>
+          </div>
+        </Card>
+      </Link>
 
       <SuspensionPanel />
 
