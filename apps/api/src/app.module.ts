@@ -27,6 +27,7 @@ import { BillingModule } from "./modules/billing/billing.module.js";
 import { SearchModule } from "./modules/search/search.module.js";
 import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
+import { CitiesModule } from "./modules/cities/cities.module.js";
 import { AdminModule } from "./modules/admin/admin.module.js";
 import { ObservabilityModule } from "./modules/observability/observability.module.js";
 import { MetricsInterceptor } from "./modules/observability/interface/metrics.interceptor.js";
@@ -83,6 +84,7 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     SearchModule,
     PublicProfileModule,
     WorkOrdersModule,
+    CitiesModule,
     AdminModule,
     ObservabilityModule,
   ],

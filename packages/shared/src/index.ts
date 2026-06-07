@@ -12,6 +12,7 @@ export * from "./pagination.js";
 export * from "./api-response.js";
 export * from "./envelope.js";
 export * from "./user.js";
+export * from "./city.js";
 export * from "./auth.js";
 export * from "./profiles.js";
 export * from "./availability.js";
