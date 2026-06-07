@@ -29,11 +29,19 @@ export default async function InicioPage() {
           </Card>
         </Link>
       ) : (
-        <Card>
-          <p className="text-muted-foreground">
-            Encontre profissionais e acompanhe seus pedidos por aqui.
-          </p>
-        </Card>
+        <Link href="/buscar" className="block">
+          <Card className="transition-colors hover:border-primary">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-foreground">Encontrar profissional</div>
+                <p className="text-sm text-muted-foreground">Busque por especialidade ou perto de você.</p>
+              </div>
+              <span aria-hidden className="text-xl text-primary">
+                →
+              </span>
+            </div>
+          </Card>
+        </Link>
       )}
     </section>
   );
