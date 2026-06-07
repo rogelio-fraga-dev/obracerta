@@ -1,9 +1,10 @@
-import type { JwtClaims, Penalty, PenaltySummary } from "@obracerta/shared";
+import type { JwtClaims, Penalty, PenaltySummary, Review } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { acceptanceTone, formatPercent, penaltyReasonLabel } from "@/lib/penalty-ui";
 import { formatDateTimeBR } from "@/lib/format";
+import { RespostaForm } from "./_components/RespostaForm";
 
 /**
  * Aba Perfil. Mostra a sessão (prova o loop BFF) e, para profissionais, o
@@ -31,7 +32,40 @@ export default async function PerfilPage() {
       </Card>
 
       {isProfissional && <ComportamentoPanel />}
+
+      <AvaliacoesRecebidas />
     </section>
+  );
+}
+
+async function AvaliacoesRecebidas() {
+  const reviews = await serverApi<Review[]>("GET", "/reviews/received");
+
+  return (
+    <Card className="space-y-3">
+      <h2 className="font-display text-lg font-black text-foreground">Avaliações recebidas</h2>
+      {reviews.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Nenhuma avaliação revelada ainda. Elas aparecem quando ambas as partes avaliam.
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {reviews.map((r) => (
+            <li key={r.id} className="space-y-1.5 border-b border-border pb-3 last:border-0 last:pb-0">
+              <div className="flex items-center justify-between gap-3">
+                <span aria-label={`${r.nota} de 5`} className="text-primary">
+                  {"★".repeat(r.nota)}
+                  <span className="text-border">{"★".repeat(5 - r.nota)}</span>
+                </span>
+                <span className="text-xs text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
+              </div>
+              {r.comentario && <p className="text-sm text-foreground">{r.comentario}</p>}
+              <RespostaForm reviewId={r.id} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 

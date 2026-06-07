@@ -8,6 +8,7 @@ import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { BookingActions } from "./_components/BookingActions";
 import { TermsCard } from "./_components/TermsCard";
+import { ReviewForm } from "./_components/ReviewForm";
 
 /** Detalhe de um pedido: estado, ações (por papel) e aceite de termos bilateral. */
 export default async function PedidoDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -50,6 +51,8 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
       </Card>
 
       <BookingActions bookingId={booking.id} status={booking.status} tipo={tipo} />
+
+      {booking.status === "CONCLUIDO" && <ReviewForm bookingId={booking.id} />}
 
       <TermsCard bookingId={booking.id} tipo={tipo} acceptances={acceptances} />
     </section>
