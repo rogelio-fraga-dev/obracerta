@@ -1,10 +1,13 @@
-import type { JwtClaims, Penalty, PenaltySummary, Review } from "@obracerta/shared";
+import type { JwtClaims, Penalty, PenaltySummary, Review, Suspension } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { acceptanceTone, formatPercent, penaltyReasonLabel } from "@/lib/penalty-ui";
+import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { RespostaForm } from "./_components/RespostaForm";
+import { ReportDialog } from "./_components/ReportDialog";
+import { AppealForm } from "./_components/AppealForm";
 
 /**
  * Aba Perfil. Mostra a sessão (prova o loop BFF) e, para profissionais, o
@@ -31,10 +34,41 @@ export default async function PerfilPage() {
         <Row label="Tipo" value={hint?.tipo === "PROFISSIONAL" ? "Profissional" : "Contratante"} />
       </Card>
 
+      <SuspensionPanel />
+
       {isProfissional && <ComportamentoPanel />}
 
       <AvaliacoesRecebidas />
     </section>
+  );
+}
+
+async function SuspensionPanel() {
+  const suspensoes = await serverApi<Suspension[]>("GET", "/suspensions/me");
+  if (suspensoes.length === 0) return null;
+
+  return (
+    <Card className="space-y-3 border-danger/40">
+      <h2 className="font-display text-lg font-black text-foreground">Sua conta</h2>
+      <ul className="space-y-3">
+        {suspensoes.map((s) => {
+          const ui = SUSPENSION_STATUS_UI[s.status];
+          return (
+            <li key={s.id} className="space-y-2 border-b border-border pb-3 last:border-0 last:pb-0">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold text-foreground">{s.motivo}</span>
+                <Badge tone={ui.tone}>{ui.label}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Desde {formatDateTimeBR(s.inicioEm)}
+                {s.apelacaoTexto ? ` · Apelação enviada` : ""}
+              </p>
+              {s.status === "ATIVA" && <AppealForm suspensionId={s.id} />}
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
   );
 }
 
@@ -60,7 +94,10 @@ async function AvaliacoesRecebidas() {
                 <span className="text-xs text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
               </div>
               {r.comentario && <p className="text-sm text-foreground">{r.comentario}</p>}
-              <RespostaForm reviewId={r.id} />
+              <div className="flex items-center justify-between gap-3">
+                <RespostaForm reviewId={r.id} />
+                <ReportDialog entidade="REVIEW" entidadeId={r.id} />
+              </div>
             </li>
           ))}
         </ul>
