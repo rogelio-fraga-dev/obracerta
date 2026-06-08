@@ -24,7 +24,8 @@ describe("ModerationService — auto-lift de suspensão (integração)", () => {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const db = drizzle(pool, { schema });
   const usersRepo = new DrizzleUsersRepository(db);
-  const usersService = new UsersService(usersRepo);
+  const mockStorage = { putObject: async () => "url" };
+  const usersService = new UsersService(usersRepo, mockStorage as any);
   const reportRepo = new DrizzleReportRepository(db);
   const suspRepo = new DrizzleSuspensionRepository(db);
   const reputationStub = {} as ReputationService;

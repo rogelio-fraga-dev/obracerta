@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/c
 import type { AuthResult, AuthTokens, OtpRequestResult, User } from "@obracerta/shared";
 import { UsersService } from "../../users/application/users.service.js";
 import { canAuthenticate } from "../domain/account-status.js";
+import { hashPassword, verifyPassword } from "../domain/password.js";
 import { OtpService } from "./otp.service.js";
 import { TokenService } from "./token.service.js";
 
@@ -42,6 +43,42 @@ export class AuthService {
 
     const tokens = await this.tokens.issue(user);
     return { registered: true, user, tokens };
+  }
+
+  /**
+   * Login "conta normal" (e-mail + senha). Mensagem genérica em qualquer falha
+   * (e-mail inexistente, conta sem senha, senha errada) para não revelar se um
+   * e-mail está cadastrado. Conta não-ATIVA é bloqueada como no fluxo OTP.
+   */
+  async loginWithPassword(email: string, password: string): Promise<{ user: User; tokens: AuthTokens }> {
+    const credentials = await this.users.findCredentialsByEmail(email);
+    const invalid = new UnauthorizedException("E-mail ou senha incorretos.");
+    if (!credentials || !credentials.senhaHash) {
+      throw invalid;
+    }
+    const ok = await verifyPassword(password, credentials.senhaHash);
+    if (!ok) {
+      throw invalid;
+    }
+    this.assertActive(credentials.user);
+    const tokens = await this.tokens.issue(credentials.user);
+    return { user: credentials.user, tokens };
+  }
+
+  async updatePassword(userId: string, oldPass: string, newPass: string): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new UnauthorizedException("Usuário não encontrado");
+
+    const credentials = await this.users.findCredentialsByEmail(user.email ?? "");
+    if (!credentials || !credentials.senhaHash) {
+      throw new ForbiddenException("Usuário não tem senha configurada");
+    }
+
+    const isValid = await verifyPassword(oldPass, credentials.senhaHash);
+    if (!isValid) throw new ForbiddenException("Senha antiga incorreta");
+
+    const newHash = await hashPassword(newPass);
+    await this.users.updatePasswordHash(userId, newHash);
   }
 
   async refresh(refreshToken: string): Promise<AuthTokens> {

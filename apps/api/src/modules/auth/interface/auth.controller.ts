@@ -1,9 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from "@nestjs/common";
 import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import {
   type AuthResult,
   type AuthTokens,
+  type CadastroResult,
   type JwtClaims,
+  type LoginInput,
+  loginSchema,
   type OtpRequestInput,
   type OtpRequestResult,
   otpRequestSchema,
@@ -11,8 +14,14 @@ import {
   otpVerifySchema,
   type RefreshInput,
   refreshSchema,
+  type UpdateProfileInput,
+  updateProfileSchema,
+  type UpdatePasswordInput,
+  updatePasswordSchema,
 } from "@obracerta/shared";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
+import { UsersService } from "../../users/application/users.service.js";
 import { AuthService } from "../application/auth.service.js";
 import { CurrentUser } from "./current-user.decorator.js";
 import { JwtAuthGuard } from "./jwt-auth.guard.js";
@@ -23,7 +32,10 @@ import { JwtAuthGuard } from "./jwt-auth.guard.js";
  */
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly users: UsersService,
+  ) {}
 
   /** Solicita OTP. Rate-limited (anti-abuso, roadmap §9): 3 req / 60s por IP. */
   @Post("otp/request")
@@ -47,6 +59,17 @@ export class AuthController {
     return this.auth.verifyOtp(body.whatsapp, body.code);
   }
 
+  /** Login "conta normal" (e-mail + senha). Rate-limited contra brute force. */
+  @Post("login")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  loginWithPassword(
+    @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,
+  ): Promise<CadastroResult> {
+    return this.auth.loginWithPassword(body.email, body.password);
+  }
+
   /** Renova o par de tokens (rotaciona o refresh). */
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
@@ -67,5 +90,59 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: JwtClaims): JwtClaims {
     return user;
+  }
+
+  /** Papéis administrativos do próprio usuário autenticado (gating de UI, não-segredo). */
+  @Get("me/roles")
+  @UseGuards(JwtAuthGuard)
+  async myRoles(@CurrentUser() user: JwtClaims): Promise<{ roles: string[] }> {
+    return { roles: await this.users.getRoles(user.sub) };
+  }
+
+  /** Retorna os dados completos do usuário logado */
+  @Get("me/profile")
+  @UseGuards(JwtAuthGuard)
+  getProfileData(@CurrentUser() user: JwtClaims) {
+    return this.users.findById(user.sub);
+  }
+
+  /** Atualiza perfil básico (nome, email) */
+  @Put("me/profile")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  updateProfile(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
+  ) {
+    return this.users.updateProfile(user.sub, body);
+  }
+
+  /** Atualiza senha */
+  @Put("me/password")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  async updatePassword(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(updatePasswordSchema)) body: UpdatePasswordInput,
+  ) {
+    await this.auth.updatePassword(user.sub, body.oldPassword, body.newPassword);
+  }
+
+  /** Upload de foto de perfil (qualquer usuário logado) */
+  @Post("me/foto")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor("file"))
+  async uploadFoto(
+    @CurrentUser() user: JwtClaims,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({ fileType: ".(png|jpeg|jpg|webp)" })
+        .addMaxSizeValidator({ maxSize: 1024 * 1024 * 5 }) // 5MB
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    )
+    file: any,
+  ) {
+    return this.users.uploadFoto(user.sub, file);
   }
 }

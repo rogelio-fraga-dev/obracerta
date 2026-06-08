@@ -105,3 +105,23 @@ export async function requireSession(): Promise<Session> {
   }
   return session;
 }
+
+/**
+ * Papéis administrativos do usuário atual — **best-effort para gating de UI**
+ * (mostrar/esconder o painel admin). Nunca lança nem redireciona: qualquer falha
+ * (sem sessão, token expirado, API fora) devolve `[]`. A segurança real é a API
+ * (RolesGuard relê os papéis frescos do banco a cada request).
+ */
+export async function getMyRoles(): Promise<string[]> {
+  const session = await getSession();
+  if (!session) return [];
+  try {
+    const { callApi } = await import("./server-api");
+    const result = await callApi<{ roles: string[] }>("GET", "/auth/me/roles", {
+      token: session.accessToken,
+    });
+    return result.roles;
+  } catch {
+    return [];
+  }
+}

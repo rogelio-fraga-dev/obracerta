@@ -86,6 +86,25 @@ export class DrizzleBookingRepository implements BookingRepository {
     return rows.map(rowToBooking);
   }
 
+  async findAll(): Promise<BookingRequest[]> {
+    const rows = await this.db
+      .select()
+      .from(bookingRequests)
+      .orderBy(desc(bookingRequests.criadoEm));
+    return rows.map(rowToBooking);
+  }
+
+  async findAllPaginated(limit: number, offset: number): Promise<{ items: BookingRequest[], total: number }> {
+    const rows = await this.db
+      .select()
+      .from(bookingRequests)
+      .orderBy(desc(bookingRequests.criadoEm))
+      .limit(limit)
+      .offset(offset);
+    const [c] = await this.db.select({ total: count() }).from(bookingRequests);
+    return { items: rows.map(rowToBooking), total: c?.total ?? 0 };
+  }
+
   async transitionStatus(
     id: string,
     expectedFrom: BookingStatus,

@@ -61,6 +61,17 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
     return row ? rowToWorkOrder(row) : null;
   }
 
+  async findAll(): Promise<WorkOrder[]> {
+    const rows = await this.db.select().from(workOrders).orderBy(desc(workOrders.criadoEm));
+    return rows.map(rowToWorkOrder);
+  }
+
+  async findAllPaginated(limit: number, offset: number): Promise<{ items: WorkOrder[], total: number }> {
+    const rows = await this.db.select().from(workOrders).orderBy(desc(workOrders.criadoEm)).limit(limit).offset(offset);
+    const [c] = await this.db.select({ total: count() }).from(workOrders);
+    return { items: rows.map(rowToWorkOrder), total: c?.total ?? 0 };
+  }
+
   async listOpen(f: ListOpenWorkOrdersFilters): Promise<WorkOrderPage> {
     const conds: SQL[] = [eq(workOrders.status, "ABERTA")];
     if (f.cidadeId) conds.push(eq(workOrders.cidadeId, f.cidadeId));

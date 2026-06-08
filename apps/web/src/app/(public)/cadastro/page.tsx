@@ -9,46 +9,63 @@ import {
   otpVerifySchema,
   type ProfessionalPlan,
   professionalPlansOrdered,
+  registerSchema,
   type Subscription,
   type User,
   type UserType,
 } from "@obracerta/shared";
-import { Badge, Button, Card, Field, Input } from "@obracerta/ui";
+import { Badge, Button, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { AuthPanel } from "../_auth/AuthPanel";
+import { AuthDivider, GoogleButton } from "../_auth/SocialAuth";
+import { MethodTabs } from "../_auth/MethodTabs";
 
-type VerifyResult = { registered: true } | { registered: false };
-
-type Step = "whatsapp" | "codigo" | "perfil" | "especialidades" | "plano" | "pagamento";
-
-const PROFISSIONAL_STEPS: { id: Step; label: string }[] = [
-  { id: "whatsapp", label: "WhatsApp" },
-  { id: "codigo", label: "Código" },
-  { id: "perfil", label: "Perfil" },
-  { id: "especialidades", label: "Atuação" },
-  { id: "plano", label: "Plano" },
-];
+type Method = "email" | "whatsapp";
 
 /**
- * Onboarding do profissional (roadmap §4/§14, linguagem do `prototipo2`). Tudo
- * sobre o **BFF** — os cookies de sessão são setados no cadastro e reutilizados
- * nos passos autenticados (perfil, assinatura). O contratante encerra no passo 3.
+ * Cadastro (área pública) — 3 caminhos: e-mail+senha ("conta normal", funcional),
+ * WhatsApp por OTP (assistente em passos, funcional) e Google (visual). O e-mail
+ * coleta só o essencial; o resto do perfil é completado depois de entrar.
  */
 export default function CadastroPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<Step>("whatsapp");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [code, setCode] = useState("");
-  const [nomeCompleto, setNomeCompleto] = useState("");
-  const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
-  const [especialidades, setEspecialidades] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [anos, setAnos] = useState("");
-  const [plano, setPlano] = useState<ProfessionalPlan | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [method, setMethod] = useState<Method>("email");
+
+  return (
+    <AuthPanel
+      eyebrow="Criar conta"
+      title="Crie sua"
+      accent="conta"
+      subtitle="Comece com o essencial. Você completa o resto do perfil depois de entrar."
+      footer={
+        <>
+          Já tem conta?{" "}
+          <a href="/entrar" className="font-semibold text-primary hover:underline">
+            Entrar
+          </a>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <GoogleButton />
+        <AuthDivider />
+        <MethodTabs
+          value={method}
+          onChange={(m) => setMethod(m as Method)}
+          options={[
+            { value: "email", label: "E-mail e senha" },
+            { value: "whatsapp", label: "WhatsApp" },
+          ]}
+        />
+        {method === "email" ? <EmailSignup /> : <WhatsappSignup />}
+      </div>
+    </AuthPanel>
+  );
+}
+
+function useAsyncAction() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  async function run(fn: () => Promise<void>): Promise<void> {
+  const run = async (fn: () => Promise<void>) => {
     setError(null);
     setLoading(true);
     try {
@@ -58,7 +75,113 @@ export default function CadastroPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
+  return { error, loading, run };
+}
+
+function ErrorBox({ message }: { message: string }) {
+  return (
+    <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger">
+      {message}
+    </p>
+  );
+}
+
+/** Conta normal: coleta o essencial (tipo, nome, e-mail, senha, WhatsApp) e entra. */
+function EmailSignup() {
+  const router = useRouter();
+  const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
+  const [nomeCompleto, setNomeCompleto] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const { error, loading, run } = useAsyncAction();
+
+  const submit = () =>
+    run(async () => {
+      const parsed = registerSchema.safeParse({ nomeCompleto, email, password, whatsapp, tipo });
+      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      await bff.post<{ user: User }>("/api/auth/register", parsed.data);
+      router.replace("/inicio");
+    });
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      {error && <ErrorBox message={error} />}
+      <fieldset>
+        <legend className="text-sm font-semibold text-foreground">Você é…</legend>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
+          <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
+        </div>
+      </fieldset>
+      <Field label="Nome completo">
+        <Input
+          autoComplete="name"
+          placeholder="Ex.: Carlos Mendes"
+          value={nomeCompleto}
+          onChange={(e) => setNomeCompleto(e.target.value)}
+        />
+      </Field>
+      <Field label="E-mail">
+        <Input
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          placeholder="voce@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Field>
+      <Field label="Senha" hint="Mínimo de 8 caracteres">
+        <Input
+          type="password"
+          autoComplete="new-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </Field>
+      <Field label="WhatsApp" hint="Fica escondido até você aceitar um pedido.">
+        <Input
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder="+5511999999999"
+          value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value)}
+        />
+      </Field>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? "Criando conta…" : "Criar conta"}
+      </Button>
+    </form>
+  );
+}
+
+type WhatsappStep = "whatsapp" | "codigo" | "perfil" | "especialidades" | "plano" | "pagamento";
+
+const WHATSAPP_STEPS: WhatsappStep[] = ["whatsapp", "codigo", "perfil", "especialidades", "plano"];
+
+/** Cadastro via WhatsApp (OTP) — assistente em passos (linguagem do prototipo2). */
+function WhatsappSignup() {
+  const router = useRouter();
+  const [step, setStep] = useState<WhatsappStep>("whatsapp");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [code, setCode] = useState("");
+  const [nomeCompleto, setNomeCompleto] = useState("");
+  const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
+  const [especialidades, setEspecialidades] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [anos, setAnos] = useState("");
+  const [plano, setPlano] = useState<ProfessionalPlan | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const { error, loading, run } = useAsyncAction();
 
   const requestOtp = () =>
     run(async () => {
@@ -72,12 +195,9 @@ export default function CadastroPage() {
     run(async () => {
       const parsed = otpVerifySchema.safeParse({ whatsapp, code });
       if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Código inválido.");
-      const result = await bff.post<VerifyResult>("/api/auth/verify", { whatsapp, code });
-      if (result.registered) {
-        router.replace("/inicio"); // já tem conta → entra direto
-      } else {
-        setStep("perfil");
-      }
+      const result = await bff.post<{ registered: boolean }>("/api/auth/verify", { whatsapp, code });
+      if (result.registered) router.replace("/inicio");
+      else setStep("perfil");
     });
 
   const cadastrar = () =>
@@ -85,11 +205,8 @@ export default function CadastroPage() {
       const parsed = cadastroSchema.safeParse({ whatsapp, nomeCompleto, tipo });
       if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
       await bff.post<{ user: User }>("/api/auth/cadastro", { whatsapp, nomeCompleto, tipo });
-      if (tipo === "PROFISSIONAL") {
-        setStep("especialidades");
-      } else {
-        router.replace("/inicio");
-      }
+      if (tipo === "PROFISSIONAL") setStep("especialidades");
+      else router.replace("/inicio");
     });
 
   const salvarAtuacao = () =>
@@ -111,7 +228,7 @@ export default function CadastroPage() {
     run(async () => {
       if (!plano) throw new Error("Escolha um plano para continuar.");
       if (plano === "INICIANTE") {
-        router.replace("/inicio"); // grátis: sem cobrança
+        router.replace("/inicio");
         return;
       }
       const sub = await bff.post<Subscription>("/api/billing/subscribe", { plano });
@@ -119,168 +236,165 @@ export default function CadastroPage() {
       setStep("pagamento");
     });
 
-  const activeIndex = PROFISSIONAL_STEPS.findIndex((s) => s.id === step);
+  const activeIndex = WHATSAPP_STEPS.indexOf(step);
 
   return (
-    <section aria-labelledby="cadastro-heading" className="mx-auto max-w-md px-6 py-12">
-      <h1 id="cadastro-heading" className="font-display text-3xl font-black text-foreground">
-        Criar conta
-      </h1>
-
+    <div className="space-y-4">
       {step !== "pagamento" && (
-        <ol className="mt-6 flex gap-1.5" aria-label="Progresso do cadastro">
-          {PROFISSIONAL_STEPS.map((s, i) => (
+        <ol className="flex gap-1.5" aria-label="Progresso do cadastro">
+          {WHATSAPP_STEPS.map((s, i) => (
             <li
-              key={s.id}
+              key={s}
               className={`h-1.5 flex-1 rounded-full ${i <= activeIndex ? "bg-primary" : "bg-border"}`}
-              aria-current={s.id === step ? "step" : undefined}
+              aria-current={s === step ? "step" : undefined}
             />
           ))}
         </ol>
       )}
 
-      {error && (
-        <p role="alert" className="mt-4 rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger">
-          {error}
-        </p>
+      {error && <ErrorBox message={error} />}
+
+      {step === "whatsapp" && (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            requestOtp();
+          }}
+        >
+          <Field label="Seu WhatsApp" hint="Formato: +55 DDD 9XXXXXXXX">
+            <Input
+              placeholder="+5511999999999"
+              inputMode="tel"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+            />
+          </Field>
+          <PrimaryAction loading={loading}>Enviar código</PrimaryAction>
+        </form>
       )}
 
-      <Card className="mt-6 space-y-4">
-        {step === "whatsapp" && (
-          <>
-            <Field label="Seu WhatsApp" hint="Formato: +55 DDD 9XXXXXXXX">
-              <Input
-                placeholder="+5511999999999"
-                inputMode="tel"
-                value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
-              />
-            </Field>
-            <PrimaryAction onClick={requestOtp} loading={loading}>
-              Enviar código
-            </PrimaryAction>
-          </>
-        )}
+      {step === "codigo" && (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            verifyOtp();
+          }}
+        >
+          <Field label="Código recebido" hint="6 dígitos (em dev, veja o log da API)">
+            <Input
+              placeholder="000000"
+              inputMode="numeric"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </Field>
+          <PrimaryAction loading={loading}>Verificar</PrimaryAction>
+        </form>
+      )}
 
-        {step === "codigo" && (
-          <>
-            <Field label="Código recebido" hint="6 dígitos (em dev, veja o log da API)">
-              <Input
-                placeholder="000000"
-                inputMode="numeric"
-                maxLength={6}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-              />
-            </Field>
-            <PrimaryAction onClick={verifyOtp} loading={loading}>
-              Verificar
-            </PrimaryAction>
-          </>
-        )}
-
-        {step === "perfil" && (
-          <>
-            <fieldset>
-              <legend className="text-sm font-semibold text-foreground">Você é…</legend>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
-                <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
-              </div>
-            </fieldset>
-            <Field label="Nome completo">
-              <Input value={nomeCompleto} onChange={(e) => setNomeCompleto(e.target.value)} />
-            </Field>
-            <PrimaryAction onClick={cadastrar} loading={loading}>
-              Criar conta
-            </PrimaryAction>
-          </>
-        )}
-
-        {step === "especialidades" && (
-          <>
-            <Field label="Especialidades" hint="Separe por vírgula (ex.: Alvenaria, Pintura)">
-              <Input value={especialidades} onChange={(e) => setEspecialidades(e.target.value)} />
-            </Field>
-            <Field label="Bairro de atuação">
-              <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
-            </Field>
-            <Field label="Anos de experiência" hint="Opcional">
-              <Input
-                inputMode="numeric"
-                value={anos}
-                onChange={(e) => setAnos(e.target.value)}
-                placeholder="Ex.: 8"
-              />
-            </Field>
-            <PrimaryAction onClick={salvarAtuacao} loading={loading}>
-              Continuar
-            </PrimaryAction>
-          </>
-        )}
-
-        {step === "plano" && (
-          <>
-            <p className="text-sm text-muted-foreground">
-              Escolha como quer aparecer para os contratantes. Dá para mudar depois.
-            </p>
-            <div className="space-y-3">
-              {professionalPlansOrdered.map((p) => (
-                <PlanCard
-                  key={p.plano}
-                  nome={p.nome}
-                  preco={p.precoCentavos === 0 ? "Grátis" : `${formatCentavos(p.precoCentavos)}/mês`}
-                  resumo={p.resumo}
-                  beneficios={p.beneficios}
-                  recomendado={p.recomendado}
-                  selected={plano === p.plano}
-                  onSelect={() => setPlano(p.plano)}
-                />
-              ))}
+      {step === "perfil" && (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            cadastrar();
+          }}
+        >
+          <fieldset>
+            <legend className="text-sm font-semibold text-foreground">Você é…</legend>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
+              <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
             </div>
-            <PrimaryAction onClick={escolherPlano} loading={loading}>
-              {plano === "INICIANTE" ? "Começar grátis" : "Assinar"}
-            </PrimaryAction>
-          </>
-        )}
+          </fieldset>
+          <Field label="Nome completo">
+            <Input value={nomeCompleto} onChange={(e) => setNomeCompleto(e.target.value)} />
+          </Field>
+          <PrimaryAction loading={loading}>Criar conta</PrimaryAction>
+        </form>
+      )}
 
-        {step === "pagamento" && subscription && (
-          <div className="space-y-3 text-center">
-            <Badge tone="warning">Aguardando pagamento</Badge>
-            <h2 className="text-xl font-bold text-foreground">Assinatura criada 🎉</h2>
-            <p className="text-muted-foreground">
-              Geramos sua fatura de{" "}
-              <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
-              Pague via PIX para ativar — você tem alguns dias de cortesia até lá.
-            </p>
-            <Button className="w-full" onClick={() => router.replace("/inicio")}>
-              Ir para o painel
-            </Button>
+      {step === "especialidades" && (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            salvarAtuacao();
+          }}
+        >
+          <Field label="Especialidades" hint="Separe por vírgula (ex.: Alvenaria, Pintura)">
+            <Input value={especialidades} onChange={(e) => setEspecialidades(e.target.value)} />
+          </Field>
+          <Field label="Bairro de atuação">
+            <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
+          </Field>
+          <Field label="Anos de experiência" hint="Opcional">
+            <Input
+              inputMode="numeric"
+              value={anos}
+              onChange={(e) => setAnos(e.target.value)}
+              placeholder="Ex.: 8"
+            />
+          </Field>
+          <PrimaryAction loading={loading}>Continuar</PrimaryAction>
+        </form>
+      )}
+
+      {step === "plano" && (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            escolherPlano();
+          }}
+        >
+          <p className="text-sm text-muted-foreground">
+            Escolha como quer aparecer para os contratantes. Dá para mudar depois.
+          </p>
+          <div className="space-y-3">
+            {professionalPlansOrdered.map((p) => (
+              <PlanCard
+                key={p.plano}
+                nome={p.nome}
+                preco={p.precoCentavos === 0 ? "Grátis" : `${formatCentavos(p.precoCentavos)}/mês`}
+                resumo={p.resumo}
+                beneficios={p.beneficios}
+                recomendado={p.recomendado}
+                selected={plano === p.plano}
+                onSelect={() => setPlano(p.plano)}
+              />
+            ))}
           </div>
-        )}
-      </Card>
+          <PrimaryAction loading={loading}>
+            {plano === "INICIANTE" ? "Começar grátis" : "Assinar"}
+          </PrimaryAction>
+        </form>
+      )}
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        Já tem conta?{" "}
-        <a href="/entrar" className="font-semibold text-primary hover:underline">
-          Entrar
-        </a>
-      </p>
-    </section>
+      {step === "pagamento" && subscription && (
+        <div className="space-y-3 text-center">
+          <Badge tone="warning">Aguardando pagamento</Badge>
+          <h2 className="text-xl font-bold text-foreground">Assinatura criada 🎉</h2>
+          <p className="text-muted-foreground">
+            Geramos sua fatura de{" "}
+            <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
+            Pague via PIX para ativar — você tem alguns dias de cortesia até lá.
+          </p>
+          <Button className="w-full" onClick={() => router.replace("/inicio")}>
+            Ir para o painel
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
-function PrimaryAction({
-  onClick,
-  loading,
-  children,
-}: {
-  onClick: () => void;
-  loading: boolean;
-  children: ReactNode;
-}) {
+function PrimaryAction({ loading, children }: { loading: boolean; children: ReactNode }) {
   return (
-    <Button className="w-full" onClick={onClick} disabled={loading}>
+    <Button type="submit" className="w-full" disabled={loading}>
       {loading ? "Aguarde…" : children}
     </Button>
   );
@@ -304,7 +418,9 @@ function TipoOption({
       onClick={() => onSelect(value)}
       aria-pressed={selected}
       className={`rounded-md border-2 px-4 py-3 text-sm font-semibold transition-colors ${
-        selected ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:border-primary"
+        selected
+          ? "border-primary bg-primary/10 text-foreground"
+          : "border-border text-muted-foreground hover:border-primary"
       }`}
     >
       {label}

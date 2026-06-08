@@ -19,3 +19,9 @@ export const paginationMetaSchema = z.object({
   totalPages: z.number().int().nonnegative(),
 });
 export type PaginationMeta = z.infer<typeof paginationMetaSchema>;
+
+/** Generic interface for paginated list responses. */
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
+}

@@ -38,12 +38,18 @@ export default async function ModeracaoPage() {
   }
 
   return (
-    <section aria-labelledby="mod-heading" className="space-y-4">
-      <h1 id="mod-heading" className="font-display text-2xl font-black text-foreground">
-        Moderação
-      </h1>
+    <section aria-labelledby="mod-heading" className="space-y-6">
+      <header>
+        <h1 id="mod-heading" className="font-display text-3xl font-black text-foreground">
+          Moderação
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Denúncias e apelações de suspensão aguardando decisão.
+        </p>
+      </header>
 
-      <Card className="space-y-3">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="space-y-3">
         <h2 className="font-display text-lg font-black text-foreground">
           Denúncias abertas ({reports.length})
         </h2>
@@ -99,7 +105,8 @@ export default async function ModeracaoPage() {
             ))}
           </ul>
         )}
-      </Card>
+        </Card>
+      </div>
     </section>
   );
 }

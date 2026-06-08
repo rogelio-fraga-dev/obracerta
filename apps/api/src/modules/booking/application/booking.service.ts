@@ -13,6 +13,7 @@ import {
   type BookingRequest,
   type CreateBookingInput,
   type DeclineReason,
+  type PaginatedResponse,
 } from "@obracerta/shared";
 import { AvailabilityService } from "../../availability/application/availability.service.js";
 import { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
@@ -209,12 +210,35 @@ export class BookingService {
     return booking;
   }
 
+  /** Detalhe de um pedido para o Admin. */
+  async getBookingForAdmin(id: string): Promise<BookingRequest> {
+    return this.getOr404(id);
+  }
+
   listForContractor(contractorId: string): Promise<BookingRequest[]> {
     return this.repo.listForContractor(contractorId);
   }
 
   listForProfessional(professionalId: string): Promise<BookingRequest[]> {
     return this.repo.listForProfessional(professionalId);
+  }
+
+  findAll(): Promise<BookingRequest[]> {
+    return this.repo.findAll();
+  }
+
+  async findAllPaginated(page: number, limit: number): Promise<PaginatedResponse<BookingRequest>> {
+    const offset = (page - 1) * limit;
+    const { items, total } = await this.repo.findAllPaginated(limit, offset);
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   private async getOr404(id: string): Promise<BookingRequest> {

@@ -5,9 +5,15 @@ import { UserRole } from "@obracerta/shared";
  * um conjunto de papéis satisfaz o exigido. O `RolesGuard` aplica isto no HTTP.
  */
 
-/** True se o usuário tem ao menos um dos papéis exigidos (lista vazia = liberado). */
+/**
+ * True se o usuário pode acessar a rota. Regras:
+ * - lista de exigidos vazia → liberado;
+ * - **ADMIN é superusuário** → controle total, satisfaz qualquer exigência;
+ * - caso contrário, basta ter ao menos um dos papéis exigidos.
+ */
 export function hasAnyRole(userRoles: string[], required: UserRole[]): boolean {
   if (required.length === 0) return true;
+  if (userRoles.includes(UserRole.ADMIN)) return true;
   return required.some((r) => userRoles.includes(r));
 }
 

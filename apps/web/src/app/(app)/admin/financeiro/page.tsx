@@ -1,17 +1,20 @@
-import { ApiEnvelopeError, formatCentavos, type Refund } from "@obracerta/shared";
-import { Card } from "@obracerta/ui";
+import { ApiEnvelopeError, formatCentavos, type Refund, type HealthSnapshot } from "@obracerta/shared";
+import { Card, Badge } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
 import { Resolver } from "../_components/Resolver";
+import { FinanceChart } from "./_components/FinanceChart";
 
 /**
  * Fila do financeiro (FINANCEIRO/ADMIN): reembolsos pendentes para aprovar/recusar.
  * Auto-protegida pela API (403 → restrito).
  */
 export default async function FinanceiroPage() {
-  let pendentes: Refund[];
+  let pendentes: Refund[] = [];
+  let metrics: HealthSnapshot | null = null;
   try {
     pendentes = await serverApi<Refund[]>("GET", "/refunds/pending");
+    metrics = await serverApi<HealthSnapshot>("GET", "/admin/metrics");
   } catch (e) {
     if (e instanceof ApiEnvelopeError) {
       return (
@@ -27,41 +30,103 @@ export default async function FinanceiroPage() {
   }
 
   return (
-    <section aria-labelledby="fin-heading" className="space-y-4">
-      <h1 id="fin-heading" className="font-display text-2xl font-black text-foreground">
-        Financeiro
-      </h1>
+    <section aria-labelledby="fin-heading" className="space-y-8">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 id="fin-heading" className="font-display text-3xl font-black text-foreground">
+            Painel Financeiro
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Visão geral de monetização e fila de reembolsos.
+          </p>
+        </div>
+      </header>
 
-      <Card className="space-y-3">
-        <h2 className="font-display text-lg font-black text-foreground">
-          Reembolsos pendentes ({pendentes.length})
+      {metrics && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="flex flex-col p-6 space-y-4">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="p-2 bg-primary/10 rounded-lg text-primary text-xl font-bold">
+                $
+              </div>
+              <h2 className="text-sm font-bold uppercase tracking-wider">Receita Recorrente Atual</h2>
+            </div>
+            <p className="text-3xl font-black text-foreground">
+              {formatCentavos(metrics.monetizacao.mrrCentavos)}
+            </p>
+            <p className="text-xs text-muted-foreground">Receita recorrente mensal</p>
+          </Card>
+
+          <Card className="flex flex-col p-6 space-y-4">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="p-2 bg-success/10 rounded-lg text-success text-xl font-bold">
+                +
+              </div>
+              <h2 className="text-sm font-bold uppercase tracking-wider">Assinaturas</h2>
+            </div>
+            <p className="text-3xl font-black text-foreground">
+              {metrics.monetizacao.assinaturasAtivas}
+            </p>
+            <p className="text-xs text-muted-foreground">Usuários com plano ativo</p>
+          </Card>
+
+          <Card className="flex flex-col p-6 space-y-4">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="p-2 bg-danger/10 rounded-lg text-danger text-xl font-bold">
+                !
+              </div>
+              <h2 className="text-sm font-bold uppercase tracking-wider">Taxa de Cancelamento</h2>
+            </div>
+            <p className="text-3xl font-black text-foreground">
+              {(metrics.monetizacao.churnPct * 100).toFixed(1)}%
+            </p>
+            <p className="text-xs text-muted-foreground">Cancelamentos no período</p>
+          </Card>
+        </div>
+      )}
+
+      <FinanceChart />
+
+      <div className="pt-6 border-t border-border">
+        <h2 className="font-display text-xl font-bold text-foreground mb-4">
+          Fila de Reembolsos ({pendentes.length})
         </h2>
         {pendentes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum reembolso pendente.</p>
+          <Card className="p-8 text-center text-muted-foreground border-dashed bg-muted/20">
+            <p>Nenhum reembolso pendente de análise no momento.</p>
+          </Card>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {pendentes.map((r) => (
-              <li key={r.id} className="space-y-2 border-b border-border pb-3 last:border-0 last:pb-0">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-lg font-black text-foreground">
-                    {formatCentavos(r.valorCentavos)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{r.motivo}</span>
+              <Card key={r.id} className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xl font-black text-foreground block">
+                      {formatCentavos(r.valorCentavos)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{formatDateTimeBR(r.solicitadoEm)}</span>
+                  </div>
+                  <Badge tone="warning">Pendente</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">{formatDateTimeBR(r.solicitadoEm)}</p>
-                <Resolver
-                  action="/api/refunds/resolve"
-                  payloadBase={{ refundId: r.id }}
-                  options={[
-                    { label: "Aprovar", body: { aprovar: true } },
-                    { label: "Recusar", body: { aprovar: false }, variant: "secondary" },
-                  ]}
-                />
-              </li>
+                <div className="p-3 bg-muted/30 rounded-lg text-sm text-foreground">
+                  <span className="font-bold block mb-1">Motivo:</span>
+                  {r.motivo}
+                </div>
+                <div className="mt-auto pt-4 border-t border-border">
+                  <Resolver
+                    action="/api/refunds/resolve"
+                    payloadBase={{ refundId: r.id }}
+                    options={[
+                      { label: "Aprovar Reembolso", body: { aprovar: true } },
+                      { label: "Recusar Reembolso", body: { aprovar: false }, variant: "secondary" },
+                    ]}
+                  />
+                </div>
+              </Card>
             ))}
-          </ul>
+          </div>
         )}
-      </Card>
+      </div>
     </section>
   );
 }

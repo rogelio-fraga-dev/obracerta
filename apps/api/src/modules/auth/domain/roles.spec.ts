@@ -14,6 +14,12 @@ describe("hasAnyRole", () => {
     expect(hasAnyRole([], [])).toBe(true);
     expect(hasAnyRole(["FINANCEIRO"], [])).toBe(true);
   });
+
+  it("ADMIN é superusuário → satisfaz qualquer exigência", () => {
+    expect(hasAnyRole(["ADMIN"], ["MODERADOR"])).toBe(true);
+    expect(hasAnyRole(["ADMIN"], ["FINANCEIRO"])).toBe(true);
+    expect(hasAnyRole(["ADMIN"], ["MODERADOR", "FINANCEIRO"])).toBe(true);
+  });
 });
 
 describe("isAdmin", () => {

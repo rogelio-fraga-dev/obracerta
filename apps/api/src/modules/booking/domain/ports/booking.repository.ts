@@ -14,10 +14,11 @@ export interface CreateBookingData {
 export interface BookingRepository {
   create(data: CreateBookingData): Promise<BookingRequest>;
   findById(id: string): Promise<BookingRequest | null>;
-  /** Pedidos PENDENTE de um contratante numa especialidade (para o limite §11). */
   countPending(contractorId: string, especialidade: string): Promise<number>;
   listForProfessional(professionalId: string): Promise<BookingRequest[]>;
   listForContractor(contractorId: string): Promise<BookingRequest[]>;
+  findAll(): Promise<BookingRequest[]>;
+  findAllPaginated(limit: number, offset: number): Promise<{ items: BookingRequest[], total: number }>;
   /**
    * Transição atômica e guardada: muda o status só se o atual for `expectedFrom`
    * (UPDATE ... WHERE status = expectedFrom), evitando corrida entre atores.

@@ -1,56 +1,74 @@
 import Link from "next/link";
 import type { JwtClaims, Penalty, PenaltySummary, Review, Suspension } from "@obracerta/shared";
-import { Badge, Card } from "@obracerta/ui";
+import { Badge, Card, Avatar, ProgressRing, StatCard, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
-import { getProfileHint } from "@/lib/session";
-import { acceptanceTone, formatPercent, penaltyReasonLabel } from "@/lib/penalty-ui";
+import { getProfileHint, getMyRoles } from "@/lib/session";
+import { penaltyReasonLabel } from "@/lib/penalty-ui";
 import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { RespostaForm } from "./_components/RespostaForm";
 import { ReportDialog } from "./_components/ReportDialog";
 import { AppealForm } from "./_components/AppealForm";
+import { ShieldIcon } from "../_shell/icons";
+import { AdminForms } from "./_components/AdminForms";
+import type { User } from "@obracerta/shared";
 
 /**
- * Aba Perfil. Mostra a sessão (prova o loop BFF) e, para profissionais, o
- * **painel de comportamento** (Fase 2 §8): taxa de aceitação, pontos de
- * penalidade e histórico. Tudo read-only via `serverApi`.
+ * Aba Perfil. Mostra a sessão e, para profissionais, o painel de comportamento
+ * com taxa de aceitação (progress ring), pontos de penalidade e histórico.
  */
 export default async function PerfilPage() {
   const hint = await getProfileHint();
+  const roles = await getMyRoles();
+  const isAdmin = roles.includes("ADMIN");
   const isProfissional = hint?.tipo === "PROFISSIONAL";
 
   const claims = await serverApi<JwtClaims>("POST", "/auth/me");
+  const user = await serverApi<User>("GET", "/auth/me/profile");
 
   return (
-    <section aria-labelledby="perfil-heading" className="space-y-4">
+    <section aria-labelledby="perfil-heading" className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 id="perfil-heading" className="font-display text-2xl font-black text-foreground">
-          {hint?.nome ?? "Perfil"}
+        <h1 id="perfil-heading" className="font-display text-3xl font-black text-foreground">
+          Perfil
         </h1>
-        <Badge tone="success">Sessão ativa</Badge>
+        <Badge tone="success" className="animate-fade-in">Sessão ativa</Badge>
       </div>
 
-      <Card className="space-y-2 text-sm">
-        <Row label="WhatsApp" value={claims.whatsapp} />
-        <Row label="Tipo" value={hint?.tipo === "PROFISSIONAL" ? "Profissional" : "Contratante"} />
-      </Card>
-
-      <Link href="/cobrancas" className="block">
-        <Card className="transition-colors hover:border-primary">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-foreground">Cobranças e reembolsos</span>
-            <span aria-hidden className="text-xl text-primary">
-              →
-            </span>
+      {/* ── Header do Perfil ── */}
+      <Card className="animate-fade-in flex flex-col gap-6 sm:flex-row sm:items-center">
+        <Avatar nome={user.nomeCompleto ?? "Usuário"} src={user.fotoUrl ?? undefined} size="xl" />
+        <div className="flex-1 space-y-3">
+          <div>
+            <h2 className="font-display text-2xl font-black text-foreground">
+              {user.nomeCompleto ?? "Usuário"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isAdmin ? "Administração do Sistema" : isProfissional ? "Profissional" : "Contratante"}
+            </p>
           </div>
-        </Card>
-      </Link>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Badge tone="neutral">WhatsApp: {claims.whatsapp}</Badge>
+            {isProfissional && <Badge tone="primary">Conta verificada</Badge>}
+          </div>
+        </div>
+        {!isAdmin && (
+          <Link href="/cobrancas" className="sm:self-stretch">
+            <Card interactive className="flex h-full flex-col items-center justify-center bg-muted/40 p-4">
+              <span className="font-semibold text-foreground">Cobranças e reembolsos</span>
+              <span aria-hidden className="mt-1 text-primary">→</span>
+            </Card>
+          </Link>
+        )}
+      </Card>
 
       <SuspensionPanel />
 
-      {isProfissional && <ComportamentoPanel />}
+      {isAdmin && <AdminForms user={user} />}
 
-      <AvaliacoesRecebidas />
+      {!isAdmin && isProfissional && <ComportamentoPanel />}
+
+      {!isAdmin && <AvaliacoesRecebidas />}
     </section>
   );
 }
@@ -60,27 +78,27 @@ async function SuspensionPanel() {
   if (suspensoes.length === 0) return null;
 
   return (
-    <Card className="space-y-3 border-danger/40">
-      <h2 className="font-display text-lg font-black text-foreground">Sua conta</h2>
+    <div className="animate-fade-in delay-1 space-y-3">
+      <h2 className="font-display text-xl font-black text-foreground">Avisos da conta</h2>
       <ul className="space-y-3">
         {suspensoes.map((s) => {
           const ui = SUSPENSION_STATUS_UI[s.status];
           return (
-            <li key={s.id} className="space-y-2 border-b border-border pb-3 last:border-0 last:pb-0">
+            <Card key={s.id} className="border-danger/30 bg-danger/5">
               <div className="flex items-center justify-between gap-3">
-                <span className="font-semibold text-foreground">{s.motivo}</span>
+                <span className="font-bold text-danger">{s.motivo}</span>
                 <Badge tone={ui.tone}>{ui.label}</Badge>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Desde {formatDateTimeBR(s.inicioEm)}
                 {s.apelacaoTexto ? ` · Apelação enviada` : ""}
               </p>
-              {s.status === "ATIVA" && <AppealForm suspensionId={s.id} />}
-            </li>
+              {s.status === "ATIVA" && <div className="mt-4"><AppealForm suspensionId={s.id} /></div>}
+            </Card>
           );
         })}
       </ul>
-    </Card>
+    </div>
   );
 }
 
@@ -88,33 +106,35 @@ async function AvaliacoesRecebidas() {
   const reviews = await serverApi<Review[]>("GET", "/reviews/received");
 
   return (
-    <Card className="space-y-3">
-      <h2 className="font-display text-lg font-black text-foreground">Avaliações recebidas</h2>
+    <div className="animate-fade-in delay-3 space-y-3">
+      <h2 className="font-display text-xl font-black text-foreground">Avaliações recebidas</h2>
       {reviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nenhuma avaliação revelada ainda. Elas aparecem quando ambas as partes avaliam.
-        </p>
+        <EmptyState
+          icon="⭐"
+          title="Nenhuma avaliação"
+          description="As avaliações aparecem aqui quando o serviço é concluído e ambas as partes avaliam."
+        />
       ) : (
         <ul className="space-y-3">
           {reviews.map((r) => (
-            <li key={r.id} className="space-y-1.5 border-b border-border pb-3 last:border-0 last:pb-0">
+            <Card key={r.id}>
               <div className="flex items-center justify-between gap-3">
-                <span aria-label={`${r.nota} de 5`} className="text-primary">
+                <span aria-label={`${r.nota} de 5`} className="text-xl text-warning tracking-widest">
                   {"★".repeat(r.nota)}
                   <span className="text-border">{"★".repeat(5 - r.nota)}</span>
                 </span>
-                <span className="text-xs text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
+                <span className="text-sm text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
               </div>
-              {r.comentario && <p className="text-sm text-foreground">{r.comentario}</p>}
-              <div className="flex items-center justify-between gap-3">
+              {r.comentario && <p className="mt-3 text-base text-foreground leading-relaxed">{r.comentario}</p>}
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                 <RespostaForm reviewId={r.id} />
                 <ReportDialog entidade="REVIEW" entidadeId={r.id} />
               </div>
-            </li>
+            </Card>
           ))}
         </ul>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -124,72 +144,65 @@ async function ComportamentoPanel() {
     serverApi<Penalty[]>("GET", "/penalties/me"),
   ]);
 
-  return (
-    <>
-      <Card className="space-y-4">
-        <h2 className="font-display text-lg font-black text-foreground">Comportamento</h2>
-        <div className="flex items-center gap-6">
-          <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">Taxa de aceitação</div>
-            <div className="mt-0.5 flex items-baseline gap-2">
-              <span className="font-display text-4xl font-black text-foreground">
-                {formatPercent(resumo.taxaAceitacao)}
-              </span>
-              <Badge tone={acceptanceTone(resumo.taxaAceitacao)}>
-                {resumo.aprovados}/{resumo.totalPedidos} aprovados
-              </Badge>
-            </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-          <Stat label="Pedidos" value={resumo.totalPedidos} />
-          <Stat label="Recusados" value={resumo.recusados} />
-          <Stat label="Expirados" value={resumo.expirados} />
-          <Stat label="Pontos" value={resumo.pontosPenalidade} alerta={resumo.pontosPenalidade > 0} />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Recusas com justificativa legítima não penalizam. Desistir sem motivo ou não responder reduz
-          sua reputação.
-        </p>
-      </Card>
+  const aceitacaoTone =
+    resumo.taxaAceitacao === null ? "primary" : resumo.taxaAceitacao >= 0.8 ? "success" : resumo.taxaAceitacao >= 0.5 ? "warning" : "danger";
 
-      <Card className="space-y-3">
-        <h2 className="font-display text-lg font-black text-foreground">Penalidades</h2>
+  return (
+    <div className="animate-fade-in delay-2 space-y-6">
+      <div>
+        <h2 className="mb-3 font-display text-xl font-black text-foreground">Comportamento</h2>
+        <Card className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-center border-border sm:border-r sm:pr-8">
+            <ProgressRing
+              value={resumo.taxaAceitacao ? resumo.taxaAceitacao * 100 : 0}
+              tone={aceitacaoTone}
+              label={resumo.taxaAceitacao != null ? `${Math.round(resumo.taxaAceitacao * 100)}%` : "—"}
+            />
+            <span className="mt-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Taxa de aceitação
+            </span>
+          </div>
+          <div className="grid flex-1 grid-cols-2 gap-4">
+            <StatCard label="Aprovados" value={resumo.aprovados} detail={`de ${resumo.totalPedidos} pedidos`} />
+            <StatCard
+              label="Penalidades"
+              value={resumo.pontosPenalidade}
+              tone={resumo.pontosPenalidade > 0 ? "danger" : "success"}
+              detail="Pontos na conta"
+            />
+          </div>
+        </Card>
+        <p className="mt-2 px-1 text-xs text-muted-foreground">
+          Recusas com justificativa legítima não penalizam. Desistir sem motivo ou não responder reduz sua reputação.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <h3 className="font-display text-lg font-black text-foreground">Histórico de penalidades</h3>
         {penalidades.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma penalidade. Continue assim! 👏</p>
+          <EmptyState
+            icon={<ShieldIcon className="h-8 w-8 text-success" />}
+            title="Conta exemplar"
+            description="Você não possui nenhuma penalidade. Continue prestando um ótimo serviço!"
+            className="bg-success/5 border-success/20"
+          />
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {penalidades.map((p) => (
-              <li key={p.id} className="flex items-start justify-between gap-3 text-sm">
-                <div>
-                  <div className="font-semibold text-foreground">{penaltyReasonLabel(p.motivo)}</div>
-                  <div className="text-xs text-muted-foreground">{formatDateTimeBR(p.criadoEm)}</div>
-                  {p.detalhe && <div className="text-xs text-muted-foreground">{p.detalhe}</div>}
+              <Card key={p.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-foreground">{penaltyReasonLabel(p.motivo)}</p>
+                    <p className="text-sm text-muted-foreground">{formatDateTimeBR(p.criadoEm)}</p>
+                    {p.detalhe && <p className="mt-2 text-sm text-muted-foreground">{p.detalhe}</p>}
+                  </div>
+                  <Badge tone="danger" size="md">+{p.pontos} pts</Badge>
                 </div>
-                <Badge tone="danger">+{p.pontos} pts</Badge>
-              </li>
+              </Card>
             ))}
           </ul>
         )}
-      </Card>
-    </>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium text-foreground">{value}</span>
-    </div>
-  );
-}
-
-function Stat({ label, value, alerta = false }: { label: string; value: number; alerta?: boolean }) {
-  return (
-    <div className="rounded-md bg-muted px-3 py-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`text-xl font-black ${alerta ? "text-danger" : "text-foreground"}`}>{value}</div>
+      </div>
     </div>
   );
 }

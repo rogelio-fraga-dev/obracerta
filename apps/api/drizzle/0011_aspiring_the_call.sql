@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "foto_url" varchar(500);

@@ -1,0 +1,56 @@
+============================================================
+ CREDENCIAIS DO AMBIENTE LOCAL (DEV) — ObraCerta
+============================================================
+
+Geradas pelo seed: apps/api/src/infrastructure/database/seed-completo.ts
+Use no login por E-MAIL + SENHA em http://localhost:3000/entrar
+(aba "E-mail e senha").
+
+ATENÇÃO: senhas conhecidas, apenas para desenvolvimento local.
+NÃO use em produção.
+
+------------------------------------------------------------
+ ADMINISTRADOR (controle total: ADMIN + MODERADOR + FINANCEIRO)
+------------------------------------------------------------
+  E-mail:   admin@example.com
+  Senha:    admin@123
+  WhatsApp: +5511999999994
+  Acesso:   Painel admin, Moderação, Financeiro, métricas e
+            todas as áreas dos usuários.
+
+------------------------------------------------------------
+ CONTRATANTE
+------------------------------------------------------------
+  E-mail:   carlos@example.com
+  Senha:    senha@123
+  WhatsApp: +5511999999991
+
+------------------------------------------------------------
+ PROFISSIONAL — plano PRO (perfil completo)
+------------------------------------------------------------
+  E-mail:   joana@example.com
+  Senha:    senha@123
+  WhatsApp: +5511999999992
+  Perfil público: /joana-pintora-silva
+
+------------------------------------------------------------
+ PROFISSIONAL — plano INICIANTE
+------------------------------------------------------------
+  E-mail:   pedro@example.com
+  Senha:    senha@123
+  WhatsApp: +5511999999993
+  Perfil público: /pedro-pedreiro
+
+------------------------------------------------------------
+ COMO REPOPULAR O BANCO (reset dos dados)
+------------------------------------------------------------
+  1. pnpm docker:up
+  2. pnpm --filter @obracerta/api db:migrate
+  3. pnpm --filter @obracerta/api exec tsx \
+       src/infrastructure/database/seed-completo.ts
+  (No Windows, se "localhost" falhar na conexão, exporte
+   DATABASE_URL com 127.0.0.1 antes de rodar o seed.)
+
+  O login por WhatsApp (OTP) também funciona local: o código
+  de 6 dígitos aparece no log da API.
+============================================================

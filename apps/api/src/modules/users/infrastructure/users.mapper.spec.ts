@@ -8,6 +8,7 @@ function makeRow(overrides: Partial<UserRow> = {}): UserRow {
     nomeCompleto: "Maria da Silva",
     whatsapp: "+5511999999999",
     email: "maria@example.com",
+    senhaHash: null,
     cidadeId: "22222222-2222-2222-2222-222222222222",
     tipo: "PROFISSIONAL",
     cpf: "12345678901",

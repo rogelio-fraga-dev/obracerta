@@ -2,10 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { LogoutIcon } from "./icons";
 
-/** Botão de sair: chama o BFF (limpa cookies) e volta ao login. */
-export function LogoutButton() {
+/**
+ * Botão de sair: chama o BFF (limpa cookies httpOnly) e volta ao login. Botão
+ * **visível de verdade** (com borda + ícone), não um link discreto. `className`
+ * permite ocupar a largura toda na Sidebar e ficar compacto no header mobile.
+ */
+export function LogoutButton({ className }: { className?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -25,8 +31,12 @@ export function LogoutButton() {
       type="button"
       onClick={logout}
       disabled={loading}
-      className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+      className={cn(
+        "inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-bold text-muted-foreground transition-colors hover:border-danger/40 hover:bg-danger/5 hover:text-danger disabled:opacity-50",
+        className,
+      )}
     >
+      <LogoutIcon className="h-4 w-4" />
       {loading ? "Saindo…" : "Sair"}
     </button>
   );

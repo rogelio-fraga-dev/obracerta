@@ -31,6 +31,8 @@ export interface WorkOrderPage {
 export interface WorkOrderRepository {
   create(data: CreateWorkOrderData): Promise<WorkOrder>;
   findById(id: string): Promise<WorkOrder | null>;
+  findAll(): Promise<WorkOrder[]>;
+  findAllPaginated(limit: number, offset: number): Promise<{ items: WorkOrder[], total: number }>;
   listOpen(filters: ListOpenWorkOrdersFilters): Promise<WorkOrderPage>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transitionStatus(id: string, from: WorkOrderStatus, to: WorkOrderStatus): Promise<WorkOrder | null>;

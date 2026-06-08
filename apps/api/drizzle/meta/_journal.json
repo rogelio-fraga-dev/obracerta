@@ -71,6 +71,20 @@
       "when": 1780710006078,
       "tag": "0009_wooden_umar",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780928459099,
+      "tag": "0010_wet_darkhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780937675800,
+      "tag": "0011_aspiring_the_call",
+      "breakpoints": true
     }
   ]
 }

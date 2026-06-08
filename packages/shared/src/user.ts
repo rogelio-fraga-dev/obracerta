@@ -16,6 +16,7 @@ export const userSchema = z.object({
   nomeCompleto: z.string().trim().min(2).max(120),
   whatsapp: whatsappSchema,
   email: emailSchema.optional(),
+  fotoUrl: z.string().url().optional().nullable(),
   tipo: userTypeSchema,
   status: userStatusSchema,
   criadoEm: isoTimestampSchema,
@@ -30,3 +31,19 @@ export const createUserSchema = z.object({
   tipo: userTypeSchema,
 });
 export type CreateUserInput = z.infer<typeof createUserSchema>;
+
+/** Payload to update user profile */
+export const updateProfileSchema = z.object({
+  nomeCompleto: z.string().trim().min(2).max(120).optional(),
+  email: emailSchema.optional(),
+});
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+/** Payload to create a new admin */
+export const createAdminSchema = z.object({
+  nomeCompleto: z.string().trim().min(2).max(120),
+  whatsapp: whatsappSchema,
+  email: emailSchema,
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+});
+export type CreateAdminInput = z.infer<typeof createAdminSchema>;

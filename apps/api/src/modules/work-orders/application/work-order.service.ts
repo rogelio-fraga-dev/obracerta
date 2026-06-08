@@ -11,6 +11,7 @@ import {
   UserType,
   WorkOrderStatus,
   type CreateWorkOrderInput,
+  type PaginatedResponse,
   type Proposal,
   type SubmitProposalInput,
   type WorkOrder,
@@ -91,6 +92,24 @@ export class WorkOrderService {
 
   getWorkOrder(id: string): Promise<WorkOrder> {
     return this.getOrderOr404(id);
+  }
+
+  findAll(): Promise<WorkOrder[]> {
+    return this.orders.findAll();
+  }
+
+  async findAllPaginated(page: number, limit: number): Promise<PaginatedResponse<WorkOrder>> {
+    const offset = (page - 1) * limit;
+    const { items, total } = await this.orders.findAllPaginated(limit, offset);
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**

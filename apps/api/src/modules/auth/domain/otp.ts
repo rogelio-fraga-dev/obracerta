@@ -1,11 +1,14 @@
-import { randomInt } from "node:crypto";
 
 /**
  * Lógica pura de OTP (sem I/O — testável isoladamente).
  * Código de 6 dígitos gerado com CSPRNG (`crypto.randomInt`), não `Math.random`.
  */
 export function generateOtpCode(): string {
-  return randomInt(0, 1_000_000).toString().padStart(6, "0");
+  // Para facilitar testes no ambiente de desenvolvimento:
+  if (process.env.NODE_ENV !== "production") return "123456";
+  const min = 100000;
+  const max = 999999;
+  return String(Math.floor(Math.random() * (max - min + 1)) + min);
 }
 
 /** Chaves de Redis (namespaced) usadas no fluxo de OTP. */

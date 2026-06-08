@@ -1,10 +1,11 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import type { User } from "@obracerta/shared";
+import type { PaginatedResponse, User } from "@obracerta/shared";
 import {
   USERS_REPOSITORY,
   type CreateUserData,
   type UsersRepository,
 } from "../domain/ports/users.repository.js";
+import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
 
 /**
  * Casos de uso de usuário. Orquestra o domínio sobre a porta `UsersRepository`
@@ -13,23 +14,75 @@ import {
  */
 @Injectable()
 export class UsersService {
-  constructor(@Inject(USERS_REPOSITORY) private readonly users: UsersRepository) {}
+  constructor(
+    @Inject(USERS_REPOSITORY) private readonly users: UsersRepository,
+    @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+  ) {}
 
-  /** Cria um usuário, garantindo unicidade de WhatsApp (regra de aplicação). */
+  /** Cria um usuário, garantindo unicidade de WhatsApp e e-mail (regra de aplicação). */
   async create(input: CreateUserData): Promise<User> {
-    const existing = await this.users.findByWhatsapp(input.whatsapp);
-    if (existing) {
-      throw new ConflictException("Já existe um usuário com este WhatsApp.");
+    const byWhats = await this.users.findByWhatsapp(input.whatsapp);
+    if (byWhats) throw new ConflictException("WhatsApp já cadastrado");
+
+    if (input.email) {
+      const byEmail = await this.users.findByEmail(input.email);
+      if (byEmail) throw new ConflictException("E-mail já cadastrado");
     }
+
     return this.users.create(input);
+  }
+
+  async createAdmin(input: { nomeCompleto: string; whatsapp: string; email?: string; password?: string }): Promise<User> {
+    const user = await this.create({
+      nomeCompleto: input.nomeCompleto,
+      whatsapp: input.whatsapp,
+      email: input.email,
+      tipo: "CONTRATANTE",
+    });
+
+    if (input.password) {
+      const { hashPassword } = await import("../../auth/domain/password.js");
+      const hash = await hashPassword(input.password);
+      await this.users.updatePasswordHash(user.id, hash);
+    }
+
+    await this.users.setRoles(user.id, ["ADMIN"]);
+    return user;
   }
 
   findByWhatsapp(whatsapp: string): Promise<User | null> {
     return this.users.findByWhatsapp(whatsapp);
   }
 
+  findByEmail(email: string): Promise<User | null> {
+    return this.users.findByEmail(email);
+  }
+
+  /** Usuário + hash de senha por e-mail (consumido pelo login "conta normal"). */
+  findCredentialsByEmail(email: string) {
+    return this.users.findCredentialsByEmail(email);
+  }
+
   findById(id: string): Promise<User | null> {
     return this.users.findById(id);
+  }
+
+  findAll(): Promise<User[]> {
+    return this.users.findAll();
+  }
+
+  async findAllPaginated(page: number, limit: number): Promise<PaginatedResponse<User>> {
+    const offset = (page - 1) * limit;
+    const { items, total } = await this.users.findAllPaginated(limit, offset);
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /** Papéis administrativos do usuário (vazio se não tem ou não existe). */
@@ -49,5 +102,31 @@ export class UsersService {
   /** Atualiza o status da conta (usado pela moderação para suspender/reativar). */
   setStatus(id: string, status: string): Promise<void> {
     return this.users.setStatus(id, status);
+  }
+
+  async updateProfile(id: string, data: { nomeCompleto?: string; email?: string }): Promise<User> {
+    const updated = await this.users.updateProfile(id, data);
+    if (!updated) throw new NotFoundException("Usuário não encontrado");
+    return updated;
+  }
+
+  async updatePasswordHash(id: string, hash: string): Promise<void> {
+    await this.users.updatePasswordHash(id, hash);
+  }
+
+  async setFoto(id: string, url: string): Promise<User> {
+    const updated = await this.users.setFotoUrl(id, url);
+    if (!updated) throw new NotFoundException("Usuário não encontrado");
+    return updated;
+  }
+
+  async uploadFoto(
+    id: string,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<User> {
+    const ext = file.originalname.split(".").pop();
+    const key = `users/${id}/foto-${Date.now()}.${ext}`;
+    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    return this.setFoto(id, url);
   }
 }

@@ -20,6 +20,9 @@ export const users = pgTable(
     nomeCompleto: varchar("nome_completo", { length: 120 }).notNull(),
     whatsapp: varchar("whatsapp", { length: 20 }).notNull().unique(),
     email: varchar("email", { length: 255 }),
+    fotoUrl: varchar("foto_url", { length: 500 }),
+    // Hash scrypt da senha (login "conta normal"); null = conta só por OTP/Google.
+    senhaHash: varchar("senha_hash", { length: 255 }),
     cidadeId: uuid("cidade_id").references(() => cities.id, { onDelete: "set null" }),
     tipo: userTipoEnum("tipo").notNull(),
     cpf: varchar("cpf", { length: 11 }),

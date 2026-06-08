@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
 import { UsersModule } from "../users/users.module.js";
+import { WorkOrdersModule } from "../work-orders/work-orders.module.js";
+import { BookingModule } from "../booking/booking.module.js";
 import { AdminService } from "./application/admin.service.js";
 import { ADMIN_METRICS_REPOSITORY } from "./domain/ports/admin-metrics.repository.js";
 import { DrizzleAdminMetricsRepository } from "./infrastructure/drizzle-admin-metrics.repository.js";
@@ -11,7 +13,7 @@ import { AdminController } from "./interface/admin.controller.js";
  * (métricas agregadas read-only). Importa AuthModule (guards) e UsersModule (UsersService).
  */
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [AuthModule, UsersModule, WorkOrdersModule, BookingModule],
   controllers: [AdminController],
   providers: [
     AdminService,

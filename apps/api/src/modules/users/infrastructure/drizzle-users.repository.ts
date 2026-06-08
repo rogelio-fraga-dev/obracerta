@@ -1,10 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import type { User } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { users } from "../../../infrastructure/database/schema/users.js";
-import type { CreateUserData, UsersRepository } from "../domain/ports/users.repository.js";
+import type {
+  CreateUserData,
+  UserCredentials,
+  UsersRepository,
+} from "../domain/ports/users.repository.js";
 
 /** Linha crua da tabela `users` (o que o Drizzle devolve no `select`). */
 type UserRow = typeof users.$inferSelect;
@@ -20,6 +24,7 @@ export function rowToUser(row: UserRow): User {
     nomeCompleto: row.nomeCompleto,
     whatsapp: row.whatsapp,
     email: row.email ?? undefined,
+    fotoUrl: row.fotoUrl,
     tipo: row.tipo as User["tipo"],
     status: row.status as User["status"],
     criadoEm: row.criadoEm.toISOString(),
@@ -38,6 +43,7 @@ export class DrizzleUsersRepository implements UsersRepository {
         nomeCompleto: input.nomeCompleto,
         whatsapp: input.whatsapp,
         email: input.email,
+        senhaHash: input.senhaHash,
         tipo: input.tipo,
         cidadeId: input.cidadeId,
       })
@@ -49,13 +55,34 @@ export class DrizzleUsersRepository implements UsersRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const [row] = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
-    return row ? rowToUser(row) : null;
+    const res = await this.db.select().from(users).where(eq(users.id, id));
+    return res.length > 0 ? rowToUser(res[0]!) : null;
+  }
+
+  async findAll(): Promise<User[]> {
+    const rows = await this.db.select().from(users).orderBy(users.criadoEm);
+    return rows.map(rowToUser);
+  }
+
+  async findAllPaginated(limit: number, offset: number): Promise<{ items: User[], total: number }> {
+    const rows = await this.db.select().from(users).orderBy(users.criadoEm).limit(limit).offset(offset);
+    const [c] = await this.db.select({ total: count() }).from(users);
+    return { items: rows.map(rowToUser), total: c?.total ?? 0 };
   }
 
   async findByWhatsapp(whatsapp: string): Promise<User | null> {
     const [row] = await this.db.select().from(users).where(eq(users.whatsapp, whatsapp)).limit(1);
     return row ? rowToUser(row) : null;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const [row] = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
+    return row ? rowToUser(row) : null;
+  }
+
+  async findCredentialsByEmail(email: string): Promise<UserCredentials | null> {
+    const [row] = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
+    return row ? { user: rowToUser(row), senhaHash: row.senhaHash ?? null } : null;
   }
 
   async findRoles(id: string): Promise<string[] | null> {
@@ -72,6 +99,37 @@ export class DrizzleUsersRepository implements UsersRepository {
   }
 
   async setStatus(id: string, status: string): Promise<void> {
-    await this.db.update(users).set({ status }).where(eq(users.id, id));
+    await this.db
+      .update(users)
+      .set({ status: status as any })
+      .where(eq(users.id, id));
+  }
+
+  async updateProfile(id: string, data: { nomeCompleto?: string; email?: string }): Promise<User | null> {
+    const res = await this.db
+      .update(users)
+      .set({
+        ...(data.nomeCompleto ? { nomeCompleto: data.nomeCompleto } : {}),
+        ...(data.email ? { email: data.email } : {}),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return res.length > 0 ? rowToUser(res[0]!) : null;
+  }
+
+  async setFotoUrl(id: string, url: string): Promise<User | null> {
+    const res = await this.db
+      .update(users)
+      .set({ fotoUrl: url })
+      .where(eq(users.id, id))
+      .returning();
+    return res.length > 0 ? rowToUser(res[0]!) : null;
+  }
+
+  async updatePasswordHash(id: string, hash: string): Promise<void> {
+    await this.db
+      .update(users)
+      .set({ senhaHash: hash })
+      .where(eq(users.id, id));
   }
 }
