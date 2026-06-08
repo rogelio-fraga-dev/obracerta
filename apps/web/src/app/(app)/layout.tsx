@@ -3,6 +3,7 @@ import { config } from "@/lib/config";
 import { requireSession } from "@/lib/session";
 import { TabBar } from "./_shell/TabBar";
 import { LogoutButton } from "./_shell/LogoutButton";
+import { InstallPrompt } from "./_shell/InstallPrompt";
 
 /**
  * Shell da área logada (route group `(app)`) — o PWA. **Guarda de sessão no
@@ -19,6 +20,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <LogoutButton />
       </header>
       <main className="mx-auto max-w-2xl px-5 py-6">{children}</main>
+      <InstallPrompt />
       <TabBar />
     </div>
   );
