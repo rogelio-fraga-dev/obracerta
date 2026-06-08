@@ -43,3 +43,8 @@ CLAUDE.md
 docs/CODEMAPS/
 docs/skills-ecc.md
 .reports/
+
+# Playwright (E2E artifacts)
+test-results/
+playwright-report/
+playwright/.cache/

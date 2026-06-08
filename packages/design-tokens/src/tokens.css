@@ -15,7 +15,9 @@
   --color-orange-700: #a53a07;
   --color-orange-800: #7e2d06;
   --color-orange-900: #5c2105;
-  --color-orange: var(--color-orange-500);
+  /* Laranja semântico (interativo/acento). #c44408 passa WCAG AA (4.5:1) sobre
+     cream e com texto branco; o #e8560a (orange-500) fica como hero de grande porte. */
+  --color-orange: #c44408;
 
   /* ── Dark (foreground / dark surfaces) ── */
   --color-dark: #18160f;
@@ -28,7 +30,7 @@
   /* ── Semantic tokens ── */
   --color-background: var(--color-cream);
   --color-foreground: var(--color-dark);
-  --color-primary: var(--color-orange-500);
+  --color-primary: #c44408;
   --color-primary-foreground: #ffffff;
   --color-muted: var(--color-cream-soft);
   --color-muted-foreground: #6b6455;
