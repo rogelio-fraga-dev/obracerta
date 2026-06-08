@@ -93,4 +93,13 @@ export class DrizzleSuspensionRepository implements SuspensionRepository {
       .orderBy(desc(accountSuspensions.inicioEm));
     return rows.map(rowToSuspension);
   }
+
+  async listAppealed(): Promise<Suspension[]> {
+    const rows = await this.db
+      .select()
+      .from(accountSuspensions)
+      .where(eq(accountSuspensions.status, "APELADA"))
+      .orderBy(desc(accountSuspensions.apeladaEm));
+    return rows.map(rowToSuspension);
+  }
 }

@@ -19,6 +19,8 @@ export interface SuspensionRepository {
   /** Resolve (apelação/expiração): move o status; quando `resolvido`, carimba `resolvido_em`. */
   resolve(id: string, status: SuspensionStatus, resolvido: boolean): Promise<Suspension | null>;
   listForUser(userId: string): Promise<Suspension[]>;
+  /** Suspensões APELADA aguardando julgamento do moderador. */
+  listAppealed(): Promise<Suspension[]>;
 }
 
 export const SUSPENSION_REPOSITORY = Symbol("SUSPENSION_REPOSITORY");

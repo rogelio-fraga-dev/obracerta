@@ -58,6 +58,13 @@ export class ModerationController {
     return this.moderation.resolveReport(id, body.procedente);
   }
 
+  /** Fila do moderador: suspensões apeladas aguardando julgamento (MODERADOR/ADMIN). */
+  @Get("suspensions/appealed")
+  @Roles(UserRole.ADMIN, UserRole.MODERADOR)
+  appealedSuspensions(): Promise<Suspension[]> {
+    return this.moderation.listAppealedSuspensions();
+  }
+
   /** O usuário suspenso apela. */
   @Post("suspensions/appeal")
   appeal(

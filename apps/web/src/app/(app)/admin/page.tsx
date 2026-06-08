@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ApiEnvelopeError, formatCentavos, type HealthSnapshot } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
@@ -78,6 +79,19 @@ export default async function AdminPage() {
           <Stat label="Suspensões ativas" value={snapshot.moderacao.suspensoesAtivas} />
         </div>
       </Card>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/admin/moderacao" className="block">
+          <Card className="text-center transition-colors hover:border-primary">
+            <span className="font-semibold text-foreground">Moderação →</span>
+          </Card>
+        </Link>
+        <Link href="/admin/financeiro" className="block">
+          <Card className="text-center transition-colors hover:border-primary">
+            <span className="font-semibold text-foreground">Financeiro →</span>
+          </Card>
+        </Link>
+      </div>
 
       <RolesForm />
     </section>

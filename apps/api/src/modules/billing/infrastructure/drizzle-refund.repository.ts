@@ -61,4 +61,13 @@ export class DrizzleRefundRepository implements RefundRepository {
       .orderBy(desc(refunds.solicitadoEm));
     return rows.map(rowToRefund);
   }
+
+  async listPending(): Promise<Refund[]> {
+    const rows = await this.db
+      .select()
+      .from(refunds)
+      .where(eq(refunds.status, "SOLICITADO"))
+      .orderBy(desc(refunds.solicitadoEm));
+    return rows.map(rowToRefund);
+  }
 }

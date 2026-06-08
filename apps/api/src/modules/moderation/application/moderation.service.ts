@@ -215,6 +215,11 @@ export class ModerationService {
     return this.suspensions.listForUser(userId);
   }
 
+  /** Fila do moderador: suspensões apeladas aguardando julgamento. */
+  listAppealedSuspensions(): Promise<Suspension[]> {
+    return this.suspensions.listAppealed();
+  }
+
   /** Identifica o usuário ofensor de uma denúncia procedente. */
   private async resolveOffender(report: Report): Promise<string | null> {
     if (report.entidade === "USER" || report.entidade === "PROFILE") {

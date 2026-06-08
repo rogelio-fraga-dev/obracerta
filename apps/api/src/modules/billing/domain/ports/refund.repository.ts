@@ -15,6 +15,8 @@ export interface RefundRepository {
   /** Resolve o reembolso (CONCLUIDO/RECUSADO): grava status, gatewayId e processadoEm. */
   resolve(id: string, status: RefundStatus, gatewayId: string | null): Promise<Refund | null>;
   listForUser(userId: string): Promise<Refund[]>;
+  /** Reembolsos SOLICITADO aguardando decisão do financeiro. */
+  listPending(): Promise<Refund[]>;
 }
 
 export const REFUND_REPOSITORY = Symbol("REFUND_REPOSITORY");

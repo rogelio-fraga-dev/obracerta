@@ -120,6 +120,14 @@ export class BillingController {
     return this.billing.listRefunds(user.sub);
   }
 
+  /** Fila do financeiro: reembolsos pendentes (FINANCEIRO/ADMIN). */
+  @Get("refunds/pending")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.FINANCEIRO)
+  pendingRefunds(): Promise<Refund[]> {
+    return this.billing.listPendingRefunds();
+  }
+
   /** Resolve um reembolso (FINANCEIRO/ADMIN). */
   @Post("refunds/:id/resolve")
   @UseGuards(JwtAuthGuard, RolesGuard)

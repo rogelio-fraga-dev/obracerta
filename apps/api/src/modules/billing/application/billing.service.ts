@@ -320,6 +320,11 @@ export class BillingService {
     return this.refunds.listForUser(userId);
   }
 
+  /** Fila do financeiro: reembolsos SOLICITADO aguardando decisão. */
+  listPendingRefunds(): Promise<Refund[]> {
+    return this.refunds.listPending();
+  }
+
   /**
    * Solicita reembolso de uma fatura PAGA do usuário (roadmap §21). O valor é
    * calculado pelo motivo CDC (integral/proporcional); 0 → não elegível.
