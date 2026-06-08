@@ -90,3 +90,48 @@ export function PlusIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m14 6-6 6 6 6" />
+    </svg>
+  );
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </svg>
+  );
+}
+
+export function MapPinIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+export function TagIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M3.5 11.5 11 4h6.5V10.5L10 18l-6.5-6.5Z" />
+      <circle cx="14.5" cy="7.5" r="1.2" />
+    </svg>
+  );
+}
+
+export function MoneyIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3" y="6" width="18" height="12" rx="2.5" />
+      <circle cx="12" cy="12" r="2.6" />
+      <path d="M6 9.5h0M18 14.5h0" />
+    </svg>
+  );
+}
