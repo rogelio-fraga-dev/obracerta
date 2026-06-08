@@ -42,9 +42,10 @@
   --color-info: #2563eb;
 
   /* ── Typography ── */
-  /* apps/web overrides these with next/font variables; these are fallbacks. */
-  --font-display: "Fraunces", serif;
-  --font-sans: "Cabinet Grotesk", system-ui, sans-serif;
+  /* apps/web injeta as fontes via next/font (--font-fraunces/--font-jakarta);
+     aqui ficam as variáveis semânticas com fallback. */
+  --font-display: var(--font-fraunces), "Fraunces", Georgia, serif;
+  --font-sans: var(--font-jakarta), "Cabinet Grotesk", system-ui, sans-serif;
 
   /* ── Radii ── */
   --radius-sm: 8px;

@@ -2,8 +2,26 @@ import "@obracerta/design-tokens/tokens.css";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { config } from "@/lib/config";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+
+// Tipografia da marca: Fraunces (títulos) + Plus Jakarta Sans (corpo, no lugar do
+// Cabinet Grotesk, que não está no Google Fonts). Expostas como CSS variables que
+// os tokens consomem (`--font-display`/`--font-sans`).
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+const sans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${display.variable} ${sans.variable}`}>
       <body>
         {children}
         <ServiceWorkerRegister />
