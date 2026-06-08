@@ -1,13 +1,27 @@
 "use client";
 
+import type { ComponentType, SVGProps } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@obracerta/ui";
-import { TABS } from "./tabs";
+import { HomeIcon, ObrasIcon, PedidosIcon, PerfilIcon } from "./icons";
+
+interface Tab {
+  href: string;
+  label: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+}
+
+const TABS: Tab[] = [
+  { href: "/inicio", label: "Início", Icon: HomeIcon },
+  { href: "/pedidos", label: "Pedidos", Icon: PedidosIcon },
+  { href: "/obras", label: "Obras", Icon: ObrasIcon },
+  { href: "/perfil", label: "Perfil", Icon: PerfilIcon },
+];
 
 /**
- * Barra de abas inferior da área logada (mobile-first). Destaca a aba ativa pelo
- * pathname. Fixa no rodapé; o conteúdo reserva espaço com `pb` no layout.
+ * Barra de abas inferior (mobile-first) com ícones SVG. A aba ativa ganha cor de
+ * destaque + um traço superior. Fixa no rodapé, com safe-area do iOS.
  */
 export function TabBar() {
   const pathname = usePathname();
@@ -15,25 +29,29 @@ export function TabBar() {
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
       <ul className="mx-auto flex max-w-2xl">
-        {TABS.map((tab) => {
-          const active = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
+        {TABS.map(({ href, label, Icon }) => {
+          const active = pathname === href || pathname.startsWith(`${href}/`);
           return (
-            <li key={tab.href} className="flex-1">
+            <li key={href} className="relative flex-1">
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-primary"
+                />
+              )}
               <Link
-                href={tab.href}
+                href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 py-2.5 text-xs font-semibold transition-colors",
+                  "flex flex-col items-center gap-1 py-2.5 text-[11px] font-bold transition-colors",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <span aria-hidden className="text-lg leading-none">
-                  {tab.icon}
-                </span>
-                {tab.label}
+                <Icon className="h-6 w-6" />
+                {label}
               </Link>
             </li>
           );
