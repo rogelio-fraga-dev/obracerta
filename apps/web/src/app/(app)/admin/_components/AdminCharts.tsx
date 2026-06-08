@@ -2,8 +2,6 @@
 
 import { Card } from "@obracerta/ui";
 import {
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,

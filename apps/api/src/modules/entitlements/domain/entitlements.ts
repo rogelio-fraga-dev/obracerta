@@ -6,22 +6,46 @@ import { ProfessionalPlan, ContractorPlan } from "@obracerta/shared";
  * consulta a este mapa. Versão base (Fase 1); expande na monetização (Fase 4).
  */
 export const Feature = {
+  // Profissional
+  PUBLIC_PROFILE: "profile.public", // perfil aparece na busca
+  FULL_PROFILE: "profile.full", // foto, nome completo, cidade e valores visíveis
+  PORTFOLIO: "profile.portfolio", // galeria de obras
+  RECEIVE_BOOKINGS: "booking.receive", // recebe pedidos de serviço
+  ANALYTICS: "profile.analytics", // analytics do perfil (visitas)
+  TOP_SEARCH: "search.top", // destaque no topo das buscas
+  // Comum (profissional/contratante)
   SEARCH_GEO: "search.geo",
   SEARCH_UNLIMITED: "search.unlimited",
-  PUBLIC_PROFILE: "profile.public",
-  SUBMIT_BID: "bid.submit",
+  SUBMIT_BID: "bid.submit", // dar lances em obras
 } as const;
 export type Feature = (typeof Feature)[keyof typeof Feature];
 
 export type Plan = ProfessionalPlan | ContractorPlan;
 
-/** Mapa plano → features liberadas. Plano ausente = sem features extras. */
+/**
+ * Mapa plano → features liberadas (gating). Espelha os benefícios anunciados na
+ * landing/planos: Iniciante só perfil básico; Pro perfil completo + recebe
+ * pedidos; Especialista também dá lances e tem destaque. Plano ausente = nada.
+ */
 const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
   [ProfessionalPlan.INICIANTE]: [Feature.PUBLIC_PROFILE],
-  [ProfessionalPlan.PRO]: [Feature.PUBLIC_PROFILE, Feature.SEARCH_GEO],
+  [ProfessionalPlan.PRO]: [
+    Feature.PUBLIC_PROFILE,
+    Feature.FULL_PROFILE,
+    Feature.PORTFOLIO,
+    Feature.RECEIVE_BOOKINGS,
+    Feature.ANALYTICS,
+    Feature.SEARCH_GEO,
+  ],
   [ProfessionalPlan.ESPECIALISTA]: [
     Feature.PUBLIC_PROFILE,
+    Feature.FULL_PROFILE,
+    Feature.PORTFOLIO,
+    Feature.RECEIVE_BOOKINGS,
+    Feature.ANALYTICS,
     Feature.SEARCH_GEO,
+    Feature.SUBMIT_BID,
+    Feature.TOP_SEARCH,
     Feature.SEARCH_UNLIMITED,
   ],
   [ContractorPlan.BASICO]: [Feature.SEARCH_GEO],

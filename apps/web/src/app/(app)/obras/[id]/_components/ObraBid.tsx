@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatCentavos, type Proposal, type WorkOrderStatus } from "@obracerta/shared";
 import { Badge, Button, Card, Field, Input } from "@obracerta/ui";
@@ -17,11 +18,14 @@ export function ObraBid({
   status,
   pisoCentavos,
   minhaProposta,
+  canBid,
 }: {
   workOrderId: string;
   status: WorkOrderStatus;
   pisoCentavos: number | null;
   minhaProposta: Proposal | null;
+  /** O plano vigente libera dar lances (feature `bid.submit`)? */
+  canBid: boolean;
 }) {
   const router = useRouter();
   const [valor, setValor] = useState("");
@@ -55,6 +59,24 @@ export function ObraBid({
     return (
       <Card>
         <p className="text-muted-foreground">Esta obra não está mais aberta para lances.</p>
+      </Card>
+    );
+  }
+
+  // Gating: sem a feature bid.submit (plano Especialista), mostra o cadeado + upgrade.
+  if (!canBid) {
+    return (
+      <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
+        <span className="text-3xl">🔒</span>
+        <h2 className="font-display text-lg font-black text-foreground">
+          Dar lances é do plano Especialista
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Faça upgrade para enviar propostas sigilosas em obras abertas e aparecer no topo das buscas.
+        </p>
+        <Link href="/cobrancas" className="block">
+          <Button className="w-full">Fazer upgrade</Button>
+        </Link>
       </Card>
     );
   }

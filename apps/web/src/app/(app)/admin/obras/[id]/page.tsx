@@ -61,7 +61,7 @@ export default async function AdminObraDetalhePage({ params }: { params: { id: s
                   <Link href={`/admin/usuarios/${obra.contractorId}`} className="font-medium text-primary hover:underline block truncate max-w-[150px]">
                     {contratante ? contratante.nomeCompleto : `${obra.contractorId.substring(0, 8)}...`}
                   </Link>
-                  {contratante && <span className="text-xs text-muted-foreground">{contratante.telefone ?? contratante.email}</span>}
+                  {contratante && <span className="text-xs text-muted-foreground">{contratante.whatsapp ?? contratante.email}</span>}
                 </div>
               </div>
               <div className="flex justify-between items-center">

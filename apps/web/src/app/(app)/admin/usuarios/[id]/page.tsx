@@ -1,11 +1,15 @@
 import { serverApi } from "@/lib/server-api";
 import { Badge, Card, Button } from "@obracerta/ui";
-import type { User } from "@obracerta/shared";
+import type { User, ReputationSummary } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
 export default async function AdminUsuarioDetalhePage({ params }: { params: { id: string } }) {
-  const user = await serverApi<User>("GET", `/admin/users/${params.id}`);
+  const [user, rolesData, reputation] = await Promise.all([
+    serverApi<User>("GET", `/admin/users/${params.id}`),
+    serverApi<{roles: string[]}>("GET", `/admin/users/${params.id}/roles`).catch(() => ({ roles: [] })),
+    serverApi<ReputationSummary>("GET", `/reputation/${params.id}`).catch(() => null),
+  ]);
 
   return (
     <section aria-labelledby="admin-usuario-detalhe-heading" className="space-y-6">
@@ -56,6 +60,37 @@ export default async function AdminUsuarioDetalhePage({ params }: { params: { id
             </div>
           </div>
         </Card>
+
+        {reputation && (
+          <Card className="space-y-4">
+            <h2 className="font-display text-xl font-bold border-b border-border pb-2">Reputação Pública</h2>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Nota Média</span>
+                <span className="font-medium text-warning text-lg">
+                  {reputation.mediaNota != null ? `${reputation.mediaNota.toFixed(1)} ⭐` : "Sem avaliações"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Total de Avaliações</span>
+                <span className="font-medium text-foreground">{reputation.totalAvaliacoes}</span>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {rolesData.roles.length > 0 && (
+          <Card className="space-y-4">
+            <h2 className="font-display text-xl font-bold border-b border-border pb-2">Papéis no Sistema</h2>
+            <div className="flex flex-wrap gap-2">
+              {rolesData.roles.map(role => (
+                <Badge key={role} tone={role === "ADMIN" ? "danger" : "primary"}>
+                  {role}
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
 
         <Card className="space-y-4">
           <h2 className="font-display text-xl font-bold border-b border-border pb-2">Ações de Moderação</h2>

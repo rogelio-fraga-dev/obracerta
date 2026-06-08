@@ -1,0 +1,50 @@
+<svg width="440" height="420" viewBox="0 0 440 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração de obra: planta baixa e casa">
+  <defs>
+    <linearGradient id="oc-roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF7A3D"/>
+      <stop offset="1" stop-color="#E8560A"/>
+    </linearGradient>
+    <pattern id="oc-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0V28" fill="none" stroke="#E8E0CC" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Prancheta / blueprint -->
+  <rect x="20" y="40" width="400" height="340" rx="20" fill="#FAF7F0" stroke="#E8E0CC" stroke-width="2"/>
+  <rect x="20" y="40" width="400" height="340" rx="20" fill="url(#oc-grid)" opacity="0.7"/>
+
+  <!-- Casa -->
+  <g>
+    <!-- corpo -->
+    <rect x="130" y="190" width="180" height="130" rx="6" fill="#221F16"/>
+    <!-- telhado -->
+    <path d="M120 195 L220 120 L320 195 Z" fill="url(#oc-roof)"/>
+    <!-- porta -->
+    <rect x="200" y="250" width="40" height="70" rx="4" fill="#FAF7F0"/>
+    <circle cx="232" cy="288" r="3" fill="#E8560A"/>
+    <!-- janelas -->
+    <rect x="150" y="222" width="34" height="34" rx="4" fill="#FAF7F0"/>
+    <rect x="256" y="222" width="34" height="34" rx="4" fill="#FAF7F0"/>
+    <path d="M167 222v34M150 239h34" stroke="#E8E0CC" stroke-width="2"/>
+    <path d="M273 222v34M256 239h34" stroke="#E8E0CC" stroke-width="2"/>
+  </g>
+
+  <!-- Linhas de cota (blueprint) -->
+  <g stroke="#9B9080" stroke-width="1.5" stroke-dasharray="4 5">
+    <path d="M120 350 H320"/>
+    <path d="M120 345 V355 M320 345 V355"/>
+  </g>
+
+  <!-- Selo de verificação -->
+  <g transform="translate(322,62)">
+    <circle cx="28" cy="28" r="28" fill="#1A9E5C"/>
+    <path d="M16 28 l8 8 l16 -16" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Capacete (hard hat) -->
+  <g transform="translate(70,300)">
+    <path d="M2 26 a26 22 0 0 1 52 0 Z" fill="#E8560A"/>
+    <rect x="-4" y="24" width="64" height="8" rx="4" fill="#FF7A3D"/>
+    <path d="M28 6 v14" stroke="#FAF7F0" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

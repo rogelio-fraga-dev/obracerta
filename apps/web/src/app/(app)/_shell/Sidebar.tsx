@@ -51,7 +51,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
           href={href}
           aria-current={active ? "page" : undefined}
           className={cn(
-            "group relative flex items-center gap-4 rounded-xl px-4 py-3.5 text-base font-bold transition-all duration-200",
+            "group relative flex items-center gap-4 rounded-xl px-4 py-4 text-lg font-bold transition-all duration-200",
             active
               ? "bg-primary/10 text-primary"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -61,7 +61,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
           {active && (
             <span className="absolute left-0 top-1/2 h-8 w-[4px] -translate-y-1/2 rounded-r-full bg-primary" />
           )}
-          <Icon className="h-6 w-6 shrink-0 transition-transform duration-200 group-hover:scale-110" />
+          <Icon className="h-7 w-7 shrink-0 transition-transform duration-200 group-hover:scale-110" />
           {label}
         </Link>
       </li>
@@ -69,7 +69,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
   };
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-[310px] shrink-0 flex-col border-r border-border bg-background px-6 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh w-[280px] shrink-0 flex-col border-r border-border bg-background px-5 py-6 lg:flex">
       {/* ── Marca ── */}
       <Link href="/inicio" className="flex items-center gap-3 px-2" aria-label="Início">
         <span
@@ -78,7 +78,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
         >
           {inicial}
         </span>
-        <span className="font-display text-[1.4rem] font-black tracking-tight text-foreground">
+        <span className="font-display text-[1.5rem] font-black tracking-tight text-foreground">
           {brandName}
         </span>
       </Link>

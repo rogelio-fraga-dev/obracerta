@@ -7,6 +7,7 @@ export { Card, type CardProps } from "./card.js";
 export { EmptyState, type EmptyStateProps } from "./empty-state.js";
 export { Field, type FieldProps } from "./field.js";
 export { Input, type InputProps } from "./input.js";
+export { Label, type LabelProps } from "./label.js";
 export { ProgressRing, type ProgressRingProps } from "./progress-ring.js";
 export { Skeleton, SkeletonCard, type SkeletonProps } from "./skeleton.js";
 export { StatCard, type StatCardProps } from "./stat-card.js";

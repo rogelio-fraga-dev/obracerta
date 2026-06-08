@@ -1,9 +1,10 @@
+import type { LucideIcon } from "lucide-react";
 import { Home, ClipboardList, HardHat, User, Search, CalendarDays, Receipt, LayoutDashboard, Users } from "lucide-react";
 
 export interface NavItem {
   href: string;
   label: string;
-  Icon: any;
+  Icon: LucideIcon;
 }
 
 /**

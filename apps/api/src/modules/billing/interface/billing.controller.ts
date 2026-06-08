@@ -79,6 +79,16 @@ export class BillingController {
     return this.billing.subscribe(user.sub, input);
   }
 
+  /** Profissional faz **upgrade** de plano (troca o plano da assinatura vigente). */
+  @Post("subscriptions/upgrade")
+  @UseGuards(JwtAuthGuard)
+  upgrade(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(createSubscriptionSchema)) input: CreateSubscriptionInput,
+  ): Promise<Subscription> {
+    return this.billing.changePlan(user.sub, input);
+  }
+
   /** Contratante compra um plano avulso. */
   @Post("purchases")
   @UseGuards(JwtAuthGuard)

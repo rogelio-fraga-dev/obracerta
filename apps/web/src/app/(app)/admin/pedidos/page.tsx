@@ -1,6 +1,6 @@
 import { serverApi } from "@/lib/server-api";
 import { Badge, Card } from "@obracerta/ui";
-import type { BookingRequest } from "@obracerta/shared";
+import type { BookingRequest, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
@@ -13,6 +13,10 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
   const data = await serverApi<PaginatedResponse<BookingRequest>>("GET", `/admin/bookings?page=${page}&limit=20`);
   const pedidos = data.items;
   const meta = data.meta;
+
+  const uniqueUserIds = Array.from(new Set(pedidos.flatMap((p) => [p.contractorId, p.professionalId])));
+  const usersData = await Promise.all(uniqueUserIds.map((id) => serverApi<User>("GET", `/admin/users/${id}`).catch(() => null)));
+  const userMap = new Map(usersData.filter(Boolean).map((u) => [u!.id, u!.nomeCompleto]));
 
   return (
     <section aria-labelledby="admin-pedidos-heading" className="space-y-6">
@@ -53,13 +57,19 @@ export default async function AdminPedidosPage({ searchParams }: { searchParams:
                   <td className="px-6 py-4 max-w-[200px] truncate text-xs text-muted-foreground">
                     {pedido.descricao}
                   </td>
-                  <td className="px-6 py-4 font-mono text-xs text-muted-foreground space-y-1">
-                    <p>
-                      C: <Link href={`/admin/usuarios/${pedido.contractorId}`} className="text-primary hover:underline">{pedido.contractorId.substring(0, 8)}...</Link>
-                    </p>
-                    <p>
-                      P: <Link href={`/admin/usuarios/${pedido.professionalId}`} className="text-primary hover:underline">{pedido.professionalId.substring(0, 8)}...</Link>
-                    </p>
+                  <td className="px-6 py-4 text-xs text-muted-foreground space-y-2">
+                    <div>
+                      <span className="font-semibold text-foreground">C: </span>
+                      <Link href={`/admin/usuarios/${pedido.contractorId}`} className="text-primary hover:underline font-medium">
+                        {userMap.get(pedido.contractorId) ?? "Desconhecido"}
+                      </Link>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-foreground">P: </span>
+                      <Link href={`/admin/usuarios/${pedido.professionalId}`} className="text-primary hover:underline font-medium">
+                        {userMap.get(pedido.professionalId) ?? "Desconhecido"}
+                      </Link>
+                    </div>
                   </td>
                   <td className="px-6 py-4 space-y-2">
                     <Badge

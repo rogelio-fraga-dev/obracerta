@@ -84,7 +84,7 @@ export function FinanceChart() {
                   borderRadius: "8px",
                   boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
-                formatter={(value: any) => [`R$ ${value},00`, "Receita"]}
+                formatter={(value) => [`R$ ${value},00`, "Receita"]}
                 labelStyle={{ color: "hsl(var(--foreground))", fontWeight: "bold", marginBottom: "4px" }}
               />
               <Area
@@ -155,7 +155,7 @@ export function FinanceChart() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Tooltip
-                  formatter={(value: any) => [`R$ ${value},00`, "Receita"]}
+                  formatter={(value) => [`R$ ${value},00`, "Receita"]}
                   contentStyle={{
                     backgroundColor: "hsl(var(--background))",
                     borderColor: "hsl(var(--border))",

@@ -1,6 +1,6 @@
 import { serverApi } from "@/lib/server-api";
 import { Badge, Card } from "@obracerta/ui";
-import type { WorkOrder } from "@obracerta/shared";
+import type { WorkOrder, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
@@ -13,6 +13,10 @@ export default async function AdminObrasPage({ searchParams }: { searchParams: P
   const data = await serverApi<PaginatedResponse<WorkOrder>>("GET", `/admin/work-orders?page=${page}&limit=20`);
   const obras = data.items;
   const meta = data.meta;
+
+  const uniqueUserIds = Array.from(new Set(obras.map((o) => o.contractorId)));
+  const usersData = await Promise.all(uniqueUserIds.map((id) => serverApi<User>("GET", `/admin/users/${id}`).catch(() => null)));
+  const userMap = new Map(usersData.filter(Boolean).map((u) => [u!.id, u!.nomeCompleto]));
 
   return (
     <section aria-labelledby="admin-obras-heading" className="space-y-6">
@@ -35,7 +39,7 @@ export default async function AdminObrasPage({ searchParams }: { searchParams: P
               <tr>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Obra / Título</th>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Detalhes</th>
-                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Contratante (ID)</th>
+                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Contratante</th>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Status & Piso</th>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Criada em</th>
                 <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px] text-right">Ações</th>
@@ -56,9 +60,10 @@ export default async function AdminObrasPage({ searchParams }: { searchParams: P
                     {obra.bairro && <p className="text-xs text-muted-foreground">{obra.bairro}</p>}
                   </td>
                   <td className="px-6 py-4">
-                    <Link href={`/admin/usuarios/${obra.contractorId}`} className="font-mono text-xs text-primary hover:underline">
-                      {obra.contractorId.substring(0, 8)}...
+                    <Link href={`/admin/usuarios/${obra.contractorId}`} className="text-primary hover:underline font-medium text-sm block">
+                      {userMap.get(obra.contractorId) ?? "Usuário Desconhecido"}
                     </Link>
+                    <p className="text-[10px] text-muted-foreground font-mono mt-0.5">ID: {obra.contractorId.substring(0, 8)}...</p>
                   </td>
                   <td className="px-6 py-4 space-y-2">
                     <Badge tone={obra.status === "ABERTA" ? "primary" : obra.status === "ADJUDICADA" ? "success" : "neutral"} className="block w-fit">

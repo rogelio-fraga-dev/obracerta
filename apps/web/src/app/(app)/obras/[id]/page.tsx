@@ -39,6 +39,17 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
     proposals = [];
   }
 
+  // Gating: só o plano Especialista (feature bid.submit) pode dar lances.
+  let canBid = false;
+  if (tipo === "PROFISSIONAL") {
+    try {
+      const ent = await serverApi<{ features: string[] }>("GET", "/me/entitlements");
+      canBid = ent.features.includes("bid.submit");
+    } catch {
+      canBid = false;
+    }
+  }
+
   const status = WORK_ORDER_STATUS_UI[obra.status];
   const urg = WORK_URGENCY_UI[obra.urgencia];
 
@@ -95,6 +106,7 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
           status={obra.status}
           pisoCentavos={obra.pisoCentavos}
           minhaProposta={proposals[0] ?? null}
+          canBid={canBid}
         />
       ) : (
         <ObraProposals workOrderId={obra.id} status={obra.status} proposals={proposals} />

@@ -3,8 +3,8 @@
 import { useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, Button, Input, Label, Badge } from "@obracerta/ui";
-import { User, updateProfileSchema, type UpdateProfileInput, updatePasswordSchema, type UpdatePasswordInput, createAdminSchema, type CreateAdminInput } from "@obracerta/shared";
+import { Card, Button, Input, Label } from "@obracerta/ui";
+import { type User, updateProfileSchema, type UpdateProfileInput, updatePasswordSchema, type UpdatePasswordInput, createAdminSchema, type CreateAdminInput } from "@obracerta/shared";
 import { updateProfileAction, updatePasswordAction, createAdminAction, uploadFotoAction } from "../actions";
 
 interface AdminFormsProps {
@@ -41,8 +41,8 @@ function ProfileForm({ user }: { user: User }) {
       try {
         await updateProfileAction(data);
         alert("Perfil atualizado com sucesso!");
-      } catch (err: any) {
-        alert(err.message || "Erro ao atualizar perfil.");
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Erro ao atualizar perfil.");
       }
     });
   };
@@ -83,8 +83,8 @@ function PasswordForm() {
         await updatePasswordAction(data);
         alert("Senha atualizada com sucesso!");
         reset();
-      } catch (err: any) {
-        alert(err.message || "Erro ao atualizar senha.");
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Erro ao atualizar senha.");
       }
     });
   };
@@ -128,8 +128,8 @@ function PhotoForm() {
         await uploadFotoAction(formData);
         alert("Foto atualizada com sucesso!");
         if (fileInputRef.current) fileInputRef.current.value = "";
-      } catch (err: any) {
-        alert(err.message || "Erro ao atualizar foto.");
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Erro ao atualizar foto.");
       }
     });
   };
@@ -164,8 +164,8 @@ function CreateAdminForm() {
         await createAdminAction(data);
         alert("Administrador criado com sucesso!");
         reset();
-      } catch (err: any) {
-        alert(err.message || "Erro ao criar administrador.");
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Erro ao criar administrador.");
       }
     });
   };

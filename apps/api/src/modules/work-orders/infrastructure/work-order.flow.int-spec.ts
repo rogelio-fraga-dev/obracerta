@@ -11,6 +11,7 @@ import { proposals } from "../../../infrastructure/database/schema/proposals.js"
 import { DrizzleUsersRepository } from "../../users/infrastructure/drizzle-users.repository.js";
 import type { UsersService } from "../../users/application/users.service.js";
 import type { AuditService } from "../../audit/application/audit.service.js";
+import type { BillingService } from "../../billing/application/billing.service.js";
 import { WorkOrderService } from "../application/work-order.service.js";
 import type { WorkOrderScheduler } from "../application/work-order.scheduler.js";
 import { DrizzleWorkOrderRepository } from "./drizzle-work-order.repository.js";
@@ -33,7 +34,16 @@ describe("WorkOrderService (integração)", () => {
   const usersStub = { findById: (id: string) => Promise.resolve(usersById.get(id) ?? null) } as unknown as UsersService;
   const auditStub = { record: () => Promise.resolve(undefined) } as unknown as AuditService;
   const schedulerStub = { scheduleExpiry: () => Promise.resolve() } as unknown as WorkOrderScheduler;
-  const service = new WorkOrderService(orderRepo, proposalRepo, usersStub, schedulerStub, auditStub);
+  // Gating: neste fluxo os profissionais podem dar lances (Especialista).
+  const billingStub = { can: () => Promise.resolve(true) } as unknown as BillingService;
+  const service = new WorkOrderService(
+    orderRepo,
+    proposalRepo,
+    usersStub,
+    schedulerStub,
+    auditStub,
+    billingStub,
+  );
 
   const sufixo = Date.now().toString().slice(-9);
   let cidadeId = "";

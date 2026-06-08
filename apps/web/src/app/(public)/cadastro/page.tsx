@@ -16,6 +16,7 @@ import {
 } from "@obracerta/shared";
 import { Badge, Button, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { ProfessionPicker } from "@/components/ProfessionPicker";
 import { AuthPanel } from "../_auth/AuthPanel";
 import { AuthDivider, GoogleButton } from "../_auth/SocialAuth";
 import { MethodTabs } from "../_auth/MethodTabs";
@@ -176,7 +177,7 @@ function WhatsappSignup() {
   const [code, setCode] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
-  const [especialidades, setEspecialidades] = useState("");
+  const [especialidades, setEspecialidades] = useState<string[]>([]);
   const [bairro, setBairro] = useState("");
   const [anos, setAnos] = useState("");
   const [plano, setPlano] = useState<ProfessionalPlan | null>(null);
@@ -211,10 +212,7 @@ function WhatsappSignup() {
 
   const salvarAtuacao = () =>
     run(async () => {
-      const lista = especialidades
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const lista = especialidades;
       const anosNum = anos.trim() ? Number(anos) : undefined;
       await bff.post("/api/profile/professional", {
         ...(lista.length ? { especialidades: lista } : {}),
@@ -325,9 +323,13 @@ function WhatsappSignup() {
             salvarAtuacao();
           }}
         >
-          <Field label="Especialidades" hint="Separe por vírgula (ex.: Alvenaria, Pintura)">
-            <Input value={especialidades} onChange={(e) => setEspecialidades(e.target.value)} />
-          </Field>
+          <div className="space-y-1.5">
+            <span className="text-sm font-semibold text-foreground">Suas profissões</span>
+            <span className="block text-xs text-muted-foreground">
+              Selecione uma ou mais. Não achou? Use &quot;Outra&quot;.
+            </span>
+            <ProfessionPicker value={especialidades} onChange={setEspecialidades} />
+          </div>
           <Field label="Bairro de atuação">
             <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />
           </Field>

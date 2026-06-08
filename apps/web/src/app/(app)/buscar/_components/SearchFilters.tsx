@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { professionCatalog } from "@obracerta/shared";
 import { Button, Field, Input } from "@obracerta/ui";
 
 /**
@@ -62,13 +63,19 @@ export function SearchFilters() {
           onKeyDown={(e) => e.key === "Enter" && aplicar()}
         />
       </Field>
-      <Field label="Especialidade" hint="Opcional">
-        <Input
-          placeholder="Ex.: Pintura"
+      <Field label="Profissão" hint="Opcional">
+        <select
           value={especialidade}
           onChange={(e) => setEspecialidade(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && aplicar()}
-        />
+          className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 font-sans text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-orange-200"
+        >
+          <option value="">Todas as profissões</option>
+          {professionCatalog.map((p) => (
+            <option key={p.id} value={p.label}>
+              {p.icon} {p.label}
+            </option>
+          ))}
+        </select>
       </Field>
 
       {geoError && <p className="text-xs text-danger">{geoError}</p>}

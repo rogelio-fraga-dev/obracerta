@@ -375,6 +375,33 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
   - **Pendente p/ EC2:** OAuth real do Google (credenciais + redirect URIs); validação ao vivo do conjunto (front+back local).
 - **Entregável:** ✅ **produto navegável ponta a ponta, instalável (PWA), com E2E + WCAG AA — pronto para piloto.** Resta apenas a troca dos adapters fake/console por provedores reais (WhatsApp/SMS/Asaas + push VAPID + Google OAuth), que depende de contas/deploy.
 
+### Fase 8 — Evolução pós-auditoria (jun/2026) — **em andamento**
+
+> Integra o **Plano de Evolução do Produto** (`docs/plano-evolucao-produto.md`, mantido como referência detalhada)
+> e a **auditoria competitiva** (`docs/auditoria-competitiva.md`). Evolução do MVP a partir do feedback do fundador.
+
+**Decisões do fundador (jun/2026):**
+- ❌ **Sem pagamento do serviço pela plataforma** (revertido) — monetização = **assinatura/mensalidade**. O valor da
+  obra é combinado e pago **diretamente entre as partes**; a ObraCerta **só intermedia a conexão**, não é parte do
+  contrato (ToS).
+- **Catálogo de profissões fixo** + **foco em obra civil** (removido "Pintor").
+- **Empresa contrata direto**, **1 administrador** (sem sub-contas/membros).
+- **Sem chat** — apenas **mensagem na proposta** + **contato** (WhatsApp/e-mail/telefone) liberado após o aceite; **foto anexa**.
+- Landing com **prova social fake-realista** + **seletor de persona** (toggle estilo quemfaz) + **ilustração SVG**.
+- **PWA instalável** (sem app nativo) · **SEO adiado** (pós-marca) · **sem verificação de documento/antecedentes**.
+
+- [x] **8.1 — Catálogo de profissões + filtros**: catálogo fixo no `shared` (`professions.ts`, 16 ofícios de obra civil; +testes); cadastro do profissional com **multi-seleção** (`ProfessionPicker` + "Outra"); filtro de busca por **dropdown do catálogo**.
+- [x] **8.2 — Landing nova** (refatorada sobre `mockups/landing_page.html`): **seletor de persona em toggle** (Sou cliente/profissional/empresa, em seção própria estilo quemfaz) que troca o passo-a-passo + CTA; hero estático com cards flutuantes + **ilustração SVG** (`public/illustrations/`); **planos completos** (✓/✗ por plano, dois lados); depoimentos; **FAQ acordeão** (2 colunas); números fake-realistas; **largura ampla (1600px)**; **logo ObraCerta com fundo removido** no header (`scripts/remove-logo-bg.cjs`). **Provado ao vivo**.
+- [x] **8.3 — Gating por plano + upgrade no sistema**: entitlements expandidos (`entitlements.ts`: 9 funções reais — receber pedidos, perfil completo, portfólio, analytics, topo, lances) mapeadas por plano; **upgrade dentro do app** (`SubscriptionRepository.changePlan` + `BillingService.changePlan` + `POST /subscriptions/upgrade` + BFF + painel **"Meu plano"** com botões de upgrade em `/cobrancas`); **enforcement real** (`BillingService.can` → bloqueio de lances p/ não-Especialista no `submitProposal` → 403; UI com 🔒 + "Fazer upgrade"). **Provado ao vivo**: Iniciante→Pro→Especialista libera funções; Joana(Pro) lance bloqueado, Pedro(Especialista) aceito.
+- [ ] **8.4 — Mensagem + contato (Bloco B)**: proposta carrega **mensagem + foto anexa**; profissional responde; após o aceite, **contato liberado** (WhatsApp/e-mail/telefone). Sem chat em tempo real.
+- [ ] **8.5 — Ferramentas de gestão do profissional**: orçamento/cotação + recibo (depois painel financeiro). Tier premium.
+- [ ] **8.6 — Conta PJ/Empresa**: tipo EMPRESA (CNPJ, 1 admin, infos da empresa), contrata direto / publica obras; plano corporativo.
+- [ ] **8.7 — Gating restante**: aplicar `booking.receive` (Iniciante não recebe pedidos) e demais gates nas telas.
+
+**Backlog Fase 8+:** reprecificação aplicada (receber pedido grátis, lances no R$49, tier de ferramentas) · cobrança real
+da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · portfólio de fotos · analytics
+estratégico do admin (funil/coorte/liquidez/LTV) · SEO (pós-marca) · seeding de oferta por cidade-piloto (operacional).
+
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).
 - Consulta jurídica (LGPD, termos, CDC). **Decisão final de nome + domínio.**

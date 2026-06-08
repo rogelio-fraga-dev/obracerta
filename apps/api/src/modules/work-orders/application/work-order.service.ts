@@ -20,6 +20,8 @@ import {
   type WorkUrgency,
 } from "@obracerta/shared";
 import { AuditService } from "../../audit/application/audit.service.js";
+import { BillingService } from "../../billing/application/billing.service.js";
+import { Feature } from "../../entitlements/domain/entitlements.js";
 import { UsersService } from "../../users/application/users.service.js";
 import {
   canAcceptWorkOrder,
@@ -47,6 +49,7 @@ export class WorkOrderService {
     private readonly users: UsersService,
     private readonly scheduler: WorkOrderScheduler,
     private readonly audit: AuditService,
+    private readonly billing: BillingService,
   ) {}
 
   /** Contratante abre uma obra; a urgência define a expiração (job BullMQ). */
@@ -124,6 +127,13 @@ export class WorkOrderService {
     const user = await this.users.findById(professionalId);
     if (!user || user.tipo !== UserType.PROFISSIONAL) {
       throw new BadRequestException("Apenas profissionais enviam lances.");
+    }
+    // Gating de plano: dar lances é exclusivo de quem tem a feature SUBMIT_BID
+    // (plano Especialista). A trava real é aqui — a UI só esconde o botão.
+    if (!(await this.billing.can(professionalId, Feature.SUBMIT_BID))) {
+      throw new ForbiddenException(
+        "Dar lances em obras é exclusivo do plano Especialista. Faça upgrade em Cobranças.",
+      );
     }
     const order = await this.getOrderOr404(workOrderId);
     if (order.contractorId === professionalId) {

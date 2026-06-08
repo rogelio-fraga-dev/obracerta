@@ -21,6 +21,8 @@ export interface SubscriptionRepository {
   activate(id: string): Promise<Subscription | null>;
   /** Cancela a assinatura (estorno / pedido do usuário): status CANCELADA + data. */
   cancel(id: string): Promise<Subscription | null>;
+  /** Troca o plano (upgrade) de uma assinatura vigente: novo plano + valor. */
+  changePlan(id: string, plano: string, valorCentavos: number): Promise<Subscription | null>;
   /** Avança a data da próxima cobrança (renovação recorrente). */
   setProximaCobranca(id: string, proximaCobranca: string): Promise<void>;
 }

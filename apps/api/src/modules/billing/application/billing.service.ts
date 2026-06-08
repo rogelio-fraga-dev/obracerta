@@ -171,6 +171,42 @@ export class BillingService {
   }
 
   /**
+   * Upgrade de plano **dentro do sistema** (§4.2). Troca o plano de uma assinatura
+   * vigente com efeito imediato (em dev; proporcionalização fica para depois). Sem
+   * assinatura → cai no fluxo normal de `subscribe`. Não permite ir para o gratuito
+   * nem para o mesmo plano.
+   */
+  async changePlan(userId: string, input: CreateSubscriptionInput): Promise<Subscription> {
+    if (input.plano === ProfessionalPlan.INICIANTE) {
+      throw new BadRequestException(
+        "Iniciante é gratuito — para sair de um plano pago, cancele a assinatura.",
+      );
+    }
+    const ativa = await this.subscriptions.findActiveByUser(userId);
+    if (!ativa) {
+      return this.subscribe(userId, input);
+    }
+    if (ativa.plano === input.plano) {
+      throw new ConflictException("Você já está neste plano.");
+    }
+
+    const valorCentavos = professionalPriceCentavos(input.plano);
+    const atualizada = await this.subscriptions.changePlan(ativa.id, input.plano, valorCentavos);
+    if (!atualizada) {
+      throw new BadRequestException("Não foi possível atualizar o plano.");
+    }
+
+    await this.audit.record({
+      atorUserId: userId,
+      acao: "ASSINATURA_PLANO_ALTERADO",
+      entidade: "subscription",
+      entidadeId: ativa.id,
+      dados: { de: ativa.plano, para: input.plano, valorCentavos },
+    });
+    return atualizada;
+  }
+
+  /**
    * Renovação recorrente (job na próxima cobrança): se a assinatura ainda vale,
    * emite a próxima fatura, avança a próxima cobrança (+30d) e reagenda o ciclo.
    * O pagamento é confirmado pelo webhook (4.1); não pago → fatura VENCIDA (job).
@@ -426,6 +462,16 @@ export class BillingService {
   async getEntitlements(userId: string): Promise<EntitlementsView> {
     const plano = await this.activePlan(userId);
     return { plano, features: [...this.entitlements.featuresFor(plano)] };
+  }
+
+  /**
+   * Gating de verdade: o **plano vigente** do usuário libera a feature? Fonte única
+   * para enforcement fora do billing (ex.: lances exigem `SUBMIT_BID`). Sem plano
+   * vigente → `false`.
+   */
+  async can(userId: string, feature: Feature): Promise<boolean> {
+    const plano = await this.activePlan(userId);
+    return plano ? this.entitlements.can(plano, feature) : false;
   }
 
   /** Ativa a origem da fatura paga: assinatura (ATIVA) ou compra (ATIVO + expiração). */

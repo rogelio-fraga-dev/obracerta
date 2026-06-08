@@ -39,7 +39,12 @@ export const REFUND_REASONS: { value: string; label: string }[] = [
  */
 export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
   "profile.public": { label: "Perfil público", desc: "Apareça nas buscas e tenha página própria." },
+  "profile.full": { label: "Perfil completo", desc: "Foto, nome, cidade e valores visíveis." },
+  "profile.portfolio": { label: "Portfólio de obras", desc: "Galeria de fotos dos seus trabalhos." },
+  "booking.receive": { label: "Receber pedidos", desc: "Clientes solicitam agendamento com você." },
+  "profile.analytics": { label: "Analytics do perfil", desc: "Veja quantas pessoas visitaram seu perfil." },
   "search.geo": { label: "Busca por proximidade", desc: "Encontre/seja encontrado por perto." },
   "search.unlimited": { label: "Busca ilimitada", desc: "Sem limite de resultados." },
-  "bid.submit": { label: "Lances em obras", desc: "Participe das obras abertas." },
+  "search.top": { label: "Destaque no topo", desc: "Apareça no topo das buscas da sua cidade." },
+  "bid.submit": { label: "Lances em obras", desc: "Dê propostas sigilosas em obras abertas." },
 };
