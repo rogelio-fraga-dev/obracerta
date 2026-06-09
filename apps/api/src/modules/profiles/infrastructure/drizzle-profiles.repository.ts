@@ -3,16 +3,19 @@ import { eq } from "drizzle-orm";
 import type {
   ProfessionalProfile,
   ContractorProfile,
+  CompanyProfile,
   UpdateProfessionalProfileInput,
 } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { professionalProfiles } from "../../../infrastructure/database/schema/professional-profiles.js";
 import { contractorProfiles } from "../../../infrastructure/database/schema/contractor-profiles.js";
-import type { ProfilesRepository } from "../domain/ports/profiles.repository.js";
+import { companyProfiles } from "../../../infrastructure/database/schema/company-profiles.js";
+import type { CompanyInfo, ProfilesRepository } from "../domain/ports/profiles.repository.js";
 
 type ProRow = typeof professionalProfiles.$inferSelect;
 type ContractorRow = typeof contractorProfiles.$inferSelect;
+type CompanyRow = typeof companyProfiles.$inferSelect;
 
 /** Mapeia a linha do perfil profissional para o contrato público (puro). */
 export function rowToProfessionalProfile(row: ProRow): ProfessionalProfile {
@@ -35,6 +38,16 @@ export function rowToContractorProfile(row: ContractorRow): ContractorProfile {
     userId: row.userId,
     plano: row.plano as ContractorProfile["plano"],
     planoExpiraEm: row.planoExpiraEm?.toISOString() ?? null,
+  };
+}
+
+export function rowToCompanyProfile(row: CompanyRow): CompanyProfile {
+  return {
+    userId: row.userId,
+    cnpj: row.cnpj,
+    razaoSocial: row.razaoSocial,
+    nomeFantasia: row.nomeFantasia,
+    criadoEm: row.criadoEm.toISOString(),
   };
 }
 
@@ -64,6 +77,30 @@ export class DrizzleProfilesRepository implements ProfilesRepository {
     const [row] = await this.db.insert(contractorProfiles).values({ userId }).returning();
     if (!row) throw new Error("Falha ao criar perfil de contratante.");
     return rowToContractorProfile(row);
+  }
+
+  async createCompany(userId: string): Promise<CompanyProfile> {
+    const [row] = await this.db.insert(companyProfiles).values({ userId }).returning();
+    if (!row) throw new Error("Falha ao criar perfil de empresa.");
+    return rowToCompanyProfile(row);
+  }
+
+  async setCompanyInfo(userId: string, info: CompanyInfo): Promise<CompanyProfile | null> {
+    const [row] = await this.db
+      .update(companyProfiles)
+      .set({ cnpj: info.cnpj, razaoSocial: info.razaoSocial, nomeFantasia: info.nomeFantasia })
+      .where(eq(companyProfiles.userId, userId))
+      .returning();
+    return row ? rowToCompanyProfile(row) : null;
+  }
+
+  async findCompanyByUserId(userId: string): Promise<CompanyProfile | null> {
+    const [row] = await this.db
+      .select()
+      .from(companyProfiles)
+      .where(eq(companyProfiles.userId, userId))
+      .limit(1);
+    return row ? rowToCompanyProfile(row) : null;
   }
 
   async findProfessionalByUserId(userId: string): Promise<ProfessionalProfile | null> {

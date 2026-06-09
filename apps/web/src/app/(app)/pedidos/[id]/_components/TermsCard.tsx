@@ -10,6 +10,7 @@ import { formatDateTimeBR } from "@/lib/format";
 const PAPEL_LABEL: Record<UserType, string> = {
   PROFISSIONAL: "Profissional",
   CONTRATANTE: "Contratante",
+  EMPRESA: "Empresa",
 };
 
 /**

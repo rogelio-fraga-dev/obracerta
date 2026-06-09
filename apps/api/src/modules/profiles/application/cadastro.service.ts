@@ -1,5 +1,11 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
-import type { CadastroInput, CadastroResult, RegisterInput } from "@obracerta/shared";
+import {
+  UserType,
+  type CadastroInput,
+  type CadastroResult,
+  type RegisterCompanyInput,
+  type RegisterInput,
+} from "@obracerta/shared";
 import { AuthService } from "../../auth/application/auth.service.js";
 import { OtpService } from "../../auth/application/otp.service.js";
 import { hashPassword } from "../../auth/domain/password.js";
@@ -52,6 +58,31 @@ export class CadastroService {
       senhaHash,
     });
     await this.profiles.createForUser(user);
+    await this.onboarding.scheduleSequence(user.id, user.whatsapp);
+    const tokens = await this.auth.login(user);
+
+    return { user, tokens };
+  }
+
+  /**
+   * Cadastro de empresa (PJ) — roadmap §8.6. Cria a conta `tipo = EMPRESA` (1
+   * admin), o perfil de empresa e grava CNPJ + razão social. Auto-login no fim.
+   */
+  async registerCompany(input: RegisterCompanyInput): Promise<CadastroResult> {
+    const senhaHash = await hashPassword(input.password);
+    const user = await this.users.create({
+      nomeCompleto: input.nomeCompleto,
+      email: input.email,
+      whatsapp: input.whatsapp,
+      tipo: UserType.EMPRESA,
+      senhaHash,
+    });
+    await this.profiles.createForUser(user);
+    await this.profiles.setCompanyInfo(user.id, {
+      cnpj: input.cnpj,
+      razaoSocial: input.razaoSocial,
+      nomeFantasia: input.nomeFantasia ?? null,
+    });
     await this.onboarding.scheduleSequence(user.id, user.whatsapp);
     const tokens = await this.auth.login(user);
 

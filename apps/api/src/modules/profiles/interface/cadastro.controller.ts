@@ -3,6 +3,8 @@ import {
   type CadastroInput,
   type CadastroResult,
   cadastroSchema,
+  type RegisterCompanyInput,
+  registerCompanySchema,
   type RegisterInput,
   registerSchema,
 } from "@obracerta/shared";
@@ -29,5 +31,14 @@ export class CadastroController {
     @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
   ): Promise<CadastroResult> {
     return this.cadastro.registerWithPassword(body);
+  }
+
+  /** Cadastro de empresa (PJ): conta EMPRESA + CNPJ/razão social (§8.6). */
+  @Post("empresa")
+  @HttpCode(HttpStatus.CREATED)
+  registerCompany(
+    @Body(new ZodValidationPipe(registerCompanySchema)) body: RegisterCompanyInput,
+  ): Promise<CadastroResult> {
+    return this.cadastro.registerCompany(body);
   }
 }

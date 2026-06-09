@@ -13,6 +13,7 @@ import {
   RefundStatus,
   SubscriptionStatus,
   UserType,
+  canHireServices,
   type CreatePurchaseInput,
   type CreateSubscriptionInput,
   type Invoice,
@@ -271,8 +272,8 @@ export class BillingService {
    */
   async purchase(userId: string, input: CreatePurchaseInput): Promise<Purchase> {
     const user = await this.users.findById(userId);
-    if (!user || user.tipo !== UserType.CONTRATANTE) {
-      throw new BadRequestException("Apenas contratantes compram planos avulsos.");
+    if (!user || !canHireServices(user.tipo)) {
+      throw new BadRequestException("Apenas contratantes e empresas compram planos avulsos.");
     }
 
     const now = new Date();

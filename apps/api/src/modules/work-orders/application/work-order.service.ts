@@ -10,6 +10,7 @@ import {
   ProposalStatus,
   UserType,
   WorkOrderStatus,
+  canHireServices,
   type CreateWorkOrderInput,
   type PaginatedResponse,
   type Proposal,
@@ -55,8 +56,8 @@ export class WorkOrderService {
   /** Contratante abre uma obra; a urgência define a expiração (job BullMQ). */
   async openWorkOrder(contractorId: string, input: CreateWorkOrderInput): Promise<WorkOrder> {
     const user = await this.users.findById(contractorId);
-    if (!user || user.tipo !== UserType.CONTRATANTE) {
-      throw new BadRequestException("Apenas contratantes abrem obras.");
+    if (!user || !canHireServices(user.tipo)) {
+      throw new BadRequestException("Apenas contratantes e empresas abrem obras.");
     }
     const expiraEm = workOrderDeadline(input.urgencia as WorkUrgency, new Date()).toISOString();
     const order = await this.orders.create({

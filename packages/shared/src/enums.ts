@@ -14,6 +14,7 @@ import { z } from "zod";
 export const UserType = {
   PROFISSIONAL: "PROFISSIONAL",
   CONTRATANTE: "CONTRATANTE",
+  EMPRESA: "EMPRESA",
 } as const;
 export const userTypeSchema = z.nativeEnum(UserType);
 export type UserType = z.infer<typeof userTypeSchema>;

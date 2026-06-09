@@ -9,6 +9,7 @@ import {
   otpVerifySchema,
   type ProfessionalPlan,
   professionalPlansOrdered,
+  registerCompanySchema,
   registerSchema,
   type Subscription,
   type User,
@@ -96,13 +97,30 @@ function EmailSignup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [razaoSocial, setRazaoSocial] = useState("");
   const { error, loading, run } = useAsyncAction();
+
+  const isEmpresa = tipo === "EMPRESA";
 
   const submit = () =>
     run(async () => {
-      const parsed = registerSchema.safeParse({ nomeCompleto, email, password, whatsapp, tipo });
-      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
-      await bff.post<{ user: User }>("/api/auth/register", parsed.data);
+      if (isEmpresa) {
+        const parsed = registerCompanySchema.safeParse({
+          nomeCompleto,
+          email,
+          password,
+          whatsapp,
+          cnpj,
+          razaoSocial,
+        });
+        if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+        await bff.post<{ user: User }>("/api/auth/register-company", parsed.data);
+      } else {
+        const parsed = registerSchema.safeParse({ nomeCompleto, email, password, whatsapp, tipo });
+        if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+        await bff.post<{ user: User }>("/api/auth/register", parsed.data);
+      }
       router.replace("/inicio");
     });
 
@@ -117,12 +135,32 @@ function EmailSignup() {
       {error && <ErrorBox message={error} />}
       <fieldset>
         <legend className="text-sm font-semibold text-foreground">Você é…</legend>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid grid-cols-3 gap-2">
           <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
           <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
+          <TipoOption value="EMPRESA" current={tipo} onSelect={setTipo} label="Empresa" />
         </div>
       </fieldset>
-      <Field label="Nome completo">
+      {isEmpresa && (
+        <>
+          <Field label="Razão social">
+            <Input
+              placeholder="Ex.: Construtora Alfa LTDA"
+              value={razaoSocial}
+              onChange={(e) => setRazaoSocial(e.target.value)}
+            />
+          </Field>
+          <Field label="CNPJ">
+            <Input
+              inputMode="numeric"
+              placeholder="00.000.000/0000-00"
+              value={cnpj}
+              onChange={(e) => setCnpj(e.target.value)}
+            />
+          </Field>
+        </>
+      )}
+      <Field label={isEmpresa ? "Nome do responsável" : "Nome completo"}>
         <Input
           autoComplete="name"
           placeholder="Ex.: Carlos Mendes"
