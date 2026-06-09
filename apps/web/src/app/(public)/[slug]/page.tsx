@@ -97,6 +97,26 @@ export default async function PublicProfilePage({ params }: PageProps) {
         </div>
       )}
 
+      {profile.portfolio.length > 0 && (
+        <div className="mt-8">
+          <h2 className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
+          <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {profile.portfolio.map((foto, i) => (
+              <li key={i} className="overflow-hidden rounded-lg border border-border">
+                <img
+                  src={foto.url}
+                  alt={foto.legenda ?? `Obra de ${nome}`}
+                  className="aspect-square w-full object-cover"
+                />
+                {foto.legenda && (
+                  <p className="px-2 py-1 text-xs text-muted-foreground">{foto.legenda}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <Card className="mt-8 space-y-3 text-center">
         <p className="text-muted-foreground">
           Para agendar com {nome}, entre na sua conta — protegemos os contatos até a aprovação.

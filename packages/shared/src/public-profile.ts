@@ -2,6 +2,7 @@ import { z } from "zod";
 import { slugSchema } from "./primitives.js";
 import { professionalPlanSchema } from "./enums.js";
 import { reputationSummarySchema } from "./reputation.js";
+import { publicPortfolioPhotoSchema } from "./portfolio.js";
 
 /**
  * Perfil público do profissional (roadmap §18/§24, Etapa 5.2). View LIMITADA para
@@ -20,6 +21,8 @@ export const publicProfileSchema = z.object({
   plano: professionalPlanSchema,
   /** Foto pública; `null` no plano Iniciante. */
   fotoUrl: z.string().nullable(),
+  /** Galeria de obras (vazia se o plano não inclui portfólio). */
+  portfolio: z.array(publicPortfolioPhotoSchema),
   reputacao: reputationSummarySchema,
 });
 export type PublicProfile = z.infer<typeof publicProfileSchema>;

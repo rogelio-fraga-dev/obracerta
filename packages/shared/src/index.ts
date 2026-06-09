@@ -17,6 +17,7 @@ export * from "./professions.js";
 export * from "./auth.js";
 export * from "./company.js";
 export * from "./profiles.js";
+export * from "./portfolio.js";
 export * from "./availability.js";
 export * from "./booking.js";
 export * from "./terms.js";

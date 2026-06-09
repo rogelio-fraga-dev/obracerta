@@ -1,5 +1,12 @@
 import Link from "next/link";
-import type { JwtClaims, Penalty, PenaltySummary, Review, Suspension } from "@obracerta/shared";
+import type {
+  JwtClaims,
+  Penalty,
+  PenaltySummary,
+  PortfolioPhoto,
+  Review,
+  Suspension,
+} from "@obracerta/shared";
 import { Badge, Card, Avatar, ProgressRing, StatCard, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint, getMyRoles } from "@/lib/session";
@@ -9,6 +16,7 @@ import { formatDateTimeBR } from "@/lib/format";
 import { RespostaForm } from "./_components/RespostaForm";
 import { ReportDialog } from "./_components/ReportDialog";
 import { AppealForm } from "./_components/AppealForm";
+import { PortfolioManager } from "./_components/PortfolioManager";
 import { ShieldIcon } from "../_shell/icons";
 import { AdminForms } from "./_components/AdminForms";
 import type { User } from "@obracerta/shared";
@@ -66,10 +74,44 @@ export default async function PerfilPage() {
 
       {isAdmin && <AdminForms user={user} />}
 
+      {!isAdmin && isProfissional && <PortfolioPanel />}
+
       {!isAdmin && isProfissional && <ComportamentoPanel />}
 
       {!isAdmin && <AvaliacoesRecebidas />}
     </section>
+  );
+}
+
+async function PortfolioPanel() {
+  const [ent, fotos] = await Promise.all([
+    serverApi<{ features: string[] }>("GET", "/me/entitlements"),
+    serverApi<PortfolioPhoto[]>("GET", "/profiles/professional/me/portfolio"),
+  ]);
+  const canPortfolio = ent.features.includes("profile.portfolio");
+
+  return (
+    <div className="animate-fade-in delay-1 space-y-3">
+      <div>
+        <h2 className="font-display text-xl font-black text-foreground">Portfólio de obras</h2>
+        <p className="text-sm text-muted-foreground">
+          Mostre seus melhores trabalhos — aparecem no seu perfil público.
+        </p>
+      </div>
+      {canPortfolio ? (
+        <PortfolioManager fotos={fotos} />
+      ) : (
+        <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
+          <span className="text-3xl">🔒</span>
+          <p className="text-sm text-muted-foreground">
+            O portfólio de obras é um benefício dos planos pagos. Faça upgrade para montar sua galeria.
+          </p>
+          <Link href="/cobrancas" className="inline-block">
+            <Badge tone="primary" size="md">Ver planos →</Badge>
+          </Link>
+        </Card>
+      )}
+    </div>
   );
 }
 

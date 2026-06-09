@@ -8,6 +8,7 @@ export * from "./users.js";
 export * from "./professional-profiles.js";
 export * from "./contractor-profiles.js";
 export * from "./company-profiles.js";
+export * from "./portfolio-photos.js";
 export * from "./availability.js";
 export * from "./booking-requests.js";
 export * from "./schedule-blocks.js";
