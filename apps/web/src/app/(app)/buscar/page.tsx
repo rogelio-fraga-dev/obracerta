@@ -5,6 +5,7 @@ import {
 } from "@obracerta/shared";
 import { Badge, Button, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
+import { planoRecebePedidos } from "@/lib/billing-ui";
 import { SearchFilters } from "./_components/SearchFilters";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -72,9 +73,15 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                     <span className="text-xs text-muted-foreground">
                       {p.distanciaKm !== null ? `${p.distanciaKm.toFixed(1)} km de você` : ""}
                     </span>
-                    <Link href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}>
-                      <Button size="sm">Agendar</Button>
-                    </Link>
+                    {planoRecebePedidos(p.plano) ? (
+                      <Link href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}>
+                        <Button size="sm">Agendar</Button>
+                      </Link>
+                    ) : (
+                      <span className="text-xs font-medium text-muted-foreground">
+                        🔒 Não recebe pedidos
+                      </span>
+                    )}
                   </div>
                 </Card>
               </li>

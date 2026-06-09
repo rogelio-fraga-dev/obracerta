@@ -396,7 +396,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 - [ ] **8.4 — Mensagem + contato (Bloco B)**: proposta carrega **mensagem + foto anexa**; profissional responde; após o aceite, **contato liberado** (WhatsApp/e-mail/telefone). Sem chat em tempo real.
 - [ ] **8.5 — Ferramentas de gestão do profissional**: orçamento/cotação + recibo (depois painel financeiro). Tier premium.
 - [ ] **8.6 — Conta PJ/Empresa**: tipo EMPRESA (CNPJ, 1 admin, infos da empresa), contrata direto / publica obras; plano corporativo.
-- [ ] **8.7 — Gating restante**: aplicar `booking.receive` (Iniciante não recebe pedidos) e demais gates nas telas.
+- [x] **8.7 — Gating restante**: aplicado `booking.receive` (Iniciante **não recebe pedidos**) na mesma receita do gate de lances — trava real em `BookingService.createForContractor` → 403 (`BillingService.can` + `BillingModule` no `BookingModule`); UI da busca esconde "Agendar" e mostra "🔒 Não recebe pedidos" p/ Iniciante (`planoRecebePedidos` em `billing-ui`); +2 testes (`booking.gating.spec`, 172 no total).
 
 **Backlog Fase 8+:** reprecificação aplicada (receber pedido grátis, lances no R$49, tier de ferramentas) · cobrança real
 da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · portfólio de fotos · analytics

@@ -1,5 +1,15 @@
 import type { BadgeTone } from "@obracerta/ui";
+import { ProfessionalPlan } from "@obracerta/shared";
 import type { InvoiceStatus, PaymentMethod, RefundStatus } from "@obracerta/shared";
+
+/**
+ * O plano do profissional recebe pedidos de agendamento? Espelha o gating
+ * `booking.receive` do backend (§8.7): só o Iniciante não recebe. É uma dica de
+ * UI — a trava real está na API (`createForContractor`).
+ */
+export function planoRecebePedidos(plano: ProfessionalPlan): boolean {
+  return plano !== ProfessionalPlan.INICIANTE;
+}
 
 /** Rótulo + tom de cada estado de fatura. */
 export const INVOICE_STATUS_UI: Record<InvoiceStatus, { label: string; tone: BadgeTone }> = {

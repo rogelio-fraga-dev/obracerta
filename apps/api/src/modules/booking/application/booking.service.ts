@@ -16,7 +16,9 @@ import {
   type PaginatedResponse,
 } from "@obracerta/shared";
 import { AvailabilityService } from "../../availability/application/availability.service.js";
+import { BillingService } from "../../billing/application/billing.service.js";
 import { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
+import { Feature } from "../../entitlements/domain/entitlements.js";
 import {
   NOTIFICATION_PROVIDER,
   type NotificationProvider,
@@ -38,6 +40,7 @@ export class BookingService {
     private readonly scheduler: BookingScheduler,
     private readonly reviewReminders: ReviewReminderScheduler,
     private readonly penalties: PenaltyService,
+    private readonly billing: BillingService,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
   ) {}
 
@@ -52,6 +55,14 @@ export class BookingService {
     const professional = await this.users.findById(input.professionalId);
     if (!professional || professional.tipo !== UserType.PROFISSIONAL) {
       throw new NotFoundException("Profissional não encontrado.");
+    }
+    // Gating de plano: receber pedidos é exclusivo de quem tem a feature
+    // RECEIVE_BOOKINGS (planos pagos). O Iniciante aparece na busca, mas não
+    // recebe agendamentos — a trava real é aqui; a UI só esconde o botão.
+    if (!(await this.billing.can(input.professionalId, Feature.RECEIVE_BOOKINGS))) {
+      throw new ForbiddenException(
+        "Este profissional está no plano Iniciante e ainda não recebe pedidos de agendamento.",
+      );
     }
     if (Date.parse(input.dataServico) <= Date.now()) {
       throw new BadRequestException("A data do serviço deve ser no futuro.");
