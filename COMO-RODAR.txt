@@ -1,0 +1,150 @@
+==================================================================
+ ObraCerta / QuemFaz — COMO RODAR (guia rápido de dev local)
+==================================================================
+
+Objetivo: clonar em outra máquina (ex.: notebook) e rodar o sistema
+inteiro (back + front) localmente. Sem deploy, tudo em localhost.
+
+
+------------------------------------------------------------------
+0. PRÉ-REQUISITOS (instalar uma vez na máquina nova)
+------------------------------------------------------------------
+- Node.js >= 22        -> https://nodejs.org  (LTS 22)
+- pnpm >= 9            -> "npm i -g pnpm@9.15.0"
+                         (corepack também funciona, mas no Windows
+                          "corepack enable" às vezes pede admin;
+                          o "npm i -g pnpm" é o caminho que funciona)
+- Docker Desktop       -> precisa estar ABERTO/RODANDO antes do passo 4
+- Git
+
+Conferir versões:
+    node -v        (deve mostrar v22.x)
+    pnpm -v        (deve mostrar 9.x)
+    docker --version
+
+
+------------------------------------------------------------------
+1. CLONAR O REPOSITÓRIO
+------------------------------------------------------------------
+    git clone https://github.com/rogelio-fraga-dev/obracerta.git
+    cd obracerta
+
+
+------------------------------------------------------------------
+2. CRIAR O ARQUIVO .env
+------------------------------------------------------------------
+O .env NÃO vai pro git (é ignorado de propósito). Use o template:
+
+  Windows (PowerShell):
+    Copy-Item .env.example .env
+
+  Linux/macOS:
+    cp .env.example .env
+
+Os valores padrão do .env.example JÁ FUNCIONAM para dev local
+(banco, redis, minio, JWT de dev). Não precisa mudar nada para
+rodar na sua máquina.
+
+OBS WINDOWS: se o seed/migração reclamar de conexão, troque no .env
+a linha do banco de "localhost" para "127.0.0.1":
+    DATABASE_URL=postgresql://obracerta:obracerta@127.0.0.1:5432/obracerta
+(no Windows o "localhost" às vezes resolve para IPv6 ::1 e quebra o
+ cliente do Postgres).
+
+
+------------------------------------------------------------------
+3. INSTALAR AS DEPENDÊNCIAS
+------------------------------------------------------------------
+    pnpm install
+
+
+------------------------------------------------------------------
+4. SUBIR A INFRA (Postgres + Redis + MinIO) VIA DOCKER
+------------------------------------------------------------------
+Garanta que o Docker Desktop está ABERTO. Então:
+
+    pnpm docker:up
+
+Isso sobe:
+    - Postgres 16 (PostGIS)  -> porta 5432
+    - Redis                  -> porta 6379
+    - MinIO (storage S3)     -> portas 9000 (API) / 9001 (console)
+
+Parar depois:   pnpm docker:down
+Ver logs:       pnpm docker:logs
+
+CONFLITO DE PORTA: se a 5432 já estiver ocupada por outro projeto,
+pare o outro container antes (ex.: "docker stop mada_postgres_db").
+Os dois não coexistem na 5432.
+
+
+------------------------------------------------------------------
+5. CRIAR AS TABELAS (MIGRAÇÕES)
+------------------------------------------------------------------
+    pnpm --filter @obracerta/api db:migrate
+
+
+------------------------------------------------------------------
+6. POPULAR O BANCO (SEED COMPLETO COM USUÁRIOS DE TESTE)
+------------------------------------------------------------------
+  Windows (PowerShell):
+    $env:DATABASE_URL="postgresql://obracerta:obracerta@127.0.0.1:5432/obracerta"
+    pnpm --filter @obracerta/api exec tsx src/infrastructure/database/seed-completo.ts
+
+  Linux/macOS:
+    DATABASE_URL=postgresql://obracerta:obracerta@127.0.0.1:5432/obracerta \
+      pnpm --filter @obracerta/api exec tsx src/infrastructure/database/seed-completo.ts
+
+
+------------------------------------------------------------------
+7. RODAR O SISTEMA (BACK + FRONT JUNTOS)
+------------------------------------------------------------------
+    pnpm dev
+
+    Front (web):  http://localhost:3000
+    Back (api):   http://localhost:3333    (teste: GET /health)
+
+Para rodar separado:
+    pnpm --filter @obracerta/api dev      (só a API, com watch)
+    pnpm --filter @obracerta/web dev      (só o front)
+
+
+------------------------------------------------------------------
+8. USUÁRIOS DE TESTE (criados pelo seed)
+------------------------------------------------------------------
+  admin@example.com   / admin@123    (admin -> painel /admin)
+  carlos@example.com  / senha@123    (contratante)
+  joana@example.com   / senha@123    (profissional PRO)
+  pedro@example.com   / senha@123    (profissional Iniciante)
+
+Login: o campo é "password" (não "senha").
+CNPJ válido p/ testar cadastro de Empresa: 11444777000161
+
+
+------------------------------------------------------------------
+9. CHECAR QUE ESTÁ TUDO OK (opcional)
+------------------------------------------------------------------
+    pnpm --filter @obracerta/api test       (testes da API)
+    pnpm --filter @obracerta/shared test    (testes do shared)
+    pnpm typecheck
+    pnpm lint
+
+
+------------------------------------------------------------------
+NOTAS IMPORTANTES
+------------------------------------------------------------------
+- NÃO rode "next build" enquanto o "next dev"/"pnpm dev" estiver no
+  ar: corrompe a pasta .next do dev. Para validar o front use
+  typecheck/lint.
+- Sem deploy / sem contas reais por enquanto: Asaas, WhatsApp e push
+  ficam desativados (precisam de credenciais reais). O resto do
+  sistema roda 100% local.
+- Resumo do "do zero" na máquina nova:
+    git clone ... && cd obracerta
+    Copy-Item .env.example .env   (ou cp)
+    pnpm install
+    pnpm docker:up
+    pnpm --filter @obracerta/api db:migrate
+    (seed do passo 6)
+    pnpm dev
+==================================================================
