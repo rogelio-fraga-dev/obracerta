@@ -77,7 +77,7 @@ export default function NovoPedidoPage() {
           <Input
             value={especialidade}
             onChange={(e) => setEspecialidade(e.target.value)}
-            placeholder="Ex.: Pintura"
+            placeholder="Ex.: Pedreiro"
           />
         </Field>
         <Field label="Data e hora">

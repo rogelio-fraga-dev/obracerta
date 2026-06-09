@@ -41,8 +41,11 @@ async function main(): Promise<void> {
   await db.delete(schema.invoices);
   await db.delete(schema.purchases);
   await db.delete(schema.subscriptions);
+  await db.delete(schema.professionalDocuments);
+  await db.delete(schema.portfolioPhotos);
   await db.delete(schema.contractorProfiles);
   await db.delete(schema.professionalProfiles);
+  await db.delete(schema.companyProfiles);
   await db.delete(schema.users);
   await db.delete(schema.cities);
 
@@ -78,7 +81,7 @@ async function main(): Promise<void> {
     },
     {
       id: profProId,
-      nomeCompleto: "Joana Pintora Silva",
+      nomeCompleto: "Joana Andrade Silva",
       whatsapp: "+5511999999992",
       email: "joana@example.com",
       senhaHash: hashUsuario,
@@ -120,7 +123,7 @@ async function main(): Promise<void> {
   await db.insert(schema.professionalProfiles).values([
     {
       userId: profProId,
-      especialidades: ["Pintura", "Gesso"],
+      especialidades: ["Gesseiro", "Azulejista"],
       anosExperiencia: 5,
       bairro: "Pinheiros",
       raioAtendimentoKm: 15,
@@ -177,9 +180,9 @@ async function main(): Promise<void> {
       id: obraAbertaId,
       contractorId: contratanteId,
       cidadeId: sp!.id,
-      especialidade: "Pintura",
-      titulo: "Pintura de Apartamento 60m2",
-      descricao: "Preciso pintar paredes e teto.",
+      especialidade: "Gesseiro",
+      titulo: "Forro de gesso em apartamento 60m2",
+      descricao: "Preciso instalar forro de gesso em toda a área.",
       urgencia: "FLEXIVEL",
       status: "ABERTA",
       expiraEm: dataFutura,
@@ -231,8 +234,8 @@ async function main(): Promise<void> {
       id: bookingPendenteId,
       contractorId: contratanteId,
       professionalId: profProId,
-      especialidade: "Pintura",
-      descricao: "Orçamento para pintura externa.",
+      especialidade: "Gesseiro",
+      descricao: "Orçamento para acabamento em gesso.",
       dataServico: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
       status: "PENDENTE",
       expiraEm: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),

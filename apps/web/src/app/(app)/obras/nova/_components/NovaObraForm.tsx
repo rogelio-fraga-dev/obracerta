@@ -69,11 +69,11 @@ export function NovaObraForm({ cities }: { cities: City[] }) {
           ))}
         </select>
       </Field>
-      <Field label="Título" hint="Resuma o serviço (ex.: Pintura de apartamento 2 quartos)">
+      <Field label="Título" hint="Resuma o serviço (ex.: Forro de gesso em apartamento 2 quartos)">
         <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
       </Field>
       <Field label="Especialidade">
-        <Input value={especialidade} onChange={(e) => setEspecialidade(e.target.value)} placeholder="Ex.: Pintura" />
+        <Input value={especialidade} onChange={(e) => setEspecialidade(e.target.value)} placeholder="Ex.: Pedreiro" />
       </Field>
       <Field label="Urgência">
         <select
