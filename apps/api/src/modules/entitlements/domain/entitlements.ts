@@ -13,6 +13,7 @@ export const Feature = {
   RECEIVE_BOOKINGS: "booking.receive", // recebe pedidos de serviço
   ANALYTICS: "profile.analytics", // analytics do perfil (visitas)
   TOP_SEARCH: "search.top", // destaque no topo das buscas
+  PRO_TOOLS: "tools.documents", // ferramentas: orçamento + recibo (§8.5)
   // Comum (profissional/contratante)
   SEARCH_GEO: "search.geo",
   SEARCH_UNLIMITED: "search.unlimited",
@@ -47,6 +48,7 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
     Feature.SUBMIT_BID,
     Feature.TOP_SEARCH,
     Feature.SEARCH_UNLIMITED,
+    Feature.PRO_TOOLS,
   ],
   [ContractorPlan.BASICO]: [Feature.SEARCH_GEO],
   [ContractorPlan.COMPLETO]: [Feature.SEARCH_GEO, Feature.SEARCH_UNLIMITED],

@@ -57,4 +57,8 @@ export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
   "search.unlimited": { label: "Busca ilimitada", desc: "Sem limite de resultados." },
   "search.top": { label: "Destaque no topo", desc: "Apareça no topo das buscas da sua cidade." },
   "bid.submit": { label: "Lances em obras", desc: "Dê propostas sigilosas em obras abertas." },
+  "tools.documents": {
+    label: "Orçamentos e recibos",
+    desc: "Monte orçamentos e emita recibos para seus clientes.",
+  },
 };

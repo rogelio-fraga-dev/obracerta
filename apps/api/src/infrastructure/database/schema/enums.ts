@@ -16,6 +16,7 @@ import {
   WorkUrgency,
   WorkOrderStatus,
   ProposalStatus,
+  DocumentType,
 } from "@obracerta/shared";
 
 /**
@@ -80,4 +81,8 @@ export const workOrderStatusEnum = pgEnum(
 export const proposalStatusEnum = pgEnum(
   "proposal_status",
   Object.values(ProposalStatus) as [string, ...string[]],
+);
+export const documentTypeEnum = pgEnum(
+  "document_type",
+  Object.values(DocumentType) as [string, ...string[]],
 );

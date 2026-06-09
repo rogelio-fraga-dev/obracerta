@@ -26,3 +26,4 @@ export * from "./refunds.js";
 export * from "./payment-events.js";
 export * from "./work-orders.js";
 export * from "./proposals.js";
+export * from "./professional-documents.js";

@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Home, ClipboardList, HardHat, User, Search, CalendarDays, Receipt, LayoutDashboard, Users } from "lucide-react";
+import { Home, ClipboardList, HardHat, User, Search, CalendarDays, Receipt, FileText, LayoutDashboard, Users } from "lucide-react";
 
 export interface NavItem {
   href: string;
@@ -22,6 +22,7 @@ export const PRIMARY_NAV: NavItem[] = [
 export const SECONDARY_NAV: NavItem[] = [
   { href: "/buscar", label: "Buscar profissionais", Icon: Search },
   { href: "/agenda", label: "Minha agenda", Icon: CalendarDays },
+  { href: "/ferramentas", label: "Orçamentos e recibos", Icon: FileText },
   { href: "/cobrancas", label: "Cobranças", Icon: Receipt },
 ];
 

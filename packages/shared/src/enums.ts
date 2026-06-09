@@ -204,3 +204,14 @@ export const PaymentMethod = {
 } as const;
 export const paymentMethodSchema = z.nativeEnum(PaymentMethod);
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+/**
+ * Tipo de documento das ferramentas do profissional (roadmap §8.5): orçamento
+ * (estimativa, antes do serviço) ou recibo (comprovante, após o pagamento).
+ */
+export const DocumentType = {
+  ORCAMENTO: "ORCAMENTO",
+  RECIBO: "RECIBO",
+} as const;
+export const documentTypeSchema = z.nativeEnum(DocumentType);
+export type DocumentType = z.infer<typeof documentTypeSchema>;

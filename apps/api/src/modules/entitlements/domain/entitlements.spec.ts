@@ -25,4 +25,9 @@ describe("planAllows", () => {
     expect(planAllows(ProfessionalPlan.PRO, Feature.SUBMIT_BID)).toBe(false);
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.SUBMIT_BID)).toBe(true);
   });
+
+  it("ferramentas (orçamento/recibo) são exclusivas do Especialista", () => {
+    expect(planAllows(ProfessionalPlan.PRO, Feature.PRO_TOOLS)).toBe(false);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.PRO_TOOLS)).toBe(true);
+  });
 });
