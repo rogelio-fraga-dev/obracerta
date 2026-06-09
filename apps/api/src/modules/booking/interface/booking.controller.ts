@@ -1,5 +1,17 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import {
+  type BookingContact,
   type BookingRequest,
   createBookingSchema,
   type CreateBookingInput,
@@ -11,6 +23,12 @@ import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js"
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { BookingService } from "../application/booking.service.js";
+
+/** Arquivo recebido via multipart (subset do que o Multer entrega). */
+interface MultipartFile {
+  buffer: Buffer;
+  mimetype: string;
+}
 
 @Controller("bookings")
 @UseGuards(JwtAuthGuard)
@@ -24,6 +42,24 @@ export class BookingController {
     @Body(new ZodValidationPipe(createBookingSchema)) input: CreateBookingInput,
   ): Promise<BookingRequest> {
     return this.bookings.createForContractor(user.sub, input);
+  }
+
+  /** Contratante anexa a foto do serviço ao pedido (multipart, campo `file`). */
+  @Post(":id/foto")
+  @UseInterceptors(FileInterceptor("file"))
+  uploadFoto(
+    @CurrentUser() user: JwtClaims,
+    @Param("id") id: string,
+    @UploadedFile() file: MultipartFile | undefined,
+  ): Promise<BookingRequest> {
+    if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
+    return this.bookings.uploadFoto(user.sub, id, { buffer: file.buffer, mimetype: file.mimetype });
+  }
+
+  /** Contato da outra parte — liberado só após o aceite (double-blind §24). */
+  @Get(":id/contato")
+  getContact(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<BookingContact> {
+    return this.bookings.getContact(user.sub, id);
   }
 
   /** Pedidos em que sou o contratante. */

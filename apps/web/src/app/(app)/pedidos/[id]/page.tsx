@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   ApiEnvelopeError,
+  type BookingContact,
   type BookingRequest,
   type BookingStatus,
+  isBookingContactReleased,
   type TermsAcceptance,
   type UserType,
 } from "@obracerta/shared";
@@ -16,6 +18,7 @@ import { BackLink } from "../../_shell/BackLink";
 import { AgendaIcon, ClockIcon } from "../../_shell/icons";
 import { BookingStepper } from "./_components/BookingStepper";
 import { BookingActions } from "./_components/BookingActions";
+import { ContactCard } from "./_components/ContactCard";
 import { TermsCard } from "./_components/TermsCard";
 import { ReviewForm } from "./_components/ReviewForm";
 
@@ -45,6 +48,17 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
 
   const ui = BOOKING_STATUS_UI[booking.status];
   const offpath = OFFPATH[booking.status];
+
+  // Contato é double-blind: só busca quando o pedido foi aceito (§8.4/§24).
+  let contato: BookingContact | null = null;
+  if (isBookingContactReleased(booking.status)) {
+    try {
+      contato = await serverApi<BookingContact>("GET", `/bookings/${booking.id}/contato`);
+    } catch (e) {
+      if (!(e instanceof ApiEnvelopeError)) throw e;
+    }
+  }
+  const outraParte = tipo === "PROFISSIONAL" ? "Cliente" : "Profissional";
 
   return (
     <section aria-labelledby="pedido-heading" className="space-y-4">
@@ -82,11 +96,23 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
         )}
         {booking.descricao && (
           <div className="border-t border-border pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Descrição</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mensagem</p>
             <p className="mt-1 text-sm text-foreground">{booking.descricao}</p>
           </div>
         )}
+        {booking.fotoUrl && (
+          <div className="border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Foto do serviço</p>
+            <img
+              src={booking.fotoUrl}
+              alt="Foto anexada ao pedido"
+              className="mt-2 max-h-72 w-full rounded-lg object-cover"
+            />
+          </div>
+        )}
       </div>
+
+      {contato && <ContactCard contato={contato} papel={outraParte} />}
 
       <BookingActions bookingId={booking.id} status={booking.status} tipo={tipo} />
 

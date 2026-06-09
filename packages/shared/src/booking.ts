@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { uuidSchema, isoTimestampSchema } from "./primitives.js";
-import { bookingStatusSchema, declineReasonSchema, DeclineReason } from "./enums.js";
+import {
+  bookingStatusSchema,
+  BookingStatus,
+  declineReasonSchema,
+  DeclineReason,
+} from "./enums.js";
 
 /**
  * Contratos de agendamento (roadmap §4.2/§7/§11). Um `booking_request` é o pedido
@@ -15,6 +20,7 @@ export const bookingRequestSchema = z.object({
   professionalId: uuidSchema,
   especialidade: z.string().trim().min(2).max(60),
   descricao: z.string().trim().max(1000).nullable(),
+  fotoUrl: z.string().url().nullable(),
   dataServico: isoTimestampSchema,
   status: bookingStatusSchema,
   expiraEm: isoTimestampSchema,
@@ -24,6 +30,30 @@ export const bookingRequestSchema = z.object({
 });
 export type BookingRequest = z.infer<typeof bookingRequestSchema>;
 
+/**
+ * Contato de uma das partes, liberado **só após o aceite** (§24, double-blind).
+ * Até o profissional aprovar o pedido, ninguém vê WhatsApp/e-mail do outro — a
+ * plataforma intermedia a conexão; o contrato em si é direto entre as partes.
+ */
+export const bookingContactSchema = z.object({
+  nome: z.string(),
+  whatsapp: z.string(),
+  email: z.string().nullable(),
+});
+export type BookingContact = z.infer<typeof bookingContactSchema>;
+
+/** Estados em que o contato das partes está liberado (pós-aceite). */
+const CONTACT_RELEASED_STATUSES: readonly BookingStatus[] = [
+  BookingStatus.APROVADO,
+  BookingStatus.INICIADO,
+  BookingStatus.CONCLUIDO,
+];
+
+/** O contato já foi liberado neste estado do pedido? Fonte única (API + web). */
+export function isBookingContactReleased(status: BookingStatus): boolean {
+  return CONTACT_RELEASED_STATUSES.includes(status);
+}
+
 /** Criação de um pedido pelo contratante (professional alvo + dados do serviço). */
 export const createBookingSchema = z.object({
   professionalId: uuidSchema,
@@ -31,6 +61,8 @@ export const createBookingSchema = z.object({
   descricao: z.string().trim().max(1000).optional(),
   dataServico: isoTimestampSchema,
 });
+// A foto (anexo) NÃO entra na criação JSON — sobe depois por multipart
+// (`POST /bookings/:id/foto`), espelhando o upload da foto de perfil.
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 
 /**

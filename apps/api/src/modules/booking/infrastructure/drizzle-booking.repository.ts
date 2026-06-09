@@ -16,6 +16,7 @@ export function rowToBooking(row: BookingRow): BookingRequest {
     professionalId: row.professionalId,
     especialidade: row.especialidade,
     descricao: row.descricao,
+    fotoUrl: row.fotoUrl,
     dataServico: row.dataServico.toISOString(),
     status: row.status as BookingStatus,
     expiraEm: row.expiraEm.toISOString(),
@@ -43,6 +44,15 @@ export class DrizzleBookingRepository implements BookingRepository {
       .returning();
     if (!row) throw new Error("Falha ao criar o pedido de agendamento.");
     return rowToBooking(row);
+  }
+
+  async setFoto(id: string, url: string): Promise<BookingRequest | null> {
+    const [row] = await this.db
+      .update(bookingRequests)
+      .set({ fotoUrl: url, atualizadoEm: new Date() })
+      .where(eq(bookingRequests.id, id))
+      .returning();
+    return row ? rowToBooking(row) : null;
   }
 
   async findById(id: string): Promise<BookingRequest | null> {

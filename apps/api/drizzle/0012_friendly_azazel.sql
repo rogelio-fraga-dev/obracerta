@@ -1,0 +1,1 @@
+ALTER TABLE "booking_requests" ADD COLUMN "foto_url" text;

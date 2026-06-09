@@ -4,6 +4,7 @@ import type { AvailabilityService } from "../../availability/application/availab
 import type { BillingService } from "../../billing/application/billing.service.js";
 import type { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
 import type { NotificationProvider } from "../../notifications/domain/notification.provider.js";
+import type { StoragePort } from "../../storage/domain/storage.port.js";
 import type { UsersService } from "../../users/application/users.service.js";
 import { Feature } from "../../entitlements/domain/entitlements.js";
 import type { BookingRepository } from "../domain/ports/booking.repository.js";
@@ -46,6 +47,7 @@ describe("BookingService — gating booking.receive", () => {
       {} as ReviewReminderScheduler,
       {} as PenaltyService,
       billing,
+      {} as StoragePort,
       notifications,
     );
     return { service, repo, billing };

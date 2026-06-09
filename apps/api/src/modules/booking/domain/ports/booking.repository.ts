@@ -13,6 +13,8 @@ export interface CreateBookingData {
 /** Porta de saída para os pedidos de agendamento. */
 export interface BookingRepository {
   create(data: CreateBookingData): Promise<BookingRequest>;
+  /** Anexa a foto (URL no storage) a um pedido e devolve o pedido atualizado. */
+  setFoto(id: string, url: string): Promise<BookingRequest | null>;
   findById(id: string): Promise<BookingRequest | null>;
   countPending(contractorId: string, especialidade: string): Promise<number>;
   listForProfessional(professionalId: string): Promise<BookingRequest[]>;

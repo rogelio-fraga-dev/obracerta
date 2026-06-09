@@ -24,6 +24,9 @@ export const bookingRequests = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     especialidade: varchar("especialidade", { length: 60 }).notNull(),
     descricao: text("descricao"),
+    // Foto anexa (URL no storage) descrevendo o serviço — opcional, enviada pelo
+    // contratante após criar o pedido (§8.4).
+    fotoUrl: text("foto_url"),
     dataServico: timestamp("data_servico", { withTimezone: true }).notNull(),
     status: bookingStatusEnum("status").notNull().default("PENDENTE"),
     expiraEm: timestamp("expira_em", { withTimezone: true }).notNull(),

@@ -10,6 +10,8 @@ import {
 import {
   BookingStatus,
   UserType,
+  isBookingContactReleased,
+  type BookingContact,
   type BookingRequest,
   type CreateBookingInput,
   type DeclineReason,
@@ -24,10 +26,18 @@ import {
   type NotificationProvider,
 } from "../../notifications/domain/notification.provider.js";
 import { UsersService } from "../../users/application/users.service.js";
+import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
 import { computeExpiry, exceedsPendingLimit, serviceBlockWindow } from "../domain/booking-state.js";
 import { BOOKING_REPOSITORY, type BookingRepository } from "../domain/ports/booking.repository.js";
 import { BookingScheduler } from "./booking.scheduler.js";
 import { ReviewReminderScheduler } from "./review-reminder.scheduler.js";
+
+/** Formatos de imagem aceitos no anexo do pedido → extensão do objeto. */
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 @Injectable()
 export class BookingService {
@@ -41,6 +51,7 @@ export class BookingService {
     private readonly reviewReminders: ReviewReminderScheduler,
     private readonly penalties: PenaltyService,
     private readonly billing: BillingService,
+    @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
   ) {}
 
@@ -88,6 +99,53 @@ export class BookingService {
     await this.scheduler.scheduleExpiry(booking.id, expiraEm);
     await this.notify(professional.whatsapp, "Você recebeu um novo pedido de agendamento.");
     return booking;
+  }
+
+  /**
+   * Contratante anexa uma foto do serviço ao próprio pedido (enquanto PENDENTE).
+   * A imagem vai pro storage; persistimos só a URL. Mesma validação de formato
+   * da foto de perfil (§8.4).
+   */
+  async uploadFoto(
+    contractorId: string,
+    id: string,
+    file: { buffer: Buffer; mimetype: string },
+  ): Promise<BookingRequest> {
+    const booking = await this.getOr404(id);
+    if (booking.contractorId !== contractorId) {
+      throw new ForbiddenException("Este pedido não é seu.");
+    }
+    if (booking.status !== BookingStatus.PENDENTE) {
+      throw new ConflictException("Só dá para anexar foto enquanto o pedido está pendente.");
+    }
+    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
+    }
+    const key = `bookings/${id}/foto-${Date.now()}.${ext}`;
+    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const updated = await this.repo.setFoto(id, url);
+    if (!updated) throw new NotFoundException("Pedido de agendamento não encontrado.");
+    return updated;
+  }
+
+  /**
+   * Contato da outra parte, liberado **só após o aceite** (double-blind §24):
+   * antes de APROVADO ninguém vê WhatsApp/e-mail do outro — a plataforma só
+   * intermedia a conexão. Restrito aos participantes do pedido.
+   */
+  async getContact(userId: string, id: string): Promise<BookingContact> {
+    const booking = await this.getForParticipant(userId, id);
+    if (!isBookingContactReleased(booking.status)) {
+      throw new ForbiddenException(
+        "O contato é liberado só depois que o profissional aceita o pedido.",
+      );
+    }
+    const otherId =
+      booking.contractorId === userId ? booking.professionalId : booking.contractorId;
+    const other = await this.users.findById(otherId);
+    if (!other) throw new NotFoundException("Usuário não encontrado.");
+    return { nome: other.nomeCompleto, whatsapp: other.whatsapp, email: other.email ?? null };
   }
 
   /** Profissional aprova: gera o bloqueio bilateral e transita PENDENTE → APROVADO. */

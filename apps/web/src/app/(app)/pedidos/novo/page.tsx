@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type BookingRequest, createBookingSchema } from "@obracerta/shared";
 import { Button, Card, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { uploadBookingFotoAction } from "../actions";
 
 /**
  * Contratante cria um pedido. O profissional-alvo vem por query (`?prof=&esp=`)
@@ -18,6 +19,7 @@ export default function NovoPedidoPage() {
   const [especialidade, setEspecialidade] = useState(params.get("esp") ?? "");
   const [descricao, setDescricao] = useState("");
   const [quando, setQuando] = useState("");
+  const [foto, setFoto] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +37,15 @@ export default function NovoPedidoPage() {
       const parsed = createBookingSchema.safeParse(payload);
       if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
       const booking = await bff.post<BookingRequest>("/api/bookings", payload);
+      // A foto sobe depois (multipart), já com o pedido criado. Best-effort: se
+      // falhar, o pedido continua válido — o contratante pode reenviar no detalhe.
+      if (foto) {
+        const fd = new FormData();
+        fd.append("file", foto);
+        await uploadBookingFotoAction(booking.id, fd).catch(() => {
+          /* anexo é opcional: não bloqueia a navegação */
+        });
+      }
       router.replace(`/pedidos/${booking.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao criar o pedido.");
@@ -72,8 +83,16 @@ export default function NovoPedidoPage() {
         <Field label="Data e hora">
           <Input type="datetime-local" value={quando} onChange={(e) => setQuando(e.target.value)} />
         </Field>
-        <Field label="Descrição" hint="Opcional — detalhe o serviço">
+        <Field label="Mensagem ao profissional" hint="Opcional — detalhe o serviço">
           <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} />
+        </Field>
+        <Field label="Foto do serviço" hint="Opcional — JPEG, PNG ou WebP">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => setFoto(e.target.files?.[0] ?? null)}
+            className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground"
+          />
         </Field>
 
         <Button className="w-full" onClick={criar} disabled={loading}>
