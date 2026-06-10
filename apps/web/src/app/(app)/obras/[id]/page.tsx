@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
 import {
   ApiEnvelopeError,
   formatCentavos,
@@ -13,6 +12,7 @@ import { getProfileHint } from "@/lib/session";
 import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { BackLink } from "../../_shell/BackLink";
+import { Fact } from "../../_shell/Fact";
 import { ClockIcon, MapPinIcon, MoneyIcon, TagIcon } from "../../_shell/icons";
 import { ObraBid } from "./_components/ObraBid";
 import { ObraProposals } from "./_components/ObraProposals";
@@ -115,16 +115,3 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
   );
 }
 
-function Fact({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 py-2 first:pt-0 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-border">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-        {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-semibold text-foreground">{children}</p>
-      </div>
-    </div>
-  );
-}

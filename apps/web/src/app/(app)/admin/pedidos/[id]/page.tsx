@@ -4,6 +4,7 @@ import type { BookingRequest, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import Link from "next/link";
+import { BackLink } from "../../../_shell/BackLink";
 
 export default async function AdminPedidoDetalhePage({
   params,
@@ -18,9 +19,7 @@ export default async function AdminPedidoDetalhePage({
   return (
     <section aria-labelledby="admin-pedido-detalhe-heading" className="space-y-6">
       <header className="flex flex-col gap-4">
-        <Link href="/admin/pedidos" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-fit transition-colors font-medium">
-          <span className="text-lg">&larr;</span> Voltar para pedidos
-        </Link>
+        <BackLink href="/admin/pedidos" label="Voltar para pedidos" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 id="admin-pedido-detalhe-heading" className="font-display text-3xl font-black text-foreground">

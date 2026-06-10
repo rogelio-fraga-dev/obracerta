@@ -4,6 +4,7 @@ import { formatCentavos } from "@obracerta/shared";
 import type { WorkOrder, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
+import { BackLink } from "../../../_shell/BackLink";
 
 export default async function AdminObraDetalhePage({
   params,
@@ -17,9 +18,7 @@ export default async function AdminObraDetalhePage({
   return (
     <section aria-labelledby="admin-obra-detalhe-heading" className="space-y-6">
       <header className="flex flex-col gap-4">
-        <Link href="/admin/obras" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-fit transition-colors font-medium">
-          <span className="text-lg">&larr;</span> Voltar para obras
-        </Link>
+        <BackLink href="/admin/obras" label="Voltar para obras" />
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 id="admin-obra-detalhe-heading" className="font-display text-3xl font-black text-foreground">

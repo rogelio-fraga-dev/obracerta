@@ -3,12 +3,7 @@ import { formatCentavos, type ProfessionalDocument } from "@obracerta/shared";
 import { Badge, Button, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
-
-/** Rótulo + tom do tipo de documento. */
-const TIPO_UI = {
-  ORCAMENTO: { label: "Orçamento", tone: "info" as const },
-  RECIBO: { label: "Recibo", tone: "success" as const },
-};
+import { DOCUMENT_TYPE_UI } from "@/lib/document-ui";
 
 /**
  * Ferramentas do profissional (§8.5): lista de orçamentos e recibos. Premium —
@@ -63,7 +58,7 @@ export default async function FerramentasPage() {
       ) : (
         <ul className="space-y-3">
           {docs.map((doc) => {
-            const ui = TIPO_UI[doc.tipo];
+            const ui = DOCUMENT_TYPE_UI[doc.tipo];
             return (
               <li key={doc.id}>
                 <Link href={`/ferramentas/${doc.id}`} className="block">

@@ -10,6 +10,7 @@ import {
 } from "@obracerta/shared";
 import { Badge, Button, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { useAsyncAction } from "@/lib/use-async-action";
 import { AuthPanel } from "../_auth/AuthPanel";
 import { AuthDivider, GoogleButton } from "../_auth/SocialAuth";
 import { MethodTabs } from "../_auth/MethodTabs";
@@ -61,23 +62,6 @@ export default function EntrarPage() {
       </div>
     </AuthPanel>
   );
-}
-
-function useAsyncAction() {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const run = async (fn: () => Promise<void>) => {
-    setError(null);
-    setLoading(true);
-    try {
-      await fn();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro inesperado.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  return { error, loading, run };
 }
 
 function ErrorBox({ message }: { message: string }) {

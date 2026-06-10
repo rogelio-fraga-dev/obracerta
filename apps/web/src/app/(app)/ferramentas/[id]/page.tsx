@@ -7,12 +7,8 @@ import {
 import { Badge } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
+import { DOCUMENT_TYPE_UI } from "@/lib/document-ui";
 import { BackLink } from "../../_shell/BackLink";
-
-const TIPO_UI = {
-  ORCAMENTO: { label: "Orçamento", tone: "info" as const },
-  RECIBO: { label: "Recibo", tone: "success" as const },
-};
 
 /** Visão de um orçamento/recibo — pronta para imprimir/compartilhar (§8.5). */
 export default async function DocumentoDetailPage({
@@ -30,7 +26,7 @@ export default async function DocumentoDetailPage({
     throw e;
   }
 
-  const ui = TIPO_UI[doc.tipo];
+  const ui = DOCUMENT_TYPE_UI[doc.tipo];
 
   return (
     <section aria-labelledby="doc-heading" className="space-y-4">
