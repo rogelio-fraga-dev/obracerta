@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@obracerta/ui";
-import { PRIMARY_NAV, SECONDARY_NAV, type NavItem } from "./nav-items";
+import { navForTipo, tipoLabel, type NavItem } from "./nav-items";
 import { LayoutDashboard, Users, HardHat, ClipboardList, ShieldAlert, Landmark } from "lucide-react";
 
 interface SidebarProps {
@@ -37,6 +37,7 @@ const ADMIN_NAV: NavItem[] = [
  */
 export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: SidebarProps) {
   const pathname = usePathname();
+  const { primary, secondary } = navForTipo(tipo);
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
@@ -94,12 +95,12 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
           </>
         ) : (
           <>
-            <ul className="space-y-1">{PRIMARY_NAV.map(renderItem)}</ul>
+            <ul className="space-y-1">{primary.map(renderItem)}</ul>
             <div className="mx-4 my-6 h-px bg-border/60" />
             <p className="px-4 pb-3 text-xs font-extrabold uppercase tracking-wider text-muted-foreground/60">
               Atalhos
             </p>
-            <ul className="space-y-1">{SECONDARY_NAV.map(renderItem)}</ul>
+            <ul className="space-y-1">{secondary.map(renderItem)}</ul>
           </>
         )}
       </nav>
@@ -120,9 +121,9 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
             <span className="block truncate text-sm font-bold text-foreground">
               {nome ?? "Meu perfil"}
             </span>
-            {tipo && (
+            {(tipo || isAdmin) && (
               <span className="text-[11px] font-semibold text-muted-foreground">
-                {isAdmin ? "Administração" : tipo === "PROFISSIONAL" ? "Profissional" : "Contratante"}
+                {tipoLabel(tipo, isAdmin)}
               </span>
             )}
           </span>

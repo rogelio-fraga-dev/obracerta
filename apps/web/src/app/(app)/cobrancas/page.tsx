@@ -1,6 +1,7 @@
 import { formatCentavos, type Invoice, type Refund } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
+import { getProfileHint } from "@/lib/session";
 import { INVOICE_STATUS_UI, PAYMENT_METHOD_LABEL, REFUND_STATUS_UI } from "@/lib/billing-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { RefundButton } from "./_components/RefundButton";
@@ -18,10 +19,11 @@ interface EntitlementsView {
  * resolve depois.
  */
 export default async function CobrancasPage() {
-  const [invoices, refunds, ent] = await Promise.all([
+  const [invoices, refunds, ent, hint] = await Promise.all([
     serverApi<Invoice[]>("GET", "/invoices/me"),
     serverApi<Refund[]>("GET", "/refunds/me"),
     serverApi<EntitlementsView>("GET", "/me/entitlements"),
+    getProfileHint(),
   ]);
 
   return (
@@ -30,7 +32,7 @@ export default async function CobrancasPage() {
         Cobranças
       </h1>
 
-      <MeuPlano plano={ent.plano} features={ent.features} />
+      <MeuPlano plano={ent.plano} features={ent.features} tipo={hint?.tipo} />
 
       <Card className="space-y-3">
         <h2 className="font-display text-lg font-black text-foreground">Faturas</h2>

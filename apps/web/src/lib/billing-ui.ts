@@ -52,3 +52,17 @@ export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
     desc: "Monte orçamentos e emita recibos para seus clientes.",
   },
 };
+
+/**
+ * Rótulos das features na ótica do **contratante/empresa**. A mesma feature de
+ * gating (`bid.submit`) tem sentido diferente aqui (publicar obra p/ lances, não
+ * dar lances), então mapeamos separadamente para não confundir a UI.
+ */
+export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string }> = {
+  "search.geo": { label: "Busca por proximidade", desc: "Encontre profissionais perto de você." },
+  "search.unlimited": { label: "Busca ilimitada", desc: "Veja todos os resultados, sem limite." },
+  "bid.submit": {
+    label: "Publicar obra para lances",
+    desc: "Publique uma obra e receba propostas sigilosas dos profissionais.",
+  },
+};

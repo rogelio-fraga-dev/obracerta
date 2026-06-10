@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@obracerta/ui";
-import { PRIMARY_NAV, ADMIN_NAV } from "./nav-items";
+import { navForTipo, ADMIN_NAV } from "./nav-items";
 
 /**
  * Barra de abas inferior — **só no mobile** (`lg:hidden`).
  * A aba ativa ganha cor de destaque + um traço superior animado.
+ * Os itens refletem o tipo de conta (mesma fonte da Sidebar).
  */
-export function TabBar() {
+export function TabBar({ tipo }: { tipo?: string }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
-  const navItems = isAdminRoute ? ADMIN_NAV : PRIMARY_NAV;
+  const navItems = isAdminRoute ? ADMIN_NAV : navForTipo(tipo).primary;
 
   return (
     <nav

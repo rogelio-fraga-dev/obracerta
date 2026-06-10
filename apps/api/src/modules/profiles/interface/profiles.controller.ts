@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
+  type CompanyProfile,
   type JwtClaims,
   type PortfolioPhoto,
   type ProfessionalProfile,
@@ -46,6 +47,15 @@ export class ProfilesController {
     const profile = await this.profiles.getProfessional(user.sub);
     if (!profile) throw new NotFoundException("Perfil profissional não encontrado.");
     return profile;
+  }
+
+  /** Perfil de empresa (PJ) do usuário autenticado (§8.6). */
+  @Get("company/me")
+  @UseGuards(JwtAuthGuard)
+  async myCompany(@CurrentUser() user: JwtClaims): Promise<CompanyProfile> {
+    const company = await this.profiles.getCompany(user.sub);
+    if (!company) throw new NotFoundException("Perfil de empresa não encontrado.");
+    return company;
   }
 
   /** Atualiza campos do perfil profissional (passos 3–4 do cadastro). */

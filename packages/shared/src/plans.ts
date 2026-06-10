@@ -1,4 +1,4 @@
-import { ProfessionalPlan } from "./enums.js";
+import { ContractorPlan, ProfessionalPlan } from "./enums.js";
 
 /**
  * Catálogo de planos do profissional para **apresentação** (tela de escolha de
@@ -50,6 +50,54 @@ export const professionalPlansOrdered: ProfessionalPlanInfo[] = [
   professionalPlanCatalog[ProfessionalPlan.INICIANTE],
   professionalPlanCatalog[ProfessionalPlan.PRO],
   professionalPlanCatalog[ProfessionalPlan.ESPECIALISTA],
+];
+
+/**
+ * Catálogo de planos avulsos do **contratante/empresa** (acesso por 30 dias).
+ * Preços espelham `billing-rules` (BASICO R$19 · COMPLETO R$39 · LANCE R$69).
+ */
+export interface ContractorPlanInfo {
+  plano: ContractorPlan;
+  nome: string;
+  /** Preço do acesso (30 dias) em centavos. */
+  precoCentavos: number;
+  recomendado: boolean;
+  resumo: string;
+  beneficios: string[];
+}
+
+export const contractorPlanCatalog: Record<ContractorPlan, ContractorPlanInfo> = {
+  [ContractorPlan.BASICO]: {
+    plano: ContractorPlan.BASICO,
+    nome: "Básico",
+    precoCentavos: 1900,
+    recomendado: false,
+    resumo: "Explore a oferta",
+    beneficios: ["Ver todos os profissionais", "Filtro por profissão", "Disponibilidade geral"],
+  },
+  [ContractorPlan.COMPLETO]: {
+    plano: ContractorPlan.COMPLETO,
+    nome: "Completo",
+    precoCentavos: 3900,
+    recomendado: true,
+    resumo: "Contrate com segurança",
+    beneficios: ["Tudo do Básico", "Ranking e recomendados", "Agendar serviços", "Valores e agenda visíveis"],
+  },
+  [ContractorPlan.LANCE]: {
+    plano: ContractorPlan.LANCE,
+    nome: "Lance",
+    precoCentavos: 6900,
+    recomendado: false,
+    resumo: "Profissionais competem",
+    beneficios: ["Tudo do Completo", "Publicar obra para lances", "Receber propostas sigilosas"],
+  },
+};
+
+/** Planos do contratante na ordem de apresentação (do mais barato ao premium). */
+export const contractorPlansOrdered: ContractorPlanInfo[] = [
+  contractorPlanCatalog[ContractorPlan.BASICO],
+  contractorPlanCatalog[ContractorPlan.COMPLETO],
+  contractorPlanCatalog[ContractorPlan.LANCE],
 ];
 
 /** Formata centavos (inteiro) como moeda BRL: 4900 → "R$ 49,00". */

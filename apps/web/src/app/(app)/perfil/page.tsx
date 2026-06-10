@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type {
+  CompanyProfile,
   JwtClaims,
   Penalty,
   PenaltySummary,
@@ -30,6 +31,14 @@ export default async function PerfilPage() {
   const roles = await getMyRoles();
   const isAdmin = roles.includes("ADMIN");
   const isProfissional = hint?.tipo === "PROFISSIONAL";
+  const isEmpresa = hint?.tipo === "EMPRESA";
+  const tipoLabel = isAdmin
+    ? "Administração do Sistema"
+    : isProfissional
+      ? "Profissional"
+      : isEmpresa
+        ? "Empresa"
+        : "Contratante";
 
   const claims = await serverApi<JwtClaims>("POST", "/auth/me");
   const user = await serverApi<User>("GET", "/auth/me/profile");
@@ -51,9 +60,7 @@ export default async function PerfilPage() {
             <h2 className="font-display text-2xl font-black text-foreground">
               {user.nomeCompleto ?? "Usuário"}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              {isAdmin ? "Administração do Sistema" : isProfissional ? "Profissional" : "Contratante"}
-            </p>
+            <p className="text-sm text-muted-foreground">{tipoLabel}</p>
           </div>
           <div className="flex flex-wrap gap-2 text-sm">
             <Badge tone="neutral">WhatsApp: {claims.whatsapp}</Badge>
@@ -74,6 +81,8 @@ export default async function PerfilPage() {
 
       {isAdmin && <AdminForms user={user} />}
 
+      {!isAdmin && isEmpresa && <EmpresaPanel />}
+
       {!isAdmin && isProfissional && <PortfolioPanel />}
 
       {!isAdmin && isProfissional && <ComportamentoPanel />}
@@ -81,6 +90,44 @@ export default async function PerfilPage() {
       {!isAdmin && <AvaliacoesRecebidas />}
     </section>
   );
+}
+
+async function EmpresaPanel() {
+  let company: CompanyProfile | null = null;
+  try {
+    company = await serverApi<CompanyProfile>("GET", "/profiles/company/me");
+  } catch {
+    company = null;
+  }
+
+  return (
+    <div className="animate-fade-in delay-1 space-y-3">
+      <h2 className="font-display text-xl font-black text-foreground">Dados da empresa</h2>
+      <Card className="grid gap-4 sm:grid-cols-3">
+        <CompanyField label="Razão social" value={company?.razaoSocial} />
+        <CompanyField label="Nome fantasia" value={company?.nomeFantasia} />
+        <CompanyField label="CNPJ" value={formatCnpj(company?.cnpj)} />
+      </Card>
+      <p className="px-1 text-xs text-muted-foreground">
+        A empresa contrata e publica obras como contratante. A edição destes dados será habilitada em breve.
+      </p>
+    </div>
+  );
+}
+
+function CompanyField({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 font-semibold text-foreground">{value ?? "—"}</p>
+    </div>
+  );
+}
+
+/** Formata CNPJ de 14 dígitos: 11444777000161 → 11.444.777/0001-61. */
+function formatCnpj(cnpj: string | null | undefined): string | null {
+  if (!cnpj || cnpj.length !== 14) return cnpj ?? null;
+  return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
 }
 
 async function PortfolioPanel() {

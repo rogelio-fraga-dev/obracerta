@@ -47,7 +47,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       <InstallPrompt />
-      <TabBar />
+      <TabBar tipo={isAdmin ? undefined : hint?.tipo} />
     </div>
   );
 }
