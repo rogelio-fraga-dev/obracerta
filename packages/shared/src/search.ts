@@ -18,6 +18,9 @@ export const searchResultSchema = z.object({
   plano: professionalPlanSchema,
   anosExperiencia: z.number().int().nullable(),
   fotoUrl: z.string().nullable(),
+  /** Reputação (avaliações reveladas): média 0–5 e total. 0/0 quando ainda não avaliado. */
+  mediaNota: z.number().min(0).max(5),
+  totalAvaliacoes: z.number().int().min(0),
   /** Distância em km do ponto buscado (null quando a busca não é geográfica). */
   distanciaKm: z.number().nullable(),
 });

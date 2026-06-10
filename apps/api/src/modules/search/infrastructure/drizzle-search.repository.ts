@@ -18,6 +18,8 @@ interface SearchRow {
   plano: string;
   anos_experiencia: number | null;
   foto_url: string | null;
+  media_nota: string | number | null;
+  total_avaliacoes: string | number | null;
   distancia_km: string | number | null;
 }
 
@@ -49,12 +51,18 @@ export class DrizzleSearchRepository implements SearchRepository {
       : sql`null`;
     const orderBy = point ? sql`distancia_km asc nulls last, u.nome_completo` : sql`u.nome_completo`;
 
+    // reputação: agrega só as avaliações REVELADAS por alvo (LEFT JOIN — 0/0 se nenhuma)
     const result = await this.db.execute(sql`
       select u.id as user_id, u.nome_completo as nome, pp.slug_publico as slug,
              pp.especialidades, pp.bairro, pp.plano, pp.anos_experiencia, pp.foto_url,
+             coalesce(r.media, 0) as media_nota, coalesce(r.total, 0) as total_avaliacoes,
              ${distancia} as distancia_km
       from professional_profiles pp
       join users u on u.id = pp.user_id
+      left join (
+        select alvo_id, avg(nota)::numeric(3,2) as media, count(*)::int as total
+        from reviews where status = 'REVELADA' group by alvo_id
+      ) r on r.alvo_id = u.id
       where ${where}
       order by ${orderBy}
       limit ${f.limit} offset ${f.offset}
@@ -85,6 +93,8 @@ function rowToSearchResult(row: SearchRow): SearchResult {
     plano: row.plano as ProfessionalPlan,
     anosExperiencia: row.anos_experiencia,
     fotoUrl: row.foto_url,
+    mediaNota: Number(row.media_nota ?? 0),
+    totalAvaliacoes: Number(row.total_avaliacoes ?? 0),
     distanciaKm: row.distancia_km === null ? null : Number(row.distancia_km),
   };
 }

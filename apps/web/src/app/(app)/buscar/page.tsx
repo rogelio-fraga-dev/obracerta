@@ -78,6 +78,18 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                     <p className="truncate text-sm text-muted-foreground">
                       {p.especialidades.join(" · ")}
                     </p>
+                    {p.totalAvaliacoes > 0 ? (
+                      <p className="flex items-center gap-1.5 text-sm" aria-label={`${p.mediaNota.toFixed(1)} de 5, ${p.totalAvaliacoes} avaliações`}>
+                        <span aria-hidden className="tracking-tight text-warning">
+                          {"★".repeat(Math.round(p.mediaNota))}
+                          <span className="text-border">{"★".repeat(5 - Math.round(p.mediaNota))}</span>
+                        </span>
+                        <span className="font-bold text-foreground">{p.mediaNota.toFixed(1)}</span>
+                        <span className="text-muted-foreground">({p.totalAvaliacoes})</span>
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Ainda sem avaliações</p>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {[
                         p.bairro,
