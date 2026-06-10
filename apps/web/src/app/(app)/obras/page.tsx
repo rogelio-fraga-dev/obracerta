@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatCentavos, type WorkOrdersPage } from "@obracerta/shared";
+import { formatCentavos, type WorkOrder, type WorkOrdersPage } from "@obracerta/shared";
 import { Badge, Button, Card, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
@@ -7,13 +7,16 @@ import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
 import { ObrasIcon } from "../_shell/icons";
 
 /**
- * Aba Obras (Fase 5): descoberta de obras abertas (FOMO). O profissional acha
- * obras para dar lance; o contratante vê as abertas e pode publicar uma nova.
+ * Aba Obras (Fase 5): o **dono** (contratante/empresa) vê **as próprias obras**
+ * (`/work-orders/me`, todos os status) e publica novas; o **profissional** vê o
+ * feed de obras abertas para dar lance.
  */
 export default async function ObrasPage() {
   const hint = await getProfileHint();
-  const isContratante = hint?.tipo === "CONTRATANTE";
-  const { items } = await serverApi<WorkOrdersPage>("GET", "/work-orders");
+  const isContratante = hint?.tipo === "CONTRATANTE" || hint?.tipo === "EMPRESA";
+  const items = isContratante
+    ? await serverApi<WorkOrder[]>("GET", "/work-orders/me")
+    : (await serverApi<WorkOrdersPage>("GET", "/work-orders")).items;
 
   return (
     <section aria-labelledby="obras-heading" className="space-y-6">

@@ -38,6 +38,12 @@ export class WorkOrderController {
     return this.orders.listOpen(query);
   }
 
+  /** Obras do contratante autenticado (todos os status). Antes de `:id` por roteamento. */
+  @Get("work-orders/me")
+  mine(@CurrentUser() user: JwtClaims): Promise<WorkOrder[]> {
+    return this.orders.listMine(user.sub);
+  }
+
   /** Detalhe de uma obra. */
   @Get("work-orders/:id")
   get(@Param("id") id: string): Promise<WorkOrder> {

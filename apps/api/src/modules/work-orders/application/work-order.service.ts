@@ -82,6 +82,11 @@ export class WorkOrderService {
     return order;
   }
 
+  /** Obras do contratante autenticado (todos os status), mais recentes primeiro. */
+  listMine(contractorId: string): Promise<WorkOrder[]> {
+    return this.orders.listForContractor(contractorId);
+  }
+
   /** Descoberta: obras abertas (filtro por cidade/especialidade), paginado. */
   async listOpen(query: WorkOrderQuery): Promise<WorkOrdersPage> {
     const { page, limit } = query;

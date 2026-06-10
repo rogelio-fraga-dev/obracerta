@@ -90,6 +90,15 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
     return { items: rows.map(rowToWorkOrder), total: c?.total ?? 0 };
   }
 
+  async listForContractor(contractorId: string): Promise<WorkOrder[]> {
+    const rows = await this.db
+      .select()
+      .from(workOrders)
+      .where(eq(workOrders.contractorId, contractorId))
+      .orderBy(desc(workOrders.criadoEm));
+    return rows.map(rowToWorkOrder);
+  }
+
   async transitionStatus(
     id: string,
     from: WorkOrderStatus,

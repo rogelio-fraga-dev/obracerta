@@ -34,6 +34,8 @@ export interface WorkOrderRepository {
   findAll(): Promise<WorkOrder[]>;
   findAllPaginated(limit: number, offset: number): Promise<{ items: WorkOrder[], total: number }>;
   listOpen(filters: ListOpenWorkOrdersFilters): Promise<WorkOrderPage>;
+  /** Obras de um contratante (todos os status), mais recentes primeiro. */
+  listForContractor(contractorId: string): Promise<WorkOrder[]>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transitionStatus(id: string, from: WorkOrderStatus, to: WorkOrderStatus): Promise<WorkOrder | null>;
   /** Atualiza o piso de dignidade (recalculado a cada lance). */
