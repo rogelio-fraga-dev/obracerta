@@ -412,11 +412,15 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
     - **Estado de avaliação (FE-2/3):** `ReceivedReview` (Review + `resposta`/`respostaEm`) no `/reviews/received`; `GET /reviews/booking/:id/mine` (`hasReviewedBooking`); UI esconde os forms após enviar/responder. +3 testes (200 API).
     - **`/work-orders/me` (FE-20):** contratante/empresa veem as próprias obras (todos os status) em vez do feed global.
     - **`ProfileEditCard` (FE-19):** edição de nome/e-mail/foto para contratante/empresa (reusa as actions).
+  - [x] **Nota (estrelas) nos cards de busca:** `LEFT JOIN` agregando avaliações REVELADAS por alvo no `/search/professionals` (consistente com a reputação pública); `mediaNota`/`totalAvaliacoes` no `SearchResult`. _(Nota: o seed deixa o único review de profissional OCULTA — para a estrela aparecer na demo, é preciso um review REVELADA de profissional.)_
   - [ ] **Restante (polish / perf — não bloqueia demo):**
-    - **Nota nos cards de busca:** join com reputação no `/search/professionals` (backend).
     - **Onda 4 (DS/dedup):** componente `Select` no DS · gradientes como classes Tailwind · dedup `Fact`/`useAsyncAction`/`TIPO_UI` · `<BackLink>` no admin · emojis `aria-hidden` (A11y-27) · cores dos gráficos via tokens (A11y-6).
     - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)**.
     - **`PAYMENT_WEBHOOK_SECRET` (M-11)** — vai junto com o Asaas (deploy).
+
+> **Landing (jun/2026, pedido do fundador):** header sticky robusto (botões sempre
+> visíveis), rodapé multi-coluna, atmosfera de fundo leve, copy do passo-a-passo e
+> clareza dos planos do contratante. Ver commit `feat(web): landing — ...`.
 
 **Backlog Fase 8+:** cobrança real
 da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · SEO (pós-marca) ·
