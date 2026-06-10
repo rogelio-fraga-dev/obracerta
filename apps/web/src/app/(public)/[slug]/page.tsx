@@ -46,93 +46,128 @@ export default async function PublicProfilePage({ params }: PageProps) {
   const planoNome = professionalPlanCatalog[profile.plano].nome;
 
   return (
-    <section aria-labelledby="profile-heading" className="mx-auto max-w-2xl px-6 py-12">
-      <p className="mb-2 text-xs font-extrabold uppercase tracking-[3px] text-primary">Perfil público</p>
+    <section aria-labelledby="profile-heading" className="mx-auto max-w-5xl px-6 py-10">
+      {/* Header hero — vitrine do profissional */}
+      <header
+        className="relative overflow-hidden rounded-3xl px-6 py-8 text-white sm:px-10 sm:py-10"
+        style={{ background: "var(--gradient-hero)" }}
+      >
+        <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">Perfil público</p>
+        <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div
+            aria-hidden={!profile.fotoUrl}
+            className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-white/15 font-display text-4xl font-black text-white sm:h-28 sm:w-28"
+          >
+            {profile.fotoUrl ? (
+              <img
+                src={profile.fotoUrl}
+                alt={`Foto de ${nome}`}
+                className="h-full w-full rounded-2xl object-cover"
+              />
+            ) : (
+              nome.charAt(0)
+            )}
+          </div>
+          <div className="min-w-0">
+            <h1 id="profile-heading" className="font-display text-3xl font-black sm:text-4xl">
+              {nome}
+            </h1>
+            <p className="mt-1 text-white/80">{profile.especialidades.join(" · ")}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/90">
+              <span className="inline-flex items-center gap-1.5">
+                <Stars nota={profile.reputacao.mediaNota} />
+                <span className="font-bold">{profile.reputacao.mediaNota.toFixed(1)}</span>
+                <span className="text-white/70">({profile.reputacao.totalAvaliacoes} avaliações)</span>
+              </span>
+              {profile.bairro && <span className="text-white/70">{profile.bairro}</span>}
+            </div>
+          </div>
+        </div>
+      </header>
 
-      <div className="flex items-center gap-4">
-        <div
-          aria-hidden={!profile.fotoUrl}
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted font-display text-2xl font-black text-muted-foreground"
-        >
-          {profile.fotoUrl ? (
-            <img
-              src={profile.fotoUrl}
-              alt={`Foto de ${nome}`}
-              className="h-full w-full rounded-full object-cover"
-            />
+      <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_2fr]">
+        {/* Confiança + CTA (sticky no desktop) */}
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <Card className="space-y-4">
+            <h2 className="font-display text-lg font-black text-foreground">Confiança</h2>
+            <dl className="space-y-2 text-sm">
+              <Stat label="Avaliações" value={`${profile.reputacao.totalAvaliacoes}`} />
+              <Stat label="Nota média" value={`${profile.reputacao.mediaNota.toFixed(1)} / 5`} />
+              {profile.anosExperiencia !== null && (
+                <Stat label="Experiência" value={`${profile.anosExperiencia} anos`} />
+              )}
+              <Stat label="Plano" value={planoNome} />
+            </dl>
+            {profile.especialidades.length > 0 && (
+              <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+                {profile.especialidades.map((esp) => (
+                  <Badge key={esp} tone="neutral">
+                    {esp}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {profile.reputacao.badges.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {profile.reputacao.badges.map((b) => (
+                  <Badge key={b} tone="success">
+                    🏅 {b}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </Card>
+          <Card className="space-y-3 text-center">
+            <p className="text-sm text-muted-foreground">
+              Para agendar com {nome}, entre na sua conta — protegemos os contatos até a aprovação.
+            </p>
+            <Link
+              href="/entrar"
+              className="inline-block rounded-md bg-primary px-5 py-2.5 font-extrabold text-primary-foreground transition-colors hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+            >
+              Entrar para agendar
+            </Link>
+          </Card>
+        </aside>
+
+        {/* Portfólio */}
+        <div>
+          <h2 className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
+          {profile.portfolio.length > 0 ? (
+            <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {profile.portfolio.map((foto, i) => (
+                <li key={foto.url ?? i} className="overflow-hidden rounded-lg border border-border">
+                  <img
+                    src={foto.url}
+                    alt={foto.legenda ?? `Obra de ${nome}`}
+                    className="aspect-square w-full object-cover"
+                  />
+                  {foto.legenda && (
+                    <p className="px-2 py-1 text-xs text-muted-foreground">{foto.legenda}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
           ) : (
-            nome.charAt(0)
+            <Card className="mt-3">
+              <p className="text-sm text-muted-foreground">
+                Este profissional ainda não publicou fotos de obras.
+              </p>
+            </Card>
           )}
         </div>
-        <div>
-          <h1 id="profile-heading" className="font-display text-3xl font-black text-foreground">
-            {nome}
-          </h1>
-          {profile.bairro && <p className="text-sm text-muted-foreground">{profile.bairro}</p>}
-        </div>
       </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Stars nota={profile.reputacao.mediaNota} />
-        <span className="text-sm text-muted-foreground">
-          {profile.reputacao.mediaNota.toFixed(1)} · {profile.reputacao.totalAvaliacoes} avaliações
-        </span>
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        {profile.especialidades.map((esp) => (
-          <Badge key={esp} tone="neutral">
-            {esp}
-          </Badge>
-        ))}
-        {profile.anosExperiencia !== null && (
-          <Badge tone="info">{profile.anosExperiencia} anos de experiência</Badge>
-        )}
-        <Badge tone="warning">Plano {planoNome}</Badge>
-      </div>
-
-      {profile.reputacao.badges.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {profile.reputacao.badges.map((b) => (
-            <Badge key={b} tone="success">
-              🏅 {b}
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {profile.portfolio.length > 0 && (
-        <div className="mt-8">
-          <h2 className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
-          <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {profile.portfolio.map((foto, i) => (
-              <li key={i} className="overflow-hidden rounded-lg border border-border">
-                <img
-                  src={foto.url}
-                  alt={foto.legenda ?? `Obra de ${nome}`}
-                  className="aspect-square w-full object-cover"
-                />
-                {foto.legenda && (
-                  <p className="px-2 py-1 text-xs text-muted-foreground">{foto.legenda}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <Card className="mt-8 space-y-3 text-center">
-        <p className="text-muted-foreground">
-          Para agendar com {nome}, entre na sua conta — protegemos os contatos até a aprovação.
-        </p>
-        <Link
-          href="/entrar"
-          className="inline-block rounded-md bg-primary px-5 py-2.5 font-extrabold text-primary-foreground"
-        >
-          Entrar para agendar
-        </Link>
-      </Card>
     </section>
+  );
+}
+
+/** Linha de estatística (rótulo + valor) do bloco de confiança. */
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="font-bold text-foreground">{value}</dd>
+    </div>
   );
 }
 

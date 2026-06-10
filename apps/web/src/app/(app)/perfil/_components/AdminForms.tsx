@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useRef } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, Button, Input, Label } from "@obracerta/ui";
@@ -9,6 +9,25 @@ import { updateProfileAction, updatePasswordAction, createAdminAction, uploadFot
 
 interface AdminFormsProps {
   user: User;
+}
+
+/** Estado de feedback inline (substitui os `alert()` nativos — acessível e não bloqueante). */
+type Feedback = { ok: boolean; msg: string } | null;
+
+function FormFeedback({ state }: { state: Feedback }) {
+  if (!state) return null;
+  return (
+    <p
+      role="alert"
+      className={
+        state.ok
+          ? "rounded-md bg-success/10 px-3 py-2 text-sm font-medium text-success"
+          : "rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger"
+      }
+    >
+      {state.msg}
+    </p>
+  );
 }
 
 export function AdminForms({ user }: AdminFormsProps) {
@@ -28,6 +47,7 @@ export function AdminForms({ user }: AdminFormsProps) {
 
 function ProfileForm({ user }: { user: User }) {
   const [isPending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const { register, handleSubmit, formState: { errors } } = useForm<UpdateProfileInput>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
@@ -37,12 +57,13 @@ function ProfileForm({ user }: { user: User }) {
   });
 
   const onSubmit = (data: UpdateProfileInput) => {
+    setFeedback(null);
     startTransition(async () => {
       try {
         await updateProfileAction(data);
-        alert("Perfil atualizado com sucesso!");
+        setFeedback({ ok: true, msg: "Perfil atualizado com sucesso." });
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Erro ao atualizar perfil.");
+        setFeedback({ ok: false, msg: err instanceof Error ? err.message : "Erro ao atualizar perfil." });
       }
     });
   };
@@ -50,6 +71,7 @@ function ProfileForm({ user }: { user: User }) {
   return (
     <Card className="space-y-4">
       <h3 className="font-display text-xl font-bold">Dados Pessoais</h3>
+      <FormFeedback state={feedback} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="nomeCompleto">Nome Completo</Label>
@@ -73,18 +95,20 @@ function ProfileForm({ user }: { user: User }) {
 
 function PasswordForm() {
   const [isPending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<UpdatePasswordInput>({
     resolver: zodResolver(updatePasswordSchema),
   });
 
   const onSubmit = (data: UpdatePasswordInput) => {
+    setFeedback(null);
     startTransition(async () => {
       try {
         await updatePasswordAction(data);
-        alert("Senha atualizada com sucesso!");
+        setFeedback({ ok: true, msg: "Senha atualizada com sucesso." });
         reset();
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Erro ao atualizar senha.");
+        setFeedback({ ok: false, msg: err instanceof Error ? err.message : "Erro ao atualizar senha." });
       }
     });
   };
@@ -92,6 +116,7 @@ function PasswordForm() {
   return (
     <Card className="space-y-4">
       <h3 className="font-display text-xl font-bold">Segurança</h3>
+      <FormFeedback state={feedback} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="oldPassword">Senha Atual</Label>
@@ -115,21 +140,23 @@ function PasswordForm() {
 
 function PhotoForm() {
   const [isPending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = () => {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
 
+    setFeedback(null);
     startTransition(async () => {
       try {
         const formData = new FormData();
         formData.append("file", file);
         await uploadFotoAction(formData);
-        alert("Foto atualizada com sucesso!");
+        setFeedback({ ok: true, msg: "Foto atualizada com sucesso." });
         if (fileInputRef.current) fileInputRef.current.value = "";
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Erro ao atualizar foto.");
+        setFeedback({ ok: false, msg: err instanceof Error ? err.message : "Erro ao atualizar foto." });
       }
     });
   };
@@ -137,6 +164,7 @@ function PhotoForm() {
   return (
     <Card className="space-y-4">
       <h3 className="font-display text-xl font-bold">Foto de Perfil</h3>
+      <FormFeedback state={feedback} />
       <div className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="foto">Selecione uma imagem (Máx 5MB)</Label>
@@ -154,18 +182,20 @@ function PhotoForm() {
 
 function CreateAdminForm() {
   const [isPending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateAdminInput>({
     resolver: zodResolver(createAdminSchema),
   });
 
   const onSubmit = (data: CreateAdminInput) => {
+    setFeedback(null);
     startTransition(async () => {
       try {
         await createAdminAction(data);
-        alert("Administrador criado com sucesso!");
+        setFeedback({ ok: true, msg: "Administrador criado com sucesso." });
         reset();
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Erro ao criar administrador.");
+        setFeedback({ ok: false, msg: err instanceof Error ? err.message : "Erro ao criar administrador." });
       }
     });
   };
@@ -176,6 +206,7 @@ function CreateAdminForm() {
         <h3 className="font-display text-xl font-bold text-primary">Novo Administrador</h3>
         <p className="text-sm text-muted-foreground mt-1">Crie um novo usuário com controle total do sistema.</p>
       </div>
+      <FormFeedback state={feedback} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1">
           <Label htmlFor="adminNome">Nome Completo</Label>

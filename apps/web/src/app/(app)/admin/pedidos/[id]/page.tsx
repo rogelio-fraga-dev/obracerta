@@ -2,6 +2,7 @@ import { serverApi } from "@/lib/server-api";
 import { Badge, Card } from "@obracerta/ui";
 import type { BookingRequest, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
+import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import Link from "next/link";
 
 export default async function AdminPedidoDetalhePage({
@@ -29,19 +30,8 @@ export default async function AdminPedidoDetalhePage({
               ID: {pedido.id}
             </p>
           </div>
-          <Badge
-            tone={
-              pedido.status === "PENDENTE"
-                ? "warning"
-                : pedido.status === "APROVADO" || pedido.status === "CONCLUIDO"
-                  ? "success"
-                  : pedido.status === "RECUSADO" || pedido.status === "CANCELADO" || pedido.status === "EXPIRADO"
-                    ? "danger"
-                    : "neutral"
-            }
-            className="w-fit text-lg py-1 px-3"
-          >
-            {pedido.status}
+          <Badge tone={BOOKING_STATUS_UI[pedido.status].tone} className="w-fit text-lg py-1 px-3">
+            {BOOKING_STATUS_UI[pedido.status].label}
           </Badge>
         </div>
       </header>

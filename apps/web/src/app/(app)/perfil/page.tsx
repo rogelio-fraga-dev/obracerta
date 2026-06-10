@@ -43,6 +43,14 @@ export default async function PerfilPage() {
   const claims = await serverApi<JwtClaims>("POST", "/auth/me");
   const user = await serverApi<User>("GET", "/auth/me/profile");
 
+  const personaTagline = isAdmin
+    ? "Administração do sistema — moderação, financeiro e gestão de contas."
+    : isProfissional
+      ? "Sua reputação e seu comportamento definem sua visibilidade na busca."
+      : isEmpresa
+        ? "Conta empresarial — publique obras e contrate profissionais."
+        : "Acompanhe seus pedidos e encontre profissionais de confiança.";
+
   return (
     <section aria-labelledby="perfil-heading" className="space-y-6">
       <div className="flex items-center justify-between">
@@ -50,6 +58,15 @@ export default async function PerfilPage() {
           Perfil
         </h1>
         <Badge tone="success" className="animate-fade-in">Sessão ativa</Badge>
+      </div>
+
+      {/* Banner contextual por persona — comunica de imediato para qual conta o perfil é. */}
+      <div
+        className="rounded-2xl px-6 py-5 text-white"
+        style={{ background: "var(--gradient-hero)" }}
+      >
+        <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">{tipoLabel}</p>
+        <p className="mt-1 font-display text-lg font-black sm:text-xl">{personaTagline}</p>
       </div>
 
       {/* ── Header do Perfil ── */}
