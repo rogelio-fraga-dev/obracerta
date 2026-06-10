@@ -62,10 +62,7 @@ export default async function PerfilPage() {
       </div>
 
       {/* Banner contextual por persona — comunica de imediato para qual conta o perfil é. */}
-      <div
-        className="rounded-2xl px-6 py-5 text-white"
-        style={{ background: "var(--gradient-hero)" }}
-      >
+      <div className="rounded-2xl bg-gradient-hero px-6 py-5 text-white">
         <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">{tipoLabel}</p>
         <p className="mt-1 font-display text-lg font-black sm:text-xl">{personaTagline}</p>
       </div>

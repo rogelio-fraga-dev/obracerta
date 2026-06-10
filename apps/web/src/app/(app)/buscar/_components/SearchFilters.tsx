@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { professionCatalog } from "@obracerta/shared";
-import { Button, Field, Input } from "@obracerta/ui";
+import { Button, Field, Input, Select } from "@obracerta/ui";
 
 /**
  * Filtros da busca com **URL como estado**: cada busca empurra os parâmetros para
@@ -64,18 +64,14 @@ export function SearchFilters() {
         />
       </Field>
       <Field label="Profissão" hint="Opcional">
-        <select
-          value={especialidade}
-          onChange={(e) => setEspecialidade(e.target.value)}
-          className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 font-sans text-foreground outline-none transition-colors focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-orange-200"
-        >
+        <Select value={especialidade} onChange={(e) => setEspecialidade(e.target.value)}>
           <option value="">Todas as profissões</option>
           {professionCatalog.map((p) => (
             <option key={p.id} value={p.label}>
               {p.icon} {p.label}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       {geoError && (

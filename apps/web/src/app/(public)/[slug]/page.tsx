@@ -48,10 +48,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
   return (
     <section aria-labelledby="profile-heading" className="mx-auto max-w-5xl px-6 py-10">
       {/* Header hero — vitrine do profissional */}
-      <header
-        className="relative overflow-hidden rounded-3xl px-6 py-8 text-white sm:px-10 sm:py-10"
-        style={{ background: "var(--gradient-hero)" }}
-      >
+      <header className="relative overflow-hidden rounded-3xl bg-gradient-hero px-6 py-8 text-white sm:px-10 sm:py-10">
         <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">Perfil público</p>
         <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
           <div

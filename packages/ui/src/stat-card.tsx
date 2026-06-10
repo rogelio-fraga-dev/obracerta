@@ -49,7 +49,10 @@ export function StatCard({
       {...props}
     >
       {icon && (
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary text-xl">
+        <span
+          aria-hidden
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary text-xl"
+        >
           {icon}
         </span>
       )}

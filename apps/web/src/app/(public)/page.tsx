@@ -179,10 +179,7 @@ export default function HomePage() {
 
       {/* ── CTA FINAL ── */}
       <section className="px-6 py-20 sm:px-10 sm:py-24 lg:px-14">
-        <div
-          className="mx-auto max-w-5xl rounded-3xl p-1 text-center shadow-[var(--shadow-xl)]"
-          style={{ background: "var(--gradient-brand)" }}
-        >
+        <div className="mx-auto max-w-5xl rounded-3xl bg-gradient-brand p-1 text-center shadow-[var(--shadow-xl)]">
           <div className="rounded-[22px] bg-dark px-6 py-16 sm:px-12 sm:py-20">
             <h2 className="font-display text-3xl font-black tracking-tight text-cream sm:text-5xl">
               Pronto para achar o profissional <em className="italic text-primary">certo?</em>

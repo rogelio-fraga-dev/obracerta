@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ReportTarget } from "@obracerta/shared";
-import { Badge, Button } from "@obracerta/ui";
+import { Badge, Button, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { REPORT_REASONS } from "@/lib/moderation-ui";
 
@@ -53,17 +53,13 @@ export function ReportDialog({ entidade, entidadeId }: { entidade: ReportTarget;
   return (
     <div className="space-y-2 rounded-md border border-border p-3">
       {error && <p className="text-xs font-medium text-danger">{error}</p>}
-      <select
-        value={motivo}
-        onChange={(e) => setMotivo(e.target.value)}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-      >
+      <Select value={motivo} onChange={(e) => setMotivo(e.target.value)} className="text-sm">
         {REPORT_REASONS.map((r) => (
           <option key={r.value} value={r.value}>
             {r.label}
           </option>
         ))}
-      </select>
+      </Select>
       <textarea
         value={detalhe}
         onChange={(e) => setDetalhe(e.target.value)}

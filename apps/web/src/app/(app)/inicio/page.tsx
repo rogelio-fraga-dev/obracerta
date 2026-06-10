@@ -76,10 +76,7 @@ export default async function InicioPage() {
   return (
     <section aria-labelledby="inicio-heading" className="space-y-8">
       {/* ── Hero com gradiente ── */}
-      <div
-        className="animate-fade-in rounded-2xl px-7 py-8 text-background"
-        style={{ background: "var(--gradient-hero)" }}
-      >
+      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-7 py-8 text-background">
         <div className="flex items-center gap-4">
           <Avatar nome={hint?.nome ?? "U"} size="lg" />
           <div>

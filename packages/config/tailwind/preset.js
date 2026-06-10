@@ -64,6 +64,13 @@ export default {
       spacing: {
         section: "var(--space-section)",
       },
+      // Gradientes do DS como classes (bg-gradient-brand etc.) — evita style inline.
+      backgroundImage: {
+        "gradient-brand": "var(--gradient-brand)",
+        "gradient-brand-soft": "var(--gradient-brand-soft)",
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-glass": "var(--gradient-glass)",
+      },
     },
   },
   plugins: [],

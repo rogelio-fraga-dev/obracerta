@@ -8,7 +8,7 @@ import {
   declineReasonSchema,
   type UserType,
 } from "@obracerta/shared";
-import { Button, Field, Input } from "@obracerta/ui";
+import { Button, Field, Input, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { type BookingAction, bookingActionsFor, DECLINE_REASON_UI } from "@/lib/booking-ui";
 
@@ -71,17 +71,13 @@ export function BookingActions({
       {declining ? (
         <div className="space-y-3 rounded-lg border border-border p-4">
           <Field label="Motivo da recusa">
-            <select
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value as DeclineReason)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-foreground"
-            >
+            <Select value={motivo} onChange={(e) => setMotivo(e.target.value as DeclineReason)}>
               {DECLINE_REASONS.map((r) => (
                 <option key={r} value={r}>
                   {DECLINE_REASON_UI[r]}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           {motivo === "OUTRO" && (
             <Field label="Detalhe">

@@ -26,7 +26,10 @@ export function EmptyState({ icon, title, description, action, className }: Empt
         className,
       )}
     >
-      <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/8 text-3xl text-primary">
+      <span
+        aria-hidden
+        className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/8 text-3xl text-primary"
+      >
         {icon}
       </span>
       <h3 className="mt-4 font-display text-lg font-black text-foreground">{title}</h3>

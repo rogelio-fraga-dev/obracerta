@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge, Button } from "@obracerta/ui";
+import { Badge, Button, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { REFUND_REASONS } from "@/lib/billing-ui";
 
@@ -45,17 +45,13 @@ export function RefundButton({ invoiceId }: { invoiceId: string }) {
   return (
     <div className="space-y-2">
       {error && <p className="text-xs font-medium text-danger">{error}</p>}
-      <select
-        value={motivo}
-        onChange={(e) => setMotivo(e.target.value)}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-      >
+      <Select value={motivo} onChange={(e) => setMotivo(e.target.value)} className="text-sm">
         {REFUND_REASONS.map((r) => (
           <option key={r.value} value={r.value}>
             {r.label}
           </option>
         ))}
-      </select>
+      </Select>
       <div className="flex gap-2">
         <Button variant="secondary" size="sm" onClick={() => setAberto(false)} disabled={loading}>
           Cancelar

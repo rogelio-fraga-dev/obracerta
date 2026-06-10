@@ -62,10 +62,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
     <aside className="sticky top-0 hidden h-dvh w-[280px] shrink-0 flex-col border-r border-border bg-background px-5 py-6 lg:flex">
       {/* ── Marca ── */}
       <Link href="/inicio" className="flex items-center gap-3 px-2" aria-label="Início">
-        <span
-          className="flex h-10 w-10 items-center justify-center rounded-xl font-display text-lg font-black text-white"
-          style={{ background: "var(--gradient-brand)" }}
-        >
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand font-display text-lg font-black text-white">
           {inicial}
         </span>
         <span className="font-display text-[1.5rem] font-black tracking-tight text-foreground">
@@ -100,10 +97,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
           href="/perfil"
           className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted"
         >
-          <span
-            className="flex h-10 w-10 items-center justify-center rounded-full font-display text-sm font-black text-white"
-            style={{ background: "var(--gradient-brand)" }}
-          >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-brand font-display text-sm font-black text-white">
             {inicial}
           </span>
           <span className="min-w-0 flex-1">

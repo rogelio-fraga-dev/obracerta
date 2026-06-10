@@ -9,7 +9,7 @@ import {
   type WorkOrder,
   type WorkUrgency,
 } from "@obracerta/shared";
-import { Button, Card, Field, Input } from "@obracerta/ui";
+import { Button, Card, Field, Input, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { WORK_URGENCY_UI } from "@/lib/work-order-ui";
 
@@ -59,47 +59,35 @@ export function NovaObraForm({ cities }: { cities: City[] }) {
       )}
 
       <Field label="Cidade">
-        <select
-          value={cidadeId}
-          onChange={(e) => setCidadeId(e.target.value)}
-          className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-foreground"
-        >
+        <Select value={cidadeId} onChange={(e) => setCidadeId(e.target.value)}>
           {cities.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nome} — {c.uf}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label="Título" hint="Resuma o serviço (ex.: Forro de gesso em apartamento 2 quartos)">
         <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
       </Field>
       <Field label="Especialidade">
-        <select
-          value={especialidade}
-          onChange={(e) => setEspecialidade(e.target.value)}
-          className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-foreground"
-        >
+        <Select value={especialidade} onChange={(e) => setEspecialidade(e.target.value)}>
           <option value="">Selecione a profissão</option>
           {professionCatalog.map((p) => (
             <option key={p.id} value={p.label}>
               {p.icon} {p.label}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label="Urgência">
-        <select
-          value={urgencia}
-          onChange={(e) => setUrgencia(e.target.value as WorkUrgency)}
-          className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-foreground"
-        >
+        <Select value={urgencia} onChange={(e) => setUrgencia(e.target.value as WorkUrgency)}>
           {URGENCIAS.map((u) => (
             <option key={u} value={u}>
               {WORK_URGENCY_UI[u].label}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
       <Field label="Bairro" hint="Opcional">
         <Input value={bairro} onChange={(e) => setBairro(e.target.value)} />

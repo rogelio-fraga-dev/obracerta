@@ -29,7 +29,7 @@ export function AuthPanel({ eyebrow, title, accent, subtitle, children, footer }
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
       {/* ── Lado Esquerdo: Brand Panel ── */}
-      <aside className="relative hidden flex-col justify-between overflow-hidden p-14 lg:flex" style={{ background: "var(--gradient-hero)" }}>
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-gradient-hero p-14 lg:flex">
         {/* Decorative blur */}
         <div
           aria-hidden
@@ -37,10 +37,7 @@ export function AuthPanel({ eyebrow, title, accent, subtitle, children, footer }
         />
 
         <Link href="/" className="relative z-10 flex items-center gap-3">
-          <span
-            className="flex h-10 w-10 items-center justify-center rounded-xl font-display text-lg font-black text-white shadow-[var(--shadow-md)]"
-            style={{ background: "var(--gradient-brand)" }}
-          >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand font-display text-lg font-black text-white shadow-[var(--shadow-md)]">
             {config.brand.name.charAt(0)}
           </span>
           <span className="font-display text-2xl font-black text-cream">
@@ -77,10 +74,7 @@ export function AuthPanel({ eyebrow, title, accent, subtitle, children, footer }
         <div className="flex-1 overflow-y-auto px-5 py-12 sm:px-12 sm:py-16 md:px-24 lg:px-16 xl:px-24">
           <div className="mx-auto w-full max-w-sm">
             <Link href="/" className="mb-10 flex items-center gap-2.5 lg:hidden">
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-base font-black text-white"
-                style={{ background: "var(--gradient-brand)" }}
-              >
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-brand font-display text-base font-black text-white">
                 {config.brand.name.charAt(0)}
               </span>
               <span className="font-display text-xl font-black text-foreground">
