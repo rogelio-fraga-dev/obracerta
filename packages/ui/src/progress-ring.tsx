@@ -39,8 +39,15 @@ export function ProgressRing({
   const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className={cn("relative inline-flex items-center justify-center", className)}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div
+      role="meter"
+      aria-valuenow={Math.round(clamped)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={label ?? `${Math.round(clamped)}%`}
+      className={cn("relative inline-flex items-center justify-center", className)}
+    >
+      <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         {/* Background track */}
         <circle
           cx={size / 2}

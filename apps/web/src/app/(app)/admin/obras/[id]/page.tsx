@@ -5,8 +5,13 @@ import type { WorkOrder, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
-export default async function AdminObraDetalhePage({ params }: { params: { id: string } }) {
-  const obra = await serverApi<WorkOrder>("GET", `/admin/work-orders/${params.id}`);
+export default async function AdminObraDetalhePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const obra = await serverApi<WorkOrder>("GET", `/admin/work-orders/${id}`);
   const contratante = await serverApi<User>("GET", `/admin/users/${obra.contractorId}`).catch(() => null);
 
   return (
@@ -92,7 +97,12 @@ export default async function AdminObraDetalhePage({ params }: { params: { id: s
             <p className="text-xs text-muted-foreground">
               Ações administrativas forçadas para esta obra.
             </p>
-            <Button variant="secondary" className="w-full text-danger border-danger/20 hover:bg-danger/10">
+            <Button
+              variant="secondary"
+              disabled
+              title="Em breve"
+              className="w-full text-danger border-danger/20"
+            >
               Forçar Cancelamento (Takedown)
             </Button>
           </Card>

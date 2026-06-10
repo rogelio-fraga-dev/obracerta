@@ -10,11 +10,15 @@ import {
   FileText,
   LayoutDashboard,
   Users,
+  ShieldAlert,
+  Landmark,
 } from "lucide-react";
 
 export interface NavItem {
   href: string;
   label: string;
+  /** Rótulo curto (≤8 chars) usado na TabBar mobile p/ não truncar em 320px. */
+  shortLabel?: string;
   Icon: LucideIcon;
 }
 
@@ -23,9 +27,9 @@ const INICIO: NavItem = { href: "/inicio", label: "Início", Icon: Home };
 const PERFIL: NavItem = { href: "/perfil", label: "Perfil", Icon: User };
 const PEDIDOS: NavItem = { href: "/pedidos", label: "Pedidos", Icon: ClipboardList };
 const OBRAS: NavItem = { href: "/obras", label: "Obras", Icon: HardHat };
-const BUSCAR: NavItem = { href: "/buscar", label: "Buscar profissionais", Icon: Search };
-const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", Icon: CalendarDays };
-const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", Icon: FileText };
+const BUSCAR: NavItem = { href: "/buscar", label: "Buscar profissionais", shortLabel: "Buscar", Icon: Search };
+const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", shortLabel: "Agenda", Icon: CalendarDays };
+const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", shortLabel: "Docs", Icon: FileText };
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
 
 export interface NavSet {
@@ -44,13 +48,26 @@ const NAV_CONTRATANTE: NavSet = {
   secondary: [OBRAS, COBRANCAS],
 };
 
+// Empresa publica obras em escala — Obras vai para a navegação primária.
+const NAV_EMPRESA: NavSet = {
+  primary: [INICIO, BUSCAR, OBRAS, PERFIL],
+  secondary: [PEDIDOS, COBRANCAS],
+};
+
 /**
  * Navegação contextual por tipo de conta. Profissional recebe pedidos/dá lances e
- * tem ferramentas + agenda; contratante e **empresa** buscam profissionais e
- * publicam obras. Mantém a fonte única para Sidebar (desktop) e TabBar (mobile).
+ * tem ferramentas + agenda; contratante busca e agenda; **empresa** publica obras em
+ * escala (Obras na primária). Mantém a fonte única para Sidebar (desktop) e TabBar (mobile).
  */
 export function navForTipo(tipo: string | undefined): NavSet {
-  return tipo === "PROFISSIONAL" ? NAV_PROFISSIONAL : NAV_CONTRATANTE;
+  switch (tipo) {
+    case "PROFISSIONAL":
+      return NAV_PROFISSIONAL;
+    case "EMPRESA":
+      return NAV_EMPRESA;
+    default:
+      return NAV_CONTRATANTE;
+  }
 }
 
 /** Rótulo amigável do tipo de conta (inclui EMPRESA). */
@@ -66,9 +83,29 @@ export function tipoLabel(tipo: string | undefined, isAdmin = false): string {
   }
 }
 
+// Itens nomeados do painel administrativo (compostos abaixo p/ Sidebar e TabBar).
+const ADM_PAINEL: NavItem = { href: "/admin", label: "Painel admin", shortLabel: "Painel", Icon: LayoutDashboard };
+const ADM_USUARIOS: NavItem = { href: "/admin/usuarios", label: "Gestão de usuários", shortLabel: "Usuários", Icon: Users };
+const ADM_OBRAS: NavItem = { href: "/admin/obras", label: "Gestão de obras", shortLabel: "Obras", Icon: HardHat };
+const ADM_PEDIDOS: NavItem = { href: "/admin/pedidos", label: "Gestão de pedidos", shortLabel: "Pedidos", Icon: ClipboardList };
+const ADM_MODERACAO: NavItem = { href: "/admin/moderacao", label: "Moderação", Icon: ShieldAlert };
+const ADM_FINANCEIRO: NavItem = { href: "/admin/financeiro", label: "Financeiro", shortLabel: "Financ.", Icon: Landmark };
+
+/**
+ * Painel administrativo — **fonte única** (Sidebar desktop + TabBar mobile). Antes a
+ * Sidebar tinha 6 itens e a TabBar só 4, escondendo Moderação/Financeiro no mobile.
+ */
 export const ADMIN_NAV: NavItem[] = [
-  { href: "/admin", label: "Painel", Icon: LayoutDashboard },
-  { href: "/admin/obras", label: "Obras", Icon: HardHat },
-  { href: "/admin/pedidos", label: "Pedidos", Icon: ClipboardList },
-  { href: "/admin/usuarios", label: "Usuários", Icon: Users },
+  ADM_PAINEL,
+  ADM_USUARIOS,
+  ADM_OBRAS,
+  ADM_PEDIDOS,
+  ADM_MODERACAO,
+  ADM_FINANCEIRO,
 ];
+
+/**
+ * Subconjunto exibido na TabBar mobile (4 itens — inclui Moderação e Financeiro, que
+ * antes ficavam inacessíveis no mobile). Gestão de obras/pedidos fica na Sidebar/desktop.
+ */
+export const ADMIN_NAV_PRIMARY: NavItem[] = [ADM_PAINEL, ADM_USUARIOS, ADM_MODERACAO, ADM_FINANCEIRO];

@@ -134,11 +134,17 @@ export function Planos() {
         </h2>
         <p className="mt-3 text-muted-foreground">Escolha seu perfil e veja os planos disponíveis.</p>
 
-        <div className="mt-8 inline-flex rounded-xl bg-muted p-1">
+        <div
+          role="tablist"
+          aria-label="Escolha seu perfil para ver os planos"
+          className="mt-8 inline-flex rounded-xl bg-muted p-1"
+        >
           {(["profissional", "contratante"] as const).map((l) => (
             <button
               key={l}
               type="button"
+              role="tab"
+              aria-selected={lado === l}
               onClick={() => setLado(l)}
               className={cn(
                 "rounded-lg px-5 py-2 text-sm font-bold transition-colors",

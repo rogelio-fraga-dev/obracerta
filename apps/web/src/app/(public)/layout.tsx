@@ -37,7 +37,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <footer className="border-t border-border px-6 py-10 text-sm text-muted-foreground sm:px-10 lg:px-14">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span className="font-display text-lg font-black text-foreground">{config.brand.name}</span>

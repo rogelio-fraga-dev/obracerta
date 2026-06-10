@@ -109,7 +109,7 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
           canBid={canBid}
         />
       ) : (
-        <ObraProposals workOrderId={obra.id} status={obra.status} proposals={proposals} />
+        <ObraProposals status={obra.status} proposals={proposals} />
       )}
     </section>
   );

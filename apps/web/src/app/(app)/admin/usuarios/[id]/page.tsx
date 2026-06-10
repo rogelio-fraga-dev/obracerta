@@ -4,11 +4,16 @@ import type { User, ReputationSummary } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
-export default async function AdminUsuarioDetalhePage({ params }: { params: { id: string } }) {
+export default async function AdminUsuarioDetalhePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const [user, rolesData, reputation] = await Promise.all([
-    serverApi<User>("GET", `/admin/users/${params.id}`),
-    serverApi<{roles: string[]}>("GET", `/admin/users/${params.id}/roles`).catch(() => ({ roles: [] })),
-    serverApi<ReputationSummary>("GET", `/reputation/${params.id}`).catch(() => null),
+    serverApi<User>("GET", `/admin/users/${id}`),
+    serverApi<{roles: string[]}>("GET", `/admin/users/${id}/roles`).catch(() => ({ roles: [] })),
+    serverApi<ReputationSummary>("GET", `/reputation/${id}`).catch(() => null),
   ]);
 
   return (
@@ -96,15 +101,21 @@ export default async function AdminUsuarioDetalhePage({ params }: { params: { id
           <h2 className="font-display text-xl font-bold border-b border-border pb-2">Ações de Moderação</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Ações sensíveis relativas ao controle e moderação da conta deste usuário.
+            Concessão de papéis disponível na fila de moderação.
           </p>
           <div className="flex flex-col gap-3">
-            <Button variant="secondary" className="w-full justify-start text-danger border-danger/20 hover:bg-danger/10">
+            <Button
+              variant="secondary"
+              disabled
+              title="Em breve"
+              className="w-full justify-start text-danger border-danger/20"
+            >
               Suspender Usuário
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button variant="secondary" disabled title="Em breve" className="w-full justify-start">
               Editar Papéis (Roles)
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button variant="secondary" disabled title="Em breve" className="w-full justify-start">
               Ver Histórico de Auditoria
             </Button>
           </div>

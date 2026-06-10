@@ -4,8 +4,13 @@ import type { BookingRequest, User } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import Link from "next/link";
 
-export default async function AdminPedidoDetalhePage({ params }: { params: { id: string } }) {
-  const pedido = await serverApi<BookingRequest>("GET", `/admin/bookings/${params.id}`);
+export default async function AdminPedidoDetalhePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const pedido = await serverApi<BookingRequest>("GET", `/admin/bookings/${id}`);
   const contratante = await serverApi<User>("GET", `/admin/users/${pedido.contractorId}`).catch(() => null);
   const profissional = await serverApi<User>("GET", `/admin/users/${pedido.professionalId}`).catch(() => null);
 

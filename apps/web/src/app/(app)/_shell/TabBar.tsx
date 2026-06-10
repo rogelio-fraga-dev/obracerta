@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@obracerta/ui";
-import { navForTipo, ADMIN_NAV } from "./nav-items";
+import { navForTipo, ADMIN_NAV_PRIMARY } from "./nav-items";
 
 /**
  * Barra de abas inferior — **só no mobile** (`lg:hidden`).
@@ -13,7 +13,7 @@ import { navForTipo, ADMIN_NAV } from "./nav-items";
 export function TabBar({ tipo }: { tipo?: string }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
-  const navItems = isAdminRoute ? ADMIN_NAV : navForTipo(tipo).primary;
+  const navItems = isAdminRoute ? ADMIN_NAV_PRIMARY : navForTipo(tipo).primary;
 
   return (
     <nav
@@ -21,7 +21,7 @@ export function TabBar({ tipo }: { tipo?: string }) {
       className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(24,22,15,0.04)] backdrop-blur-md lg:hidden"
     >
       <ul className="mx-auto flex max-w-2xl px-2">
-        {navItems.map(({ href, label, Icon }) => {
+        {navItems.map(({ href, label, shortLabel, Icon }) => {
           const active = pathname === href || pathname.startsWith(`${href}/`);
           return (
             <li key={href} className="relative flex-1">
@@ -47,7 +47,7 @@ export function TabBar({ tipo }: { tipo?: string }) {
                     active && "scale-110",
                   )}
                 />
-                {label}
+                {shortLabel ?? label}
               </Link>
             </li>
           );

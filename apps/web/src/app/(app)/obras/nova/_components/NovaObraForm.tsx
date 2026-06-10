@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   type City,
   createWorkOrderSchema,
+  professionCatalog,
   type WorkOrder,
   type WorkUrgency,
 } from "@obracerta/shared";
@@ -44,6 +45,7 @@ export function NovaObraForm({ cities }: { cities: City[] }) {
       router.replace(`/obras/${obra.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao publicar a obra.");
+    } finally {
       setLoading(false);
     }
   }
@@ -73,7 +75,18 @@ export function NovaObraForm({ cities }: { cities: City[] }) {
         <Input value={titulo} onChange={(e) => setTitulo(e.target.value)} />
       </Field>
       <Field label="Especialidade">
-        <Input value={especialidade} onChange={(e) => setEspecialidade(e.target.value)} placeholder="Ex.: Pedreiro" />
+        <select
+          value={especialidade}
+          onChange={(e) => setEspecialidade(e.target.value)}
+          className="w-full rounded-md border border-border bg-background px-3 py-2.5 text-foreground"
+        >
+          <option value="">Selecione a profissão</option>
+          {professionCatalog.map((p) => (
+            <option key={p.id} value={p.label}>
+              {p.icon} {p.label}
+            </option>
+          ))}
+        </select>
       </Field>
       <Field label="Urgência">
         <select

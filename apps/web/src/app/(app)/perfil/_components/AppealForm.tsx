@@ -27,6 +27,7 @@ export function AppealForm({ suspensionId }: { suspensionId: string }) {
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível apelar.");
+    } finally {
       setLoading(false);
     }
   }

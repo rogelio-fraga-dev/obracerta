@@ -15,12 +15,16 @@ import { BackLink } from "../../_shell/BackLink";
 
 /** Linha do formulário: valor é texto (reais) até virar centavos no envio. */
 interface ItemForm {
+  /** id estável p/ key do React (lista add/remove — índice corromperia o estado). */
+  id: string;
   descricao: string;
   quantidade: string;
   valor: string;
 }
 
-const EMPTY_ITEM: ItemForm = { descricao: "", quantidade: "1", valor: "" };
+function makeItem(): ItemForm {
+  return { id: crypto.randomUUID(), descricao: "", quantidade: "1", valor: "" };
+}
 
 /** Converte "1.234,56" / "1234.56" em centavos inteiros (0 se inválido). */
 function toCentavos(valor: string): number {
@@ -34,7 +38,7 @@ export default function NovoDocumentoPage() {
   const [clienteNome, setClienteNome] = useState("");
   const [titulo, setTitulo] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [itens, setItens] = useState<ItemForm[]>([{ ...EMPTY_ITEM }]);
+  const [itens, setItens] = useState<ItemForm[]>([makeItem()]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +55,7 @@ export default function NovoDocumentoPage() {
     setItens((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)));
   }
   function addItem() {
-    setItens((prev) => [...prev, { ...EMPTY_ITEM }]);
+    setItens((prev) => [...prev, makeItem()]);
   }
   function removeItem(index: number) {
     setItens((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
@@ -75,6 +79,7 @@ export default function NovoDocumentoPage() {
       router.replace(`/ferramentas/${doc.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao criar o documento.");
+    } finally {
       setLoading(false);
     }
   }
@@ -118,7 +123,7 @@ export default function NovoDocumentoPage() {
         <div className="space-y-3">
           <p className="text-sm font-semibold text-foreground">Itens</p>
           {itens.map((it, i) => (
-            <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+            <div key={it.id} className="rounded-lg border border-border p-3 space-y-2">
               <Input
                 value={it.descricao}
                 onChange={(e) => updateItem(i, { descricao: e.target.value })}

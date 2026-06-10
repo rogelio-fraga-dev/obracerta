@@ -101,6 +101,7 @@ export function ObraBid({
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao enviar o lance.");
+    } finally {
       setLoading(false);
     }
   }

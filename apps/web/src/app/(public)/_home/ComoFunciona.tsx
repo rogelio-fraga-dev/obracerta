@@ -42,7 +42,9 @@ export function ComoFunciona() {
                 key={p.id}
                 type="button"
                 role="tab"
+                id={`persona-tab-${p.id}`}
                 aria-selected={active}
+                aria-controls="persona-panel"
                 onClick={() => setPersonaId(p.id)}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold transition-colors",
@@ -60,7 +62,12 @@ export function ComoFunciona() {
           Para quem <em className="italic text-primary">{persona.label.toLowerCase()}</em>
         </p>
 
-        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <ol
+          id="persona-panel"
+          role="tabpanel"
+          aria-labelledby={`persona-tab-${personaId}`}
+          className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+        >
           {persona.steps.map((s, i) => (
             <li key={s.titulo} className="rounded-2xl bg-background/[0.06] p-6">
               <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/15 text-sm font-black text-primary">

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthTokens, User, UserType } from "@obracerta/shared";
@@ -111,8 +112,11 @@ export async function requireSession(): Promise<Session> {
  * (mostrar/esconder o painel admin). Nunca lança nem redireciona: qualquer falha
  * (sem sessão, token expirado, API fora) devolve `[]`. A segurança real é a API
  * (RolesGuard relê os papéis frescos do banco a cada request).
+ *
+ * Memoizado por request com `React.cache`: layout + páginas (`/inicio`, `/perfil`)
+ * chamam na mesma request sem refazer o HTTP a `/auth/me/roles` (evita o waterfall).
  */
-export async function getMyRoles(): Promise<string[]> {
+export const getMyRoles = cache(async (): Promise<string[]> => {
   const session = await getSession();
   if (!session) return [];
   try {
@@ -124,4 +128,4 @@ export async function getMyRoles(): Promise<string[]> {
   } catch {
     return [];
   }
-}
+});

@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
+  /* Smooth scroll só para quem não pediu movimento reduzido (WCAG 2.3.3). */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
@@ -158,4 +161,16 @@
   .delay-4 { animation-delay: 300ms; }
   .delay-5 { animation-delay: 375ms; }
   .delay-6 { animation-delay: 450ms; }
+}
+
+/* Respeita "movimento reduzido" do sistema: zera animações/transições (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

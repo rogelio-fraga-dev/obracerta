@@ -4,8 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@obracerta/ui";
-import { navForTipo, tipoLabel, type NavItem } from "./nav-items";
-import { LayoutDashboard, Users, HardHat, ClipboardList, ShieldAlert, Landmark } from "lucide-react";
+import { navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 
 interface SidebarProps {
   brandName: string;
@@ -20,16 +19,6 @@ interface SidebarProps {
   /** Slot do rodapé (ex.: botão Sair). */
   children?: ReactNode;
 }
-
-/** Itens do painel administrativo (só renderizados para ADMIN). */
-const ADMIN_NAV: NavItem[] = [
-  { href: "/admin", label: "Painel admin", Icon: LayoutDashboard },
-  { href: "/admin/usuarios", label: "Gestão de usuários", Icon: Users },
-  { href: "/admin/obras", label: "Gestão de obras", Icon: HardHat },
-  { href: "/admin/pedidos", label: "Gestão de pedidos", Icon: ClipboardList },
-  { href: "/admin/moderacao", label: "Moderação", Icon: ShieldAlert },
-  { href: "/admin/financeiro", label: "Financeiro", Icon: Landmark },
-];
 
 /**
  * Navegação lateral — **só no desktop** (`hidden lg:flex`). Fixa à esquerda, com

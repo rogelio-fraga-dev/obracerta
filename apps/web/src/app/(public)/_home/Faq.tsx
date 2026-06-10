@@ -30,8 +30,10 @@ export function Faq() {
               <div key={item.q} className="overflow-hidden rounded-xl bg-background">
                 <button
                   type="button"
+                  id={`faq-btn-${i}`}
                   onClick={() => setOpen(aberto ? null : i)}
                   aria-expanded={aberto}
+                  aria-controls={`faq-panel-${i}`}
                   className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-base font-bold text-foreground"
                 >
                   {item.q}
@@ -42,7 +44,12 @@ export function Faq() {
                     +
                   </span>
                 </button>
-                <div className={`grid transition-all duration-300 ${aberto ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                <div
+                  id={`faq-panel-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-btn-${i}`}
+                  className={`grid transition-all duration-300 ${aberto ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
                   <div className="overflow-hidden">
                     <p className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
                   </div>

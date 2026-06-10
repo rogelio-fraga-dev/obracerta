@@ -22,7 +22,7 @@ export const colors = {
   dark: { DEFAULT: "#18160f", soft: "#221f16" },
   cream: { DEFAULT: "#faf7f0", soft: "#f2ede0" },
   border: "#e8e0cc",
-  mutedForeground: "#6b6455",
+  mutedForeground: "#5a5348",
   success: "#1a9e5c",
   warning: "#e8a00a",
   danger: "#dc2626",

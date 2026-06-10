@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { MAX_PORTFOLIO_PHOTOS, type PortfolioPhoto } from "@obracerta/shared";
-import { Button } from "@obracerta/ui";
+import { Button, Field, Input } from "@obracerta/ui";
 import { deletePortfolioPhotoAction, uploadPortfolioPhotoAction } from "../portfolio-actions";
 
 /**
@@ -68,7 +68,7 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
                 onClick={() => remover(f.id)}
                 disabled={pending}
                 aria-label="Remover foto"
-                className="absolute right-1.5 top-1.5 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white hover:bg-danger"
+                className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-danger"
               >
                 ✕
               </button>
@@ -83,19 +83,22 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
         </p>
       ) : (
         <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground"
-          />
-          <input
-            value={legenda}
-            onChange={(e) => setLegenda(e.target.value)}
-            placeholder="Legenda (opcional)"
-            maxLength={140}
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-          />
+          <Field label="Foto da obra">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:text-sm file:font-semibold file:text-foreground"
+            />
+          </Field>
+          <Field label="Legenda (opcional)">
+            <Input
+              value={legenda}
+              onChange={(e) => setLegenda(e.target.value)}
+              placeholder="Ex.: Reforma de cozinha em Pinheiros"
+              maxLength={140}
+            />
+          </Field>
           <Button size="sm" onClick={enviar} disabled={!file || pending}>
             {pending ? "Enviando…" : "Adicionar foto"}
           </Button>

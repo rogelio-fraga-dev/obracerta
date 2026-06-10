@@ -16,7 +16,6 @@ export function ObraProposals({
   status,
   proposals,
 }: {
-  workOrderId: string;
   status: WorkOrderStatus;
   proposals: Proposal[];
 }) {

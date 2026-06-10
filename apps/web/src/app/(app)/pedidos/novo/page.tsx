@@ -49,6 +49,7 @@ export default function NovoPedidoPage() {
       router.replace(`/pedidos/${booking.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao criar o pedido.");
+    } finally {
       setLoading(false);
     }
   }

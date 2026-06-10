@@ -51,11 +51,15 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
       <div className="flex items-center gap-4">
         <div
-          aria-hidden
+          aria-hidden={!profile.fotoUrl}
           className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted font-display text-2xl font-black text-muted-foreground"
         >
           {profile.fotoUrl ? (
-            <img src={profile.fotoUrl} alt="" className="h-full w-full rounded-full object-cover" />
+            <img
+              src={profile.fotoUrl}
+              alt={`Foto de ${nome}`}
+              className="h-full w-full rounded-full object-cover"
+            />
           ) : (
             nome.charAt(0)
           )}

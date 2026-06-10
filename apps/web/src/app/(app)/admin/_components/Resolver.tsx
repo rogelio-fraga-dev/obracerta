@@ -36,6 +36,7 @@ export function Resolver({
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível concluir.");
+    } finally {
       setLoading(false);
     }
   }

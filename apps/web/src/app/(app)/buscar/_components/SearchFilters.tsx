@@ -78,7 +78,11 @@ export function SearchFilters() {
         </select>
       </Field>
 
-      {geoError && <p className="text-xs text-danger">{geoError}</p>}
+      {geoError && (
+        <p role="alert" className="text-xs text-danger">
+          {geoError}
+        </p>
+      )}
 
       <div className="flex gap-2">
         <Button variant="secondary" size="sm" onClick={usarLocalizacao} disabled={geoLoading}>
