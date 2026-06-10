@@ -377,7 +377,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 ### Fase 8 — Evolução pós-auditoria (jun/2026) — **em andamento**
 
-> Integra o **Plano de Evolução do Produto** (`docs/plano-evolucao-produto.md`, mantido como referência detalhada)
+> Integra o **Plano de Evolução do Produto** (agora consolidado neste documento — ver **§15 Apêndice**)
 > e a **auditoria competitiva** (`docs/auditoria-competitiva.md`). Evolução do MVP a partir do feedback do fundador.
 
 **Decisões do fundador (jun/2026):**
@@ -504,4 +504,53 @@ mockups como **referência visual**.
 
 ---
 
-*Documento de planejamento — derivado do material em `/docs`, dos protótipos HTML (`docs/mockups/`, ver §14) e da análise de stack (`~/.claude/plans/voce-acha-que-essa-snappy-island.md`). Atualizar conforme decisões de produto e o plano refinado do Ultraplan.*
+## 15. Apêndice — Plano de Evolução do Produto (consolidado)
+
+> Este apêndice **incorpora** o antigo `docs/plano-evolucao-produto.md` (removido — este é agora o
+> documento único). É a referência detalhada das decisões do fundador (jun/2026) e do racional de escopo
+> da **Fase 8**, derivado da auditoria competitiva (`docs/auditoria-competitiva.md`).
+
+### 15.1 Decisões confirmadas pelo fundador (jun/2026)
+
+| # | Decisão |
+|---|---------|
+| 1 | **❌ SEM pagamento do serviço in-app (revertido jun/2026).** Monetização = **só a assinatura/mensalidade**. A plataforma **não processa o pagamento da obra** — combinado e pago **diretamente** entre as partes. |
+| 2 | Plataforma **apenas intermedia a conexão** — **não se responsabiliza** pelos contratos (ToS + UX). |
+| 3 | Diferença entre planos é por **funções liberadas** (gating), não por pagamento de serviço. |
+| 4 | **Anexar fotos** nas propostas/mensagens. |
+| 5 | **Catálogo de profissões fixo no código** · foco em **obra civil** (sem "Pintor"). |
+| 6 | **Empresa contrata direto** · **sem sub-contas** · **1 administrador** · perfil guarda infos da empresa (tamanho de equipe etc.). |
+| 7 | **Sem chat de verdade** — apenas **mensagem** ligada à proposta/pedido + **opções de contato** (WhatsApp/e-mail/telefone) liberadas após o aceite. |
+| 8 | Landing: números **fake sem selo** + **seletor de persona em toggle** + **ilustração SVG** + largura ampla (1600px). |
+| 9 | **PWA instalável** (sem app nativo) · **SEO adiado** (pós-marca) · **sem verificação de documento**. |
+| 10 | **~~Take rate de 5%~~ — cancelado.** Sem comissão sobre o serviço. Receita = assinatura. |
+
+### 15.2 Reprecificação de planos — **aplicada** (Fase 8+)
+
+Modelo vigente (preços R$0 / R$49 / R$99 inalterados; gating no mapa `entitlements`):
+
+| Recurso | INICIANTE (grátis) | PRO (R$49) | ESPECIALISTA (R$99) |
+|---|:---:|:---:|:---:|
+| Perfil público / aparecer na busca | ✅ | ✅ | ✅ |
+| **Receber pedidos** | ✅ | ✅ | ✅ |
+| Perfil completo · portfólio · analytics · busca geo | — | ✅ | ✅ |
+| **Dar lances em obras** | — | ✅ | ✅ |
+| **Ferramentas (orçamento/recibo)** · topo · busca ilimitada | — | — | ✅ |
+
+Contratante (planos avulsos, 30 dias): BASICO R$19 · COMPLETO R$39 · LANCE R$69. Empresa: usa planos de contratante (tier corporativo dedicado fica para depois).
+
+### 15.3 Mapa de defeitos da auditoria → status
+
+1. Pagamento não cobra de verdade (Asaas fake) → **adiado** (sem deploy/credenciais).
+2. Especialidade texto livre → ✅ catálogo fixo (8.1).
+3. Landing sem prova social + duplo-CTA → ✅ (8.2).
+4. Persona Empresa inexistente → ✅ conta PJ (8.6).
+5. Negociação na plataforma (proposta/mensagem/contato) → ✅ (8.4).
+6. Sem ferramentas de gestão do profissional → ✅ orçamento/recibo (8.5).
+7. "Receber pedidos" trancado no pago travava o seeding → ✅ resolvido (reprecificação: grátis).
+8. Admin sem analytics estratégico → ✅ (analytics funil/liquidez/LTV/coorte).
+9. Liquidez/cold-start sem plano de seeding → **backlog operacional**.
+
+---
+
+*Documento de planejamento — derivado do material em `/docs`, dos protótipos HTML (`docs/mockups/`, ver §14) e da análise de stack (`~/.claude/plans/voce-acha-que-essa-snappy-island.md`). Consolida o antigo `plano-evolucao-produto.md` (§15). Atualizar conforme decisões de produto.*
