@@ -413,9 +413,9 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
     - **`/work-orders/me` (FE-20):** contratante/empresa veem as próprias obras (todos os status) em vez do feed global.
     - **`ProfileEditCard` (FE-19):** edição de nome/e-mail/foto para contratante/empresa (reusa as actions).
   - [x] **Nota (estrelas) nos cards de busca:** `LEFT JOIN` agregando avaliações REVELADAS por alvo no `/search/professionals` (consistente com a reputação pública); `mediaNota`/`totalAvaliacoes` no `SearchResult`. _(Nota: o seed deixa o único review de profissional OCULTA — para a estrela aparecer na demo, é preciso um review REVELADA de profissional.)_
-  - [ ] **Restante (polish / perf — não bloqueia demo):**
-    - **Onda 4 (DS/dedup):** componente `Select` no DS · gradientes como classes Tailwind · dedup `Fact`/`useAsyncAction`/`TIPO_UI` · `<BackLink>` no admin · emojis `aria-hidden` (A11y-27) · cores dos gráficos via tokens (A11y-6).
-    - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)**.
+  - [x] **Onda 4 (DS/dedup):** componente `Select` no DS (6 `<select>` migrados) · gradientes como classes Tailwind (`bg-gradient-*`, 9 inline removidos) · cores dos gráficos via tokens + correção do `hsl(var())` quebrado (A11y-6) · `aria-hidden` em StatCard/EmptyState (A11y-27) · dedup `Fact`/`useAsyncAction`/`TIPO_UI` + `<BackLink>` no admin (FE-13/25/26/27).
+  - [ ] **Restante (perf / deploy — não bloqueia demo):**
+    - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)** — otimizações, não bugs.
     - **`PAYMENT_WEBHOOK_SECRET` (M-11)** — vai junto com o Asaas (deploy).
 
 > **Landing (jun/2026, pedido do fundador):** header sticky robusto (botões sempre
