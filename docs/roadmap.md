@@ -404,6 +404,11 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 - [x] **Reprecificação de planos** (backlog Fase 8+): novo gating sem mudar preços (R$0/49/99). **Receber pedidos virou grátis** (feature `booking.receive` no INICIANTE — reverte a §8.7); **lances saem a partir do Pro** (`bid.submit` no PRO, antes só ESPECIALISTA); **ferramentas (orçamento/recibo) seguem exclusivas do Especialista** como tier premium. Mudança centralizada no mapa `ENTITLEMENTS` (gating é dado, não código): `MeuPlano` e `/me/entitlements` refletem sozinhos. Ajustados: textos da landing (`_home/Planos.tsx`), catálogo `plans.ts` (`beneficios`), busca (sempre "Agendar"), cópia do cadeado de lances (`ObraBid`), helper morto `planoRecebePedidos` removido. **Correção-chave**: `BillingService.activePlan` agora dá baseline INICIANTE ao profissional sem assinatura (antes `null` → sem features), senão "receber pedido grátis" não teria efeito. +3 testes (`billing.service.baseline.spec`; entitlements/booking atualizados; 197 API). **Provado ao vivo**: pedro (INICIANTE) entitlements = {profile.public, booking.receive}; contratante agenda com Iniciante → 201; joana (PRO) dá lance → 201.
 
+- [~] **8.8 — Correções da auditoria técnica (2026-06-09)** _(multi-agente; detalhe em `docs/auditoria-2026-06-09.md`, mapa em §15.4)_: revisão de código por 3 reviewers (frontend/React, visual+a11y/WCAG, backend).
+  - [x] **Backend (10 itens):** sincronização de `professional_profiles.plano`/`contractor_profiles.plano` no billing via porta `PlanSyncPort` (H-1, fecha o bug de plano errado na busca/perfil); reassinatura pós-inadimplência (H-2); `@Roles(ADMIN)` no `/audit/verify` (M-7); remoção de `file: any`/`status as any` (H-3/H-4); extensão de upload via `mimetype` (M-6); unicidade de e-mail no `updateProfile` (L-18); slug fallback com `randomUUID` (L-17); comentário/mensagem do gate `RECEIVE_BOOKINGS` (H-5); limpeza de comentário no admin (M-12). **197/197 testes, typecheck/lint limpos.**
+  - [x] **Onda 1 front + WCAG:** `params` Promise nas 3 páginas admin (FE-1); `prefers-reduced-motion` + skip-to-content (A11y-13/20); **bug `ADMIN_NAV`** consolidado (Moderação/Financeiro voltam ao mobile) + `NAV_EMPRESA` + `shortLabel` na TabBar (A11y-29/30/9); `key={id}` em `ferramentas/novo` (FE-9); `finally{setLoading}` nos componentes `catch`-only (FE-12); `role="alert"` no geoError (A11y-17); target ≥24px no "Remover foto" + `Field/Input` no PortfolioManager (A11y-18/7); prop morta `workOrderId` removida (FE-8); botões admin sem ação desabilitados (FE-7); `React.cache` no `getMyRoles` (FE-11); especialidade da obra vira catálogo (FE-14); `ProgressRing role="meter"` (A11y-22); tablist/tabpanel em Planos/ComoFunciona/FAQ (A11y-5/15/16); `alt` na foto do perfil público (A11y-14); contraste do `--color-muted-foreground` (A11y-21).
+  - [ ] **Onda 2/3/4 (restante):** estado de avaliação (`jaAvaliou`/`resposta`, FE-2/3) · `alert()`→inline em AdminForms (FE-4) · `serverApiFormData` (FE-5) · Suspense em SearchFilters/páginas (FE-16/18) · vitrine do perfil público + cards de busca + banner por persona (A11y-1/2/3) · edição do contratante + `/work-orders/me` (FE-19/20) · componente `Select` no DS + gradientes Tailwind + dedup `Fact`/`useAsyncAction` (Onda 4) · perf de backend (M-8/9/10/14) · emojis `aria-hidden` (A11y-27) · `PAYMENT_WEBHOOK_SECRET` (vai com o Asaas).
+
 **Backlog Fase 8+:** cobrança real
 da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · SEO (pós-marca) ·
 seeding de oferta por cidade-piloto (operacional).
@@ -550,6 +555,54 @@ Contratante (planos avulsos, 30 dias): BASICO R$19 · COMPLETO R$39 · LANCE R$6
 7. "Receber pedidos" trancado no pago travava o seeding → ✅ resolvido (reprecificação: grátis).
 8. Admin sem analytics estratégico → ✅ (analytics funil/liquidez/LTV/coorte).
 9. Liquidez/cold-start sem plano de seeding → **backlog operacional**.
+
+### 15.4 Auditoria técnica multi-agente (2026-06-09) → ondas de correção
+
+> Detalhe completo (40+ achados com `arquivo:linha` e fix) em `docs/auditoria-2026-06-09.md`.
+> Rodada por `react-reviewer` (frontend), `a11y-architect` (visual/UX/WCAG) e `typescript-reviewer`
+> (backend). Diferente de §15.3 (defeitos de **produto**), aqui são defeitos de **código/qualidade**.
+> Vira a Fase **8.8**. Sequência sugerida por impacto/esforço:
+
+**Onda 1 — Bugs reais + bloqueadores WCAG (rápidos, alto valor):**
+- `params` síncronos nas 3 páginas admin (Next 15 — pode quebrar em build) `[FE-1]`
+- `prefers-reduced-motion` + skip-to-content no `globals.css`/layout raiz `[A11y-13,20]`
+- Bug `ADMIN_NAV` duplicado: TabBar mobile perde Moderação/Financeiro `[A11y-29]`
+- `key={i}` → `key={id}` em `ferramentas/novo` (corrompe estado de input) `[FE-9]`
+- `setLoading` em `finally` nos 7 componentes `catch`-only `[FE-12]`
+- `role="alert"` no geoError da busca; target ≥24px no "Remover foto" `[A11y-17,18]`
+- remover `workOrderId` morto de `ObraProposals` `[FE-8]`
+
+**Onda 2 — Estado/UX correto (médio esforço):**
+- `jaAvaliou`/`resposta` do Server Component p/ `ReviewForm`+`RespostaForm` (evita re-render e 409) `[FE-2,3]`
+- trocar `alert()` de `AdminForms` por feedback inline `[FE-4]`
+- conectar (ou desabilitar) botões sem ação no admin `[FE-7]`
+- `uploadFotoAction` via `serverApiFormData` com refresh `[FE-5]`
+- `<Suspense>` em `SearchFilters` e páginas com fetch múltiplo `[FE-16,18]`
+- a11y de tabs/accordion: `role="tabpanel"`/`aria-controls` em FAQ, ComoFunciona, MethodTabs `[A11y-15,16]`; `role="meter"` no ProgressRing `[A11y-22]`
+
+**Onda 3 — Vitrine + diferenciação por persona (produto, maior esforço):**
+- Perfil público `/[slug]`: header hero + 2 colunas + bloco de confiança `[A11y-1,11,14]`
+- Busca: cards com Avatar + nota + distância; banner contextual no `/perfil` `[A11y-2,3]`
+- `ContratanteProfileForm` (edição) + `/work-orders/me` p/ contratante `[FE-19,20]`
+- `NAV_EMPRESA` separado de contratante `[A11y-30]`
+
+**Onda 4 — Consistência DS + dedup (manutenção):**
+- componente `Select` no DS; `Field`+`Input` no PortfolioManager `[A11y-24,25,7]`
+- gradientes como classes Tailwind no preset; `aria-hidden` nos emojis `[A11y-26,27]`
+- escurecer `--color-muted-foreground`; cores dos gráficos via tokens `[A11y-21,6]`
+- extrair `Fact`/`useAsyncAction`/`TIPO_UI`; usar `<BackLink>` no admin `[FE-13,25,26,27]`
+
+**Backend (typescript-reviewer):** sem CRITICAL (SQLi/XSS/webhook/leak cobertos). Detalhe em §3 de
+`docs/auditoria-2026-06-09.md`. Onda backend prioritária:
+- **[H-1]** sincronizar `professional_profiles.plano` (e `contractor_profiles.plano`) nas transições de
+  assinatura/compra — hoje a coluna alimenta busca/perfil público mas nunca é escrita pelo billing
+  (assinante PRO aparece como INICIANTE e some do filtro `?plano=PRO`).
+- **[M-11] segurança:** remover o default `"dev-webhook-secret-change-me"` de `PAYMENT_WEBHOOK_SECRET`
+  no schema de validação (em prod sem a var, a API aceitaria webhooks com segredo público) — fazer junto
+  com a entrada de provedores reais (Asaas).
+- **[H-2]** não bloquear nova assinatura após inadimplência; **[M-7]** `@Roles(ADMIN)` no `/audit/verify`;
+  **[H-3/H-4]** remover `file: any`/`status as any`; **[M-6]** extensão de upload via `mimetype`;
+  **[L-18]** unicidade de e-mail no `updateProfile`.
 
 ---
 
