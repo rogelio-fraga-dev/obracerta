@@ -408,12 +408,14 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
   - [x] **Backend (10 itens):** sincronização de `professional_profiles.plano`/`contractor_profiles.plano` no billing via porta `PlanSyncPort` (H-1, fecha o bug de plano errado na busca/perfil); reassinatura pós-inadimplência (H-2); `@Roles(ADMIN)` no `/audit/verify` (M-7); remoção de `file: any`/`status as any` (H-3/H-4); extensão de upload via `mimetype` (M-6); unicidade de e-mail no `updateProfile` (L-18); slug fallback com `randomUUID` (L-17); comentário/mensagem do gate `RECEIVE_BOOKINGS` (H-5); limpeza de comentário no admin (M-12). **197/197 testes, typecheck/lint limpos.**
   - [x] **Onda 1 front + WCAG:** `params` Promise nas 3 páginas admin (FE-1); `prefers-reduced-motion` + skip-to-content (A11y-13/20); **bug `ADMIN_NAV`** consolidado (Moderação/Financeiro voltam ao mobile) + `NAV_EMPRESA` + `shortLabel` na TabBar (A11y-29/30/9); `key={id}` em `ferramentas/novo` (FE-9); `finally{setLoading}` nos componentes `catch`-only (FE-12); `role="alert"` no geoError (A11y-17); target ≥24px no "Remover foto" + `Field/Input` no PortfolioManager (A11y-18/7); prop morta `workOrderId` removida (FE-8); botões admin sem ação desabilitados (FE-7); `React.cache` no `getMyRoles` (FE-11); especialidade da obra vira catálogo (FE-14); `ProgressRing role="meter"` (A11y-22); tablist/tabpanel em Planos/ComoFunciona/FAQ (A11y-5/15/16); `alt` na foto do perfil público (A11y-14); contraste do `--color-muted-foreground` (A11y-21).
   - [x] **Onda 2/3 (parcial):** `alert()`→inline acessível em AdminForms (FE-4); `<Suspense>` no SearchFilters (FE-18); **vitrine** — perfil público `/[slug]` redesenhado (header hero + 2 colunas + CTA com foco + empty state, A11y-1/11/14) e cards de busca com Avatar/hierarquia/plano (A11y-3); banner por persona no `/perfil` (A11y-2); `BOOKING_STATUS_UI` no detalhe admin (FE-23).
-  - [ ] **Restante (precisa de contrato/backend ou é polish):**
-    - **Estado de avaliação (FE-2/3):** exige incluir `resposta` no payload de `/reviews/received` + endpoint "já avaliei este booking?" — mexe no contrato da avaliação dupla-cega (fazer com cuidado/TDD).
-    - **`/work-orders/me` p/ contratante (FE-20)** e **`ContratanteProfileForm` (FE-19):** o primeiro precisa de endpoint novo na API; o segundo reusa `updateProfileAction`.
-    - **Nota nos cards de busca:** exige join com reputação no `/search/professionals` (backend).
-    - **Onda 4 (DS/dedup, sem urgência):** componente `Select` no DS · gradientes como classes Tailwind · dedup `Fact`/`useAsyncAction`/`TIPO_UI` · `<BackLink>` no admin · emojis `aria-hidden` (A11y-27) · cores dos gráficos via tokens (A11y-6).
-    - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)** — não bloqueiam a demo.
+  - [x] **Contrato/backend (aplicado, com TDD):**
+    - **Estado de avaliação (FE-2/3):** `ReceivedReview` (Review + `resposta`/`respostaEm`) no `/reviews/received`; `GET /reviews/booking/:id/mine` (`hasReviewedBooking`); UI esconde os forms após enviar/responder. +3 testes (200 API).
+    - **`/work-orders/me` (FE-20):** contratante/empresa veem as próprias obras (todos os status) em vez do feed global.
+    - **`ProfileEditCard` (FE-19):** edição de nome/e-mail/foto para contratante/empresa (reusa as actions).
+  - [ ] **Restante (polish / perf — não bloqueia demo):**
+    - **Nota nos cards de busca:** join com reputação no `/search/professionals` (backend).
+    - **Onda 4 (DS/dedup):** componente `Select` no DS · gradientes como classes Tailwind · dedup `Fact`/`useAsyncAction`/`TIPO_UI` · `<BackLink>` no admin · emojis `aria-hidden` (A11y-27) · cores dos gráficos via tokens (A11y-6).
+    - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)**.
     - **`PAYMENT_WEBHOOK_SECRET` (M-11)** — vai junto com o Asaas (deploy).
 
 **Backlog Fase 8+:** cobrança real
