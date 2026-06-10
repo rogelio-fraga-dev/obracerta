@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import type { PaginatedResponse, User } from "@obracerta/shared";
 import {
   USERS_REPOSITORY,
@@ -6,6 +12,13 @@ import {
   type UsersRepository,
 } from "../domain/ports/users.repository.js";
 import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
+
+/** Extensão segura derivada do mimetype validado (nunca do `originalname` do cliente). */
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 /**
  * Casos de uso de usuário. Orquestra o domínio sobre a porta `UsersRepository`
@@ -105,6 +118,11 @@ export class UsersService {
   }
 
   async updateProfile(id: string, data: { nomeCompleto?: string; email?: string }): Promise<User> {
+    // garante unicidade de e-mail antes de gravar (evita 500 por violação de constraint)
+    if (data.email) {
+      const byEmail = await this.users.findByEmail(data.email);
+      if (byEmail && byEmail.id !== id) throw new ConflictException("E-mail já cadastrado");
+    }
     const updated = await this.users.updateProfile(id, data);
     if (!updated) throw new NotFoundException("Usuário não encontrado");
     return updated;
@@ -122,9 +140,10 @@ export class UsersService {
 
   async uploadFoto(
     id: string,
-    file: { buffer: Buffer; originalname: string; mimetype: string },
+    file: { buffer: Buffer; mimetype: string },
   ): Promise<User> {
-    const ext = file.originalname.split(".").pop();
+    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    if (!ext) throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     const key = `users/${id}/foto-${Date.now()}.${ext}`;
     const url = await this.storage.putObject(key, file.buffer, file.mimetype);
     return this.setFoto(id, url);

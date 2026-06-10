@@ -67,13 +67,12 @@ export class BookingService {
     if (!professional || professional.tipo !== UserType.PROFISSIONAL) {
       throw new NotFoundException("Profissional não encontrado.");
     }
-    // Gating de plano: receber pedidos é exclusivo de quem tem a feature
-    // RECEIVE_BOOKINGS (planos pagos). O Iniciante aparece na busca, mas não
-    // recebe agendamentos — a trava real é aqui; a UI só esconde o botão.
+    // Gating de plano: o alvo precisa da feature RECEIVE_BOOKINGS para receber
+    // agendamentos. Após a reprecificação (Fase 8+) o INICIANTE já tem a feature
+    // (receber pedidos virou grátis) — o gate permanece como trava do mecanismo
+    // (data-driven via ENTITLEMENTS), barrando apenas quem não a tiver.
     if (!(await this.billing.can(input.professionalId, Feature.RECEIVE_BOOKINGS))) {
-      throw new ForbiddenException(
-        "Este profissional está no plano Iniciante e ainda não recebe pedidos de agendamento.",
-      );
+      throw new ForbiddenException("Este profissional não está habilitado a receber pedidos.");
     }
     if (Date.parse(input.dataServico) <= Date.now()) {
       throw new BadRequestException("A data do serviço deve ser no futuro.");

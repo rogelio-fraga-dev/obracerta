@@ -57,6 +57,7 @@ import {
   PAYMENT_EVENT_REPOSITORY,
   type PaymentEventRepository,
 } from "../domain/ports/payment-event.repository.js";
+import { PLAN_SYNC_PORT, type PlanSyncPort } from "../domain/ports/plan-sync.port.js";
 import { BillingScheduler } from "./billing.scheduler.js";
 
 /** Entrada de um webhook de pagamento já normalizada. */
@@ -92,6 +93,7 @@ export class BillingService {
     @Inject(INVOICE_REPOSITORY) private readonly invoices: InvoiceRepository,
     @Inject(REFUND_REPOSITORY) private readonly refunds: RefundRepository,
     @Inject(PAYMENT_EVENT_REPOSITORY) private readonly events: PaymentEventRepository,
+    @Inject(PLAN_SYNC_PORT) private readonly planSync: PlanSyncPort,
     @Inject(PAYMENT_GATEWAY) private readonly gateway: PaymentGateway,
     private readonly scheduler: BillingScheduler,
     private readonly entitlements: EntitlementsService,
@@ -112,9 +114,15 @@ export class BillingService {
     if (!user || user.tipo !== UserType.PROFISSIONAL) {
       throw new BadRequestException("Apenas profissionais assinam planos recorrentes.");
     }
-    if (await this.subscriptions.findActiveByUser(userId)) {
+    const existente = await this.subscriptions.findActiveByUser(userId);
+    if (
+      existente &&
+      (existente.status === SubscriptionStatus.EM_GRACA ||
+        existente.status === SubscriptionStatus.ATIVA)
+    ) {
       throw new ConflictException("Você já tem uma assinatura vigente.");
     }
+    // INADIMPLENTE não bloqueia: permite reassinar para regularizar o acesso.
 
     const now = new Date();
     const valorCentavos = professionalPriceCentavos(input.plano);
@@ -168,6 +176,8 @@ export class BillingService {
       entidadeId: subscription.id,
       dados: { plano: input.plano, valorCentavos },
     });
+    // o plano em graça já concede as features (activePlan) → reflete na busca/perfil já
+    await this.planSync.setProfessionalPlano(userId, input.plano);
     return subscription;
   }
 
@@ -204,6 +214,7 @@ export class BillingService {
       entidadeId: ativa.id,
       dados: { de: ativa.plano, para: input.plano, valorCentavos },
     });
+    await this.planSync.setProfessionalPlano(userId, atualizada.plano);
     return atualizada;
   }
 
@@ -429,8 +440,13 @@ export class BillingService {
       valorCentavos: refund.valorCentavos,
     });
     await this.invoices.transition(invoice.id, InvoiceStatus.PAGA, InvoiceStatus.ESTORNADA);
-    if (invoice.purchaseId) await this.purchases.expire(invoice.purchaseId);
-    else if (invoice.subscriptionId) await this.subscriptions.cancel(invoice.subscriptionId);
+    if (invoice.purchaseId) {
+      await this.purchases.expire(invoice.purchaseId);
+      await this.planSync.expireContractorPlano(invoice.userId);
+    } else if (invoice.subscriptionId) {
+      await this.subscriptions.cancel(invoice.subscriptionId);
+      await this.planSync.resetProfessionalPlano(invoice.userId);
+    }
 
     const concluido = await this.refunds.resolve(refundId, RefundStatus.CONCLUIDO, ref.gatewayId);
     await this.audit.record({
@@ -478,10 +494,12 @@ export class BillingService {
   /** Ativa a origem da fatura paga: assinatura (ATIVA) ou compra (ATIVO + expiração). */
   private async activateOrigin(invoice: Invoice): Promise<void> {
     if (invoice.subscriptionId) {
-      await this.subscriptions.activate(invoice.subscriptionId);
+      const sub = await this.subscriptions.activate(invoice.subscriptionId);
+      if (sub) await this.planSync.setProfessionalPlano(sub.userId, sub.plano);
     } else if (invoice.purchaseId) {
       const expiraEm = purchaseExpiry(new Date()).toISOString();
-      await this.purchases.activate(invoice.purchaseId, expiraEm);
+      const purchase = await this.purchases.activate(invoice.purchaseId, expiraEm);
+      if (purchase) await this.planSync.setContractorPlano(purchase.userId, purchase.plano, expiraEm);
       await this.scheduler.schedulePurchaseExpiry(invoice.purchaseId, expiraEm);
     }
   }

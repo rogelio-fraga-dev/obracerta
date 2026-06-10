@@ -22,6 +22,7 @@ import { DrizzlePurchaseRepository } from "./drizzle-purchase.repository.js";
 import { DrizzleInvoiceRepository } from "./drizzle-invoice.repository.js";
 import { DrizzleRefundRepository } from "./drizzle-refund.repository.js";
 import { DrizzlePaymentEventRepository } from "./drizzle-payment-event.repository.js";
+import { DrizzlePlanSyncAdapter } from "./drizzle-plan-sync.adapter.js";
 
 config({ path: "../../.env" });
 
@@ -39,6 +40,7 @@ describe("BillingService (integração)", () => {
   const invoiceRepo = new DrizzleInvoiceRepository(db);
   const refundRepo = new DrizzleRefundRepository(db);
   const eventRepo = new DrizzlePaymentEventRepository(db);
+  const planSyncAdapter = new DrizzlePlanSyncAdapter(db);
   const gateway = new FakePaymentGateway();
   const entitlements = new EntitlementsService();
 
@@ -59,6 +61,7 @@ describe("BillingService (integração)", () => {
     invoiceRepo,
     refundRepo,
     eventRepo,
+    planSyncAdapter,
     gateway,
     schedulerStub,
     entitlements,

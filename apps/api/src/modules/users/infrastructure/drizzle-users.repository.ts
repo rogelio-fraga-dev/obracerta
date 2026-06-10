@@ -101,7 +101,7 @@ export class DrizzleUsersRepository implements UsersRepository {
   async setStatus(id: string, status: string): Promise<void> {
     await this.db
       .update(users)
-      .set({ status: status as any })
+      .set({ status: status as (typeof users.$inferInsert)["status"] })
       .where(eq(users.id, id));
   }
 

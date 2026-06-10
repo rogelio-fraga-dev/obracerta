@@ -64,8 +64,9 @@ export class ProfilesService {
         return candidate;
       }
     }
-    // fallback altamente improvável: sufixo aleatório
-    return slugWithSuffix(base, Date.now() % 100_000);
+    // fallback altamente improvável: sufixo aleatório sem risco de colisão
+    const { randomUUID } = await import("node:crypto");
+    return `${base}-${randomUUID().slice(0, 8)}`;
   }
 
   getProfessional(userId: string): Promise<ProfessionalProfile | null> {

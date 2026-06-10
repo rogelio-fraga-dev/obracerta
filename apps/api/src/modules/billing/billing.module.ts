@@ -12,7 +12,9 @@ import { PURCHASE_REPOSITORY } from "./domain/ports/purchase.repository.js";
 import { INVOICE_REPOSITORY } from "./domain/ports/invoice.repository.js";
 import { REFUND_REPOSITORY } from "./domain/ports/refund.repository.js";
 import { PAYMENT_EVENT_REPOSITORY } from "./domain/ports/payment-event.repository.js";
+import { PLAN_SYNC_PORT } from "./domain/ports/plan-sync.port.js";
 import { FakePaymentGateway } from "./infrastructure/fake-payment-gateway.js";
+import { DrizzlePlanSyncAdapter } from "./infrastructure/drizzle-plan-sync.adapter.js";
 import { DrizzleSubscriptionRepository } from "./infrastructure/drizzle-subscription.repository.js";
 import { DrizzlePurchaseRepository } from "./infrastructure/drizzle-purchase.repository.js";
 import { DrizzleInvoiceRepository } from "./infrastructure/drizzle-invoice.repository.js";
@@ -45,6 +47,7 @@ import { BillingController } from "./interface/billing.controller.js";
     { provide: INVOICE_REPOSITORY, useClass: DrizzleInvoiceRepository },
     { provide: REFUND_REPOSITORY, useClass: DrizzleRefundRepository },
     { provide: PAYMENT_EVENT_REPOSITORY, useClass: DrizzlePaymentEventRepository },
+    { provide: PLAN_SYNC_PORT, useClass: DrizzlePlanSyncAdapter },
   ],
   exports: [BillingService],
 })

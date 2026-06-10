@@ -141,7 +141,7 @@ export class AuthController {
         .addMaxSizeValidator({ maxSize: 1024 * 1024 * 5 }) // 5MB
         .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
-    file: any,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
   ) {
     return this.users.uploadFoto(user.sub, file);
   }

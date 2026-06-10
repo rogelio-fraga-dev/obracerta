@@ -86,14 +86,9 @@ export class AdminController {
     return this.bookings.findAllPaginated(query.page, query.limit);
   }
 
-  /** Detalhe de um pedido. */
+  /** Detalhe de um pedido (visão de admin — ignora a restrição de participante). */
   @Get("bookings/:id")
   async getBooking(@Param("id") id: string) {
-    // Note: this should return any booking for the admin.
-    // However, booking.service.ts getForParticipant is restricted.
-    // I should add a method to BookingService for the admin, or findById directly?
-    // Wait, BookingService.getOr404 is private. We can add a method `getBookingAdmin(id)` to bookingService, or just use it if exposed.
-    // Wait, I will just call it as `getBookingForAdmin` and I'll add it to BookingService.
     return this.bookings.getBookingForAdmin(id);
   }
 

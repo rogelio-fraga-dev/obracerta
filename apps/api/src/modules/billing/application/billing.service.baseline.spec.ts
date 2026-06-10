@@ -29,15 +29,16 @@ describe("BillingService — plano baseline e gating", () => {
     const service = new BillingService(
       subscriptions,
       purchases,
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
+      {} as never, // invoices
+      {} as never, // refunds
+      {} as never, // events
+      {} as never, // planSync
+      {} as never, // gateway
+      {} as never, // scheduler
       new EntitlementsService(),
       users,
-      {} as never,
-      {} as never,
+      {} as never, // audit
+      {} as never, // notifications
     );
     return service;
   }
