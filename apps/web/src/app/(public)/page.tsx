@@ -15,11 +15,23 @@ export default function HomePage() {
     <>
       {/* ── HERO ── */}
       <section className="relative overflow-hidden px-6 py-16 sm:px-10 sm:py-24 lg:px-14">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-primary/[0.06] blur-3xl"
-        />
-        <div className="mx-auto grid max-w-[1600px] items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+        {/* Atmosfera de fundo: grade de pontos + glows suaves (decorativo) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(24,22,15,0.05) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+              maskImage: "radial-gradient(ellipse 75% 60% at 50% 0%, #000 25%, transparent 80%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 75% 60% at 50% 0%, #000 25%, transparent 80%)",
+            }}
+          />
+          <div className="absolute -right-40 -top-40 h-[600px] w-[600px] rounded-full bg-primary/[0.07] blur-3xl" />
+          <div className="absolute -left-32 top-1/3 h-[420px] w-[420px] rounded-full bg-orange-200/40 blur-3xl" />
+        </div>
+        <div className="relative mx-auto grid max-w-[1600px] items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="relative z-10">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
@@ -132,8 +144,12 @@ export default function HomePage() {
       <Planos />
 
       {/* ── DEPOIMENTOS ── */}
-      <section id="depoimentos" className="px-6 py-20 sm:px-10 sm:py-28 lg:px-14">
-        <div className="mx-auto max-w-[1600px]">
+      <section id="depoimentos" className="relative overflow-hidden px-6 py-20 sm:px-10 sm:py-28 lg:px-14">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-primary/[0.05] blur-3xl"
+        />
+        <div className="relative mx-auto max-w-[1600px]">
           <span className="text-xs font-extrabold uppercase tracking-[3px] text-primary">Depoimentos</span>
           <h2 className="mt-3 font-display text-3xl font-black tracking-tight text-foreground sm:text-5xl">
             Quem já usou <em className="italic text-primary">aprovou</em>

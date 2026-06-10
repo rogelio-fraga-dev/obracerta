@@ -76,7 +76,7 @@ const PLANOS_CONTRATANTE: PlanoView[] = [
   {
     nome: "Básico",
     preco: "R$19",
-    periodo: "acesso por 30 dias",
+    periodo: "30 dias · sem renovação automática",
     desc: "Explore os profissionais disponíveis na sua cidade.",
     sim: ["Ver todos os profissionais", "Filtro por profissão", "Disponibilidade geral"],
     nao: [
@@ -91,7 +91,7 @@ const PLANOS_CONTRATANTE: PlanoView[] = [
   {
     nome: "Completo",
     preco: "R$39",
-    periodo: "acesso por 30 dias",
+    periodo: "30 dias · sem renovação automática",
     destaque: true,
     desc: "Contrate com segurança, vendo todos os dados antes de decidir.",
     sim: [
@@ -109,7 +109,7 @@ const PLANOS_CONTRATANTE: PlanoView[] = [
   {
     nome: "Lance",
     preco: "R$69",
-    periodo: "acesso por 30 dias",
+    periodo: "30 dias · sem renovação automática",
     desc: "Faça os melhores profissionais competirem pela sua obra.",
     sim: [
       "Tudo do Completo",
