@@ -183,17 +183,40 @@ function PhotoForm() {
 function CreateAdminForm() {
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<Feedback>(null);
+  // Etapa de confirmação: criar um admin dá **controle total**, então exigimos
+  // re-digitar o e-mail do novo admin antes de efetivar — evita criação acidental
+  // e adiciona fricção contra automação. (A trava de autorização real é a API.)
+  const [pendingAdmin, setPendingAdmin] = useState<CreateAdminInput | null>(null);
+  const [confirmEmail, setConfirmEmail] = useState("");
   const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateAdminInput>({
     resolver: zodResolver(createAdminSchema),
   });
 
   const onSubmit = (data: CreateAdminInput) => {
     setFeedback(null);
+    setConfirmEmail("");
+    setPendingAdmin(data); // abre a confirmação em vez de criar direto
+  };
+
+  const cancelar = () => {
+    setPendingAdmin(null);
+    setConfirmEmail("");
+  };
+
+  const confirmar = () => {
+    if (!pendingAdmin) return;
+    if (confirmEmail.trim().toLowerCase() !== pendingAdmin.email.toLowerCase()) {
+      setFeedback({ ok: false, msg: "O e-mail não confere. Digite o e-mail do novo admin para confirmar." });
+      return;
+    }
+    setFeedback(null);
     startTransition(async () => {
       try {
-        await createAdminAction(data);
+        await createAdminAction(pendingAdmin);
         setFeedback({ ok: true, msg: "Administrador criado com sucesso." });
         reset();
+        setPendingAdmin(null);
+        setConfirmEmail("");
       } catch (err) {
         setFeedback({ ok: false, msg: err instanceof Error ? err.message : "Erro ao criar administrador." });
       }
@@ -207,33 +230,64 @@ function CreateAdminForm() {
         <p className="text-sm text-muted-foreground mt-1">Crie um novo usuário com controle total do sistema.</p>
       </div>
       <FormFeedback state={feedback} />
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1">
-          <Label htmlFor="adminNome">Nome Completo</Label>
-          <Input id="adminNome" {...register("nomeCompleto")} />
-          {errors.nomeCompleto && <p className="text-sm text-danger">{errors.nomeCompleto.message}</p>}
+
+      {pendingAdmin ? (
+        <div className="space-y-3 rounded-lg border border-danger/30 bg-danger/5 p-4">
+          <p className="text-sm font-bold text-danger">
+            <span aria-hidden>⚠ </span>Ação sensível: controle total do sistema
+          </p>
+          <p className="text-sm text-foreground">
+            Você vai criar um administrador com acesso a tudo:{" "}
+            <span className="font-bold">{pendingAdmin.nomeCompleto}</span> ({pendingAdmin.email}). Para
+            confirmar, digite o e-mail dele novamente.
+          </p>
+          <div className="space-y-1">
+            <Label htmlFor="confirmAdminEmail">Confirme o e-mail do novo admin</Label>
+            <Input
+              id="confirmAdminEmail"
+              type="email"
+              autoComplete="off"
+              value={confirmEmail}
+              onChange={(e) => setConfirmEmail(e.target.value)}
+              placeholder={pendingAdmin.email}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="secondary" onClick={cancelar} disabled={isPending}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={confirmar} disabled={isPending || !confirmEmail.trim()}>
+              {isPending ? "Criando..." : "Confirmar criação"}
+            </Button>
+          </div>
         </div>
-        <div className="space-y-1">
-          <Label htmlFor="adminWhatsapp">WhatsApp</Label>
-          <Input id="adminWhatsapp" {...register("whatsapp")} placeholder="+5511999999999" />
-          {errors.whatsapp && <p className="text-sm text-danger">{errors.whatsapp.message}</p>}
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="adminEmail">E-mail de Login</Label>
-          <Input id="adminEmail" type="email" {...register("email")} />
-          {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="adminPassword">Senha Provisória</Label>
-          <Input id="adminPassword" type="password" {...register("password")} />
-          {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
-        </div>
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Criando..." : "Criar Administrador"}
-          </Button>
-        </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-1">
+            <Label htmlFor="adminNome">Nome Completo</Label>
+            <Input id="adminNome" {...register("nomeCompleto")} />
+            {errors.nomeCompleto && <p className="text-sm text-danger">{errors.nomeCompleto.message}</p>}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="adminWhatsapp">WhatsApp</Label>
+            <Input id="adminWhatsapp" {...register("whatsapp")} placeholder="+5511999999999" />
+            {errors.whatsapp && <p className="text-sm text-danger">{errors.whatsapp.message}</p>}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="adminEmail">E-mail de Login</Label>
+            <Input id="adminEmail" type="email" {...register("email")} />
+            {errors.email && <p className="text-sm text-danger">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="adminPassword">Senha Provisória</Label>
+            <Input id="adminPassword" type="password" {...register("password")} />
+            {errors.password && <p className="text-sm text-danger">{errors.password.message}</p>}
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit">Revisar e criar</Button>
+          </div>
+        </form>
+      )}
     </Card>
   );
 }
