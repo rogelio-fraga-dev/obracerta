@@ -5,7 +5,7 @@ import type {
   Penalty,
   PenaltySummary,
   PortfolioPhoto,
-  Review,
+  ReceivedReview,
   Suspension,
 } from "@obracerta/shared";
 import { Badge, Card, Avatar, ProgressRing, StatCard, EmptyState } from "@obracerta/ui";
@@ -209,7 +209,7 @@ async function SuspensionPanel() {
 }
 
 async function AvaliacoesRecebidas() {
-  const reviews = await serverApi<Review[]>("GET", "/reviews/received");
+  const reviews = await serverApi<ReceivedReview[]>("GET", "/reviews/received");
 
   return (
     <div className="animate-fade-in delay-3 space-y-3">
@@ -232,8 +232,20 @@ async function AvaliacoesRecebidas() {
                 <span className="text-sm text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
               </div>
               {r.comentario && <p className="mt-3 text-base text-foreground leading-relaxed">{r.comentario}</p>}
+              {r.resposta && (
+                <div className="mt-3 rounded-lg border-l-4 border-primary bg-muted/40 px-3 py-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Sua resposta
+                  </p>
+                  <p className="mt-1 text-sm text-foreground">{r.resposta}</p>
+                </div>
+              )}
               <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                <RespostaForm reviewId={r.id} />
+                {r.resposta ? (
+                  <span className="text-sm text-muted-foreground">Você já respondeu.</span>
+                ) : (
+                  <RespostaForm reviewId={r.id} />
+                )}
                 <ReportDialog entidade="REVIEW" entidadeId={r.id} />
               </div>
             </Card>

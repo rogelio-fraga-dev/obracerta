@@ -30,6 +30,21 @@ export const reviewSchema = z.object({
 });
 export type Review = z.infer<typeof reviewSchema>;
 
+/**
+ * Avaliação recebida (revelada) enriquecida com a **resposta pública** já publicada,
+ * se houver. Permite à UI esconder o formulário de resposta quando já respondida
+ * (sem refazer fetch por avaliação).
+ */
+export const receivedReviewSchema = reviewSchema.extend({
+  resposta: z.string().nullable(),
+  respostaEm: isoTimestampSchema.nullable(),
+});
+export type ReceivedReview = z.infer<typeof receivedReviewSchema>;
+
+/** Indica se o usuário autenticado já avaliou um pedido (controla o form na tela do pedido). */
+export const bookingReviewStatusSchema = z.object({ jaAvaliou: z.boolean() });
+export type BookingReviewStatus = z.infer<typeof bookingReviewStatusSchema>;
+
 /** Entrada para avaliar (o autor autenticado avalia a contraparte de um pedido). */
 export const createReviewSchema = z.object({
   bookingId: uuidSchema,

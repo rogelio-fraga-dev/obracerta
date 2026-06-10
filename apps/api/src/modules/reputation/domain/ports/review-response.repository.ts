@@ -10,6 +10,8 @@ export interface CreateResponseData {
 /** Porta de saída do direito de resposta (1 por avaliação, garantido por UNIQUE). */
 export interface ReviewResponseRepository {
   findByReview(reviewId: string): Promise<ReviewResponse | null>;
+  /** Respostas de um conjunto de avaliações (para enriquecer a lista de recebidas). */
+  findByReviews(reviewIds: string[]): Promise<ReviewResponse[]>;
   create(data: CreateResponseData): Promise<ReviewResponse>;
 }
 

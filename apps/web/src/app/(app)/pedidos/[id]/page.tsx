@@ -4,6 +4,7 @@ import {
   ApiEnvelopeError,
   type BookingContact,
   type BookingRequest,
+  type BookingReviewStatus,
   type BookingStatus,
   isBookingContactReleased,
   type TermsAcceptance,
@@ -59,6 +60,17 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
     }
   }
   const outraParte = tipo === "PROFISSIONAL" ? "Cliente" : "Profissional";
+
+  // Já avaliou? Evita o ReviewForm reaparecer após enviar (e o 409 num 2º envio).
+  let jaAvaliou = false;
+  if (booking.status === "CONCLUIDO") {
+    try {
+      const r = await serverApi<BookingReviewStatus>("GET", `/reviews/booking/${booking.id}/mine`);
+      jaAvaliou = r.jaAvaliou;
+    } catch (e) {
+      if (!(e instanceof ApiEnvelopeError)) throw e;
+    }
+  }
 
   return (
     <section aria-labelledby="pedido-heading" className="space-y-4">
@@ -116,7 +128,12 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
 
       <BookingActions bookingId={booking.id} status={booking.status} tipo={tipo} />
 
-      {booking.status === "CONCLUIDO" && <ReviewForm bookingId={booking.id} />}
+      {booking.status === "CONCLUIDO" &&
+        (jaAvaliou ? (
+          <Badge tone="success">Avaliação enviada</Badge>
+        ) : (
+          <ReviewForm bookingId={booking.id} />
+        ))}
 
       <TermsCard bookingId={booking.id} tipo={tipo} acceptances={acceptances} />
     </section>

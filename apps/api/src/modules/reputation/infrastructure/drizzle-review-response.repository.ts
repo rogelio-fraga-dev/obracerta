@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { ReviewResponse } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -32,6 +32,15 @@ export class DrizzleReviewResponseRepository implements ReviewResponseRepository
       .where(eq(reviewResponses.reviewId, reviewId))
       .limit(1);
     return row ? rowToResponse(row) : null;
+  }
+
+  async findByReviews(reviewIds: string[]): Promise<ReviewResponse[]> {
+    if (reviewIds.length === 0) return [];
+    const rows = await this.db
+      .select()
+      .from(reviewResponses)
+      .where(inArray(reviewResponses.reviewId, reviewIds));
+    return rows.map(rowToResponse);
   }
 
   async create(data: CreateResponseData): Promise<ReviewResponse> {

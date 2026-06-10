@@ -2,9 +2,11 @@ import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import {
   createReviewSchema,
   createReviewResponseSchema,
+  type BookingReviewStatus,
   type CreateReviewInput,
   type CreateReviewResponseInput,
   type JwtClaims,
+  type ReceivedReview,
   type ReputationEvent,
   type ReputationSummary,
   type Review,
@@ -29,10 +31,19 @@ export class ReputationController {
     return this.reputation.createReview(user.sub, input);
   }
 
-  /** Avaliações reveladas recebidas pelo usuário autenticado (alvo). */
+  /** Avaliações reveladas recebidas pelo usuário autenticado (alvo), com a resposta (se houver). */
   @Get("reviews/received")
-  received(@CurrentUser() user: JwtClaims): Promise<Review[]> {
+  received(@CurrentUser() user: JwtClaims): Promise<ReceivedReview[]> {
     return this.reputation.listReceived(user.sub);
+  }
+
+  /** O usuário autenticado já avaliou este pedido? (a UI usa para não mostrar o form de novo). */
+  @Get("reviews/booking/:bookingId/mine")
+  reviewedBooking(
+    @CurrentUser() user: JwtClaims,
+    @Param("bookingId") bookingId: string,
+  ): Promise<BookingReviewStatus> {
+    return this.reputation.hasReviewedBooking(user.sub, bookingId);
   }
 
   /** Avaliado responde (1x, em até 30 dias da revelação). */

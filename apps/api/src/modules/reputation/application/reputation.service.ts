@@ -8,8 +8,10 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import type {
+  BookingReviewStatus,
   CreateReviewInput,
   CreateReviewResponseInput,
+  ReceivedReview,
   ReputationEvent,
   ReputationSummary,
   Review,
@@ -143,9 +145,26 @@ export class ReputationService {
     };
   }
 
-  /** Avaliações reveladas recebidas por um usuário (alvo). */
-  listReceived(alvoId: string): Promise<Review[]> {
-    return this.repo.listRevealedForTarget(alvoId);
+  /**
+   * Avaliações reveladas recebidas por um usuário (alvo), já enriquecidas com a
+   * resposta pública (se houver) — assim a UI sabe quando esconder o formulário de
+   * resposta sem um fetch por avaliação.
+   */
+  async listReceived(alvoId: string): Promise<ReceivedReview[]> {
+    const reviews = await this.repo.listRevealedForTarget(alvoId);
+    if (reviews.length === 0) return [];
+    const responses = await this.responses.findByReviews(reviews.map((r) => r.id));
+    const byReviewId = new Map(responses.map((resp) => [resp.reviewId, resp]));
+    return reviews.map((r) => {
+      const resp = byReviewId.get(r.id);
+      return { ...r, resposta: resp?.texto ?? null, respostaEm: resp?.criadoEm ?? null };
+    });
+  }
+
+  /** O usuário autenticado já avaliou este pedido? (controla o form na tela do pedido). */
+  async hasReviewedBooking(authorId: string, bookingId: string): Promise<BookingReviewStatus> {
+    const existing = await this.repo.findByBookingAndAuthor(bookingId, authorId);
+    return { jaAvaliou: existing !== null };
   }
 
   /** Busca uma avaliação por id (usado pela moderação para achar o ofensor). */
