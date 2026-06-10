@@ -400,9 +400,11 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 - [x] **Portfólio de fotos** (backlog Fase 8+): galeria de obras do profissional. Tabela `portfolio_photos` (FK cascade; migração `0015`); `PortfolioService` com upload gated (feature `profile.portfolio`, PRO+) para storage S3/MinIO, limite de 12 fotos e remoção só pelo dono; endpoints `GET/POST/DELETE /profiles/professional/me/portfolio`. Exibição no perfil público `/[slug]` **gated por plano** (`planAllows`). UI: `PortfolioManager` em `/perfil` (grade + upload com legenda + remover) e galeria no perfil público. +4 testes (`portfolio.gating.spec`; 181 API). **Provado ao vivo**: Iniciante 403; Especialista sobe/lista/aparece no público/remove.
 
+- [x] **Analytics estratégico do admin** (backlog Fase 8+): `GET /admin/analytics` (gated ADMIN) com agregações **read-only** (sem migração): **funil** de conversão (cadastro→perfil→ativação→lance→obra adjudicada com taxas de passagem), **liquidez** do marketplace (obras com ≥1 lance / total, lances por obra, taxa de adjudicação), **receita** (ARPA + **LTV estimado** projetado pela vida útil ≈1/churn, teto 24 meses) e **coorte** de cadastros/mês. Domínio puro testado (`media`, `estimateLtvCentavos` em `metrics-rules`); derivações no `AdminService.analyticsSnapshot`; SQL em `DrizzleAdminMetricsRepository.analytics` (Promise.all). Contrato `analyticsSnapshotSchema` no shared. UI: página `/admin/analytics` (funil + KPIs + `AnalyticsCharts` recharts: barras do funil + linha de coorte) e atalho na home do admin. +13 testes (194 API / 27 shared). **Provado ao vivo**: admin 200 (ARPA R$49, LTV com teto, liquidez 100%); joana 403.
+
 **Backlog Fase 8+:** reprecificação aplicada (receber pedido grátis, lances no R$49, tier de ferramentas) · cobrança real
-da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · analytics
-estratégico do admin (funil/coorte/liquidez/LTV) · SEO (pós-marca) · seeding de oferta por cidade-piloto (operacional).
+da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · SEO (pós-marca) ·
+seeding de oferta por cidade-piloto (operacional).
 
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).

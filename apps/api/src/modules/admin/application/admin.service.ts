@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { HealthSnapshot } from "@obracerta/shared";
-import { rate } from "../domain/metrics-rules.js";
+import type { AnalyticsSnapshot, HealthSnapshot } from "@obracerta/shared";
+import { rate, media, estimateLtvCentavos } from "../domain/metrics-rules.js";
 import {
   ADMIN_METRICS_REPOSITORY,
   type AdminMetricsRepository,
@@ -50,6 +50,50 @@ export class AdminService {
         abertas: c.obrasAbertas,
         adjudicadas: c.obrasAdjudicadas,
       },
+    };
+  }
+
+  /**
+   * Analytics estratégico (funil/liquidez/receita/coorte). Pega os agregados
+   * crus do repositório e deriva taxas, ARPA e LTV estimado no domínio
+   * (funções puras testáveis), sem regra de negócio no SQL.
+   */
+  async analyticsSnapshot(): Promise<AnalyticsSnapshot> {
+    const a = await this.metrics.analytics();
+
+    const churnPct = rate(
+      a.assinaturasCanceladas,
+      a.assinaturasAtivas + a.assinaturasCanceladas,
+    );
+    const arpaCentavos =
+      a.assinaturasAtivas > 0 ? Math.round(a.mrrCentavos / a.assinaturasAtivas) : 0;
+
+    return {
+      funil: {
+        cadastros: a.cadastros,
+        profissionaisComPerfil: a.profissionaisComPerfil,
+        profissionaisAtivados: a.profissionaisAtivados,
+        profissionaisComLance: a.profissionaisComLance,
+        contratantesComObra: a.contratantesComObra,
+        obrasAdjudicadas: a.obrasAdjudicadas,
+        taxaPerfil: rate(a.profissionaisComPerfil, a.usuariosProfissionais),
+        taxaAtivacao: rate(a.profissionaisAtivados, a.profissionaisComPerfil),
+        taxaEngajamento: rate(a.profissionaisComLance, a.profissionaisAtivados),
+      },
+      liquidez: {
+        obrasTotal: a.obrasTotal,
+        obrasComLance: a.obrasComLance,
+        taxaLiquidez: rate(a.obrasComLance, a.obrasTotal),
+        lancesPorObra: media(a.lancesTotal, a.obrasComLance),
+        taxaAdjudicacao: rate(a.obrasAdjudicadas, a.obrasTotal),
+      },
+      receita: {
+        assinantesAtivos: a.assinaturasAtivas,
+        arpaCentavos,
+        ltvEstimadoCentavos: estimateLtvCentavos(arpaCentavos, churnPct),
+        churnPct,
+      },
+      coorte: a.coorte,
     };
   }
 }

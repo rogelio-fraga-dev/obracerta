@@ -5,6 +5,7 @@ import {
   paginationQuerySchema,
   type PaginationQuery,
   type HealthSnapshot,
+  type AnalyticsSnapshot,
   type SetUserRolesInput,
   type CreateAdminInput,
   createAdminSchema,
@@ -38,6 +39,12 @@ export class AdminController {
   @Get("metrics")
   metrics(): Promise<HealthSnapshot> {
     return this.admin.healthSnapshot();
+  }
+
+  /** Analytics estratégico: funil de conversão, liquidez, receita (ARPA/LTV) e coorte. */
+  @Get("analytics")
+  analytics(): Promise<AnalyticsSnapshot> {
+    return this.admin.analyticsSnapshot();
   }
 
   @Post("users/admin")

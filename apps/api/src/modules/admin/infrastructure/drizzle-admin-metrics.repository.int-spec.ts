@@ -37,4 +37,30 @@ describe("DrizzleAdminMetricsRepository (integração)", () => {
     expect(c.profissionaisAtivados).toBeLessThanOrEqual(c.profissionaisComPerfil);
     expect(c.obrasAvaliadasBilateralmente * 2).toBeLessThanOrEqual(c.avaliacoesReveladas);
   });
+
+  it("agrega o analytics com invariantes de funil/liquidez consistentes", async () => {
+    const a = await repo.analytics();
+
+    const escalares = { ...a, coorte: undefined };
+    for (const valor of Object.values(escalares)) {
+      if (valor === undefined) continue;
+      expect(typeof valor).toBe("number");
+      expect(valor).toBeGreaterThanOrEqual(0);
+    }
+
+    // funil: cada etapa é subconjunto da anterior
+    expect(a.profissionaisComPerfil).toBeLessThanOrEqual(a.usuariosProfissionais);
+    expect(a.profissionaisAtivados).toBeLessThanOrEqual(a.profissionaisComPerfil);
+    // liquidez: obras com lance e adjudicadas não passam do total
+    expect(a.obrasComLance).toBeLessThanOrEqual(a.obrasTotal);
+    expect(a.obrasAdjudicadas).toBeLessThanOrEqual(a.obrasTotal);
+    expect(a.obrasComLance).toBeLessThanOrEqual(a.lancesTotal); // ≥1 lance por obra com lance
+
+    // coorte: forma do ponto
+    expect(Array.isArray(a.coorte)).toBe(true);
+    for (const ponto of a.coorte) {
+      expect(typeof ponto.mes).toBe("string");
+      expect(ponto.cadastros).toBeGreaterThanOrEqual(0);
+    }
+  });
 });

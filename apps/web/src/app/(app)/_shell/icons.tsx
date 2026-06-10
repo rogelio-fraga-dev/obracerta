@@ -154,3 +154,12 @@ export function ShieldIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function AnalyticsIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 4v15a1 1 0 0 0 1 1h15" />
+      <path d="M8 16v-4M12.5 16V8M17 16v-6" />
+    </svg>
+  );
+}

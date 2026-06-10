@@ -3,7 +3,7 @@ import { ApiEnvelopeError, formatCentavos, type HealthSnapshot } from "@obracert
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
-import { MoneyIcon, ShieldIcon } from "../_shell/icons";
+import { AnalyticsIcon, MoneyIcon, ShieldIcon } from "../_shell/icons";
 import { AdminCharts } from "./_components/AdminCharts";
 
 function pct(taxa: number): string {
@@ -101,8 +101,14 @@ export default async function AdminPage() {
         </Card>
       </div>
 
-      {/* Atalhos para as filas operacionais. */}
-      <div className="grid gap-3 sm:grid-cols-2">
+      {/* Atalhos para as filas operacionais e o analytics estratégico. */}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ShortcutCard
+          href="/admin/analytics"
+          title="Analytics estratégico"
+          desc="Funil, liquidez, ARPA/LTV e coorte"
+          Icon={AnalyticsIcon}
+        />
         <ShortcutCard
           href="/admin/moderacao"
           title="Fila de moderação"
