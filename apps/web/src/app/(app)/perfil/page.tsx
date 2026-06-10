@@ -20,6 +20,7 @@ import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
 import { ShieldIcon } from "../_shell/icons";
 import { AdminForms } from "./_components/AdminForms";
+import { ProfileEditCard } from "./_components/ProfileEditCard";
 import type { User } from "@obracerta/shared";
 
 /**
@@ -95,6 +96,8 @@ export default async function PerfilPage() {
       </Card>
 
       <SuspensionPanel />
+
+      {!isAdmin && <ProfileEditCard user={user} />}
 
       {isAdmin && <AdminForms user={user} />}
 
