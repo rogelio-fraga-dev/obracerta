@@ -184,6 +184,9 @@ async function main(): Promise<void> {
   const bkRecusadoId = randomUUID();
   const bkCanceladoId = randomUUID();
   const bkIniciadoId = randomUUID();
+  // Concluídos do marcos — geram avaliações reveladas (estrela visível na busca)
+  const bkMarcos1Id = randomUUID();
+  const bkMarcos2Id = randomUUID();
 
   await db.insert(schema.bookingRequests).values([
     { id: bkPendenteId, contractorId: carlosId, professionalId: joanaId, especialidade: "Gesseiro", descricao: "Orçamento para acabamento em gesso.", dataServico: daysFromNow(2), status: "PENDENTE", expiraEm: daysFromNow(1) },
@@ -192,6 +195,8 @@ async function main(): Promise<void> {
     { id: bkRecusadoId, contractorId: carlosId, professionalId: pedroId, especialidade: "Pedreiro", descricao: "Pequeno reparo.", dataServico: daysFromNow(4), status: "RECUSADO", motivoRecusa: "Agenda indisponível na data.", expiraEm: daysFromNow(3) },
     { id: bkCanceladoId, contractorId: alineId, professionalId: marcosId, especialidade: "Encanador", descricao: "Cancelado pelo cliente.", dataServico: daysFromNow(5), status: "CANCELADO", expiraEm: daysFromNow(4) },
     { id: bkIniciadoId, contractorId: empresaId, professionalId: marcosId, especialidade: "Eletricista", descricao: "Manutenção elétrica predial (em andamento).", dataServico: daysAgo(1), status: "INICIADO", expiraEm: daysAgo(2) },
+    { id: bkMarcos1Id, contractorId: carlosId, professionalId: marcosId, especialidade: "Eletricista", descricao: "Troca de quadro de distribuição.", dataServico: daysAgo(10), status: "CONCLUIDO", expiraEm: daysAgo(11) },
+    { id: bkMarcos2Id, contractorId: alineId, professionalId: marcosId, especialidade: "Encanador", descricao: "Reparo de vazamento na cozinha.", dataServico: daysAgo(8), status: "CONCLUIDO", expiraEm: daysAgo(9) },
   ]);
 
   console.log("Inserindo Termos + Avaliações (dupla-cega) + Resposta...");
@@ -205,6 +210,9 @@ async function main(): Promise<void> {
     // Pedido concluído — avaliação bilateral revelada
     { id: reviewCarlosId, bookingId: bkConcluidoId, autorId: carlosId, alvoId: joanaId, papelAutor: "CONTRATANTE", nota: 5, comentario: "Excelente serviço, caprichada e pontual!", status: "REVELADA", prazoEm: daysAgo(5), reveladaEm: daysAgo(5) },
     { id: randomUUID(), bookingId: bkConcluidoId, autorId: joanaId, alvoId: carlosId, papelAutor: "PROFISSIONAL", nota: 5, comentario: "Cliente ótimo, pagou em dia.", status: "REVELADA", prazoEm: daysAgo(5), reveladaEm: daysAgo(5) },
+    // Marcos (Especialista) — avaliações reveladas sem denúncia → estrela na busca (média 4.5)
+    { id: randomUUID(), bookingId: bkMarcos1Id, autorId: carlosId, alvoId: marcosId, papelAutor: "CONTRATANTE", nota: 5, comentario: "Resolveu o quadro elétrico com segurança e rapidez.", status: "REVELADA", prazoEm: daysAgo(9), reveladaEm: daysAgo(9) },
+    { id: randomUUID(), bookingId: bkMarcos2Id, autorId: alineId, alvoId: marcosId, papelAutor: "CONTRATANTE", nota: 4, comentario: "Bom serviço, atrasou um pouco mas resolveu.", status: "REVELADA", prazoEm: daysAgo(7), reveladaEm: daysAgo(7) },
   ]);
 
   await db.insert(schema.reviewResponses).values([
