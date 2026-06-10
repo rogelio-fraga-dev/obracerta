@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from "@nestjs/common";
-import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { Throttle } from "@nestjs/throttler";
 import {
   type AuthResult,
   type AuthTokens,
@@ -40,7 +40,6 @@ export class AuthController {
   /** Solicita OTP. Rate-limited (anti-abuso, roadmap §9): 3 req / 60s por IP. */
   @Post("otp/request")
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   requestOtp(
     @Body(new ZodValidationPipe(otpRequestSchema)) body: OtpRequestInput,
@@ -51,7 +50,6 @@ export class AuthController {
   /** Valida o OTP → login (se já cadastrado) ou sinaliza cadastro pendente. */
   @Post("otp/verify")
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   verifyOtp(
     @Body(new ZodValidationPipe(otpVerifySchema)) body: OtpVerifyInput,
@@ -62,7 +60,6 @@ export class AuthController {
   /** Login "conta normal" (e-mail + senha). Rate-limited contra brute force. */
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   loginWithPassword(
     @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,

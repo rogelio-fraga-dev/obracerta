@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
-import { ThrottlerModule } from "@nestjs/throttler";
 import type { AppConfig } from "../../config/configuration.js";
 import { UsersModule } from "../users/users.module.js";
 import { AuthService } from "./application/auth.service.js";
@@ -18,7 +17,6 @@ import { RolesGuard } from "./interface/roles.guard.js";
 @Module({
   imports: [
     UsersModule,
-    ThrottlerModule.forRoot([{ name: "default", ttl: 60_000, limit: 10 }]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<AppConfig, true>) => ({

@@ -1,7 +1,8 @@
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { type AppConfig, configuration } from "./config/configuration.js";
 import { validateEnv } from "./config/env.validation.js";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
@@ -64,6 +65,10 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
         };
       },
     }),
+    // Rate limiting GLOBAL (anti-abuso/scraping/brute force): 120 req/60s por IP.
+    // Rotas sensíveis (login/OTP) endurecem com @Throttle. Storage em memória
+    // (suficiente p/ instância única; trocar por Redis no deploy multi-instância).
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
     DatabaseModule,
     RedisModule,
     StorageModule,
@@ -91,6 +96,8 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     ObservabilityModule,
   ],
   providers: [
+    // Rate limiting global (aplica o ThrottlerModule a TODAS as rotas).
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Outermost: mede duração total + status final de cada requisição.
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },
