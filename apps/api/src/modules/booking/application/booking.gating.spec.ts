@@ -13,9 +13,11 @@ import type { ReviewReminderScheduler } from "./review-reminder.scheduler.js";
 import { BookingService } from "./booking.service.js";
 
 /**
- * Gating de plano no agendamento (roadmap §8.7): o profissional Iniciante NÃO
- * recebe pedidos (feature `booking.receive`). A trava real fica no serviço — este
- * teste prova que `createForContractor` recusa antes de tocar o repositório.
+ * Gating de plano no agendamento (roadmap §8.7): o agendamento exige a feature
+ * `booking.receive` no profissional alvo. A trava real fica no serviço — este
+ * teste prova que `createForContractor` recusa (quando a feature falta) antes de
+ * tocar o repositório, e cria quando ela está liberada. (Pós-reprecificação Fase 8+
+ * todos os planos recebem pedidos; o mecanismo do gate continua sendo testado aqui.)
  */
 describe("BookingService — gating booking.receive", () => {
   const professionalId = "pro-1";
@@ -53,7 +55,7 @@ describe("BookingService — gating booking.receive", () => {
     return { service, repo, billing };
   }
 
-  it("recusa o pedido quando o profissional não tem booking.receive (Iniciante)", async () => {
+  it("recusa o pedido quando o profissional não tem booking.receive", async () => {
     const { service, repo, billing } = build(false);
 
     await expect(service.createForContractor(contractorId, input)).rejects.toBeInstanceOf(

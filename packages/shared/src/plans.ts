@@ -4,7 +4,8 @@ import { ProfessionalPlan } from "./enums.js";
  * Catálogo de planos do profissional para **apresentação** (tela de escolha de
  * plano — roadmap §4.2). Fonte única do front; espelha os preços que a regra de
  * cobrança usa no backend (`billing-rules`): INICIANTE grátis, PRO R$49, ESP R$99.
- * O teste trava esses valores para flagrar qualquer divergência.
+ * O teste trava esses valores para flagrar qualquer divergência. Pós-reprecificação
+ * (Fase 8+): receber pedidos é grátis; lances saem no Pro; ferramentas no Especialista.
  */
 export interface ProfessionalPlanInfo {
   plano: ProfessionalPlan;
@@ -24,7 +25,7 @@ export const professionalPlanCatalog: Record<ProfessionalPlan, ProfessionalPlanI
     precoCentavos: 0,
     recomendado: false,
     resumo: "Comece de graça",
-    beneficios: ["Perfil público", "Apareça nas buscas do seu bairro"],
+    beneficios: ["Perfil público", "Apareça nas buscas do seu bairro", "Receba pedidos de clientes"],
   },
   [ProfessionalPlan.PRO]: {
     plano: ProfessionalPlan.PRO,
@@ -32,7 +33,7 @@ export const professionalPlanCatalog: Record<ProfessionalPlan, ProfessionalPlanI
     precoCentavos: 4900,
     recomendado: true,
     resumo: "Mais visibilidade",
-    beneficios: ["Tudo do Iniciante", "Busca por proximidade", "Destaque no seu perfil"],
+    beneficios: ["Tudo do Iniciante", "Perfil completo", "Dê lances em obras", "Busca por proximidade"],
   },
   [ProfessionalPlan.ESPECIALISTA]: {
     plano: ProfessionalPlan.ESPECIALISTA,
@@ -40,7 +41,7 @@ export const professionalPlanCatalog: Record<ProfessionalPlan, ProfessionalPlanI
     precoCentavos: 9900,
     recomendado: false,
     resumo: "Alcance máximo",
-    beneficios: ["Tudo do Pro", "Busca ilimitada", "Prioridade nos resultados"],
+    beneficios: ["Tudo do Pro", "Orçamentos e recibos", "Busca ilimitada", "Topo nos resultados"],
   },
 };
 

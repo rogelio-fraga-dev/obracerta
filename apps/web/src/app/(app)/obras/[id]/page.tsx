@@ -39,7 +39,7 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
     proposals = [];
   }
 
-  // Gating: só o plano Especialista (feature bid.submit) pode dar lances.
+  // Gating: lances são dos planos pagos (Pro+ — feature bid.submit).
   let canBid = false;
   if (tipo === "PROFISSIONAL") {
     try {

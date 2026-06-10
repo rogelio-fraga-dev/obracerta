@@ -500,7 +500,12 @@ export class BillingService {
     return { inicio, fim: null };
   }
 
-  /** Plano efetivamente vigente do usuário (ou null). */
+  /**
+   * Plano efetivamente vigente do usuário. Assinatura vigente (EM_GRACA/ATIVA) ou
+   * compra avulsa vigente têm prioridade. Sem nenhuma delas, o **profissional** cai
+   * no tier gratuito **INICIANTE** (baseline — garante "receber pedidos grátis" e
+   * perfil público sem assinatura); contratante/empresa sem compra → `null`.
+   */
   private async activePlan(userId: string): Promise<Plan | null> {
     const sub = await this.subscriptions.findActiveByUser(userId);
     if (
@@ -513,6 +518,7 @@ export class BillingService {
     if (purchase?.expiraEm && new Date(purchase.expiraEm).getTime() > Date.now()) {
       return purchase.plano;
     }
-    return null;
+    const user = await this.users.findById(userId);
+    return user?.tipo === UserType.PROFISSIONAL ? ProfessionalPlan.INICIANTE : null;
   }
 }

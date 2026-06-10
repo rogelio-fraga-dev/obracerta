@@ -25,11 +25,13 @@ export type Plan = ProfessionalPlan | ContractorPlan;
 
 /**
  * Mapa plano → features liberadas (gating). Espelha os benefícios anunciados na
- * landing/planos: Iniciante só perfil básico; Pro perfil completo + recebe
- * pedidos; Especialista também dá lances e tem destaque. Plano ausente = nada.
+ * landing/planos (reprecificação Fase 8+): **receber pedidos é grátis** (todo
+ * profissional, inclusive Iniciante); **lances saem a partir do Pro (R$49)**;
+ * Especialista mantém o tier premium (ferramentas, topo, busca ilimitada).
+ * Plano ausente = nada.
  */
 const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
-  [ProfessionalPlan.INICIANTE]: [Feature.PUBLIC_PROFILE],
+  [ProfessionalPlan.INICIANTE]: [Feature.PUBLIC_PROFILE, Feature.RECEIVE_BOOKINGS],
   [ProfessionalPlan.PRO]: [
     Feature.PUBLIC_PROFILE,
     Feature.FULL_PROFILE,
@@ -37,6 +39,7 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
     Feature.RECEIVE_BOOKINGS,
     Feature.ANALYTICS,
     Feature.SEARCH_GEO,
+    Feature.SUBMIT_BID,
   ],
   [ProfessionalPlan.ESPECIALISTA]: [
     Feature.PUBLIC_PROFILE,

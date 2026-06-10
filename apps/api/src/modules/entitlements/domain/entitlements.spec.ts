@@ -16,13 +16,15 @@ describe("planAllows", () => {
     expect(planAllows(ContractorPlan.COMPLETO, Feature.SUBMIT_BID)).toBe(false);
   });
 
-  it("Iniciante não recebe pedidos; Pro recebe", () => {
-    expect(planAllows(ProfessionalPlan.INICIANTE, Feature.RECEIVE_BOOKINGS)).toBe(false);
+  it("receber pedidos é grátis: todo plano do profissional recebe (reprecificação)", () => {
+    expect(planAllows(ProfessionalPlan.INICIANTE, Feature.RECEIVE_BOOKINGS)).toBe(true);
     expect(planAllows(ProfessionalPlan.PRO, Feature.RECEIVE_BOOKINGS)).toBe(true);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.RECEIVE_BOOKINGS)).toBe(true);
   });
 
-  it("dar lances em obras é exclusivo do Especialista (entre os profissionais)", () => {
-    expect(planAllows(ProfessionalPlan.PRO, Feature.SUBMIT_BID)).toBe(false);
+  it("dar lances sai a partir do Pro (Iniciante não; Pro e Especialista sim)", () => {
+    expect(planAllows(ProfessionalPlan.INICIANTE, Feature.SUBMIT_BID)).toBe(false);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.SUBMIT_BID)).toBe(true);
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.SUBMIT_BID)).toBe(true);
   });
 

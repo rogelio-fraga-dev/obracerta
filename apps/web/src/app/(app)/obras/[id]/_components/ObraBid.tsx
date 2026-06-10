@@ -63,16 +63,16 @@ export function ObraBid({
     );
   }
 
-  // Gating: sem a feature bid.submit (plano Especialista), mostra o cadeado + upgrade.
+  // Gating: sem a feature bid.submit (planos pagos, Pro+), mostra o cadeado + upgrade.
   if (!canBid) {
     return (
       <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
         <span className="text-3xl">🔒</span>
         <h2 className="font-display text-lg font-black text-foreground">
-          Dar lances é do plano Especialista
+          Dar lances é dos planos pagos
         </h2>
         <p className="text-sm text-muted-foreground">
-          Faça upgrade para enviar propostas sigilosas em obras abertas e aparecer no topo das buscas.
+          Faça upgrade para o plano Pro ou Especialista e envie propostas sigilosas em obras abertas.
         </p>
         <Link href="/cobrancas" className="block">
           <Button className="w-full">Fazer upgrade</Button>
