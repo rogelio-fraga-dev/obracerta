@@ -1,0 +1,112 @@
+name: obracerta-local
+
+# Validação LOCAL da stack containerizada (mesmos Dockerfiles de produção).
+# Sem Caddy/TLS — expõe as portas direto no localhost. Use só para conferir que
+# as imagens buildam e a app sobe antes de ir pra nuvem.
+#
+#   Buildar+subir:  docker compose -f infra/docker/docker-compose.local.yml up -d --build
+#   Migrar+seed:    docker compose -f infra/docker/docker-compose.local.yml \
+#                     run --rm api sh -lc "pnpm db:migrate && pnpm db:seed"
+#   Derrubar:       docker compose -f infra/docker/docker-compose.local.yml down -v
+#
+# Web: http://localhost:3000   API: http://localhost:3333/health
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: obracerta
+      POSTGRES_PASSWORD: obracerta
+      POSTGRES_DB: obracerta
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U obracerta -d obracerta"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: obracerta
+      MINIO_ROOT_PASSWORD: obracerta123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: obracerta-api:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    environment:
+      NODE_ENV: production
+      API_PORT: "3333"
+      API_CORS_ORIGINS: http://localhost:3000
+      DATABASE_URL: postgresql://obracerta:obracerta@postgres:5432/obracerta
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-only-insecure-secret-change-me-32chars
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL_DAYS: "30"
+      OTP_TTL_SECONDS: "300"
+      OTP_MAX_ATTEMPTS: "5"
+      ONBOARDING_SPEEDUP: "86400"
+      PAYMENT_WEBHOOK_SECRET: local-webhook-secret
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: obracerta
+      S3_ACCESS_KEY: obracerta
+      S3_SECRET_KEY: obracerta123
+      S3_PUBLIC_URL: http://localhost:9000
+    ports: ["3333:3333"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      minio: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  web:
+    image: obracerta-web:local
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: http://api:3333
+        NEXT_PUBLIC_BRAND_NAME: ObraCerta
+        NEXT_PUBLIC_BRAND_DOMAIN: obracerta.com.br
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://api:3333
+    ports: ["3000:3000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  miniodata:

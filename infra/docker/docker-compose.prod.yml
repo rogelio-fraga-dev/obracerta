@@ -1,0 +1,146 @@
+name: obracerta-prod
+
+# Stack de produção/demo para uma única VPS ou EC2.
+# As imagens api/web são BUILDADAS na própria máquina (precisa de 4GB+ de RAM).
+#   Rode a partir da RAIZ do repo (o contexto de build é o repo inteiro):
+#   Subir:   docker compose --env-file infra/docker/.env.prod \
+#              -f infra/docker/docker-compose.prod.yml up -d --build
+#   Migrar:  docker compose --env-file infra/docker/.env.prod \
+#              -f infra/docker/docker-compose.prod.yml \
+#              run --rm api sh -lc "pnpm db:migrate && pnpm db:seed"
+#
+# Apenas o Caddy expõe portas públicas (80/443). Postgres/Redis/MinIO/API/Web
+# ficam na rede interna `internal` e NÃO são acessíveis de fora.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  minio:
+    # Storage S3 das fotos. Servido publicamente via Caddy (FILES_HOST) com HTTPS.
+    # Se a RAM apertar no free tier, dá pra comentar este serviço (sem upload de foto).
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+  api:
+    image: obracerta-api:latest
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_PORT: "3333"
+      API_CORS_ORIGINS: ${PUBLIC_URL}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL_DAYS: "30"
+      OTP_TTL_SECONDS: "300"
+      OTP_MAX_ATTEMPTS: "5"
+      ONBOARDING_SPEEDUP: ${ONBOARDING_SPEEDUP:-86400}
+      PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_PUBLIC_URL: ${FILES_URL}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3333/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [internal]
+
+  web:
+    image: obracerta-web:latest
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.web
+      args:
+        # A API é interna (rede Docker); o navegador só fala com o BFF (mesma origem).
+        NEXT_PUBLIC_API_URL: http://api:3333
+        NEXT_PUBLIC_BRAND_NAME: ${NEXT_PUBLIC_BRAND_NAME:-ObraCerta}
+        NEXT_PUBLIC_BRAND_DOMAIN: ${NEXT_PUBLIC_BRAND_DOMAIN:-obracerta.com.br}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # Runtime: usado pelo middleware (CSP). O navegador nunca chama esta URL.
+      NEXT_PUBLIC_API_URL: http://api:3333
+    depends_on:
+      api: { condition: service_healthy }
+    networks: [internal]
+
+  caddy:
+    # Reverse proxy + TLS automático (Let's Encrypt) para os hosts sslip.io.
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST}
+      FILES_HOST: ${FILES_HOST}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - web
+    networks: [internal]
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  caddydata:
+  caddyconfig:
+
+networks:
+  internal:

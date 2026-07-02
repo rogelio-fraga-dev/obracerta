@@ -120,7 +120,7 @@ function EmailSignup() {
       {error && <ErrorBox message={error} />}
       <fieldset>
         <legend className="text-sm font-semibold text-foreground">Você é…</legend>
-        <div className="mt-2 grid grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
           <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
           <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
           <TipoOption value="EMPRESA" current={tipo} onSelect={setTipo} label="Empresa" />
@@ -326,7 +326,7 @@ function WhatsappSignup() {
         >
           <fieldset>
             <legend className="text-sm font-semibold text-foreground">Você é…</legend>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <TipoOption value="PROFISSIONAL" current={tipo} onSelect={setTipo} label="Profissional" />
               <TipoOption value="CONTRATANTE" current={tipo} onSelect={setTipo} label="Contratante" />
             </div>

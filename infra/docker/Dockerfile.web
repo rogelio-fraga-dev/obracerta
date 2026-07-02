@@ -18,6 +18,15 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
 COPY . .
+# NEXT_PUBLIC_* são "assadas" no build do Next (inlined). Como o navegador fala
+# só com o BFF (mesma origem), a API pode ser o hostname interno da rede Docker.
+# Marca desacoplada (plan §1): nome/domínio entram como build-args.
+ARG NEXT_PUBLIC_API_URL=http://api:3333
+ARG NEXT_PUBLIC_BRAND_NAME=ObraCerta
+ARG NEXT_PUBLIC_BRAND_DOMAIN=obracerta.com.br
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_BRAND_NAME=$NEXT_PUBLIC_BRAND_NAME \
+    NEXT_PUBLIC_BRAND_DOMAIN=$NEXT_PUBLIC_BRAND_DOMAIN
 RUN pnpm turbo run build --filter=@obracerta/web
 
 FROM base AS runner

@@ -29,14 +29,6 @@ export default function EntrarPage() {
       title="Bem-vindo de"
       accent="volta"
       subtitle="Acesse sua conta para gerenciar pedidos, obras e seu perfil."
-      footer={
-        <>
-          Não tem conta?{" "}
-          <a href="/cadastro" className="font-semibold text-primary transition-colors hover:text-orange-400">
-            Criar agora
-          </a>
-        </>
-      }
     >
       <div className="animate-fade-in space-y-6">
         <GoogleButton />

@@ -82,7 +82,7 @@ export default async function AdminPage() {
             <span className="font-display text-xl lg:text-2xl font-black text-foreground">Monetização</span>
             <Badge tone="success">Assinaturas</Badge>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Stat label="Receita Recorrente" value={formatCentavos(snapshot.monetizacao.mrrCentavos)} />
             <Stat label="Assinaturas" value={snapshot.monetizacao.assinaturasAtivas} />
             <Stat label="Cancelamentos" value={pct(snapshot.monetizacao.churnPct)} />

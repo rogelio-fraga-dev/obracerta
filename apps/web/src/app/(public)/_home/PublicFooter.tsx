@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface FooterLink {
   label: string;
@@ -16,8 +19,13 @@ interface FooterColumn {
  * existirem. Marca/domínio vêm do config (desacoplados).
  */
 export function PublicFooter({ brandName, domain }: { brandName: string; domain: string }) {
+  const pathname = usePathname();
   const ano = new Date().getFullYear();
   const contato = `contato@${domain}`;
+
+  if (pathname === "/entrar" || pathname === "/cadastro") {
+    return null;
+  }
 
   const columns: FooterColumn[] = [
     {

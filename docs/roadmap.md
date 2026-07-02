@@ -375,7 +375,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
   - **Pendente p/ EC2:** OAuth real do Google (credenciais + redirect URIs); validação ao vivo do conjunto (front+back local).
 - **Entregável:** ✅ **produto navegável ponta a ponta, instalável (PWA), com E2E + WCAG AA — pronto para piloto.** Resta apenas a troca dos adapters fake/console por provedores reais (WhatsApp/SMS/Asaas + push VAPID + Google OAuth), que depende de contas/deploy.
 
-### Fase 8 — Evolução pós-auditoria (jun/2026) — **em andamento**
+### Fase 8 — Evolução pós-auditoria (jun/2026) — ✅ **concluída** _(não-bloqueado; resta apenas perf/deploy)_
 
 > Integra o **Plano de Evolução do Produto** (agora consolidado neste documento — ver **§15 Apêndice**)
 > e a **auditoria competitiva** (`docs/auditoria-competitiva.md`). Evolução do MVP a partir do feedback do fundador.
@@ -404,7 +404,7 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 
 - [x] **Reprecificação de planos** (backlog Fase 8+): novo gating sem mudar preços (R$0/49/99). **Receber pedidos virou grátis** (feature `booking.receive` no INICIANTE — reverte a §8.7); **lances saem a partir do Pro** (`bid.submit` no PRO, antes só ESPECIALISTA); **ferramentas (orçamento/recibo) seguem exclusivas do Especialista** como tier premium. Mudança centralizada no mapa `ENTITLEMENTS` (gating é dado, não código): `MeuPlano` e `/me/entitlements` refletem sozinhos. Ajustados: textos da landing (`_home/Planos.tsx`), catálogo `plans.ts` (`beneficios`), busca (sempre "Agendar"), cópia do cadeado de lances (`ObraBid`), helper morto `planoRecebePedidos` removido. **Correção-chave**: `BillingService.activePlan` agora dá baseline INICIANTE ao profissional sem assinatura (antes `null` → sem features), senão "receber pedido grátis" não teria efeito. +3 testes (`billing.service.baseline.spec`; entitlements/booking atualizados; 197 API). **Provado ao vivo**: pedro (INICIANTE) entitlements = {profile.public, booking.receive}; contratante agenda com Iniciante → 201; joana (PRO) dá lance → 201.
 
-- [~] **8.8 — Correções da auditoria técnica (2026-06-09)** _(multi-agente; detalhe em `docs/auditoria-2026-06-09.md`, mapa em §15.4)_: revisão de código por 3 reviewers (frontend/React, visual+a11y/WCAG, backend).
+- [x] **8.8 — Correções da auditoria técnica (2026-06-09)** _(multi-agente; detalhe em `docs/auditoria-2026-06-09.md`, mapa em §15.4)_: revisão de código por 3 reviewers (frontend/React, visual+a11y/WCAG, backend).
   - [x] **Backend (10 itens):** sincronização de `professional_profiles.plano`/`contractor_profiles.plano` no billing via porta `PlanSyncPort` (H-1, fecha o bug de plano errado na busca/perfil); reassinatura pós-inadimplência (H-2); `@Roles(ADMIN)` no `/audit/verify` (M-7); remoção de `file: any`/`status as any` (H-3/H-4); extensão de upload via `mimetype` (M-6); unicidade de e-mail no `updateProfile` (L-18); slug fallback com `randomUUID` (L-17); comentário/mensagem do gate `RECEIVE_BOOKINGS` (H-5); limpeza de comentário no admin (M-12). **197/197 testes, typecheck/lint limpos.**
   - [x] **Onda 1 front + WCAG:** `params` Promise nas 3 páginas admin (FE-1); `prefers-reduced-motion` + skip-to-content (A11y-13/20); **bug `ADMIN_NAV`** consolidado (Moderação/Financeiro voltam ao mobile) + `NAV_EMPRESA` + `shortLabel` na TabBar (A11y-29/30/9); `key={id}` em `ferramentas/novo` (FE-9); `finally{setLoading}` nos componentes `catch`-only (FE-12); `role="alert"` no geoError (A11y-17); target ≥24px no "Remover foto" + `Field/Input` no PortfolioManager (A11y-18/7); prop morta `workOrderId` removida (FE-8); botões admin sem ação desabilitados (FE-7); `React.cache` no `getMyRoles` (FE-11); especialidade da obra vira catálogo (FE-14); `ProgressRing role="meter"` (A11y-22); tablist/tabpanel em Planos/ComoFunciona/FAQ (A11y-5/15/16); `alt` na foto do perfil público (A11y-14); contraste do `--color-muted-foreground` (A11y-21).
   - [x] **Onda 2/3 (parcial):** `alert()`→inline acessível em AdminForms (FE-4); `<Suspense>` no SearchFilters (FE-18); **vitrine** — perfil público `/[slug]` redesenhado (header hero + 2 colunas + CTA com foco + empty state, A11y-1/11/14) e cards de busca com Avatar/hierarquia/plano (A11y-3); banner por persona no `/perfil` (A11y-2); `BOOKING_STATUS_UI` no detalhe admin (FE-23).
@@ -414,13 +414,16 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
     - **`ProfileEditCard` (FE-19):** edição de nome/e-mail/foto para contratante/empresa (reusa as actions).
   - [x] **Nota (estrelas) nos cards de busca:** `LEFT JOIN` agregando avaliações REVELADAS por alvo no `/search/professionals` (consistente com a reputação pública); `mediaNota`/`totalAvaliacoes` no `SearchResult`. _(Nota: o seed deixa o único review de profissional OCULTA — para a estrela aparecer na demo, é preciso um review REVELADA de profissional.)_
   - [x] **Onda 4 (DS/dedup):** componente `Select` no DS (6 `<select>` migrados) · gradientes como classes Tailwind (`bg-gradient-*`, 9 inline removidos) · cores dos gráficos via tokens + correção do `hsl(var())` quebrado (A11y-6) · `aria-hidden` em StatCard/EmptyState (A11y-27) · dedup `Fact`/`useAsyncAction`/`TIPO_UI` + `<BackLink>` no admin (FE-13/25/26/27).
-  - [ ] **Restante (perf / deploy — não bloqueia demo):**
+  - [x] **Hardening de segurança (jun/2026):** **rate-limit global** na API + **CSP** no Next (fecha as pendências de rate-limiting global e CSP herdadas da 6.1) · **confirmação (re-digitar e-mail) na criação de admin**. **Provado ao vivo.**
+  - [ ] **Diferido (perf / deploy — não bloqueia o piloto):**
     - **Perf backend (M-8/9/10/14)** e **`serverApiFormData` (FE-5)** — otimizações, não bugs.
-    - **`PAYMENT_WEBHOOK_SECRET` (M-11)** — vai junto com o Asaas (deploy).
+    - **`PAYMENT_WEBHOOK_SECRET` em produção (M-11)** — vai junto com o Asaas (deploy).
 
 > **Landing (jun/2026, pedido do fundador):** header sticky robusto (botões sempre
 > visíveis), rodapé multi-coluna, atmosfera de fundo leve, copy do passo-a-passo e
 > clareza dos planos do contratante. Ver commit `feat(web): landing — ...`.
+
+- **Entregável:** ✅ **MVP navegável ponta a ponta** — catálogo fixo de profissões, gating por plano com upgrade no app, double-blind de contato (mensagem + foto + contato pós-aceite), ferramentas do profissional (orçamento/recibo), conta PJ/Empresa, portfólio de fotos, analytics estratégico do admin, reprecificação de planos e correções da auditoria técnica. **Verificado ao vivo em localhost.** Resta apenas perf/deploy (otimizações + troca dos adapters fake por provedores reais), que dependem de contas/deploy.
 
 **Backlog Fase 8+:** cobrança real
 da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · SEO (pós-marca) ·

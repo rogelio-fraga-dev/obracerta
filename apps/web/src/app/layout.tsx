@@ -6,6 +6,8 @@ import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import { config } from "@/lib/config";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
+import { headers } from "next/headers";
+
 // Tipografia da marca: Fraunces (títulos) + Plus Jakarta Sans (corpo, no lugar do
 // Cabinet Grotesk, que não está no Google Fonts). Expostas como CSS variables que
 // os tokens consomem (`--font-display`/`--font-sans`).
@@ -23,6 +25,8 @@ const sans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     default: `${config.brand.name} — profissionais da construção civil`,
@@ -38,9 +42,12 @@ export const viewport: Viewport = {
   themeColor: "#e8560a",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") || undefined;
+
   return (
-    <html lang="pt-BR" className={`${display.variable} ${sans.variable}`}>
+    <html lang="pt-BR" className={`${display.variable} ${sans.variable}`} nonce={nonce} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body>
         <a
           href="#main-content"

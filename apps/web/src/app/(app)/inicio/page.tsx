@@ -163,8 +163,8 @@ export default async function InicioPage() {
       {/* ── Painel de comportamento (profissional) ── */}
       {isProfissional && penaltyStats && (
         <div className="animate-fade-in delay-4">
-          <Card className="flex items-center gap-6">
-            <div className="text-center">
+          <Card className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <div className="text-center shrink-0">
               <div className="font-display text-4xl font-black text-primary">
                 {penaltyStats.taxaAceitacao != null
                   ? `${Math.round(penaltyStats.taxaAceitacao * 100)}%`
@@ -172,9 +172,9 @@ export default async function InicioPage() {
               </div>
               <p className="mt-0.5 text-xs font-semibold text-muted-foreground">Taxa de aceitação</p>
             </div>
-            <div className="h-12 w-px bg-border" />
-            <div className="flex-1">
-              <div className="flex items-center gap-4 text-sm">
+            <div className="h-px w-full sm:h-12 sm:w-px bg-border" />
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-sm">
                 <span className="text-muted-foreground">
                   <strong className="text-foreground">{penaltyStats.aprovados}</strong> aprovados
                 </span>

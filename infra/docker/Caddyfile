@@ -1,0 +1,19 @@
+# Caddy — reverse proxy + HTTPS automático (Let's Encrypt).
+# Os hosts vêm do compose (env). Com sslip.io o DNS resolve sozinho para o IP
+# público da EC2, então o desafio HTTP-01 do Let's Encrypt funciona sem domínio.
+
+{
+	email {$ACME_EMAIL}
+}
+
+# App (Next.js) — é o link que a stakeholder abre.
+{$PUBLIC_HOST} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+# Storage de fotos (MinIO) servido publicamente em HTTPS.
+{$FILES_HOST} {
+	encode gzip
+	reverse_proxy minio:9000
+}

@@ -67,7 +67,7 @@ export default async function PedidosPage() {
                         <PedidosIcon className="h-6 w-6" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="text-base font-bold text-foreground">{p.especialidade}</span>
                           <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
                         </div>

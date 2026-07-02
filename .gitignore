@@ -19,6 +19,8 @@ coverage/
 .env
 .env.local
 .env.*.local
+.env.prod
+*.pem
 !.env.example
 
 # Logs

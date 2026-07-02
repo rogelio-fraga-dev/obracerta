@@ -60,14 +60,14 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-[280px] shrink-0 flex-col border-r border-border bg-background px-5 py-6 lg:flex">
-      {/* ── Marca ── */}
-      <Link href="/inicio" className="flex items-center gap-3 px-2" aria-label="Início">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand font-display text-lg font-black text-white">
-          {inicial}
-        </span>
-        <span className="font-display text-[1.5rem] font-black tracking-tight text-foreground">
-          {brandName}
-        </span>
+      <Link href="/inicio" className="flex shrink-0 items-center px-2" aria-label="Início">
+        <img
+          src="/brand/obracerta-logo.png"
+          alt={brandName}
+          width={1120}
+          height={305}
+          className="h-9 w-auto"
+        />
       </Link>
 
       {/* ── Navegação ── */}

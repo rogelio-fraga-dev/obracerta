@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@obracerta/ui";
 
@@ -16,6 +17,7 @@ const NAV_LINKS = [
  * botões sobre qualquer seção (corrige o sumiço dos botões ao descer a página).
  */
 export function PublicHeader({ brandName }: { brandName: string }) {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -24,6 +26,10 @@ export function PublicHeader({ brandName }: { brandName: string }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (pathname === "/entrar" || pathname === "/cadastro") {
+    return null;
+  }
 
   return (
     <header

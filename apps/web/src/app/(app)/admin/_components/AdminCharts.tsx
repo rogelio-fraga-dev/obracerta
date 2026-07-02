@@ -54,7 +54,7 @@ export function AdminCharts({ snapshot }: AdminChartsProps) {
               <XAxis dataKey="name" stroke={axis} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={axis} fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip cursor={{ fill: "transparent" }} contentStyle={tooltipStyle} itemStyle={{ color: colors.dark.DEFAULT }} />
-              <Legend verticalAlign="top" height={36} />
+              <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
               <Bar dataKey="quantidade" name="Usuários Ativos" fill={colors.info} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -72,7 +72,7 @@ export function AdminCharts({ snapshot }: AdminChartsProps) {
               <XAxis dataKey="name" stroke={axis} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={axis} fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip cursor={{ fill: "transparent" }} contentStyle={tooltipStyle} itemStyle={{ color: colors.dark.DEFAULT }} />
-              <Legend verticalAlign="top" height={36} />
+              <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
               <Bar dataKey="total" name="Cadastrados" fill={colors.orange[500]} radius={[4, 4, 0, 0]} />
               <Bar dataKey="concluidos" name="Sucesso/Adjudicados" fill={colors.success} radius={[4, 4, 0, 0]} />
             </BarChart>

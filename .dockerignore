@@ -1,0 +1,34 @@
+# Mantém o contexto de build enxuto e evita vazar segredos/artefatos na imagem.
+# Os Dockerfiles fazem `COPY . .` + `pnpm install` (node_modules é regerado).
+
+# Dependências e artefatos de build (regerados dentro da imagem)
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+.turbo
+
+# Segredos e ambiente local — NUNCA dentro da imagem
+.env
+.env.*
+!.env.example
+infra/docker/.env.prod
+infra/docker/.env.prod.*
+!infra/docker/.env.prod.example
+
+# Git e metadados
+.git
+.github
+.reports
+
+# Editor / SO
+.vscode
+.idea
+**/*.log
+.DS_Store
+Thumbs.db
+
+# Testes/E2E que não entram na imagem de runtime
+**/playwright-report
+**/test-results

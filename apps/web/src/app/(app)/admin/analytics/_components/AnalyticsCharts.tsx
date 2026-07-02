@@ -48,25 +48,27 @@ export function AnalyticsCharts({ snapshot }: AnalyticsChartsProps) {
         </h2>
         <div className="h-[260px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={funilData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <BarChart layout="vertical" data={funilData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
               <XAxis
-                dataKey="etapa"
+                type="number"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
-                interval={0}
-              />
-              <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
                 allowDecimals={false}
               />
+              <YAxis
+                dataKey="etapa"
+                type="category"
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+                width={85}
+              />
               <Tooltip cursor={{ fill: "transparent" }} contentStyle={tooltipStyle} />
-              <Bar dataKey="quantidade" name="Profissionais" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="quantidade" name="Profissionais" fill="#3b82f6" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -100,7 +102,7 @@ export function AnalyticsCharts({ snapshot }: AnalyticsChartsProps) {
                   allowDecimals={false}
                 />
                 <Tooltip cursor={{ fill: "transparent" }} contentStyle={tooltipStyle} />
-                <Legend verticalAlign="top" height={36} />
+                <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
                 <Line
                   type="monotone"
                   dataKey="profissionais"
