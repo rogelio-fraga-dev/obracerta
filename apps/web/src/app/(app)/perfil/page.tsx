@@ -83,9 +83,9 @@ export default async function PerfilPage() {
           </div>
         </div>
         {!isAdmin && (
-          <Link href="/cobrancas" className="sm:self-stretch">
-            <Card interactive className="flex h-full flex-col items-center justify-center bg-muted/40 p-4">
-              <span className="font-semibold text-foreground">Cobranças e reembolsos</span>
+          <Link href="/cobrancas" className="sm:self-stretch w-full sm:w-auto">
+            <Card interactive className="flex h-full w-full flex-col items-center justify-center bg-muted/40 p-4">
+              <span className="font-semibold text-foreground text-center">Cobranças e reembolsos</span>
               <span aria-hidden className="mt-1 text-primary">→</span>
             </Card>
           </Link>

@@ -47,7 +47,7 @@ export function AnalyticsCharts({ snapshot }: AnalyticsChartsProps) {
           Funil de conversão
         </h2>
         <div className="h-[260px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height="100%" minWidth={0}>
             <BarChart layout="vertical" data={funilData} margin={{ top: 10, right: 10, left: 15, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
               <XAxis
@@ -84,7 +84,7 @@ export function AnalyticsCharts({ snapshot }: AnalyticsChartsProps) {
               Ainda sem dados de cadastro por mês.
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%" minWidth={0}>
               <LineChart data={snapshot.coorte} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis

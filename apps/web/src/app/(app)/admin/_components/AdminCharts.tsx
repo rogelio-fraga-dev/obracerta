@@ -48,7 +48,7 @@ export function AdminCharts({ snapshot }: AdminChartsProps) {
           Distribuição de Usuários
         </h2>
         <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height="100%" minWidth={0}>
             <BarChart data={usersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={grid} />
               <XAxis dataKey="name" stroke={axis} fontSize={12} tickLine={false} axisLine={false} />
@@ -66,7 +66,7 @@ export function AdminCharts({ snapshot }: AdminChartsProps) {
           Atividade do Sistema
         </h2>
         <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="99%" height="100%" minWidth={0}>
             <BarChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={grid} />
               <XAxis dataKey="name" stroke={axis} fontSize={12} tickLine={false} axisLine={false} />

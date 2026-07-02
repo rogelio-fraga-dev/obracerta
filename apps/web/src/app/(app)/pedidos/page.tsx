@@ -19,7 +19,7 @@ export default async function PedidosPage() {
 
   return (
     <section aria-labelledby="pedidos-heading" className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 id="pedidos-heading" className="font-display text-3xl font-black text-foreground">
             Pedidos
@@ -31,8 +31,8 @@ export default async function PedidosPage() {
           </p>
         </div>
         {!isProfissional && (
-          <Link href="/pedidos/novo">
-            <Button size="sm">+ Novo pedido</Button>
+          <Link href="/pedidos/novo" className="w-fit">
+            <Button size="sm" className="w-full sm:w-auto">+ Novo pedido</Button>
           </Link>
         )}
       </div>

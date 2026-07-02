@@ -102,9 +102,9 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                   </div>
                   <Link
                     href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}
-                    className="shrink-0"
+                    className="shrink-0 w-full sm:w-auto"
                   >
-                    <Button size="sm">Agendar</Button>
+                    <Button size="sm" className="w-full sm:w-auto">Agendar</Button>
                   </Link>
                 </Card>
               </li>
