@@ -18,7 +18,7 @@ import {
 export interface NavItem {
   href: string;
   label: string;
-  /** Rótulo curto (≤8 chars) usado na TabBar mobile p/ não truncar em 320px. */
+  /** Rótulo curto (≤8 chars) para contextos apertados. */
   shortLabel?: string;
   Icon: LucideIcon;
 }
@@ -59,7 +59,7 @@ const NAV_EMPRESA: NavSet = {
 /**
  * Navegação contextual por tipo de conta. Profissional recebe pedidos/dá lances e
  * tem ferramentas + agenda; contratante busca e agenda; **empresa** publica obras em
- * escala (Obras na primária). Mantém a fonte única para Sidebar (desktop) e TabBar (mobile).
+ * escala (Obras na primária). Fonte única para Sidebar (desktop) e drawer (mobile).
  */
 export function navForTipo(tipo: string | undefined): NavSet {
   switch (tipo) {
@@ -85,7 +85,7 @@ export function tipoLabel(tipo: string | undefined, isAdmin = false): string {
   }
 }
 
-// Itens nomeados do painel administrativo (compostos abaixo p/ Sidebar e TabBar).
+// Itens nomeados do painel administrativo (compostos abaixo p/ Sidebar e drawer).
 const ADM_PAINEL: NavItem = { href: "/admin", label: "Painel admin", shortLabel: "Painel", Icon: LayoutDashboard };
 const ADM_USUARIOS: NavItem = { href: "/admin/usuarios", label: "Gestão de usuários", shortLabel: "Usuários", Icon: Users };
 const ADM_OBRAS: NavItem = { href: "/admin/obras", label: "Gestão de obras", shortLabel: "Obras", Icon: HardHat };
@@ -95,8 +95,8 @@ const ADM_MODERACAO: NavItem = { href: "/admin/moderacao", label: "Moderação",
 const ADM_FINANCEIRO: NavItem = { href: "/admin/financeiro", label: "Financeiro", shortLabel: "Financ.", Icon: Landmark };
 
 /**
- * Painel administrativo — **fonte única** (Sidebar desktop + TabBar mobile). Antes a
- * Sidebar tinha 6 itens e a TabBar só 4, escondendo Moderação/Financeiro no mobile.
+ * Painel administrativo — **fonte única** (Sidebar desktop + drawer mobile), com
+ * todos os itens acessíveis nas duas superfícies.
  */
 export const ADMIN_NAV: NavItem[] = [
   ADM_PAINEL,
@@ -107,9 +107,3 @@ export const ADMIN_NAV: NavItem[] = [
   ADM_MODERACAO,
   ADM_FINANCEIRO,
 ];
-
-/**
- * Subconjunto exibido na TabBar mobile (4 itens — inclui Moderação e Financeiro, que
- * antes ficavam inacessíveis no mobile). Gestão de obras/pedidos fica na Sidebar/desktop.
- */
-export const ADMIN_NAV_PRIMARY: NavItem[] = [ADM_PAINEL, ADM_USUARIOS, ADM_MODERACAO, ADM_FINANCEIRO];

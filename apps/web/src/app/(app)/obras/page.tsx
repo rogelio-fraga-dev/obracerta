@@ -20,7 +20,7 @@ export default async function ObrasPage() {
 
   return (
     <section aria-labelledby="obras-heading" className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 id="obras-heading" className="font-display text-3xl font-black text-foreground">
             Obras
@@ -32,7 +32,7 @@ export default async function ObrasPage() {
           </p>
         </div>
         {isContratante && (
-          <Link href="/obras/nova">
+          <Link href="/obras/nova" className="w-fit shrink-0">
             <Button size="sm">+ Nova obra</Button>
           </Link>
         )}

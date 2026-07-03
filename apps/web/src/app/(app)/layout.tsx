@@ -5,12 +5,11 @@ import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
 import { InstallPrompt } from "./_shell/InstallPrompt";
 import { MobileHeader } from "./_shell/MobileHeader";
-import { TabBar } from "./_shell/TabBar";
 
 /**
  * Shell da área logada (route group `(app)`) — o PWA, **PC-first com
  * responsividade**. No desktop: Sidebar fixa à esquerda + conteúdo amplo. No
- * mobile: header compacto no topo + TabBar inferior. **Guarda de sessão no
+ * mobile: header compacto no topo com Início + Menu (drawer). **Guarda de sessão no
  * servidor**: sem cookie válido, `requireSession` redireciona ao login.
  */
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -37,13 +36,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1600px] flex-1 px-5 py-6 pb-28 lg:px-12 lg:py-10 lg:pb-12"
+          className="mx-auto w-full max-w-[1600px] flex-1 px-5 py-6 pb-12 lg:px-12 lg:py-10 lg:pb-12"
         >
           {children}
         </main>
-
-        {/* Navegação inferior — só no mobile (a Sidebar cobre o desktop). */}
-        <TabBar tipo={hint?.tipo} />
       </div>
 
       <InstallPrompt />

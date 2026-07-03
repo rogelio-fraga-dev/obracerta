@@ -40,11 +40,11 @@ export default async function FerramentasPage() {
 
   return (
     <section aria-labelledby="ferr-heading" className="space-y-5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 id="ferr-heading" className="font-display text-2xl font-black text-foreground">
           Orçamentos e recibos
         </h1>
-        <Link href="/ferramentas/novo">
+        <Link href="/ferramentas/novo" className="shrink-0">
           <Button size="sm">Novo documento</Button>
         </Link>
       </div>

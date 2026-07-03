@@ -93,7 +93,7 @@ export default async function AvaliacoesPage() {
             {reviews.map((r, i) => (
               <li key={r.id} className={`animate-fade-in delay-${Math.min(i + 1, 6)}`}>
                 <Card className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <span aria-label={`${r.nota} de 5`} className="text-xl text-warning tracking-widest">
                         {"★".repeat(r.nota)}
@@ -126,13 +126,17 @@ export default async function AvaliacoesPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
-                    {r.resposta ? (
-                      <span className="text-xs text-muted-foreground">Você respondeu a este feedback.</span>
-                    ) : (
-                      <RespostaForm reviewId={r.id} />
-                    )}
-                    <ReportDialog entidade="REVIEW" entidadeId={r.id} />
+                  <div className="flex flex-col gap-3 border-t border-border pt-4 mt-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      {r.resposta ? (
+                        <span className="text-xs text-muted-foreground">Você respondeu a este feedback.</span>
+                      ) : (
+                        <RespostaForm reviewId={r.id} />
+                      )}
+                    </div>
+                    <div className="shrink-0 self-end sm:self-start">
+                      <ReportDialog entidade="REVIEW" entidadeId={r.id} />
+                    </div>
                   </div>
                 </Card>
               </li>

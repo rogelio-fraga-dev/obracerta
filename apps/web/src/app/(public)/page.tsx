@@ -98,6 +98,8 @@ export default function HomePage() {
                   className={cn(
                     "flex items-center gap-3 rounded-2xl border border-border bg-background p-3 shadow-[var(--shadow-lg)] lg:w-64",
                     i === 1 && "lg:mr-8",
+                    // No mobile mostramos só 2 cards (a lista de 3 alongava demais o hero).
+                    i === 2 && "hidden lg:flex",
                   )}
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-xl">

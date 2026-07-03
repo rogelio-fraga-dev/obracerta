@@ -47,7 +47,7 @@ export function BookingStepper({ status }: { status: BookingStatus }) {
               )}
             </div>
             <span
-              className={`mt-1.5 text-[11px] font-semibold ${
+              className={`mt-1.5 text-center text-[10px] font-semibold leading-tight sm:text-[11px] ${
                 active ? "text-foreground" : "text-muted-foreground"
               }`}
             >

@@ -45,14 +45,22 @@ export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: Mobile
               Olá, {firstName(nome) || "Usuário"}
             </span>
           </Link>
-          <button
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            aria-label="Abrir menu"
-          >
-            Menu
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href={isAdmin ? "/admin" : "/inicio"}
+              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              Início
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsOpen(true)}
+              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              aria-label="Abrir menu"
+            >
+              Menu
+            </button>
+          </div>
         </div>
       </header>
 
