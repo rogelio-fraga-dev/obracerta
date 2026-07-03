@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-
 /** Logo "G" do Google em SVG (cores oficiais), sem dependência externa. */
 function GoogleGlyph() {
   return (
@@ -27,30 +23,19 @@ function GoogleGlyph() {
 }
 
 /**
- * Botão "Continuar com Google" — **visual por enquanto** (roadmap §6). O OAuth
- * real é configurado quando subirmos para a EC2; aqui sinalizamos "em breve" para
- * dar a ideia do fluxo sem prometer algo que ainda não funciona.
+ * Botão "Continuar com Google" — inicia o OAuth pelo BFF (`/api/auth/google/start`).
+ * Sem credenciais reais no backend, o adapter fake abre o consentimento simulado;
+ * com `GOOGLE_CLIENT_ID/SECRET`, vai ao accounts.google.com de verdade.
  */
 export function GoogleButton() {
-  const [hint, setHint] = useState(false);
-
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setHint(true)}
-        aria-describedby={hint ? "google-soon" : undefined}
-        className="flex w-full items-center justify-center gap-3 rounded-md border-2 border-border bg-background px-6 py-3 font-sans font-extrabold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
-      >
-        <GoogleGlyph />
-        Continuar com Google
-      </button>
-      {hint && (
-        <p id="google-soon" role="status" className="mt-2 text-center text-xs text-muted-foreground">
-          🚧 Login com Google chega em breve. Por enquanto, use e-mail ou WhatsApp.
-        </p>
-      )}
-    </div>
+    <a
+      href="/api/auth/google/start"
+      className="flex w-full items-center justify-center gap-3 rounded-md border-2 border-border bg-background px-6 py-3 font-sans font-extrabold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+    >
+      <GoogleGlyph />
+      Continuar com Google
+    </a>
   );
 }
 

@@ -1,8 +1,18 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
-import type { AuthResult, AuthTokens, OtpRequestResult, User } from "@obracerta/shared";
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import type {
+  AuthResult,
+  AuthTokens,
+  GoogleAuthResult,
+  OtpRequestResult,
+  User,
+} from "@obracerta/shared";
 import { UsersService } from "../../users/application/users.service.js";
 import { canAuthenticate } from "../domain/account-status.js";
 import { hashPassword, verifyPassword } from "../domain/password.js";
+import {
+  GOOGLE_IDENTITY,
+  type GoogleIdentityPort,
+} from "../domain/ports/google-identity.port.js";
 import { OtpService } from "./otp.service.js";
 import { TokenService } from "./token.service.js";
 
@@ -16,6 +26,7 @@ export class AuthService {
     private readonly otp: OtpService,
     private readonly tokens: TokenService,
     private readonly users: UsersService,
+    @Inject(GOOGLE_IDENTITY) private readonly google: GoogleIdentityPort,
   ) {}
 
   requestOtp(whatsapp: string): Promise<OtpRequestResult> {
@@ -63,6 +74,27 @@ export class AuthService {
     this.assertActive(credentials.user);
     const tokens = await this.tokens.issue(credentials.user);
     return { user: credentials.user, tokens };
+  }
+
+  /** URL de consentimento do Google (real ou simulada, conforme o adapter). */
+  getGoogleAuthUrl(redirectUri: string, state: string): string {
+    return this.google.buildAuthUrl(redirectUri, state);
+  }
+
+  /**
+   * Login com Google: troca o `code` pelo perfil e casa por **e-mail**. Conta
+   * existente → tokens; e-mail sem conta → `registered: false` com os dados
+   * para pré-preencher o cadastro (a criação segue o fluxo normal).
+   */
+  async loginWithGoogle(code: string, redirectUri: string): Promise<GoogleAuthResult> {
+    const profile = await this.google.exchangeCode(code, redirectUri);
+    const user = await this.users.findByEmail(profile.email);
+    if (!user) {
+      return { registered: false, email: profile.email, nome: profile.nome };
+    }
+    this.assertActive(user);
+    const tokens = await this.tokens.issue(user);
+    return { registered: true, user, tokens };
   }
 
   async updatePassword(userId: string, oldPass: string, newPass: string): Promise<void> {

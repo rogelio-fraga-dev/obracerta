@@ -73,6 +73,15 @@ export class DrizzleInvoiceRepository implements InvoiceRepository {
     return row ? rowToInvoice(row) : null;
   }
 
+  async attachGatewayCharge(id: string, gateway: string, gatewayId: string): Promise<Invoice | null> {
+    const [row] = await this.db
+      .update(invoices)
+      .set({ gateway, gatewayId, atualizadoEm: new Date() })
+      .where(eq(invoices.id, id))
+      .returning();
+    return row ? rowToInvoice(row) : null;
+  }
+
   async transition(id: string, from: InvoiceStatus, to: InvoiceStatus): Promise<Invoice | null> {
     const [row] = await this.db
       .update(invoices)

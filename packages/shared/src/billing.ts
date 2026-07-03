@@ -93,3 +93,20 @@ export const refundSchema = z.object({
   processadoEm: isoTimestampSchema.nullable(),
 });
 export type Refund = z.infer<typeof refundSchema>;
+
+/**
+ * Cobrança Pix de uma fatura (QR Code + copia-e-cola). Em sandbox o payload é
+ * gerado localmente (EMV fictício) e `simulavel: true` habilita o botão de
+ * confirmar o pagamento de mentira; com gateway real, vem do provedor.
+ */
+export const pixChargeSchema = z.object({
+  invoiceId: uuidSchema,
+  /** BR Code EMV (conteúdo do QR e do copia-e-cola). */
+  payload: z.string().min(10),
+  txid: z.string().min(1).max(64),
+  valorCentavos: centavosSchema,
+  vencimentoEm: isoTimestampSchema,
+  /** true = gateway sandbox (permite simular a confirmação). */
+  simulavel: z.boolean(),
+});
+export type PixCharge = z.infer<typeof pixChargeSchema>;

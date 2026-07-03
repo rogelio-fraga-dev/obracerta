@@ -24,6 +24,9 @@ const REFRESH_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 /** Rota de entrada para onde redirecionamos quando não há sessão. */
 export const LOGIN_PATH = "/entrar";
 
+/** Cookie httpOnly com o `state` anti-CSRF do fluxo Google (uso único, 10 min). */
+export const GOOGLE_STATE_COOKIE = "oc_gstate";
+
 function baseCookieOptions() {
   return {
     httpOnly: true,

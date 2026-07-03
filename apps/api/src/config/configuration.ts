@@ -15,6 +15,10 @@ export interface AppConfig {
   jwtRefreshTtlDays: number;
   otpTtlSeconds: number;
   otpMaxAttempts: number;
+  google: {
+    clientId: string | null;
+    clientSecret: string | null;
+  };
   s3: {
     endpoint: string;
     region: string;
@@ -45,6 +49,10 @@ export function configuration(): AppConfig {
     jwtRefreshTtlDays: env.JWT_REFRESH_TTL_DAYS,
     otpTtlSeconds: env.OTP_TTL_SECONDS,
     otpMaxAttempts: env.OTP_MAX_ATTEMPTS,
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID ?? null,
+      clientSecret: env.GOOGLE_CLIENT_SECRET ?? null,
+    },
     s3: {
       endpoint: env.S3_ENDPOINT,
       region: env.S3_REGION,

@@ -22,6 +22,7 @@ import {
   type CreateSubscriptionInput,
   type Invoice,
   type JwtClaims,
+  type PixCharge,
   type Purchase,
   type Refund,
   type Subscription,
@@ -104,6 +105,24 @@ export class BillingController {
   @UseGuards(JwtAuthGuard)
   myInvoices(@CurrentUser() user: JwtClaims): Promise<Invoice[]> {
     return this.billing.listInvoices(user.sub);
+  }
+
+  /** Pix (QR + copia-e-cola) de uma fatura aberta do próprio usuário. */
+  @Get("invoices/:id/pix")
+  @UseGuards(JwtAuthGuard)
+  invoicePix(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<PixCharge> {
+    return this.billing.getPixCharge(user.sub, id);
+  }
+
+  /** Sandbox: simula a confirmação do Pix (mesmo pipeline do webhook real). */
+  @Post("invoices/:id/pix/simular")
+  @UseGuards(JwtAuthGuard)
+  async simulatePix(
+    @CurrentUser() user: JwtClaims,
+    @Param("id") id: string,
+  ): Promise<{ status: WebhookResult }> {
+    const status = await this.billing.simulatePixPayment(user.sub, id);
+    return { status };
   }
 
   /** Plano vigente + features liberadas do usuário autenticado (gating). */

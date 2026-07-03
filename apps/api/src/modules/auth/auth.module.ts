@@ -6,6 +6,9 @@ import { UsersModule } from "../users/users.module.js";
 import { AuthService } from "./application/auth.service.js";
 import { OtpService } from "./application/otp.service.js";
 import { TokenService } from "./application/token.service.js";
+import { GOOGLE_IDENTITY } from "./domain/ports/google-identity.port.js";
+import { FakeGoogleIdentityAdapter } from "./infrastructure/fake-google-identity.adapter.js";
+import { GoogleIdentityAdapter } from "./infrastructure/google-identity.adapter.js";
 import { AuthController } from "./interface/auth.controller.js";
 import { JwtAuthGuard } from "./interface/jwt-auth.guard.js";
 import { RolesGuard } from "./interface/roles.guard.js";
@@ -26,7 +29,25 @@ import { RolesGuard } from "./interface/roles.guard.js";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, TokenService, JwtAuthGuard, RolesGuard],
+  providers: [
+    AuthService,
+    OtpService,
+    TokenService,
+    JwtAuthGuard,
+    RolesGuard,
+    // Google atrás de porta: com credenciais no env usa o adapter real; sem, o fake
+    // (consentimento simulado) — mesma receita dos gateways de pagamento/notificação.
+    {
+      provide: GOOGLE_IDENTITY,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<AppConfig, true>) => {
+        const { clientId, clientSecret } = config.get("google", { infer: true });
+        return clientId && clientSecret
+          ? new GoogleIdentityAdapter(clientId, clientSecret)
+          : new FakeGoogleIdentityAdapter();
+      },
+    },
+  ],
   // Re-exporta UsersModule: módulos que usam o RolesGuard (via @UseGuards) precisam
   // do UsersService em escopo, pois o Nest re-resolve o guard no módulo consumidor.
   exports: [JwtModule, JwtAuthGuard, RolesGuard, AuthService, OtpService, UsersModule],

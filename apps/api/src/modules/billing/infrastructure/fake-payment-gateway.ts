@@ -1,10 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { randomUUID } from "node:crypto";
+import { buildPixPayload } from "../domain/pix-brcode.js";
 import type {
   CreateChargeParams,
   CreateSubscriptionParams,
   GatewayRef,
   PaymentGateway,
+  PixCode,
+  PixCodeParams,
   RefundChargeParams,
 } from "../domain/ports/payment-gateway.js";
 
@@ -17,6 +20,8 @@ import type {
 @Injectable()
 export class FakePaymentGateway implements PaymentGateway {
   readonly name = "asaas";
+  /** Sandbox: habilita o "Simular pagamento" no app (o adapter real será false). */
+  readonly sandbox = true;
   private readonly logger = new Logger("PaymentGateway");
 
   createSubscription(params: CreateSubscriptionParams): Promise<GatewayRef> {
@@ -39,5 +44,19 @@ export class FakePaymentGateway implements PaymentGateway {
     const gatewayId = `ref_${randomUUID()}`;
     this.logger.log(`[fake] estorno ${gatewayId} (${params.valorCentavos}c) da cobrança ${params.chargeId}`);
     return Promise.resolve({ gatewayId });
+  }
+
+  /** Pix fictício (formato EMV válido, chave de exemplo) — o Asaas real devolve o dele. */
+  getPixCode(params: PixCodeParams): Promise<PixCode> {
+    const txid = params.chargeId.replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "OBRACERTA";
+    const payload = buildPixPayload({
+      chave: "pagamentos@obracerta.com.br",
+      merchantName: "ObraCerta",
+      merchantCity: "Uberlandia",
+      valorCentavos: params.valorCentavos,
+      txid,
+    });
+    this.logger.log(`[fake] pix ${txid} (${params.valorCentavos}c) — ${params.descricao}`);
+    return Promise.resolve({ payload, txid });
   }
 }

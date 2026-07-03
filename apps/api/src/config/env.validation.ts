@@ -26,6 +26,10 @@ export const envSchema = z.object({
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 
+  // Login com Google (opcional — sem as credenciais, o adapter fake simula o fluxo)
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+
   // Object storage S3-compatível (roadmap §4.2)
   S3_ENDPOINT: z.string().url().default("http://localhost:9000"),
   S3_REGION: z.string().default("us-east-1"),

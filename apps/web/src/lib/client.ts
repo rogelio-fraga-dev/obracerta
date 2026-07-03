@@ -5,7 +5,7 @@ import { unwrapEnvelope } from "@obracerta/shared";
  * (mesma origem, `/api/...`) — nunca a API direto. Os cookies httpOnly viajam
  * sozinhos; o JS nunca toca em token. Desembrulha o mesmo envelope da API.
  */
-async function send<T>(method: "POST", path: string, body?: unknown): Promise<T> {
+async function send<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<T> {
   const res = await fetch(path, {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,
@@ -16,5 +16,6 @@ async function send<T>(method: "POST", path: string, body?: unknown): Promise<T>
 }
 
 export const bff = {
+  get: <T>(path: string) => send<T>("GET", path),
   post: <T>(path: string, body?: unknown) => send<T>("POST", path, body),
 };

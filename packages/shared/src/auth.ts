@@ -96,3 +96,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Informe sua senha"),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+/** Login com Google (OAuth code flow): o BFF troca o `code` na API. */
+export const googleLoginSchema = z.object({
+  code: z.string().trim().min(1).max(2048),
+  redirectUri: z.string().url(),
+});
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;
+
+/**
+ * Resultado do login com Google:
+ * - e-mail já cadastrado → login completo (tokens + user);
+ * - e-mail sem conta → `registered: false` com os dados do Google para
+ *   pré-preencher o cadastro (a conta é criada pelo fluxo normal).
+ */
+export const googleAuthResultSchema = z.discriminatedUnion("registered", [
+  z.object({ registered: z.literal(true), user: userSchema, tokens: authTokensSchema }),
+  z.object({ registered: z.literal(false), email: emailSchema, nome: z.string() }),
+]);
+export type GoogleAuthResult = z.infer<typeof googleAuthResultSchema>;

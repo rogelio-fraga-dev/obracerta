@@ -7,17 +7,20 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { randomUUID } from "node:crypto";
 import {
   InvoiceStatus,
+  PaymentMethod,
   ProfessionalPlan,
   RefundStatus,
   SubscriptionStatus,
   UserType,
   canHireServices,
+  uuidSchema,
+  type PixCharge,
   type CreatePurchaseInput,
   type CreateSubscriptionInput,
   type Invoice,
-  type PaymentMethod,
   type Purchase,
   type Refund,
   type Subscription,
@@ -362,6 +365,78 @@ export class BillingService {
 
   listInvoices(userId: string): Promise<Invoice[]> {
     return this.invoices.listForUser(userId);
+  }
+
+  /**
+   * Pix (QR + copia-e-cola) de uma fatura PENDENTE/VENCIDA do próprio usuário.
+   * O payload vem do gateway (fake: EMV local fictício; Asaas: do provedor);
+   * `simulavel` reflete o sandbox e habilita o botão de simulação no app.
+   */
+  async getPixCharge(userId: string, invoiceId: string): Promise<PixCharge> {
+    const invoice = await this.requirePayableInvoice(userId, invoiceId);
+    const pix = await this.gateway.getPixCode({
+      chargeId: invoice.gatewayId!,
+      valorCentavos: invoice.valorCentavos,
+      descricao: `Fatura ${invoice.id.slice(0, 8)}`,
+    });
+    return {
+      invoiceId: invoice.id,
+      payload: pix.payload,
+      txid: pix.txid,
+      valorCentavos: invoice.valorCentavos,
+      vencimentoEm: invoice.vencimentoEm,
+      simulavel: this.gateway.sandbox,
+    };
+  }
+
+  /**
+   * **Sandbox only**: simula a confirmação do Pix injetando um evento no MESMO
+   * pipeline do webhook real (idempotência, ativação da origem, auditoria).
+   * Com gateway real (`sandbox: false`) a rota é estruturalmente bloqueada.
+   */
+  async simulatePixPayment(userId: string, invoiceId: string): Promise<WebhookResult> {
+    if (!this.gateway.sandbox) {
+      throw new ForbiddenException("Simulação de pagamento indisponível fora do sandbox.");
+    }
+    const invoice = await this.requirePayableInvoice(userId, invoiceId);
+    return this.handleWebhook({
+      eventId: `sim_${randomUUID()}`,
+      tipo: "PAYMENT_CONFIRMED",
+      chargeId: invoice.gatewayId!,
+      metodo: PaymentMethod.PIX,
+    });
+  }
+
+  /** Fatura do próprio usuário, ainda pagável, garantindo a cobrança no gateway. */
+  private async requirePayableInvoice(userId: string, invoiceId: string): Promise<Invoice> {
+    if (!uuidSchema.safeParse(invoiceId).success) {
+      throw new NotFoundException("Fatura não encontrada.");
+    }
+    const invoice = await this.invoices.findById(invoiceId);
+    if (!invoice || invoice.userId !== userId) {
+      throw new NotFoundException("Fatura não encontrada.");
+    }
+    if (!canTransitionInvoice(invoice.status, InvoiceStatus.PAGA)) {
+      throw new ConflictException("Esta fatura não está mais aberta para pagamento.");
+    }
+    // Backfill: fatura sem cobrança vinculada (ex.: dados antigos/seed) ganha uma
+    // no gateway na 1ª tentativa de pagar — mesmo caminho de quem nasce com ela.
+    if (!invoice.gatewayId || invoice.gateway !== this.gateway.name) {
+      const ref = await this.gateway.createCharge({
+        userId: invoice.userId,
+        valorCentavos: invoice.valorCentavos,
+        vencimento: invoice.vencimentoEm,
+        descricao: `Fatura ${invoice.id.slice(0, 8)}`,
+      });
+      const updated = await this.invoices.attachGatewayCharge(
+        invoice.id,
+        this.gateway.name,
+        ref.gatewayId,
+      );
+      if (!updated) throw new NotFoundException("Fatura não encontrada.");
+      return updated;
+    }
+    return invoice;
   }
 
   listRefunds(userId: string): Promise<Refund[]> {

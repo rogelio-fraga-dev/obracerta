@@ -6,6 +6,7 @@ import { formatCentavos, type Invoice, type Refund } from "@obracerta/shared";
 import { INVOICE_STATUS_UI, PAYMENT_METHOD_LABEL, REFUND_STATUS_UI } from "@/lib/billing-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { RefundButton } from "./RefundButton";
+import { PagarPixButton } from "./PixDialog";
 import { MeuPlano } from "./MeuPlano";
 
 interface CobrancasClientProps {
@@ -135,6 +136,9 @@ export function CobrancasClient({ invoices, refunds, plano, features, tipo }: Co
                               {inv.pagoEm ? formatDateTimeBR(inv.pagoEm) : "—"}
                             </td>
                             <td className="py-3.5 px-4 text-right">
+                              {(inv.status === "PENDENTE" || inv.status === "VENCIDA") && (
+                                <PagarPixButton invoiceId={inv.id} />
+                              )}
                               {inv.status === "PAGA" && (
                                 <RefundButton invoiceId={inv.id} />
                               )}
@@ -175,6 +179,11 @@ export function CobrancasClient({ invoices, refunds, plano, features, tipo }: Co
                             {inv.pagoEm ? formatDateTimeBR(inv.pagoEm) : "—"}
                           </dd>
                         </dl>
+                        {(inv.status === "PENDENTE" || inv.status === "VENCIDA") && (
+                          <div className="flex justify-end border-t border-border/60 pt-2.5">
+                            <PagarPixButton invoiceId={inv.id} />
+                          </div>
+                        )}
                         {inv.status === "PAGA" && (
                           <div className="flex justify-end border-t border-border/60 pt-2.5">
                             <RefundButton invoiceId={inv.id} />

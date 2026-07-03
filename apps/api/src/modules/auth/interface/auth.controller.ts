@@ -1,12 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UseGuards, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import {
   type AuthResult,
   type AuthTokens,
   type CadastroResult,
+  type GoogleAuthResult,
+  type GoogleLoginInput,
+  googleLoginSchema,
   type JwtClaims,
   type LoginInput,
   loginSchema,
+  z,
   type OtpRequestInput,
   type OtpRequestResult,
   otpRequestSchema,
@@ -65,6 +69,27 @@ export class AuthController {
     @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,
   ): Promise<CadastroResult> {
     return this.auth.loginWithPassword(body.email, body.password);
+  }
+
+  /** URL de consentimento do Google (real ou simulada). O BFF gera o `state`. */
+  @Get("google/url")
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  googleUrl(@Query("redirectUri") redirectUri: string, @Query("state") state: string): { url: string } {
+    const parsed = z.string().url().safeParse(redirectUri);
+    if (!parsed.success || !state) {
+      throw new BadRequestException("redirectUri/state inválidos.");
+    }
+    return { url: this.auth.getGoogleAuthUrl(parsed.data, state) };
+  }
+
+  /** Troca o `code` do Google por login (ou sinaliza cadastro pendente). */
+  @Post("google")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  loginWithGoogle(
+    @Body(new ZodValidationPipe(googleLoginSchema)) body: GoogleLoginInput,
+  ): Promise<GoogleAuthResult> {
+    return this.auth.loginWithGoogle(body.code, body.redirectUri);
   }
 
   /** Renova o par de tokens (rotaciona o refresh). */

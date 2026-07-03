@@ -19,6 +19,8 @@ export interface InvoiceRepository {
   findByGatewayCharge(gateway: string, gatewayId: string): Promise<Invoice | null>;
   /** Marca a fatura como PAGA (idempotência/validade de transição checadas no service). */
   markPaid(id: string, metodo: PaymentMethod | null): Promise<Invoice | null>;
+  /** Vincula (ou revincula) a fatura a uma cobrança do gateway — backfill do Pix. */
+  attachGatewayCharge(id: string, gateway: string, gatewayId: string): Promise<Invoice | null>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transition(id: string, from: InvoiceStatus, to: InvoiceStatus): Promise<Invoice | null>;
   listForUser(userId: string): Promise<Invoice[]>;
