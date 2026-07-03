@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { GoogleAuthResult } from "@obracerta/shared";
+import { publicOrigin } from "@/lib/bff";
 import { callApi } from "@/lib/server-api";
 import { GOOGLE_STATE_COOKIE, setProfileCookie, setSessionCookies } from "@/lib/session";
 
@@ -13,7 +14,7 @@ import { GOOGLE_STATE_COOKIE, setProfileCookie, setSessionCookies } from "@/lib/
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const url = new URL(request.url);
-  const origin = url.origin;
+  const origin = publicOrigin(request);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
 

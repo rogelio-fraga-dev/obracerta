@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
+import { publicOrigin } from "@/lib/bff";
 import { callApi } from "@/lib/server-api";
 import { GOOGLE_STATE_COOKIE } from "@/lib/session";
 
@@ -9,7 +10,7 @@ import { GOOGLE_STATE_COOKIE } from "@/lib/session";
  * adapter do backend) e redireciona o navegador para lá.
  */
 export async function GET(request: Request): Promise<NextResponse> {
-  const origin = new URL(request.url).origin;
+  const origin = publicOrigin(request);
   const redirectUri = `${origin}/api/auth/google/callback`;
   const state = randomBytes(16).toString("hex");
 

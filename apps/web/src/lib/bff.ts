@@ -14,6 +14,22 @@ export function jsonOk<T>(data: T, status = 200): NextResponse {
   return NextResponse.json({ success: true, data, error: null }, { status });
 }
 
+/**
+ * Origem **pública** da requisição. Atrás do proxy (Caddy) o `request.url`
+ * reflete o host interno do container (`localhost:3000`) — para montar URLs de
+ * redirect/callback usamos os headers encaminhados (`x-forwarded-*`) primeiro.
+ */
+export function publicOrigin(request: Request): string {
+  const proto =
+    request.headers.get("x-forwarded-proto") ??
+    new URL(request.url).protocol.replace(":", "");
+  const host =
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    new URL(request.url).host;
+  return `${proto}://${host}`;
+}
+
 /** Resposta de erro no envelope padrão. */
 export function jsonError(code: string, message: string, status = 400): NextResponse {
   return NextResponse.json({ success: false, data: null, error: { code, message } }, { status });
