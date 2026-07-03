@@ -74,7 +74,7 @@ export default async function InicioPage() {
   }
 
   return (
-    <section aria-labelledby="inicio-heading" className="space-y-8">
+    <section aria-labelledby="inicio-heading" className="space-y-6 sm:space-y-8">
       {/* ── Hero com gradiente ── */}
       <div className="animate-fade-in rounded-2xl bg-gradient-hero px-5 py-6 text-background sm:px-7 sm:py-8">
         <div className="flex items-center gap-3 sm:gap-4">
@@ -95,41 +95,37 @@ export default async function InicioPage() {
         </div>
       </div>
 
-      {/* ── Stats KPIs ── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="animate-fade-in delay-1">
-          <StatCard
-            icon="📋"
-            label="Pendentes"
-            value={pendentes}
-            tone={pendentes > 0 ? "warning" : "default"}
-            detail={pendentes > 0 ? "Aguardando ação" : "Tudo em dia"}
-          />
-        </div>
-        <div className="animate-fade-in delay-2">
-          <StatCard
-            icon="🔨"
-            label="Em andamento"
-            value={emAndamento}
-            tone={emAndamento > 0 ? "primary" : "default"}
-          />
-        </div>
-        <div className="animate-fade-in delay-3">
-          <StatCard
-            icon="✅"
-            label="Concluídos"
-            value={concluidos}
-            tone="success"
-          />
-        </div>
-        <div className="animate-fade-in delay-4">
-          <StatCard
-            icon="⭐"
-            label="Avaliação média"
-            value={mediaNotas}
-            detail={`${reviews.length} avaliação(ões)`}
-          />
-        </div>
+      {/* ── Stats KPIs — 2 colunas no celular (antes empilhava 4 cards enormes) ── */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <StatCard
+          className="h-full animate-fade-in delay-1"
+          icon="📋"
+          label="Pendentes"
+          value={pendentes}
+          tone={pendentes > 0 ? "warning" : "default"}
+          detail={pendentes > 0 ? "Aguardando ação" : "Tudo em dia"}
+        />
+        <StatCard
+          className="h-full animate-fade-in delay-2"
+          icon="🔨"
+          label="Em andamento"
+          value={emAndamento}
+          tone={emAndamento > 0 ? "primary" : "default"}
+        />
+        <StatCard
+          className="h-full animate-fade-in delay-3"
+          icon="✅"
+          label="Concluídos"
+          value={concluidos}
+          tone="success"
+        />
+        <StatCard
+          className="h-full animate-fade-in delay-4"
+          icon="⭐"
+          label="Avaliação média"
+          value={mediaNotas}
+          detail={`${reviews.length} avaliação(ões)`}
+        />
       </div>
 
       {/* ── Próximos compromissos ── */}
@@ -143,15 +139,15 @@ export default async function InicioPage() {
               const ui = BOOKING_STATUS_UI[p.status];
               return (
                 <Link key={p.id} href={`/pedidos/${p.id}`} className="block">
-                  <Card interactive className="flex items-center gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
-                      <PedidosIcon className="h-6 w-6" />
+                  <Card interactive className="flex items-center gap-3 p-4 sm:gap-4 sm:p-6">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary sm:h-12 sm:w-12">
+                      <PedidosIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground">{p.especialidade}</p>
-                      <p className="text-sm text-muted-foreground">{formatDateTimeBR(p.dataServico)}</p>
+                      <p className="truncate font-semibold text-foreground">{p.especialidade}</p>
+                      <p className="truncate text-sm text-muted-foreground">{formatDateTimeBR(p.dataServico)}</p>
                     </div>
-                    <Badge tone={ui.tone}>{ui.label}</Badge>
+                    <Badge tone={ui.tone} className="shrink-0">{ui.label}</Badge>
                   </Card>
                 </Link>
               );
@@ -205,10 +201,10 @@ export default async function InicioPage() {
             <Link key={href} href={href}>
               <Card
                 interactive
-                className={`flex items-center gap-4 animate-fade-in delay-${i + 1}`}
+                className={`flex items-center gap-3 p-4 sm:gap-4 sm:p-6 animate-fade-in delay-${i + 1}`}
               >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
-                  <Icon className="h-6 w-6" />
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary sm:h-12 sm:w-12">
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-base font-bold text-foreground">{titulo}</span>

@@ -478,7 +478,11 @@ seeding de oferta por cidade-piloto (operacional).
 
 ## 12. Fora do Escopo do MVP (PRD §25)
 
-Não construir agora: chat interno, upload de documentos, geração de contratos, escrow/pagamento de obras, verificação de antecedentes, senha no login, app nativo iOS/Android, verificação automática de referências. Fases futuras (2027+) quando o volume justificar.
+Não construir agora: chat interno, upload de documentos, geração de contratos, escrow/pagamento de obras, verificação de antecedentes, app nativo iOS/Android, verificação automática de referências. Fases futuras (2027+) quando o volume justificar.
+
+> **Nota (jul/2026):** "senha no login" constava aqui, mas foi **construída** na Fase 7 por
+> decisão do fundador (login "conta normal" e-mail+senha, além do OTP). Item removido da
+> lista para refletir o estado real.
 
 ---
 
