@@ -4,6 +4,7 @@ import { DEPOIMENTOS, DORES, HERO_CARDS, STATS } from "./_home/data";
 import { ComoFunciona } from "./_home/ComoFunciona";
 import { Planos } from "./_home/Planos";
 import { Faq } from "./_home/Faq";
+import { TradeShowcase } from "./_home/TradeShowcase";
 
 /**
  * Landing pública (refatorada sobre `docs/mockups/landing_page.html`). Hero estático;
@@ -38,7 +39,7 @@ export default function HomePage() {
               Construção civil com confiança
             </span>
 
-            <h1 className="mt-6 font-display text-5xl font-black leading-[1.02] tracking-tight text-foreground sm:text-7xl">
+            <h1 className="mt-6 font-display text-[2.5rem] font-black leading-[1.05] tracking-tight text-foreground sm:text-7xl sm:leading-[1.02]">
               O profissional <em className="italic text-primary">certo</em> para sua obra
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
@@ -76,22 +77,27 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Visual: ilustração + cards flutuantes */}
-          <div className="relative hidden lg:block">
-            <img
-              src="/illustrations/hero-blueprint.svg"
-              alt="Planta de obra com casa e selo de verificação"
-              width={440}
-              height={420}
-              className="mx-auto opacity-95"
-            />
-            <div className="absolute inset-0 flex flex-col items-end justify-center gap-3">
+          {/* Visual: ilustração + cards. Antes escondido no mobile ("sem imagens");
+              agora aparece em todas as telas — no mobile empilhado, no desktop
+              com os cards flutuando sobre a ilustração. */}
+          <div className="relative mt-2 lg:mt-0">
+            <div className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-border bg-gradient-brand-soft p-6 shadow-[var(--shadow-lg)] lg:max-w-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
+              <img
+                src="/illustrations/hero-blueprint.svg"
+                alt="Planta de obra com casa e selo de verificação"
+                width={440}
+                height={420}
+                className="mx-auto w-full max-w-[300px] opacity-95 sm:max-w-[360px] lg:max-w-[440px]"
+              />
+            </div>
+
+            <div className="mt-4 space-y-3 lg:absolute lg:inset-0 lg:mt-0 lg:flex lg:flex-col lg:items-end lg:justify-center">
               {HERO_CARDS.map((c, i) => (
                 <div
                   key={c.nome}
                   className={cn(
-                    "flex w-64 items-center gap-3 rounded-2xl border border-border bg-background p-3 shadow-[var(--shadow-lg)]",
-                    i === 1 && "mr-8",
+                    "flex items-center gap-3 rounded-2xl border border-border bg-background p-3 shadow-[var(--shadow-lg)] lg:w-64",
+                    i === 1 && "lg:mr-8",
                   )}
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-xl">
@@ -136,6 +142,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── PROFISSÕES (vitrine ilustrada) ── */}
+      <TradeShowcase />
 
       {/* ── COMO FUNCIONA (toggle de persona) ── */}
       <ComoFunciona />

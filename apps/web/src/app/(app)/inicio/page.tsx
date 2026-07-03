@@ -76,14 +76,14 @@ export default async function InicioPage() {
   return (
     <section aria-labelledby="inicio-heading" className="space-y-8">
       {/* ── Hero com gradiente ── */}
-      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-7 py-8 text-background">
-        <div className="flex items-center gap-4">
-          <Avatar nome={hint?.nome ?? "U"} size="lg" />
-          <div>
+      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-5 py-6 text-background sm:px-7 sm:py-8">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Avatar nome={hint?.nome ?? "U"} size="lg" className="shrink-0" />
+          <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[2px] text-orange-300/80">
               {isProfissional ? "Profissional" : "Contratante"}
             </p>
-            <h1 id="inicio-heading" className="mt-0.5 font-display text-3xl font-black text-background sm:text-4xl">
+            <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-2xl font-black text-background sm:text-4xl">
               {primeiroNome ? `Olá, ${primeiroNome}` : "Bem-vindo"}
             </h1>
             <p className="mt-1 text-sm text-background/60">

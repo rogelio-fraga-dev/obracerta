@@ -37,7 +37,7 @@ export function PublicHeader({ brandName }: { brandName: string }) {
         "sticky top-0 z-50 transition-colors duration-300",
         scrolled
           ? "border-b border-border bg-background/95 shadow-[var(--shadow-sm)] backdrop-blur-md"
-          : "border-b border-transparent bg-background/60 backdrop-blur-sm",
+          : "border-b border-border/60 bg-background/85 backdrop-blur-md",
       )}
     >
       <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3.5 sm:px-10 lg:px-14">
