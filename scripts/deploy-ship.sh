@@ -18,7 +18,9 @@ cd "$ROOT"
 [ -f infra/deploy.env ] && source infra/deploy.env
 
 DEPLOY_USER="${DEPLOY_USER:-ec2-user}"
-DEPLOY_DIR="${DEPLOY_DIR:-~/obracerta}"
+# Relativo ao home remoto — NÃO usar ~ (o bash expande p/ o home LOCAL).
+DEPLOY_DIR="${DEPLOY_DIR:-obracerta}"
+SKIP_BUILD="${SKIP_BUILD:-0}"
 ENV_PROD="infra/docker/.env.prod"
 COMPOSE="docker compose --env-file $ENV_PROD -f infra/docker/docker-compose.prod.yml"
 
@@ -28,22 +30,32 @@ done
 [ -f "$DEPLOY_KEY" ] || { echo "✗ Chave não encontrada: $DEPLOY_KEY" >&2; exit 1; }
 [ -f "$ENV_PROD" ] || { echo "✗ Falta $ENV_PROD (config de produção)." >&2; exit 1; }
 
-SSH="ssh -i $DEPLOY_KEY -o StrictHostKeyChecking=accept-new"
+# Cópia da chave com permissão 600 (ssh recusa chave "aberta" no Windows/Git Bash).
+KEY="$(mktemp)"; cp "$DEPLOY_KEY" "$KEY"; chmod 600 "$KEY"
+trap 'rm -f "$KEY"' EXIT
+
+SSH="ssh -i $KEY -o StrictHostKeyChecking=accept-new"
 TARGET="$DEPLOY_USER@$DEPLOY_HOST"
 
-echo "▶ 1/5 Buildando imagens localmente (api + web)…"
-$COMPOSE build api web
+if [ "$SKIP_BUILD" = "1" ]; then
+  echo "▶ 1-2/5 SKIP_BUILD=1 — reutilizando tars existentes em deploy-temp/…"
+  [ -f deploy-temp/obracerta-api.tar ] && [ -f deploy-temp/obracerta-web.tar ] || {
+    echo "✗ Tars não encontrados em deploy-temp/ (rode sem SKIP_BUILD)." >&2; exit 1; }
+else
+  echo "▶ 1/5 Buildando imagens localmente (api + web)…"
+  $COMPOSE build api web
 
-echo "▶ 2/5 Salvando imagens em tar…"
-mkdir -p deploy-temp
-docker save obracerta-api:latest -o deploy-temp/obracerta-api.tar
-docker save obracerta-web:latest -o deploy-temp/obracerta-web.tar
+  echo "▶ 2/5 Salvando imagens em tar…"
+  mkdir -p deploy-temp
+  docker save obracerta-api:latest -o deploy-temp/obracerta-api.tar
+  docker save obracerta-web:latest -o deploy-temp/obracerta-web.tar
+fi
 
 echo "▶ 3/5 Enviando imagens + infra para a EC2 ($TARGET)…"
 $SSH "$TARGET" "mkdir -p ${DEPLOY_DIR}/infra/docker"
-scp -i "$DEPLOY_KEY" -o StrictHostKeyChecking=accept-new \
+scp -i "$KEY" -o StrictHostKeyChecking=accept-new \
   deploy-temp/obracerta-api.tar deploy-temp/obracerta-web.tar "$TARGET:${DEPLOY_DIR}/"
-scp -i "$DEPLOY_KEY" -o StrictHostKeyChecking=accept-new -r \
+scp -i "$KEY" -o StrictHostKeyChecking=accept-new -r \
   infra/docker/. "$TARGET:${DEPLOY_DIR}/infra/docker/"
 
 echo "▶ 4/5 Carregando imagens e subindo a stack na EC2…"
