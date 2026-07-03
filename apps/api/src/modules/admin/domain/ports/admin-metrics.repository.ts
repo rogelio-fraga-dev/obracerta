@@ -50,6 +50,22 @@ export interface AdminAnalyticsAggregates {
 export interface AdminMetricsRepository {
   counts(): Promise<AdminCounts>;
   analytics(): Promise<AdminAnalyticsAggregates>;
+  listReviewsPaginated(
+    page: number,
+    limit: number,
+  ): Promise<{
+    items: Array<{
+      id: string;
+      bookingId: string;
+      autorNome: string;
+      alvoNome: string;
+      nota: number;
+      comentario: string | null;
+      status: string;
+      criadoEm: string;
+    }>;
+    total: number;
+  }>;
 }
 
 export const ADMIN_METRICS_REPOSITORY = Symbol("ADMIN_METRICS_REPOSITORY");

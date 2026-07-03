@@ -5,7 +5,6 @@ import type {
   Penalty,
   PenaltySummary,
   PortfolioPhoto,
-  ReceivedReview,
   Suspension,
 } from "@obracerta/shared";
 import { Badge, Card, Avatar, ProgressRing, StatCard, EmptyState } from "@obracerta/ui";
@@ -14,8 +13,6 @@ import { getProfileHint, getMyRoles } from "@/lib/session";
 import { penaltyReasonLabel } from "@/lib/penalty-ui";
 import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
-import { RespostaForm } from "./_components/RespostaForm";
-import { ReportDialog } from "./_components/ReportDialog";
 import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
 import { ShieldIcon } from "../_shell/icons";
@@ -103,8 +100,6 @@ export default async function PerfilPage() {
       {!isAdmin && isProfissional && <PortfolioPanel />}
 
       {!isAdmin && isProfissional && <ComportamentoPanel />}
-
-      {!isAdmin && <AvaliacoesRecebidas />}
     </section>
   );
 }
@@ -204,54 +199,6 @@ async function SuspensionPanel() {
           );
         })}
       </ul>
-    </div>
-  );
-}
-
-async function AvaliacoesRecebidas() {
-  const reviews = await serverApi<ReceivedReview[]>("GET", "/reviews/received");
-
-  return (
-    <div className="animate-fade-in delay-3 space-y-3">
-      <h2 className="font-display text-xl font-black text-foreground">Avaliações recebidas</h2>
-      {reviews.length === 0 ? (
-        <EmptyState
-          icon="⭐"
-          title="Nenhuma avaliação"
-          description="As avaliações aparecem aqui quando o serviço é concluído e ambas as partes avaliam."
-        />
-      ) : (
-        <ul className="space-y-3">
-          {reviews.map((r) => (
-            <Card key={r.id}>
-              <div className="flex items-center justify-between gap-3">
-                <span aria-label={`${r.nota} de 5`} className="text-xl text-warning tracking-widest">
-                  {"★".repeat(r.nota)}
-                  <span className="text-border">{"★".repeat(5 - r.nota)}</span>
-                </span>
-                <span className="text-sm text-muted-foreground">{formatDateTimeBR(r.criadoEm)}</span>
-              </div>
-              {r.comentario && <p className="mt-3 text-base text-foreground leading-relaxed">{r.comentario}</p>}
-              {r.resposta && (
-                <div className="mt-3 rounded-lg border-l-4 border-primary bg-muted/40 px-3 py-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Sua resposta
-                  </p>
-                  <p className="mt-1 text-sm text-foreground">{r.resposta}</p>
-                </div>
-              )}
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                {r.resposta ? (
-                  <span className="text-sm text-muted-foreground">Você já respondeu.</span>
-                ) : (
-                  <RespostaForm reviewId={r.id} />
-                )}
-                <ReportDialog entidade="REVIEW" entidadeId={r.id} />
-              </div>
-            </Card>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

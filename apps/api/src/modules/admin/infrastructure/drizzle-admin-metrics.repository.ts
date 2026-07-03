@@ -170,4 +170,50 @@ export class DrizzleAdminMetricsRepository implements AdminMetricsRepository {
       coorte: coorteRows,
     };
   }
+
+  async listReviewsPaginated(
+    page: number,
+    limit: number,
+  ): Promise<{
+    items: Array<{
+      id: string;
+      bookingId: string;
+      autorNome: string;
+      alvoNome: string;
+      nota: number;
+      comentario: string | null;
+      status: string;
+      criadoEm: string;
+    }>;
+    total: number;
+  }> {
+    const offset = (page - 1) * limit;
+    const itemsResult = await this.db.execute(sql`
+      select r.id, r.booking_id as "bookingId", 
+             u1.nome_completo as "autorNome", 
+             u2.nome_completo as "alvoNome", 
+             r.nota, r.comentario, r.status, 
+             r.criado_em as "criadoEm"
+      from reviews r
+      left join users u1 on u1.id = r.autor_id
+      left join users u2 on u2.id = r.alvo_id
+      order by r.criado_em desc
+      limit ${limit} offset ${offset}
+    `);
+    const countResult = await this.db.execute(sql`select count(*) as total from reviews`);
+
+    const items = (itemsResult.rows as any[]).map((row) => ({
+      id: String(row.id),
+      bookingId: String(row.bookingId),
+      autorNome: String(row.autorNome ?? "Desconhecido"),
+      alvoNome: String(row.alvoNome ?? "Desconhecido"),
+      nota: Number(row.nota),
+      comentario: row.comentario ? String(row.comentario) : null,
+      status: String(row.status),
+      criadoEm: new Date(row.criadoEm).toISOString(),
+    }));
+    const total = Number(countResult.rows[0]?.total ?? 0);
+
+    return { items, total };
+  }
 }

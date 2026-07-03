@@ -96,4 +96,8 @@ export class AdminService {
       coorte: a.coorte,
     };
   }
+
+  async listReviewsPaginated(page: number, limit: number) {
+    return this.metrics.listReviewsPaginated(page, limit);
+  }
 }

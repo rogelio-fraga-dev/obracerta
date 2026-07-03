@@ -27,6 +27,7 @@ function makeService(aggregates: AdminAnalyticsAggregates): AdminService {
   const repo: AdminMetricsRepository = {
     counts: () => Promise.resolve({} as AdminCounts),
     analytics: () => Promise.resolve(aggregates),
+    listReviewsPaginated: () => Promise.resolve({ items: [], total: 0 }),
   };
   return new AdminService(repo);
 }

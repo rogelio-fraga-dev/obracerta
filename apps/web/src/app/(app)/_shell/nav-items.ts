@@ -12,6 +12,7 @@ import {
   Users,
   ShieldAlert,
   Landmark,
+  Star,
 } from "lucide-react";
 
 export interface NavItem {
@@ -31,6 +32,7 @@ const BUSCAR: NavItem = { href: "/buscar", label: "Buscar profissionais", shortL
 const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", shortLabel: "Agenda", Icon: CalendarDays };
 const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", shortLabel: "Docs", Icon: FileText };
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
+const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: Star };
 
 export interface NavSet {
   primary: NavItem[];
@@ -40,18 +42,18 @@ export interface NavSet {
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
-  secondary: [AGENDA, FERRAMENTAS, COBRANCAS],
+  secondary: [AGENDA, FERRAMENTAS, AVALIACOES, COBRANCAS],
 };
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [OBRAS, COBRANCAS],
+  secondary: [OBRAS, AVALIACOES, COBRANCAS],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [PEDIDOS, COBRANCAS],
+  secondary: [PEDIDOS, AVALIACOES, COBRANCAS],
 };
 
 /**
@@ -88,6 +90,7 @@ const ADM_PAINEL: NavItem = { href: "/admin", label: "Painel admin", shortLabel:
 const ADM_USUARIOS: NavItem = { href: "/admin/usuarios", label: "Gestão de usuários", shortLabel: "Usuários", Icon: Users };
 const ADM_OBRAS: NavItem = { href: "/admin/obras", label: "Gestão de obras", shortLabel: "Obras", Icon: HardHat };
 const ADM_PEDIDOS: NavItem = { href: "/admin/pedidos", label: "Gestão de pedidos", shortLabel: "Pedidos", Icon: ClipboardList };
+const ADM_AVALIACOES: NavItem = { href: "/admin/avaliacoes", label: "Gestão de avaliações", shortLabel: "Reviews", Icon: Star };
 const ADM_MODERACAO: NavItem = { href: "/admin/moderacao", label: "Moderação", Icon: ShieldAlert };
 const ADM_FINANCEIRO: NavItem = { href: "/admin/financeiro", label: "Financeiro", shortLabel: "Financ.", Icon: Landmark };
 
@@ -100,6 +103,7 @@ export const ADMIN_NAV: NavItem[] = [
   ADM_USUARIOS,
   ADM_OBRAS,
   ADM_PEDIDOS,
+  ADM_AVALIACOES,
   ADM_MODERACAO,
   ADM_FINANCEIRO,
 ];

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Query, UseGuards, Post, HttpCode, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, Query, UseGuards, Post, HttpCode, HttpStatus, Inject } from "@nestjs/common";
 import {
   setUserRolesSchema,
   UserRole,
@@ -18,6 +18,9 @@ import { UsersService } from "../../users/application/users.service.js";
 import { WorkOrderService } from "../../work-orders/application/work-order.service.js";
 import { BookingService } from "../../booking/application/booking.service.js";
 import { AdminService } from "../application/admin.service.js";
+import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
+import type { Database } from "../../../infrastructure/database/drizzle.js";
+import { sql } from "drizzle-orm";
 
 /**
  * Painel administrativo (roadmap Fase 6). Todas as rotas exigem o papel ADMIN.
@@ -33,6 +36,7 @@ export class AdminController {
     private readonly admin: AdminService,
     private readonly workOrders: WorkOrderService,
     private readonly bookings: BookingService,
+    @Inject(DRIZZLE) private readonly db: Database,
   ) {}
 
   /** Snapshot de saúde do produto (ativação, conclusão, North Star, churn, moderação). */
@@ -106,5 +110,25 @@ export class AdminController {
   ): Promise<{ roles: string[] }> {
     await this.users.setRoles(id, body.roles);
     return { roles: body.roles };
+  }
+
+  /** Lista global de todas as avaliações do sistema. */
+  @Get("reviews")
+  async listReviews(@Query(new ZodValidationPipe(paginationQuerySchema)) query: PaginationQuery) {
+    return this.admin.listReviewsPaginated(query.page, query.limit);
+  }
+
+  /** Oculta uma avaliação do sistema. */
+  @Post("reviews/:id/hide")
+  async hideReview(@Param("id") id: string) {
+    await this.db.execute(sql`update reviews set status = 'OCULTA' where id = ${id}`);
+    return { success: true };
+  }
+
+  /** Restaura uma avaliação oculta. */
+  @Post("reviews/:id/restore")
+  async restoreReview(@Param("id") id: string) {
+    await this.db.execute(sql`update reviews set status = 'REVELADA' where id = ${id}`);
+    return { success: true };
   }
 }
