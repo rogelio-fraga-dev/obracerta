@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { MAX_PORTFOLIO_PHOTOS, type PortfolioPhoto } from "@obracerta/shared";
 import { Button, Field, Input } from "@obracerta/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { deletePortfolioPhotoAction, uploadPortfolioPhotoAction } from "../portfolio-actions";
 
 /**
@@ -13,6 +14,7 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
   const [file, setFile] = useState<File | null>(null);
   const [legenda, setLegenda] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [removendoId, setRemovendoId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const cheio = fotos.length >= MAX_PORTFOLIO_PHOTOS;
@@ -41,6 +43,8 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
         await deletePortfolioPhotoAction(id);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erro ao remover a foto.");
+      } finally {
+        setRemovendoId(null);
       }
     });
   }
@@ -65,7 +69,7 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
               )}
               <button
                 type="button"
-                onClick={() => remover(f.id)}
+                onClick={() => setRemovendoId(f.id)}
                 disabled={pending}
                 aria-label="Remover foto"
                 className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-danger"
@@ -104,6 +108,17 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
           </Button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={removendoId !== null}
+        title="Remover esta foto?"
+        description="Ela some do seu portfólio e do perfil público na hora."
+        confirmLabel="Sim, remover"
+        cancelLabel="Manter foto"
+        loading={pending}
+        onConfirm={() => removendoId && remover(removendoId)}
+        onClose={() => setRemovendoId(null)}
+      />
     </div>
   );
 }

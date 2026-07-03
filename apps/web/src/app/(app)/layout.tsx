@@ -3,6 +3,7 @@ import type { BookingRequest, User } from "@obracerta/shared";
 import { config } from "@/lib/config";
 import { serverApi } from "@/lib/server-api";
 import { getMyRoles, getProfileHint, requireSession } from "@/lib/session";
+import { ToastProvider } from "@/components/Toast";
 import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
 import { InstallPrompt } from "./_shell/InstallPrompt";
@@ -34,6 +35,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const fotoUrl = user?.fotoUrl ?? undefined;
 
   return (
+    <ToastProvider>
     <div className="flex min-h-dvh bg-background">
       <Sidebar
         brandName={config.brand.name}
@@ -68,5 +70,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
       <InstallPrompt />
     </div>
+    </ToastProvider>
   );
 }

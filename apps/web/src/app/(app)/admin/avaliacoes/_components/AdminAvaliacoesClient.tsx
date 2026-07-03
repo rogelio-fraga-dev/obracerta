@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge, Button, Card, Input, Select, type BadgeTone } from "@obracerta/ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { bff } from "@/lib/client";
+import { useToast } from "@/components/Toast";
 
 interface ReviewItem {
   id: string;
@@ -29,11 +30,10 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
   const [ratingFilter, setRatingFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  // Feedback inline acessível (substitui o alert() nativo — não-bloqueante).
-  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+  const toast = useToast();
   const itemsPerPage = 10;
 
-  // Moderar status da avaliação
+  // Moderar status da avaliação (feedback via toast — não empurra o layout)
   async function toggleStatus(id: string, currentStatus: string) {
     const action = currentStatus === "REVELADA" ? "hide" : "restore";
     try {
@@ -45,12 +45,9 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
             : r
         )
       );
-      setFeedback({
-        ok: true,
-        msg: action === "hide" ? "Avaliação ocultada." : "Avaliação restaurada.",
-      });
+      toast.success(action === "hide" ? "Avaliação ocultada." : "Avaliação restaurada.");
     } catch {
-      setFeedback({ ok: false, msg: "Não foi possível alterar o status da avaliação." });
+      toast.error("Não foi possível alterar o status da avaliação.");
     }
   }
 
@@ -100,19 +97,6 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
 
   return (
     <div className="space-y-4">
-      {feedback && (
-        <p
-          role="alert"
-          className={
-            feedback.ok
-              ? "rounded-md bg-success/10 px-3 py-2 text-sm font-medium text-success"
-              : "rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger"
-          }
-        >
-          {feedback.msg}
-        </p>
-      )}
-
       {/* ── Filtros e Busca ── */}
       <Card className="grid gap-4 sm:grid-cols-3">
         <div>

@@ -486,14 +486,45 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 
 ---
 
-## 13. Próximos Passos Imediatos
+## 13. Próximos Passos Imediatos _(revisado jul/2026 — pós-MVP, demo no ar)_
 
-1. **Decisão de nome + registro de domínio** (`.com.br` + `.com`) — destrava SEO/perfil público.
-2. Aprovar este plano (e o refinamento do Ultraplan) e iniciar **Fase 0**.
-3. Provisionar **VPS São Paulo (8GB) + Coolify + domínio + Cloudflare**; medir latência real vs. Hetzner.
-4. Contas sandbox: **WhatsApp Cloud API (Meta)**, **Asaas**, provedor **SMS** — validar OTP ponta a ponta.
-5. POC `packages/shared` (tipos+Zod) consumido por `apps/web` e `apps/api` (type-safety end-to-end).
-6. ✅ ORM decidido: **Drizzle** (SQL-first, PostGIS/`pg_trgm` nativos via `sql`, tipos inferidos do schema, leve). Registrar em **ADR-0001**.
+> Estado: MVP completo (Fases 0–8) + Google/Pix sandbox + paridade de UX com o segmento
+> (favoritos, reviews públicas, busca avançada, faixa de preço, checklist de ativação).
+> Demo pública na EC2 (`app.<IP>.sslip.io`). **O código deixou de ser o gargalo** —
+> os itens abaixo estão em ordem de prioridade.
+
+### 13.1 Proteger o que existe (código, curto)
+- [ ] **Backup automático do Postgres** — hoje o banco da demo vive num único container
+      **sem backup** (maior risco técnico atual). `pg_dump` diário → S3/MinIO via cron no host.
+- [ ] **Deploy via CI** (GitHub Actions builda a imagem → EC2 puxa) — substitui o upload de
+      ~630MB da máquina local (`scripts/deploy-ship.sh`) e a dependência do IP liberado no SG.
+- [ ] **Monitoramento mínimo** — a API já expõe `/metrics` (Prometheus); plugar Grafana Cloud
+      free ou ao menos um uptime-checker apontando pra demo.
+
+### 13.2 Validação com usuários (não-código, o mais valioso)
+- [ ] Roteiro de demo + **feedback estruturado da stakeholder** (cadastro → busca → pedido → Pix simulado).
+- [ ] **10 entrevistas por persona** (profissional/contratante) — pré-lançamento (§ Pré-lançamento).
+
+### 13.3 Decisão de nome + domínio (destrava a cadeia)
+- [ ] Nome definitivo + registro `.com.br`/`.com`. Bloqueia: Google OAuth **real** (tela de
+      consentimento exige domínio), e-mail transacional, SEO, Cloudflare, materiais.
+      Arquitetura já desacoplada (`NEXT_PUBLIC_BRAND_*`) — trocar é config.
+
+### 13.4 Provedores reais (quando 13.3 sair; tudo já atrás de portas)
+- [ ] **Asaas sandbox** — Pix real (UI + pipeline de webhook prontos; trocar o adapter).
+- [ ] **WhatsApp Cloud API + SMS fallback** — OTP real.
+- [ ] **Google OAuth** — credenciais reais (`GOOGLE_CLIENT_ID/SECRET`; o fluxo já alterna sozinho).
+- [ ] **Push VAPID** + `PAYMENT_WEBHOOK_SECRET` de produção (M-11).
+
+### 13.5 Qualidade na fila
+- [ ] **E2E Playwright** dos 2 fluxos críticos (cadastro→pedido→aceite→conclusão→avaliação;
+      busca→agendar) — maior lacuna de testes.
+- [ ] Rodada de **review multi-agente** (security/react/database/silent-failure — ver `docs/skills-ecc.md`).
+- [ ] Perf diferida do backend (M-8/9/10) + `serverApiFormData` (FE-5).
+
+### 13.6 Polimento visual restante (menor)
+- [ ] Dark mode (pós-piloto; tokens já permitem).
+- [x] ~~Ilustrações no "Como funciona", toasts, 404 própria, confirmações estilizadas~~ _(jul/2026)_.
 
 ---
 

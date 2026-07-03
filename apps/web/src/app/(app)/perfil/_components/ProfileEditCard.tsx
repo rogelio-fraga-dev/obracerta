@@ -62,7 +62,14 @@ export function ProfileEditCard({ user }: { user: User }) {
 
   const onUpload = () => {
     const file = fileRef.current?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      setFeedback({ ok: false, msg: "Escolha uma imagem antes de enviar." });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setFeedback({ ok: false, msg: "A foto passa de 5MB — escolha uma imagem menor." });
+      return;
+    }
     setFeedback(null);
     startTransition(async () => {
       try {

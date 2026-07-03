@@ -9,6 +9,8 @@ export type PersonaId = "contratante" | "profissional" | "empresa";
 export interface PersonaStep {
   titulo: string;
   texto: string;
+  /** Ilustração do passo (emoji — mesmo estilo da seção Dores). */
+  emoji: string;
 }
 
 export interface Persona {
@@ -41,11 +43,11 @@ export const PERSONAS: Persona[] = [
       "Encontre pedreiros, eletricistas, encanadores e mais — com histórico real, agenda transparente e reputação verificada. Sem boca a boca, sem surpresas.",
     ctaLabel: "Encontrar profissional",
     steps: [
-      { titulo: "Busque e compare", texto: "Filtre por profissão, cidade e nota. Veja portfólio, agenda e reputação antes de decidir." },
-      { titulo: "Envie o pedido", texto: "Escolha um horário livre na agenda e mande o pedido com mensagem e fotos do serviço." },
-      { titulo: "Aguarde o aceite", texto: "O profissional confirma em até 24h. No aceite, telefone, e-mail e WhatsApp são liberados." },
-      { titulo: "Combine direto", texto: "Com os contatos liberados, vocês alinham valor, data e escopo sem intermediário." },
-      { titulo: "Avalie no fim", texto: "Concluído o serviço, avalie. A nota é dupla-cega — justa para os dois lados." },
+      { emoji: "🔍", titulo: "Busque e compare", texto: "Filtre por profissão, cidade e nota. Veja portfólio, agenda e reputação antes de decidir." },
+      { emoji: "📅", titulo: "Envie o pedido", texto: "Escolha um horário livre na agenda e mande o pedido com mensagem e fotos do serviço." },
+      { emoji: "⏳", titulo: "Aguarde o aceite", texto: "O profissional confirma em até 24h. No aceite, telefone, e-mail e WhatsApp são liberados." },
+      { emoji: "🤝", titulo: "Combine direto", texto: "Com os contatos liberados, vocês alinham valor, data e escopo sem intermediário." },
+      { emoji: "⭐", titulo: "Avalie no fim", texto: "Concluído o serviço, avalie. A nota é dupla-cega — justa para os dois lados." },
     ],
   },
   {
@@ -60,11 +62,11 @@ export const PERSONAS: Persona[] = [
       "Apareça nas buscas da sua cidade, receba pedidos diretos e construa uma reputação que vale mais que qualquer indicação. 7 dias do Pro grátis.",
     ctaLabel: "Criar perfil profissional",
     steps: [
-      { titulo: "Monte seu perfil", texto: "Escolha suas profissões no catálogo, suba fotos do portfólio e configure sua agenda." },
-      { titulo: "Apareça na busca", texto: "Clientes da sua cidade te acham por profissão e disponibilidade. Reputação melhor, posição mais alta." },
-      { titulo: "Receba pedidos", texto: "A solicitação chega com a mensagem do cliente. Você tem 24h para aceitar ou recusar." },
-      { titulo: "Aceite e execute", texto: "No aceite, seus contatos são liberados. Combine os detalhes e faça o serviço." },
-      { titulo: "Construa reputação", texto: "Cada obra vira avaliação e badge. No Pro, dê lances sigilosos em obras abertas." },
+      { emoji: "👷", titulo: "Monte seu perfil", texto: "Escolha suas profissões no catálogo, suba fotos do portfólio e configure sua agenda." },
+      { emoji: "📣", titulo: "Apareça na busca", texto: "Clientes da sua cidade te acham por profissão e disponibilidade. Reputação melhor, posição mais alta." },
+      { emoji: "📬", titulo: "Receba pedidos", texto: "A solicitação chega com a mensagem do cliente. Você tem 24h para aceitar ou recusar." },
+      { emoji: "🛠️", titulo: "Aceite e execute", texto: "No aceite, seus contatos são liberados. Combine os detalhes e faça o serviço." },
+      { emoji: "🏆", titulo: "Construa reputação", texto: "Cada obra vira avaliação e badge. No Pro, dê lances sigilosos em obras abertas." },
     ],
   },
   {
@@ -79,11 +81,11 @@ export const PERSONAS: Persona[] = [
       "Cadastre sua empresa, encontre profissionais verificados e publique obras para receber propostas. Gestão centralizada num único acesso.",
     ctaLabel: "Cadastrar empresa",
     steps: [
-      { titulo: "Cadastre a empresa", texto: "CNPJ, razão social e dados da equipe num só administrador. Cadastro rápido." },
-      { titulo: "Busque ou publique", texto: "Ache profissionais por profissão e cidade, ou publique a obra para receber propostas." },
-      { titulo: "Receba lances", texto: "Profissionais enviam propostas sigilosas. Compare valor e prazo lado a lado." },
-      { titulo: "Escolha e contrate", texto: "Selecione o melhor lance, libere os contatos e combine os detalhes diretamente." },
-      { titulo: "Acompanhe tudo", texto: "Veja o histórico de obras e avalie cada serviço. Sua reputação como contratante também conta." },
+      { emoji: "🏢", titulo: "Cadastre a empresa", texto: "CNPJ, razão social e dados da equipe num só administrador. Cadastro rápido." },
+      { emoji: "📢", titulo: "Busque ou publique", texto: "Ache profissionais por profissão e cidade, ou publique a obra para receber propostas." },
+      { emoji: "📥", titulo: "Receba lances", texto: "Profissionais enviam propostas sigilosas. Compare valor e prazo lado a lado." },
+      { emoji: "🤝", titulo: "Escolha e contrate", texto: "Selecione o melhor lance, libere os contatos e combine os detalhes diretamente." },
+      { emoji: "📊", titulo: "Acompanhe tudo", texto: "Veja o histórico de obras e avalie cada serviço. Sua reputação como contratante também conta." },
     ],
   },
 ];

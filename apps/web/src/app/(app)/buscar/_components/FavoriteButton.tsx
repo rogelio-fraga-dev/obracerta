@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { bff } from "@/lib/client";
+import { useToast } from "@/components/Toast";
 
 /**
  * Coração de favoritar (otimista: muda na hora, desfaz se a chamada falhar).
@@ -17,6 +18,7 @@ export function FavoriteButton({
 }) {
   const [favorited, setFavorited] = useState(initialFavorited);
   const [busy, setBusy] = useState(false);
+  const toast = useToast();
 
   async function toggle() {
     if (busy) return;
@@ -25,8 +27,10 @@ export function FavoriteButton({
     setBusy(true);
     try {
       await bff.post("/api/favorites", { professionalId, favoritar: next });
+      toast.success(next ? "Salvo nos favoritos ♥" : "Removido dos favoritos");
     } catch {
-      setFavorited(!next); // rollback com feedback visual (volta o coração)
+      setFavorited(!next); // rollback
+      toast.error("Não foi possível atualizar os favoritos. Tente de novo.");
     } finally {
       setBusy(false);
     }

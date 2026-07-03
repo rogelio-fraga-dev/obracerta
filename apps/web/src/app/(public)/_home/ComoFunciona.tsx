@@ -70,9 +70,12 @@ export function ComoFunciona() {
         >
           {persona.steps.map((s, i) => (
             <li key={s.titulo} className="rounded-2xl bg-background/[0.06] p-6">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/15 text-sm font-black text-primary">
-                {i + 1}
-              </span>
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/15 text-sm font-black text-primary">
+                  {i + 1}
+                </span>
+                <span aria-hidden className="text-3xl">{s.emoji}</span>
+              </div>
               <h3 className="mt-4 font-bold text-background">{s.titulo}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-background/60">{s.texto}</p>
             </li>

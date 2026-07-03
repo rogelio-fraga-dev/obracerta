@@ -10,6 +10,7 @@ import {
 } from "@obracerta/shared";
 import { Button, Field, Input, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { type BookingAction, bookingActionsFor, DECLINE_REASON_UI } from "@/lib/booking-ui";
 
 const DECLINE_REASONS = Object.keys(DECLINE_REASON_UI) as DeclineReason[];
@@ -31,6 +32,7 @@ export function BookingActions({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [declining, setDeclining] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [motivo, setMotivo] = useState<DeclineReason>("AGENDA_INDISPONIVEL");
   const [detalhe, setDetalhe] = useState("");
 
@@ -99,7 +101,11 @@ export function BookingActions({
             <Button
               key={a.action}
               variant={a.variant}
-              onClick={() => (a.action === "decline" ? setDeclining(true) : void send(a.action))}
+              onClick={() => {
+                if (a.action === "decline") setDeclining(true);
+                else if (a.action === "cancel") setConfirmingCancel(true);
+                else void send(a.action);
+              }}
               disabled={loading}
             >
               {a.label}
@@ -107,6 +113,21 @@ export function BookingActions({
           ))}
         </div>
       )}
+
+      {/* Cancelamento é irreversível — pede confirmação. */}
+      <ConfirmDialog
+        open={confirmingCancel}
+        title="Cancelar este pedido?"
+        description="O pedido será encerrado para os dois lados e não poderá ser reaberto."
+        confirmLabel="Sim, cancelar"
+        cancelLabel="Manter pedido"
+        loading={loading}
+        onConfirm={async () => {
+          await send("cancel");
+          setConfirmingCancel(false);
+        }}
+        onClose={() => setConfirmingCancel(false)}
+      />
     </div>
   );
 }
