@@ -29,6 +29,8 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
   const [ratingFilter, setRatingFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  // Feedback inline acessível (substitui o alert() nativo — não-bloqueante).
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
   const itemsPerPage = 10;
 
   // Moderar status da avaliação
@@ -43,8 +45,12 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
             : r
         )
       );
+      setFeedback({
+        ok: true,
+        msg: action === "hide" ? "Avaliação ocultada." : "Avaliação restaurada.",
+      });
     } catch {
-      alert("Não foi possível alterar o status da avaliação.");
+      setFeedback({ ok: false, msg: "Não foi possível alterar o status da avaliação." });
     }
   }
 
@@ -76,8 +82,37 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
     PENDENTE: "warning",
   };
 
+  // Ação de moderação por linha (reutilizada na tabela desktop e nos cards mobile).
+  const renderAcao = (r: ReviewItem) => (
+    <>
+      {r.status === "REVELADA" && (
+        <Button size="sm" variant="secondary" onClick={() => toggleStatus(r.id, r.status)}>
+          Ocultar
+        </Button>
+      )}
+      {r.status === "OCULTA" && (
+        <Button size="sm" onClick={() => toggleStatus(r.id, r.status)}>
+          Restaurar
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-4">
+      {feedback && (
+        <p
+          role="alert"
+          className={
+            feedback.ok
+              ? "rounded-md bg-success/10 px-3 py-2 text-sm font-medium text-success"
+              : "rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger"
+          }
+        >
+          {feedback.msg}
+        </p>
+      )}
+
       {/* ── Filtros e Busca ── */}
       <Card className="grid gap-4 sm:grid-cols-3">
         <div>
@@ -135,68 +170,91 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
       </Card>
 
       {/* ── Lista de Registros ── */}
-      <Card className="overflow-x-auto">
-        {paginatedItems.length === 0 ? (
+      {paginatedItems.length === 0 ? (
+        <Card>
           <p className="py-6 text-center text-sm text-muted-foreground">
             Nenhuma avaliação encontrada para os critérios selecionados.
           </p>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <th className="py-3 px-4">Autor</th>
-                <th className="py-3 px-4">Destinatário</th>
-                <th className="py-3 px-4 text-center">Nota</th>
-                <th className="py-3 px-4">Comentário</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4">Criado em</th>
-                <th className="py-3 px-4 text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {paginatedItems.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/10">
-                  <td className="py-3.5 px-4 font-bold text-foreground">{r.autorNome}</td>
-                  <td className="py-3.5 px-4 font-semibold text-foreground">{r.alvoNome}</td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className="text-warning font-bold">★ {r.nota}</span>
-                  </td>
-                  <td className="py-3.5 px-4 max-w-[240px] truncate text-muted-foreground" title={r.comentario ?? undefined}>
-                    {r.comentario ?? "—"}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
+        </Card>
+      ) : (
+        <>
+          {/* Desktop: tabela */}
+          <Card className="hidden overflow-x-auto md:block">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <th className="py-3 px-4">Autor</th>
+                  <th className="py-3 px-4">Destinatário</th>
+                  <th className="py-3 px-4 text-center">Nota</th>
+                  <th className="py-3 px-4">Comentário</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4">Criado em</th>
+                  <th className="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {paginatedItems.map((r) => (
+                  <tr key={r.id} className="hover:bg-muted/10">
+                    <td className="py-3.5 px-4 font-bold text-foreground">{r.autorNome}</td>
+                    <td className="py-3.5 px-4 font-semibold text-foreground">{r.alvoNome}</td>
+                    <td className="py-3.5 px-4 text-center">
+                      <span className="text-warning font-bold">★ {r.nota}</span>
+                    </td>
+                    <td className="py-3.5 px-4 max-w-[240px] truncate text-muted-foreground" title={r.comentario ?? undefined}>
+                      {r.comentario ?? "—"}
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <Badge tone={statusTone[r.status] ?? "neutral"} size="sm">
+                        {r.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                      {formatDateTimeBR(r.criadoEm)}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">{renderAcao(r)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+
+          {/* Mobile: cards */}
+          <ul className="space-y-3 md:hidden">
+            {paginatedItems.map((r) => (
+              <li key={r.id}>
+                <Card className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-bold text-foreground">{r.autorNome}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        para <span className="font-semibold text-foreground">{r.alvoNome}</span>
+                      </p>
+                    </div>
                     <Badge tone={statusTone[r.status] ?? "neutral"} size="sm">
                       {r.status}
                     </Badge>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs text-muted-foreground">
-                    {formatDateTimeBR(r.criadoEm)}
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    {r.status === "REVELADA" && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => toggleStatus(r.id, r.status)}
-                      >
-                        Ocultar
-                      </Button>
-                    )}
-                    {r.status === "OCULTA" && (
-                      <Button
-                        size="sm"
-                        onClick={() => toggleStatus(r.id, r.status)}
-                      >
-                        Restaurar
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-bold text-warning">★ {r.nota}</span>
+                    <span className="text-xs text-muted-foreground">· {formatDateTimeBR(r.criadoEm)}</span>
+                  </div>
+
+                  {r.comentario && (
+                    <p className="text-sm italic text-muted-foreground line-clamp-3">
+                      &ldquo;{r.comentario}&rdquo;
+                    </p>
+                  )}
+
+                  {(r.status === "REVELADA" || r.status === "OCULTA") && (
+                    <div className="flex justify-end border-t border-border/60 pt-3">{renderAcao(r)}</div>
+                  )}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       {/* ── Paginação ── */}
       {totalPages > 1 && (

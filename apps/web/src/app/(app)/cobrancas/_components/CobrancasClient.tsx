@@ -100,49 +100,91 @@ export function CobrancasClient({ invoices, refunds, plano, features, tipo }: Co
                 Nenhuma fatura encontrada.
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      <th className="py-3 px-4">Valor</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">Vencimento</th>
-                      <th className="py-3 px-4">Método</th>
-                      <th className="py-3 px-4">Paga em</th>
-                      <th className="py-3 px-4 text-right">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {invoices.map((inv) => {
-                      const ui = INVOICE_STATUS_UI[inv.status];
-                      return (
-                        <tr key={inv.id} className="hover:bg-muted/10">
-                          <td className="py-3.5 px-4 font-bold text-foreground">
+              <>
+                {/* Desktop: tabela */}
+                <div className="hidden overflow-x-auto sm:block">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <th className="py-3 px-4">Valor</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4">Vencimento</th>
+                        <th className="py-3 px-4">Método</th>
+                        <th className="py-3 px-4">Paga em</th>
+                        <th className="py-3 px-4 text-right">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {invoices.map((inv) => {
+                        const ui = INVOICE_STATUS_UI[inv.status];
+                        return (
+                          <tr key={inv.id} className="hover:bg-muted/10">
+                            <td className="py-3.5 px-4 font-bold text-foreground">
+                              {formatCentavos(inv.valorCentavos)}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
+                            </td>
+                            <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                              {formatDateTimeBR(inv.vencimentoEm)}
+                            </td>
+                            <td className="py-3.5 px-4 text-xs text-foreground">
+                              {inv.metodo ? PAYMENT_METHOD_LABEL[inv.metodo] : "—"}
+                            </td>
+                            <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                              {inv.pagoEm ? formatDateTimeBR(inv.pagoEm) : "—"}
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              {inv.status === "PAGA" && (
+                                <RefundButton invoiceId={inv.id} />
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile: cards */}
+                <ul className="space-y-3 sm:hidden">
+                  {invoices.map((inv) => {
+                    const ui = INVOICE_STATUS_UI[inv.status];
+                    return (
+                      <li
+                        key={inv.id}
+                        className="rounded-xl border border-border p-4 space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-display text-lg font-black text-foreground">
                             {formatCentavos(inv.valorCentavos)}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
-                          </td>
-                          <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                          </span>
+                          <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
+                        </div>
+                        <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                          <dt className="text-muted-foreground">Vencimento</dt>
+                          <dd className="text-right font-medium text-foreground">
                             {formatDateTimeBR(inv.vencimentoEm)}
-                          </td>
-                          <td className="py-3.5 px-4 text-xs text-foreground">
+                          </dd>
+                          <dt className="text-muted-foreground">Método</dt>
+                          <dd className="text-right font-medium text-foreground">
                             {inv.metodo ? PAYMENT_METHOD_LABEL[inv.metodo] : "—"}
-                          </td>
-                          <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                          </dd>
+                          <dt className="text-muted-foreground">Paga em</dt>
+                          <dd className="text-right font-medium text-foreground">
                             {inv.pagoEm ? formatDateTimeBR(inv.pagoEm) : "—"}
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            {inv.status === "PAGA" && (
-                              <RefundButton invoiceId={inv.id} />
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                          </dd>
+                        </dl>
+                        {inv.status === "PAGA" && (
+                          <div className="flex justify-end border-t border-border/60 pt-2.5">
+                            <RefundButton invoiceId={inv.id} />
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
             )}
           </Card>
         )}
