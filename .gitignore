@@ -53,3 +53,6 @@ playwright/.cache/
 
 # Deploy config local (segredos de SSH)
 infra/deploy.env
+
+# Tars temporarios de deploy (docker save)
+deploy-temp/
