@@ -40,14 +40,20 @@ export function PublicHeader({ brandName }: { brandName: string }) {
           : "border-b border-border/60 bg-background/85 backdrop-blur-md",
       )}
     >
-      <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-6 py-3.5 sm:px-10 lg:px-14">
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-10 sm:py-3.5 lg:px-14">
         <Link href="/" aria-label={brandName} className="flex shrink-0 items-center">
+          {/* Celular: só o símbolo (a logo completa + botões estouram 320–360px). */}
+          <img
+            src="/brand/obracerta-mark.png"
+            alt={brandName}
+            className="h-9 w-auto sm:hidden"
+          />
           <img
             src="/brand/obracerta-logo.png"
             alt={brandName}
             width={1120}
             height={305}
-            className="h-9 w-auto sm:h-10"
+            className="hidden h-10 w-auto sm:block"
           />
         </Link>
 
@@ -65,16 +71,16 @@ export function PublicHeader({ brandName }: { brandName: string }) {
         </nav>
 
         {/* Acesso — sempre visível */}
-        <nav className="flex shrink-0 items-center gap-2 sm:gap-3" aria-label="Acesso">
+        <nav className="flex shrink-0 items-center gap-1.5 sm:gap-3" aria-label="Acesso">
           <Link
             href="/entrar"
-            className="rounded-md px-3 py-2 text-sm font-bold text-foreground transition-colors hover:text-primary"
+            className="rounded-md px-2.5 py-2 text-sm font-bold text-foreground transition-colors hover:text-primary sm:px-3"
           >
             Entrar
           </Link>
           <Link
             href="/cadastro"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-extrabold text-primary-foreground shadow-[0_2px_12px_rgba(196,68,8,0.25)] transition-colors hover:bg-orange-400"
+            className="whitespace-nowrap rounded-lg bg-primary px-3 py-2 text-sm font-extrabold text-primary-foreground shadow-[0_2px_12px_rgba(196,68,8,0.25)] transition-colors hover:bg-orange-400 sm:px-4"
           >
             Criar conta
           </Link>

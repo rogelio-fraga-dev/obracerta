@@ -11,7 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: config.brand.name,
     description:
       "Profissionais da construção civil com reputação verificada e agenda em tempo real.",
-    start_url: "/inicio",
+    // Abre na landing: quem não tem sessão conhece o produto; quem tem entra por ali.
+    start_url: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#faf7f0",
