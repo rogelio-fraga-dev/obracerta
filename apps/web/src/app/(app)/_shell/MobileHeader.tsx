@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, ArrowRight } from "lucide-react";
 import { cn } from "@obracerta/ui";
+import { firstName } from "@/lib/format";
 import { navForTipo, tipoLabel, ADMIN_NAV } from "./nav-items";
 import { LogoutButton } from "./LogoutButton";
 
@@ -41,25 +42,17 @@ export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: Mobile
               {inicial}
             </span>
             <span className="font-display text-sm font-bold text-foreground truncate">
-              Bem-vindo - {nome ?? "Usuário"}
+              Olá, {firstName(nome) || "Usuário"}
             </span>
           </Link>
-          <div className="flex items-center gap-2">
-            <Link
-              href={isAdmin ? "/admin" : "/inicio"}
-              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              Início
-            </Link>
-            <button
-              type="button"
-              onClick={() => setIsOpen(true)}
-              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              aria-label="Abrir menu"
-            >
-              Menu
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsOpen(true)}
+            className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            aria-label="Abrir menu"
+          >
+            Menu
+          </button>
         </div>
       </header>
 

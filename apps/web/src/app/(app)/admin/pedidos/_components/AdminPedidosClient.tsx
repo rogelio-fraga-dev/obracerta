@@ -62,7 +62,7 @@ export function AdminPedidosClient({ initialPedidos, userMap }: AdminPedidosClie
         />
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-background rounded-xl border border-border overflow-hidden">
         {/* Desktop View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -118,7 +118,7 @@ export function AdminPedidosClient({ initialPedidos, userMap }: AdminPedidosClie
                       {pedido.status}
                     </Badge>
                     {pedido.motivoRecusa && (
-                      <p className="text-[10px] text-destructive truncate max-w-[120px]">
+                      <p className="text-[10px] text-danger truncate max-w-[120px]">
                         Recusado: {pedido.motivoRecusa}
                       </p>
                     )}

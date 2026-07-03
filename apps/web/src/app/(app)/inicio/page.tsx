@@ -5,7 +5,7 @@ import type { BookingRequest, PenaltySummary, Review } from "@obracerta/shared";
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
 import { serverApi } from "@/lib/server-api";
-import { formatDateTimeBR } from "@/lib/format";
+import { formatDateTimeBR, firstName } from "@/lib/format";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import {
   AgendaIcon,
@@ -42,7 +42,7 @@ export default async function InicioPage() {
   const [hint, roles] = await Promise.all([getProfileHint(), getMyRoles()]);
   if (roles.includes("ADMIN")) redirect("/admin");
 
-  const primeiroNome = hint?.nome.split(" ")[0] ?? "";
+  const primeiroNome = firstName(hint?.nome);
   const isProfissional = hint?.tipo === "PROFISSIONAL";
   const acoes = isProfissional ? ACOES_PROFISSIONAL : ACOES_CONTRATANTE;
 

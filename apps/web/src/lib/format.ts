@@ -11,6 +11,11 @@ export const WEEKDAY_LABELS_LONG = [
   "Sábado",
 ] as const;
 
+/** Primeiro nome de um nome completo (evita estourar o header em telas pequenas). */
+export function firstName(nome: string | null | undefined): string {
+  return (nome ?? "").trim().split(/\s+/)[0] ?? "";
+}
+
 /** Formata "YYYY-MM-DD" como "DD/MM" (sem fuso — a data já vem só com o dia). */
 export function formatDayBR(isoDate: string): string {
   const [, mes, dia] = isoDate.split("-");

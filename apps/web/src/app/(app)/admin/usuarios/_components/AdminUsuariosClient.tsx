@@ -52,7 +52,7 @@ export function AdminUsuariosClient({ initialUsers }: { initialUsers: User[] }) 
         />
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-background rounded-xl border border-border overflow-hidden">
         {/* Desktop View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm">

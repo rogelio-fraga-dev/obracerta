@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, Button, Card, Input, Select } from "@obracerta/ui";
+import { Badge, Button, Card, Input, Select, type BadgeTone } from "@obracerta/ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { bff } from "@/lib/client";
 
@@ -43,7 +43,7 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
             : r
         )
       );
-    } catch (e) {
+    } catch {
       alert("Não foi possível alterar o status da avaliação.");
     }
   }
@@ -70,7 +70,7 @@ export function AdminAvaliacoesClient({ initialData }: AdminAvaliacoesClientProp
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedItems = filtered.slice(startIndex, startIndex + itemsPerPage);
 
-  const statusTone: Record<string, any> = {
+  const statusTone: Record<string, BadgeTone> = {
     REVELADA: "success",
     OCULTA: "danger",
     PENDENTE: "warning",

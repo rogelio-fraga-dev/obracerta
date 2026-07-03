@@ -5,6 +5,7 @@ import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
 import { InstallPrompt } from "./_shell/InstallPrompt";
 import { MobileHeader } from "./_shell/MobileHeader";
+import { TabBar } from "./_shell/TabBar";
 
 /**
  * Shell da área logada (route group `(app)`) — o PWA, **PC-first com
@@ -36,10 +37,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1600px] flex-1 px-5 py-6 pb-12 lg:px-12 lg:py-10 lg:pb-12"
+          className="mx-auto w-full max-w-[1600px] flex-1 px-5 py-6 pb-28 lg:px-12 lg:py-10 lg:pb-12"
         >
           {children}
         </main>
+
+        {/* Navegação inferior — só no mobile (a Sidebar cobre o desktop). */}
+        <TabBar tipo={hint?.tipo} />
       </div>
 
       <InstallPrompt />
