@@ -3,13 +3,18 @@ import {
   UserStatus,
   type PublicPortfolioPhoto,
   type PublicProfile,
+  type PublicReview,
 } from "@obracerta/shared";
 import { PortfolioService } from "../../profiles/application/portfolio.service.js";
 import { ProfilesService } from "../../profiles/application/profiles.service.js";
 import { Feature, planAllows } from "../../entitlements/domain/entitlements.js";
+import { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
 import { ReputationService } from "../../reputation/application/reputation.service.js";
 import { UsersService } from "../../users/application/users.service.js";
-import { publicFoto, publicName } from "../domain/public-profile-rules.js";
+import { nomeParcial, publicFoto, publicName } from "../domain/public-profile-rules.js";
+
+/** Quantas avaliações recentes aparecem no perfil público. */
+const PUBLIC_REVIEWS_LIMIT = 5;
 
 @Injectable()
 export class PublicProfileService {
@@ -18,6 +23,7 @@ export class PublicProfileService {
     private readonly portfolio: PortfolioService,
     private readonly users: UsersService,
     private readonly reputation: ReputationService,
+    private readonly penalties: PenaltyService,
   ) {}
 
   /**
@@ -33,7 +39,11 @@ export class PublicProfileService {
       throw new NotFoundException("Perfil não encontrado.");
     }
 
-    const reputacao = await this.reputation.getReputation(profile.userId);
+    const [reputacao, avaliacoes, taxaAceitacao] = await Promise.all([
+      this.reputation.getReputation(profile.userId),
+      this.publicReviews(profile.userId),
+      this.acceptanceRate(profile.userId),
+    ]);
     return {
       slug: profile.slugPublico,
       nome: publicName(user.nomeCompleto, profile.plano),
@@ -44,7 +54,32 @@ export class PublicProfileService {
       fotoUrl: publicFoto(profile.fotoUrl, profile.plano),
       portfolio: await this.publicPortfolio(profile.userId, profile.plano),
       reputacao,
+      avaliacoes,
+      taxaAceitacao,
     };
+  }
+
+  /**
+   * Últimas avaliações reveladas com autor **parcial** (LGPD) + resposta pública.
+   * Comentários reais são o maior fator de confiança do segmento.
+   */
+  private async publicReviews(userId: string): Promise<PublicReview[]> {
+    const received = await this.reputation.listReceived(userId);
+    const latest = received.slice(0, PUBLIC_REVIEWS_LIMIT);
+    const autores = await Promise.all(latest.map((r) => this.users.findById(r.autorId)));
+    return latest.map((r, i) => ({
+      autorNome: autores[i] ? nomeParcial(autores[i]!.nomeCompleto) : "Contratante",
+      nota: r.nota,
+      comentario: r.comentario,
+      criadoEm: r.criadoEm,
+      resposta: r.resposta,
+    }));
+  }
+
+  /** Taxa de aceitação pública (sinal de "responde rápido"); null sem histórico. */
+  private async acceptanceRate(userId: string): Promise<number | null> {
+    const summary = await this.penalties.getSummary(userId);
+    return summary.taxaAceitacao;
   }
 
   /**

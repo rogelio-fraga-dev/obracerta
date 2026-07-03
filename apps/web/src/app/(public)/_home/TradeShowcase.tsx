@@ -1,9 +1,11 @@
+import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 
 /**
  * Vitrine de profissões — grade ilustrada (SVG próprios, sem depender de fotos
- * externas por conta da CSP). Dá "imagens" reais à landing tanto no mobile
- * quanto no desktop, reforçando de imediato o que a plataforma cobre.
+ * externas por conta da CSP) e **clicável**: cada ofício leva à busca já
+ * filtrada (`/buscar?especialidade=`; sem sessão, o guard manda ao login).
+ * Os rótulos casam com o `professionCatalog` do shared.
  */
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -79,13 +81,14 @@ function RulerIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// Rótulos idênticos ao professionCatalog (shared) — o filtro da busca casa exato.
 const TRADES: Trade[] = [
   { label: "Pedreiro", desc: "Alvenaria e acabamento", Icon: BrickIcon, from: "#e8560a", to: "#a53a07" },
   { label: "Eletricista", desc: "Instalações e reparos", Icon: BoltIcon, from: "#e8a00a", to: "#c44408" },
   { label: "Encanador", desc: "Hidráulica e vazamentos", Icon: WrenchIcon, from: "#2563eb", to: "#1e3a8a" },
-  { label: "Pintor", desc: "Interna e externa", Icon: RollerIcon, from: "#1a9e5c", to: "#0f5c37" },
+  { label: "Gesseiro", desc: "Paredes, forros e sancas", Icon: RollerIcon, from: "#1a9e5c", to: "#0f5c37" },
   { label: "Marceneiro", desc: "Móveis sob medida", Icon: HammerIcon, from: "#c44408", to: "#7e2d06" },
-  { label: "Mestre de obras", desc: "Gestão e medição", Icon: RulerIcon, from: "#221f16", to: "#18160f" },
+  { label: "Serralheiro", desc: "Portões e estruturas", Icon: RulerIcon, from: "#221f16", to: "#18160f" },
 ];
 
 export function TradeShowcase() {
@@ -106,7 +109,10 @@ export function TradeShowcase() {
         <ul className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
           {TRADES.map(({ label, desc, Icon, from, to }) => (
             <li key={label}>
-              <div className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border bg-background p-4 text-center transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[var(--shadow-md)] sm:p-6">
+              <Link
+                href={`/buscar?especialidade=${encodeURIComponent(label)}`}
+                className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border bg-background p-4 text-center transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-6"
+              >
                 <span
                   className="flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-[var(--shadow-sm)] transition-transform group-hover:scale-105 sm:h-16 sm:w-16"
                   style={{ backgroundImage: `linear-gradient(135deg, ${from}, ${to})` }}
@@ -117,13 +123,13 @@ export function TradeShowcase() {
                   <div className="font-display text-sm font-black text-foreground sm:text-base">{label}</div>
                   <div className="mt-0.5 text-xs text-muted-foreground">{desc}</div>
                 </div>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>
 
         <p className="mt-6 text-center text-sm text-muted-foreground sm:text-left">
-          E muitas outras — gesseiro, serralheiro, vidraceiro, jardineiro, diarista e mais.
+          E muitas outras — azulejista, telhadista, vidraceiro, piscineiro, paisagista e mais.
         </p>
       </div>
     </section>

@@ -5,6 +5,8 @@ import { ApiEnvelopeError, type PublicProfile, professionalPlanCatalog } from "@
 import { Badge, Card } from "@obracerta/ui";
 import { callApi } from "@/lib/server-api";
 import { config } from "@/lib/config";
+import { formatDateTimeBR } from "@/lib/format";
+import { ShareButton } from "./ShareButton";
 
 interface PageProps {
   // Next.js 15: params é assíncrono (Promise) em Server Components.
@@ -49,7 +51,10 @@ export default async function PublicProfilePage({ params }: PageProps) {
     <section aria-labelledby="profile-heading" className="mx-auto max-w-5xl px-6 py-10">
       {/* Header hero — vitrine do profissional */}
       <header className="relative overflow-hidden rounded-3xl bg-gradient-hero px-6 py-8 text-white sm:px-10 sm:py-10">
-        <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">Perfil público</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">Perfil público</p>
+          <ShareButton nome={nome} />
+        </div>
         <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
           <div
             aria-hidden={!profile.fotoUrl}
@@ -90,11 +95,17 @@ export default async function PublicProfilePage({ params }: PageProps) {
             <dl className="space-y-2 text-sm">
               <Stat label="Avaliações" value={`${profile.reputacao.totalAvaliacoes}`} />
               <Stat label="Nota média" value={`${profile.reputacao.mediaNota.toFixed(1)} / 5`} />
+              {profile.taxaAceitacao !== null && (
+                <Stat label="Aceita pedidos" value={`${Math.round(profile.taxaAceitacao * 100)}%`} />
+              )}
               {profile.anosExperiencia !== null && (
                 <Stat label="Experiência" value={`${profile.anosExperiencia} anos`} />
               )}
               <Stat label="Plano" value={planoNome} />
             </dl>
+            {profile.taxaAceitacao !== null && profile.taxaAceitacao >= 0.8 && (
+              <Badge tone="success">⚡ Responde rápido</Badge>
+            )}
             {profile.especialidades.length > 0 && (
               <div className="flex flex-wrap gap-2 border-t border-border pt-3">
                 {profile.especialidades.map((esp) => (
@@ -127,9 +138,52 @@ export default async function PublicProfilePage({ params }: PageProps) {
           </Card>
         </aside>
 
-        {/* Portfólio */}
-        <div>
-          <h2 className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
+        {/* Portfólio + avaliações */}
+        <div className="space-y-8">
+          <section aria-labelledby="avaliacoes-heading">
+            <h2 id="avaliacoes-heading" className="font-display text-lg font-black text-foreground">
+              O que dizem os clientes
+            </h2>
+            {profile.avaliacoes.length > 0 ? (
+              <ul className="mt-3 space-y-3">
+                {profile.avaliacoes.map((av, i) => (
+                  <li key={`${av.criadoEm}-${i}`}>
+                    <Card className="space-y-2 p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                        <div className="flex items-center gap-2">
+                          <Stars nota={av.nota} />
+                          <span className="text-sm font-bold text-foreground">{av.autorNome}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDateTimeBR(av.criadoEm)}
+                        </span>
+                      </div>
+                      {av.comentario && (
+                        <p className="text-sm leading-relaxed text-foreground">“{av.comentario}”</p>
+                      )}
+                      {av.resposta && (
+                        <div className="rounded-lg border border-border bg-muted/40 p-3">
+                          <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                            Resposta do profissional
+                          </p>
+                          <p className="mt-1 text-sm text-foreground">{av.resposta}</p>
+                        </div>
+                      )}
+                    </Card>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Card className="mt-3">
+                <p className="text-sm text-muted-foreground">
+                  Ainda sem avaliações públicas — seja o primeiro a contratar e avaliar.
+                </p>
+              </Card>
+            )}
+          </section>
+
+          <section aria-labelledby="portfolio-heading">
+          <h2 id="portfolio-heading" className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
           {profile.portfolio.length > 0 ? (
             <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {profile.portfolio.map((foto, i) => (
@@ -152,6 +206,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
               </p>
             </Card>
           )}
+          </section>
         </div>
       </div>
     </section>

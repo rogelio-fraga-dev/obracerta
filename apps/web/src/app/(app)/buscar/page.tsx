@@ -1,13 +1,16 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import {
+  formatCentavos,
   professionalPlanCatalog,
   type ProfessionalPlan,
   type SearchProfessionalsResult,
 } from "@obracerta/shared";
 import { Avatar, Badge, Button, Card, type BadgeTone } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
+import { getProfileHint } from "@/lib/session";
 import { SearchFilters } from "./_components/SearchFilters";
+import { FavoriteButton } from "./_components/FavoriteButton";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -20,7 +23,7 @@ const PLANO_TONE: Record<ProfessionalPlan, BadgeTone> = {
 
 function buildQuery(params: Record<string, string | string[] | undefined>): string {
   const qs = new URLSearchParams();
-  for (const key of ["q", "especialidade", "plano", "lat", "lng", "raioKm", "page"]) {
+  for (const key of ["q", "especialidade", "plano", "lat", "lng", "raioKm", "notaMin", "ordem", "page"]) {
     const value = params[key];
     if (typeof value === "string" && value.trim()) qs.set(key, value);
   }
@@ -37,10 +40,19 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
   const query = buildQuery(params);
   const especialidadeBuscada = typeof params.especialidade === "string" ? params.especialidade : "";
 
-  const { items, meta } = await serverApi<SearchProfessionalsResult>(
-    "GET",
-    `/search/professionals${query ? `?${query}` : ""}`,
-  );
+  const hint = await getProfileHint();
+  const canFavorite = hint?.tipo !== "PROFISSIONAL";
+
+  const [{ items, meta, faixaPreco }, favoritedIds] = await Promise.all([
+    serverApi<SearchProfessionalsResult>(
+      "GET",
+      `/search/professionals${query ? `?${query}` : ""}`,
+    ),
+    canFavorite
+      ? serverApi<string[]>("GET", "/favorites/me/ids").catch(() => [] as string[])
+      : Promise.resolve([] as string[]),
+  ]);
+  const favoritedSet = new Set(favoritedIds);
 
   return (
     <section aria-labelledby="buscar-heading" className="space-y-5">
@@ -53,6 +65,22 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
       </Suspense>
 
       <p className="text-sm text-muted-foreground">{meta.total} profissional(is) encontrado(s)</p>
+
+      {/* Faixa de preço de referência (agregado anônimo de lances) — dor "quanto custa?". */}
+      {faixaPreco && (
+        <div className="rounded-xl border border-info/25 bg-info/5 px-4 py-3 text-sm">
+          <span className="font-bold text-foreground">
+            💡 Faixa de preço em {faixaPreco.especialidade}:
+          </span>{" "}
+          <span className="text-foreground">
+            {formatCentavos(faixaPreco.minCentavos)} a {formatCentavos(faixaPreco.maxCentavos)}
+          </span>{" "}
+          <span className="text-muted-foreground">
+            (mediana {formatCentavos(faixaPreco.medianaCentavos)}, base de {faixaPreco.amostras}{" "}
+            proposta(s) em obras)
+          </span>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <Card>
@@ -100,12 +128,20 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                         .join(" · ")}
                     </p>
                   </div>
-                  <Link
-                    href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}
-                    className="shrink-0 w-full sm:w-auto"
-                  >
-                    <Button size="sm" className="w-full sm:w-auto">Agendar</Button>
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-2 w-full sm:w-auto">
+                    {canFavorite && (
+                      <FavoriteButton
+                        professionalId={p.userId}
+                        initialFavorited={favoritedSet.has(p.userId)}
+                      />
+                    )}
+                    <Link
+                      href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}
+                      className="min-w-0 flex-1 sm:flex-none"
+                    >
+                      <Button size="sm" className="w-full sm:w-auto">Agendar</Button>
+                    </Link>
+                  </div>
                 </Card>
               </li>
             );

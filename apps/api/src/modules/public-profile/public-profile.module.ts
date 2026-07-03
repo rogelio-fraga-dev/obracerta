@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { DeclinePenaltyModule } from "../decline-penalty/decline-penalty.module.js";
 import { ProfilesModule } from "../profiles/profiles.module.js";
 import { ReputationModule } from "../reputation/reputation.module.js";
 import { UsersModule } from "../users/users.module.js";
@@ -7,10 +8,11 @@ import { PublicProfileController } from "./interface/public-profile.controller.j
 
 /**
  * Perfil público (roadmap §18/§24, Etapa 5.2). Compõe perfil (ProfilesModule),
- * identidade (UsersModule) e reputação (ReputationModule) na view pública limitada.
+ * identidade (UsersModule), reputação (ReputationModule) e comportamento
+ * (DeclinePenaltyModule — taxa de aceitação) na view pública limitada.
  */
 @Module({
-  imports: [ProfilesModule, UsersModule, ReputationModule],
+  imports: [ProfilesModule, UsersModule, ReputationModule, DeclinePenaltyModule],
   controllers: [PublicProfileController],
   providers: [PublicProfileService],
   exports: [PublicProfileService],

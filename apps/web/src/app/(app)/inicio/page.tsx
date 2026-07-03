@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ComponentType, SVGProps } from "react";
-import type { BookingRequest, PenaltySummary, Review } from "@obracerta/shared";
+import type {
+  AvailabilitySlot,
+  BookingRequest,
+  PenaltySummary,
+  PortfolioPhoto,
+  ProfessionalProfile,
+  Review,
+} from "@obracerta/shared";
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
 import { serverApi } from "@/lib/server-api";
@@ -21,6 +28,45 @@ interface Acao {
   titulo: string;
   desc: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
+}
+
+interface ChecklistItem {
+  href: string;
+  titulo: string;
+  done: boolean;
+}
+
+/**
+ * Passos de ativação do profissional (onboarding guiado): perfil completo,
+ * agenda definida e portfólio com fotos — o caminho até aparecer bem na busca.
+ * `portfolio: null` = plano sem a feature (não vira pendência).
+ */
+function buildChecklist(
+  perfil: ProfessionalProfile | null,
+  agenda: AvailabilitySlot[],
+  portfolio: PortfolioPhoto[] | null,
+): ChecklistItem[] {
+  const itens: ChecklistItem[] = [
+    {
+      href: "/perfil",
+      titulo: "Complete seu perfil",
+      done: (perfil?.completudePct ?? 0) >= 100,
+    },
+    {
+      href: "/agenda",
+      titulo: "Defina sua agenda semanal",
+      done: agenda.length > 0,
+    },
+  ];
+  if (portfolio !== null) {
+    itens.push({
+      href: "/perfil",
+      titulo: "Publique fotos no portfólio",
+      done: portfolio.length > 0,
+    });
+  }
+  // Tudo feito → o card nem aparece.
+  return itens.every((i) => i.done) ? [] : itens;
 }
 
 const ACOES_PROFISSIONAL: Acao[] = [
@@ -67,10 +113,19 @@ export default async function InicioPage() {
     .sort((a, b) => new Date(a.dataServico).getTime() - new Date(b.dataServico).getTime())
     .slice(0, 3);
 
-  // Para profissionais: buscar penalidades
+  // Para profissionais: penalidades + passos de ativação (checklist do 1º acesso)
   let penaltyStats: PenaltySummary | null = null;
+  let checklist: ChecklistItem[] = [];
   if (isProfissional) {
-    penaltyStats = await serverApi<PenaltySummary>("GET", "/penalties/me/summary").catch(() => null);
+    const [penalties, perfil, agenda, portfolio] = await Promise.all([
+      serverApi<PenaltySummary>("GET", "/penalties/me/summary").catch(() => null),
+      serverApi<ProfessionalProfile>("GET", "/profiles/professional/me").catch(() => null),
+      serverApi<AvailabilitySlot[]>("GET", "/availability/me").catch(() => [] as AvailabilitySlot[]),
+      // 403 no plano sem portfólio → não vira passo pendente
+      serverApi<PortfolioPhoto[]>("GET", "/profiles/professional/me/portfolio").catch(() => null),
+    ]);
+    penaltyStats = penalties;
+    checklist = buildChecklist(perfil, agenda, portfolio);
   }
 
   return (
@@ -94,6 +149,50 @@ export default async function InicioPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Checklist de ativação (profissional com passos pendentes) ── */}
+      {checklist.length > 0 && (
+        <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-display text-lg font-black text-foreground">
+              Comece bem: ative seu perfil
+            </h2>
+            <span className="text-xs font-bold text-muted-foreground">
+              {checklist.filter((c) => c.done).length}/{checklist.length} concluídos
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Perfis completos aparecem melhor na busca e recebem mais pedidos.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {checklist.map((item) => (
+              <li key={item.titulo}>
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:border-primary/40"
+                >
+                  <span
+                    aria-hidden
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${
+                      item.done ? "bg-success text-white" : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {item.done ? "✓" : "•"}
+                  </span>
+                  <span
+                    className={`flex-1 text-sm font-semibold ${
+                      item.done ? "text-muted-foreground line-through" : "text-foreground"
+                    }`}
+                  >
+                    {item.titulo}
+                  </span>
+                  {!item.done && <span aria-hidden className="text-muted-foreground">→</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* ── Stats KPIs — 2 colunas no celular (antes empilhava 4 cards enormes) ── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">

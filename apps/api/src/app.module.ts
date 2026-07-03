@@ -25,6 +25,7 @@ import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.
 import { ReputationModule } from "./modules/reputation/reputation.module.js";
 import { ModerationModule } from "./modules/moderation/moderation.module.js";
 import { BillingModule } from "./modules/billing/billing.module.js";
+import { FavoritesModule } from "./modules/favorites/favorites.module.js";
 import { SearchModule } from "./modules/search/search.module.js";
 import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
@@ -87,6 +88,7 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     ReputationModule,
     ModerationModule,
     BillingModule,
+    FavoritesModule,
     SearchModule,
     PublicProfileModule,
     WorkOrdersModule,

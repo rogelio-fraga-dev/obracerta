@@ -29,3 +29,4 @@ export * from "./payment-events.js";
 export * from "./work-orders.js";
 export * from "./proposals.js";
 export * from "./professional-documents.js";
+export * from "./favorites.js";

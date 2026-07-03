@@ -1,8 +1,20 @@
 import { z } from "zod";
-import { slugSchema } from "./primitives.js";
+import { isoTimestampSchema, slugSchema } from "./primitives.js";
 import { professionalPlanSchema } from "./enums.js";
 import { reputationSummarySchema } from "./reputation.js";
 import { publicPortfolioPhotoSchema } from "./portfolio.js";
+
+/** Avaliação exibida no perfil público: autor parcial + nota + comentário + resposta. */
+export const publicReviewSchema = z.object({
+  /** Nome parcial do autor ("Maria F.") — minimização LGPD. */
+  autorNome: z.string(),
+  nota: z.number().int().min(1).max(5),
+  comentario: z.string().nullable(),
+  criadoEm: isoTimestampSchema,
+  /** Resposta pública do profissional (direito de resposta), se houver. */
+  resposta: z.string().nullable(),
+});
+export type PublicReview = z.infer<typeof publicReviewSchema>;
 
 /**
  * Perfil público do profissional (roadmap §18/§24, Etapa 5.2). View LIMITADA para
@@ -24,5 +36,9 @@ export const publicProfileSchema = z.object({
   /** Galeria de obras (vazia se o plano não inclui portfólio). */
   portfolio: z.array(publicPortfolioPhotoSchema),
   reputacao: reputationSummarySchema,
+  /** Últimas avaliações reveladas (comentários públicos — o que mais vende). */
+  avaliacoes: z.array(publicReviewSchema),
+  /** Taxa de aceitação de pedidos (0–1); null sem histórico suficiente. */
+  taxaAceitacao: z.number().min(0).max(1).nullable(),
 });
 export type PublicProfile = z.infer<typeof publicProfileSchema>;

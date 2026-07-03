@@ -3,6 +3,7 @@ import {
   Home,
   ClipboardList,
   HardHat,
+  Heart,
   User,
   Search,
   CalendarDays,
@@ -33,6 +34,7 @@ const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", shortLabel: "A
 const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", shortLabel: "Docs", Icon: FileText };
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
 const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: Star };
+const FAVORITOS: NavItem = { href: "/favoritos", label: "Favoritos", Icon: Heart };
 
 export interface NavSet {
   primary: NavItem[];
@@ -47,13 +49,13 @@ const NAV_PROFISSIONAL: NavSet = {
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [OBRAS, AVALIACOES, COBRANCAS],
+  secondary: [OBRAS, FAVORITOS, AVALIACOES, COBRANCAS],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [PEDIDOS, AVALIACOES, COBRANCAS],
+  secondary: [PEDIDOS, FAVORITOS, AVALIACOES, COBRANCAS],
 };
 
 /**

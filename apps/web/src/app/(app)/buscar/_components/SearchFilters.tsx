@@ -15,6 +15,8 @@ export function SearchFilters() {
   const params = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
   const [especialidade, setEspecialidade] = useState(params.get("especialidade") ?? "");
+  const [notaMin, setNotaMin] = useState(params.get("notaMin") ?? "");
+  const [ordem, setOrdem] = useState(params.get("ordem") ?? "relevancia");
   const [coords, setCoords] = useState<{ lat: string; lng: string } | null>(
     params.get("lat") && params.get("lng")
       ? { lat: params.get("lat")!, lng: params.get("lng")! }
@@ -27,6 +29,8 @@ export function SearchFilters() {
     const next = new URLSearchParams();
     if (q.trim()) next.set("q", q.trim());
     if (especialidade.trim()) next.set("especialidade", especialidade.trim());
+    if (notaMin) next.set("notaMin", notaMin);
+    if (ordem && ordem !== "relevancia") next.set("ordem", ordem);
     if (coords) {
       next.set("lat", coords.lat);
       next.set("lng", coords.lng);
@@ -73,6 +77,24 @@ export function SearchFilters() {
           ))}
         </Select>
       </Field>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Nota mínima" hint="Opcional">
+          <Select value={notaMin} onChange={(e) => setNotaMin(e.target.value)}>
+            <option value="">Qualquer nota</option>
+            <option value="4.5">★ 4,5+</option>
+            <option value="4">★ 4,0+</option>
+            <option value="3">★ 3,0+</option>
+          </Select>
+        </Field>
+        <Field label="Ordenar por">
+          <Select value={ordem} onChange={(e) => setOrdem(e.target.value)}>
+            <option value="relevancia">Relevância</option>
+            <option value="nota">Melhor nota</option>
+            <option value="distancia">Mais perto</option>
+          </Select>
+        </Field>
+      </div>
 
       {geoError && (
         <p role="alert" className="text-xs text-danger">

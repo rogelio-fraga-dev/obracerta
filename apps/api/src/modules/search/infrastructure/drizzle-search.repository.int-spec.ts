@@ -56,7 +56,7 @@ describe("DrizzleSearchRepository (integração)", () => {
     await pool.end();
   });
 
-  const base = { q: null, plano: null, geo: null, limit: 20, offset: 0 };
+  const base = { q: null, plano: null, geo: null, notaMin: null, ordem: "relevancia" as const, limit: 20, offset: 0 };
 
   it("encontra por especialidade (GIN @>)", async () => {
     const { items, total } = await repo.searchProfessionals({ ...base, especialidade });

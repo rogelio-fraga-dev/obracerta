@@ -4,6 +4,7 @@ import type { ProfessionalPlan, SearchResult } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import type {
+  PriceAggregate,
   SearchPage,
   SearchProfessionalsFilters,
   SearchRepository,
@@ -44,14 +45,33 @@ export class DrizzleSearchRepository implements SearchRepository {
     if (point) {
       conds.push(sql`pp.geo is not null and ST_DWithin(pp.geo::geography, ${point}::geography, ${f.geo!.raioKm * 1000})`);
     }
+    // nota mínima considera só avaliações REVELADAS (o join `r` existe nos 2 queries)
+    if (f.notaMin !== null) conds.push(sql`coalesce(r.media, 0) >= ${f.notaMin}`);
     const where = sql.join(conds, sql` and `);
 
     const distancia = point
       ? sql`round((ST_Distance(pp.geo::geography, ${point}::geography) / 1000)::numeric, 2)`
       : sql`null`;
-    const orderBy = point ? sql`distancia_km asc nulls last, u.nome_completo` : sql`u.nome_completo`;
+
+    // Ordenação: nota (melhor primeiro), distância (exige geo; senão cai na
+    // relevância) ou relevância (distância quando geo, senão nome).
+    const orderBy =
+      f.ordem === "nota"
+        ? sql`coalesce(r.media, 0) desc, coalesce(r.total, 0) desc, u.nome_completo`
+        : f.ordem === "distancia" && point
+          ? sql`distancia_km asc nulls last, u.nome_completo`
+          : point
+            ? sql`distancia_km asc nulls last, u.nome_completo`
+            : sql`u.nome_completo`;
 
     // reputação: agrega só as avaliações REVELADAS por alvo (LEFT JOIN — 0/0 se nenhuma)
+    const reviewsJoin = sql`
+      left join (
+        select alvo_id, avg(nota)::numeric(3,2) as media, count(*)::int as total
+        from reviews where status = 'REVELADA' group by alvo_id
+      ) r on r.alvo_id = u.id
+    `;
+
     const result = await this.db.execute(sql`
       select u.id as user_id, u.nome_completo as nome, pp.slug_publico as slug,
              pp.especialidades, pp.bairro, pp.plano, pp.anos_experiencia, pp.foto_url,
@@ -59,10 +79,7 @@ export class DrizzleSearchRepository implements SearchRepository {
              ${distancia} as distancia_km
       from professional_profiles pp
       join users u on u.id = pp.user_id
-      left join (
-        select alvo_id, avg(nota)::numeric(3,2) as media, count(*)::int as total
-        from reviews where status = 'REVELADA' group by alvo_id
-      ) r on r.alvo_id = u.id
+      ${reviewsJoin}
       where ${where}
       order by ${orderBy}
       limit ${f.limit} offset ${f.offset}
@@ -72,6 +89,7 @@ export class DrizzleSearchRepository implements SearchRepository {
       select count(*)::int as total
       from professional_profiles pp
       join users u on u.id = pp.user_id
+      ${reviewsJoin}
       where ${where}
     `);
 
@@ -79,6 +97,33 @@ export class DrizzleSearchRepository implements SearchRepository {
     return {
       items: (result.rows as unknown as SearchRow[]).map(rowToSearchResult),
       total: Number(totalRow?.total ?? 0),
+    };
+  }
+
+  /**
+   * Faixa de preço da especialidade: agregado **anônimo** sobre os lances das
+   * obras dessa especialidade (mediana via percentile_cont). Nunca expõe lance
+   * individual — o sigilo (§lances) segue intacto.
+   */
+  async priceReference(especialidade: string): Promise<PriceAggregate | null> {
+    const result = await this.db.execute(sql`
+      select min(p.valor_centavos)::int as min_c,
+             percentile_cont(0.5) within group (order by p.valor_centavos)::int as med_c,
+             max(p.valor_centavos)::int as max_c,
+             count(*)::int as amostras
+      from proposals p
+      join work_orders w on w.id = p.work_order_id
+      where w.especialidade = ${especialidade}
+    `);
+    const row = result.rows[0] as
+      | { min_c: number | null; med_c: number | null; max_c: number | null; amostras: number }
+      | undefined;
+    if (!row || !row.min_c || !row.med_c || !row.max_c || Number(row.amostras) === 0) return null;
+    return {
+      minCentavos: Number(row.min_c),
+      medianaCentavos: Number(row.med_c),
+      maxCentavos: Number(row.max_c),
+      amostras: Number(row.amostras),
     };
   }
 }

@@ -36,6 +36,10 @@ export const DEFAULT_SEARCH_RADIUS_KM = 25;
  * Query da busca. `lat`+`lng` (juntos) ligam a busca geográfica; `raioKm` é
  * opcional (default no servidor). Coerções tratam query string (`?lat=...`).
  */
+/** Ordenações disponíveis (distância exige busca geográfica). */
+export const searchOrderSchema = z.enum(["relevancia", "nota", "distancia"]);
+export type SearchOrder = z.infer<typeof searchOrderSchema>;
+
 export const searchProfessionalsQuerySchema = z
   .object({
     q: z.string().trim().min(1).max(80).optional(),
@@ -44,6 +48,9 @@ export const searchProfessionalsQuerySchema = z
     lat: z.coerce.number().min(-90).max(90).optional(),
     lng: z.coerce.number().min(-180).max(180).optional(),
     raioKm: z.coerce.number().positive().max(MAX_SEARCH_RADIUS_KM).optional(),
+    /** Nota média mínima (1–5) — considera só avaliações reveladas. */
+    notaMin: z.coerce.number().min(1).max(5).optional(),
+    ordem: searchOrderSchema.default("relevancia"),
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(MAX_SEARCH_LIMIT).default(DEFAULT_SEARCH_LIMIT),
   })
@@ -53,9 +60,28 @@ export const searchProfessionalsQuerySchema = z
   });
 export type SearchProfessionalsQuery = z.infer<typeof searchProfessionalsQuerySchema>;
 
-/** Resposta paginada da busca. */
+/**
+ * Faixa de preço de referência de uma especialidade — agregado **anônimo** dos
+ * lances dados em obras dessa especialidade (o sigilo individual é preservado;
+ * só estatística). Ataca a dor "não sei quanto devia custar".
+ */
+export const priceReferenceSchema = z.object({
+  especialidade: z.string(),
+  minCentavos: z.number().int().positive(),
+  medianaCentavos: z.number().int().positive(),
+  maxCentavos: z.number().int().positive(),
+  amostras: z.number().int().positive(),
+});
+export type PriceReference = z.infer<typeof priceReferenceSchema>;
+
+/** Resposta paginada da busca (+ faixa de preço quando filtrada por especialidade). */
 export const searchProfessionalsResultSchema = z.object({
   items: z.array(searchResultSchema),
   meta: paginationMetaSchema,
+  faixaPreco: priceReferenceSchema.nullable(),
 });
 export type SearchProfessionalsResult = z.infer<typeof searchProfessionalsResultSchema>;
+
+/** Entrada para favoritar/desfavoritar um profissional. */
+export const favoriteInputSchema = z.object({ professionalId: uuidSchema });
+export type FavoriteInput = z.infer<typeof favoriteInputSchema>;
