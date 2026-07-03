@@ -1,7 +1,7 @@
 import type { ReceivedReview } from "@obracerta/shared";
 import { Card, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
-import { formatDateTimeBR } from "@/lib/format";
+import { formatRelativeBR } from "@/lib/format";
 import { RespostaForm } from "../perfil/_components/RespostaForm";
 import { ReportDialog } from "../perfil/_components/ReportDialog";
 
@@ -105,7 +105,7 @@ export default async function AvaliacoesPage() {
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {formatDateTimeBR(r.criadoEm)}
+                      {formatRelativeBR(r.criadoEm)}
                     </span>
                   </div>
 

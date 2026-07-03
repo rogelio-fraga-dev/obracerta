@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   loginSchema,
   type OtpRequestResult,
@@ -20,8 +20,19 @@ type WhatsappStep = "numero" | "codigo";
 type VerifyResult = { registered: true; user: { nomeCompleto: string } } | { registered: false };
 
 export default function EntrarPage() {
+  // useSearchParams exige Suspense no App Router.
+  return (
+    <Suspense fallback={null}>
+      <EntrarInner />
+    </Suspense>
+  );
+}
+
+function EntrarInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const [method, setMethod] = useState<Method>("email");
+  const googleFalhou = params.get("erro") === "google";
 
   return (
     <AuthPanel
@@ -31,6 +42,9 @@ export default function EntrarPage() {
       subtitle="Acesse sua conta para gerenciar pedidos, obras e seu perfil."
     >
       <div className="animate-fade-in space-y-6">
+        {googleFalhou && (
+          <ErrorBox message="Não foi possível entrar com o Google. Tente de novo — ou use e-mail/WhatsApp." />
+        )}
         <GoogleButton />
         <AuthDivider />
         <MethodTabs

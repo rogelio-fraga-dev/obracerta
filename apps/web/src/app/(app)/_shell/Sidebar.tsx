@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@obracerta/ui";
+import { Avatar, cn } from "@obracerta/ui";
 import { navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 
 interface SidebarProps {
@@ -16,6 +16,10 @@ interface SidebarProps {
   tipo?: string;
   /** Mostra o grupo de administração (só para usuários com papel ADMIN). */
   isAdmin?: boolean;
+  /** Foto de perfil (avatar real em vez da inicial). */
+  fotoUrl?: string;
+  /** Pedidos aguardando ação — badge no item Pedidos. */
+  pendingPedidos?: number;
   /** Slot do rodapé (ex.: botão Sair). */
   children?: ReactNode;
 }
@@ -24,7 +28,16 @@ interface SidebarProps {
  * Navegação lateral — **só no desktop** (`hidden lg:flex`). Fixa à esquerda, com
  * marca no topo, grupos de navegação e o cartão de perfil + sair no rodapé.
  */
-export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: SidebarProps) {
+export function Sidebar({
+  brandName,
+  inicial,
+  nome,
+  tipo,
+  isAdmin,
+  fotoUrl,
+  pendingPedidos = 0,
+  children,
+}: SidebarProps) {
   const pathname = usePathname();
   const { primary, secondary } = navForTipo(tipo);
 
@@ -35,6 +48,7 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
 
   const renderItem = ({ href, label, Icon }: NavItem) => {
     const active = isActive(href);
+    const badge = href === "/pedidos" && pendingPedidos > 0 ? pendingPedidos : 0;
     return (
       <li key={href}>
         <Link
@@ -52,7 +66,15 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
             <span className="absolute left-0 top-1/2 h-8 w-[4px] -translate-y-1/2 rounded-r-full bg-primary" />
           )}
           <Icon className="h-7 w-7 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-          {label}
+          <span className="flex-1">{label}</span>
+          {badge > 0 && (
+            <span
+              aria-label={`${badge} pendente(s)`}
+              className="flex h-6 min-w-6 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-black text-white"
+            >
+              {badge}
+            </span>
+          )}
         </Link>
       </li>
     );
@@ -97,9 +119,13 @@ export function Sidebar({ brandName, inicial, nome, tipo, isAdmin, children }: S
           href="/perfil"
           className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-brand font-display text-sm font-black text-white">
-            {inicial}
-          </span>
+          {fotoUrl ? (
+            <Avatar nome={nome ?? inicial} src={fotoUrl} size="md" />
+          ) : (
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-brand font-display text-sm font-black text-white">
+              {inicial}
+            </span>
+          )}
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-bold text-foreground">
               {nome ?? "Meu perfil"}

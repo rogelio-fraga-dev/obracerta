@@ -12,7 +12,7 @@ import type {
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
 import { serverApi } from "@/lib/server-api";
-import { formatDateTimeBR, firstName } from "@/lib/format";
+import { formatRelativeBR, firstName } from "@/lib/format";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import {
   AgendaIcon,
@@ -244,7 +244,7 @@ export default async function InicioPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-foreground">{p.especialidade}</p>
-                      <p className="truncate text-sm text-muted-foreground">{formatDateTimeBR(p.dataServico)}</p>
+                      <p className="truncate text-sm text-muted-foreground">{formatRelativeBR(p.dataServico)}</p>
                     </div>
                     <Badge tone={ui.tone} className="shrink-0">{ui.label}</Badge>
                   </Card>

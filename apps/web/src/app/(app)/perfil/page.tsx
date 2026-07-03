@@ -15,6 +15,7 @@ import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
+import { ProfileQrCard } from "./_components/ProfileQrCard";
 import { ShieldIcon } from "../_shell/icons";
 import { AdminForms } from "./_components/AdminForms";
 import { ProfileEditCard } from "./_components/ProfileEditCard";
@@ -97,6 +98,8 @@ export default async function PerfilPage() {
 
       {!isAdmin && isEmpresa && <EmpresaPanel />}
 
+      {!isAdmin && isProfissional && <QrPanel />}
+
       {!isAdmin && isProfissional && <PortfolioPanel />}
 
       {!isAdmin && isProfissional && <ComportamentoPanel />}
@@ -140,6 +143,20 @@ function CompanyField({ label, value }: { label: string; value: string | null | 
 function formatCnpj(cnpj: string | null | undefined): string | null {
   if (!cnpj || cnpj.length !== 14) return cnpj ?? null;
   return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+}
+
+/** Cartão de visita digital (QR do perfil público) — só profissionais com slug. */
+async function QrPanel() {
+  const perfil = await serverApi<{ slugPublico: string | null }>(
+    "GET",
+    "/profiles/professional/me",
+  ).catch(() => null);
+  if (!perfil?.slugPublico) return null;
+  return (
+    <div className="animate-fade-in delay-1">
+      <ProfileQrCard slug={perfil.slugPublico} />
+    </div>
+  );
 }
 
 async function PortfolioPanel() {

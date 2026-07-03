@@ -5,7 +5,7 @@ import { ApiEnvelopeError, type PublicProfile, professionalPlanCatalog } from "@
 import { Badge, Card } from "@obracerta/ui";
 import { callApi } from "@/lib/server-api";
 import { config } from "@/lib/config";
-import { formatDateTimeBR } from "@/lib/format";
+import { formatRelativeBR } from "@/lib/format";
 import { ShareButton } from "./ShareButton";
 
 interface PageProps {
@@ -155,7 +155,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
                           <span className="text-sm font-bold text-foreground">{av.autorNome}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {formatDateTimeBR(av.criadoEm)}
+                          {formatRelativeBR(av.criadoEm)}
                         </span>
                       </div>
                       {av.comentario && (

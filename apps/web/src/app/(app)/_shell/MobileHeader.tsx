@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, ArrowRight } from "lucide-react";
-import { cn } from "@obracerta/ui";
+import { Avatar, cn } from "@obracerta/ui";
 import { firstName } from "@/lib/format";
 import { navForTipo, tipoLabel, ADMIN_NAV } from "./nav-items";
 import { LogoutButton } from "./LogoutButton";
@@ -15,9 +15,21 @@ interface MobileHeaderProps {
   nome?: string;
   tipo?: string;
   isAdmin?: boolean;
+  /** Foto de perfil (avatar real em vez da inicial). */
+  fotoUrl?: string;
+  /** Pedidos aguardando ação — ponto no Menu + badge no drawer. */
+  pendingPedidos?: number;
 }
 
-export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: MobileHeaderProps) {
+export function MobileHeader({
+  brandName,
+  inicial,
+  nome,
+  tipo,
+  isAdmin,
+  fotoUrl,
+  pendingPedidos = 0,
+}: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const { primary, secondary } = navForTipo(tipo);
@@ -38,9 +50,13 @@ export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: Mobile
       <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between px-5 py-3">
           <Link href="/perfil" className="flex items-center gap-2.5 min-w-0" aria-label="Meu perfil">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary font-display text-base font-black text-primary-foreground">
-              {inicial}
-            </span>
+            {fotoUrl ? (
+              <Avatar nome={nome ?? inicial} src={fotoUrl} size="sm" />
+            ) : (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary font-display text-base font-black text-primary-foreground">
+                {inicial}
+              </span>
+            )}
             <span className="font-display text-sm font-bold text-foreground truncate">
               Olá, {firstName(nome) || "Usuário"}
             </span>
@@ -55,10 +71,16 @@ export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: Mobile
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              aria-label="Abrir menu"
+              className="relative flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              aria-label={pendingPedidos > 0 ? `Abrir menu (${pendingPedidos} pendente(s))` : "Abrir menu"}
             >
               Menu
+              {pendingPedidos > 0 && (
+                <span
+                  aria-hidden
+                  className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-danger ring-2 ring-background"
+                />
+              )}
             </button>
           </div>
         </div>
@@ -144,6 +166,14 @@ export function MobileHeader({ brandName, inicial, nome, tipo, isAdmin }: Mobile
                     >
                       <Icon className="h-5 w-5 shrink-0" />
                       <span className="flex-1">{label}</span>
+                      {href === "/pedidos" && pendingPedidos > 0 && (
+                        <span
+                          aria-label={`${pendingPedidos} pendente(s)`}
+                          className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
+                        >
+                          {pendingPedidos}
+                        </span>
+                      )}
                       <ArrowRight className={cn("h-4 w-4 opacity-0 transition-opacity", active && "opacity-40")} />
                     </Link>
                   </li>

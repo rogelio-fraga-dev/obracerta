@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   cadastroSchema,
   formatCentavos,
@@ -26,12 +26,28 @@ import { MethodTabs } from "../_auth/MethodTabs";
 type Method = "email" | "whatsapp";
 
 /**
- * Cadastro (área pública) — 3 caminhos: e-mail+senha ("conta normal", funcional),
- * WhatsApp por OTP (assistente em passos, funcional) e Google (visual). O e-mail
- * coleta só o essencial; o resto do perfil é completado depois de entrar.
+ * Cadastro (área pública) — 3 caminhos: e-mail+senha ("conta normal"), WhatsApp
+ * por OTP (assistente em passos) e Google (OAuth; e-mail novo chega aqui com
+ * `?google=1&email=&nome=` e o formulário vem pré-preenchido). O e-mail coleta
+ * só o essencial; o resto do perfil é completado depois de entrar.
  */
 export default function CadastroPage() {
+  // useSearchParams exige Suspense no App Router.
+  return (
+    <Suspense fallback={null}>
+      <CadastroInner />
+    </Suspense>
+  );
+}
+
+function CadastroInner() {
+  const params = useSearchParams();
   const [method, setMethod] = useState<Method>("email");
+
+  // Pré-preenchimento vindo do Google (e-mail ainda sem conta).
+  const viaGoogle = params.get("google") === "1";
+  const googleEmail = params.get("email") ?? "";
+  const googleNome = params.get("nome") ?? "";
 
   return (
     <AuthPanel
@@ -49,6 +65,15 @@ export default function CadastroPage() {
       }
     >
       <div className="space-y-5">
+        {viaGoogle && (
+          <p
+            role="status"
+            className="rounded-lg bg-info/10 px-4 py-3 text-sm font-semibold text-foreground"
+          >
+            Seu Google ainda não tem conta aqui — complete o cadastro abaixo (já preenchemos
+            nome e e-mail) e defina uma senha.
+          </p>
+        )}
         <GoogleButton />
         <AuthDivider />
         <MethodTabs
@@ -59,7 +84,11 @@ export default function CadastroPage() {
             { value: "whatsapp", label: "WhatsApp" },
           ]}
         />
-        {method === "email" ? <EmailSignup /> : <WhatsappSignup />}
+        {method === "email" ? (
+          <EmailSignup initialEmail={googleEmail} initialNome={googleNome} />
+        ) : (
+          <WhatsappSignup />
+        )}
       </div>
     </AuthPanel>
   );
@@ -75,11 +104,17 @@ function ErrorBox({ message }: { message: string }) {
 }
 
 /** Conta normal: coleta o essencial (tipo, nome, e-mail, senha, WhatsApp) e entra. */
-function EmailSignup() {
+function EmailSignup({
+  initialEmail = "",
+  initialNome = "",
+}: {
+  initialEmail?: string;
+  initialNome?: string;
+}) {
   const router = useRouter();
   const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
-  const [nomeCompleto, setNomeCompleto] = useState("");
-  const [email, setEmail] = useState("");
+  const [nomeCompleto, setNomeCompleto] = useState(initialNome);
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [cnpj, setCnpj] = useState("");

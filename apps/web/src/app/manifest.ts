@@ -23,5 +23,15 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
+    // Atalhos ao segurar o ícone do app (Android/desktop).
+    shortcuts: [
+      {
+        name: "Buscar profissional",
+        url: "/buscar",
+        icons: [{ src: "/icon-192.png", sizes: "192x192" }],
+      },
+      { name: "Pedidos", url: "/pedidos", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+      { name: "Minha agenda", url: "/agenda", icons: [{ src: "/icon-192.png", sizes: "192x192" }] },
+    ],
   };
 }

@@ -4,7 +4,7 @@ import { Badge, Button, Card, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
-import { formatDateTimeBR } from "@/lib/format";
+import { formatRelativeBR } from "@/lib/format";
 import { PedidosIcon } from "../_shell/icons";
 
 /**
@@ -72,7 +72,7 @@ export default async function PedidosPage() {
                           <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
                         </div>
                         <p className="mt-0.5 text-sm text-muted-foreground">
-                          {formatDateTimeBR(p.dataServico)}
+                          {formatRelativeBR(p.dataServico)}
                           {p.descricao && ` · ${p.descricao.substring(0, 50)}${p.descricao.length > 50 ? "…" : ""}`}
                         </p>
                       </div>

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import type { BookingRequest, User } from "@obracerta/shared";
 import { config } from "@/lib/config";
+import { serverApi } from "@/lib/server-api";
 import { getMyRoles, getProfileHint, requireSession } from "@/lib/session";
 import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
@@ -18,10 +20,30 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const roles = await getMyRoles();
   const isAdmin = roles.includes("ADMIN");
   const inicial = (hint?.nome ?? config.brand.name).charAt(0).toUpperCase();
+  const isProfissional = hint?.tipo === "PROFISSIONAL";
+
+  // Foto do usuário (humaniza o shell) + pendências do profissional (badge no menu).
+  const [user, pendingPedidos] = await Promise.all([
+    serverApi<User>("GET", "/auth/me/profile").catch(() => null),
+    isProfissional
+      ? serverApi<BookingRequest[]>("GET", "/bookings/me/professional")
+          .then((b) => b.filter((p) => p.status === "PENDENTE").length)
+          .catch(() => 0)
+      : Promise.resolve(0),
+  ]);
+  const fotoUrl = user?.fotoUrl ?? undefined;
 
   return (
     <div className="flex min-h-dvh bg-background">
-      <Sidebar brandName={config.brand.name} inicial={inicial} nome={hint?.nome} tipo={hint?.tipo} isAdmin={isAdmin}>
+      <Sidebar
+        brandName={config.brand.name}
+        inicial={inicial}
+        nome={hint?.nome}
+        tipo={hint?.tipo}
+        isAdmin={isAdmin}
+        fotoUrl={fotoUrl}
+        pendingPedidos={pendingPedidos}
+      >
         <LogoutButton className="w-full" />
       </Sidebar>
 
@@ -32,6 +54,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           nome={hint?.nome}
           tipo={hint?.tipo}
           isAdmin={isAdmin}
+          fotoUrl={fotoUrl}
+          pendingPedidos={pendingPedidos}
         />
 
         <main
