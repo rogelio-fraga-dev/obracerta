@@ -56,13 +56,18 @@ fi
 bash infra/docker/update.sh
 
 if [ "$SEED" = "1" ]; then
-  echo "▶ Rodando seed (SEED=1)… defina SEED_ADMIN_PASSWORD/SEED_USER_PASSWORD no .env.prod!"
   ENV_FILE="infra/docker/.env.prod"
+  # Passa -e só quando a senha está definida (não comentada). Se ausente, o seed
+  # usa os padrões (admin@123 / senha@123).
+  SEED_ENV=""
+  adm="$(grep -E '^SEED_ADMIN_PASSWORD=' "$ENV_FILE" | cut -d= -f2- || true)"
+  usr="$(grep -E '^SEED_USER_PASSWORD=' "$ENV_FILE" | cut -d= -f2- || true)"
+  [ -n "$adm" ] && SEED_ENV="$SEED_ENV -e SEED_ADMIN_PASSWORD=$adm"
+  [ -n "$usr" ] && SEED_ENV="$SEED_ENV -e SEED_USER_PASSWORD=$usr"
+  echo "▶ Rodando seed (SEED=1)…"
+  # shellcheck disable=SC2086
   docker compose --env-file "$ENV_FILE" -f infra/docker/docker-compose.prod.yml \
-    run --rm \
-    -e SEED_ADMIN_PASSWORD="$(grep -E '^SEED_ADMIN_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)" \
-    -e SEED_USER_PASSWORD="$(grep -E '^SEED_USER_PASSWORD=' "$ENV_FILE" | cut -d= -f2-)" \
-    api sh -lc "pnpm db:seed"
+    run --rm $SEED_ENV api sh -lc "pnpm db:seed"
 fi
 REMOTE
 
