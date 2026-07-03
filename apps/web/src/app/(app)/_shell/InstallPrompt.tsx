@@ -81,8 +81,8 @@ export function InstallPrompt() {
       aria-label="Instalar o aplicativo"
       className="fixed inset-x-3 bottom-20 z-40 mx-auto flex max-w-md items-center gap-3 rounded-xl border border-border bg-background p-3.5 shadow-[var(--shadow-xl)] lg:bottom-6"
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-        <img src="/icon.svg" alt="" width={28} height={28} className="h-7 w-7" />
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted">
+        <img src="/brand/obracerta-mark.png" alt="" className="h-7 w-auto" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-bold text-foreground">Instalar o app</div>

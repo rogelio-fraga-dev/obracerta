@@ -5,9 +5,9 @@
  * - Estáticos (`/_next/static`, ícone): cache com revalidação.
  * - `/api/*` (BFF) e cross-origin: **nunca** cacheados (dados/sessão sempre frescos).
  */
-const CACHE = "oc-shell-v1";
+const CACHE = "oc-shell-v2";
 const OFFLINE_URL = "/offline.html";
-const PRECACHE = [OFFLINE_URL, "/icon.svg"];
+const PRECACHE = [OFFLINE_URL, "/icon-192.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
@@ -36,7 +36,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  const cacheable = url.pathname.startsWith("/_next/static/") || url.pathname === "/icon.svg";
+  const cacheable = url.pathname.startsWith("/_next/static/") || url.pathname === "/icon-192.png";
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)
