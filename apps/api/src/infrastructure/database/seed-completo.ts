@@ -18,8 +18,11 @@ config({ path: "../../.env" });
  *
  * NÃO use em produção — senhas conhecidas, dados fictícios.
  */
-const SENHA_ADMIN = "admin@123";
-const SENHA_USUARIO = "senha@123";
+// Senhas do seed — padrão de DEV. Em um ambiente exposto (demo na nuvem), defina
+// SEED_ADMIN_PASSWORD/SEED_USER_PASSWORD com valores fortes ANTES de rodar o seed,
+// senão o admin fica com credencial pública conhecida (documentada em docs/).
+const SENHA_ADMIN = process.env.SEED_ADMIN_PASSWORD ?? "admin@123";
+const SENHA_USUARIO = process.env.SEED_USER_PASSWORD ?? "senha@123";
 
 const dia = 24 * 60 * 60 * 1000;
 const daysFromNow = (n: number): Date => new Date(Date.now() + n * dia);

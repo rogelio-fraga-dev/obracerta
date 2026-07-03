@@ -129,7 +129,7 @@ mkdir -p ~/obracerta && tar -xzf ~/obracerta-src.tgz -C ~/obracerta && cd ~/obra
    ```
 
 Pronto: abra **`https://app.SEU-IP.sslip.io`**. Credenciais de demo em
-`docs/credenciais-local.txt`.
+`docs/desenvolvimento-local.md`.
 
 ---
 

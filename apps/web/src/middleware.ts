@@ -48,6 +48,19 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+  // Desliga APIs sensíveis que não usamos; geolocation só na própria origem ("perto de mim").
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), payment=(), usb=(), geolocation=(self)",
+  );
+  // HSTS só em produção (em dev quebraria http://localhost). O Caddy também aplica,
+  // mas garantimos aqui caso o app rode atrás de outro proxy.
+  if (!isDev) {
+    response.headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload",
+    );
+  }
   return response;
 }
 

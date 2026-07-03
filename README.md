@@ -103,7 +103,7 @@ pnpm dev
 - Web: http://localhost:3000
 - API: http://localhost:3333 — healthcheck em `GET /health`
 - MinIO console: http://localhost:9001
-- Credenciais dos usuários de demo: `docs/credenciais-local.txt`
+- Setup local completo + credenciais de demo: `docs/desenvolvimento-local.md`
 
 > No Windows, use `127.0.0.1` (não `localhost`) no `DATABASE_URL` — `localhost` pode resolver para IPv6 e quebrar o cliente `pg`.
 
