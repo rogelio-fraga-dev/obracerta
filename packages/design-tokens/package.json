@@ -30,9 +30,9 @@
   },
   "devDependencies": {
     "@obracerta/config": "workspace:*",
-    "eslint": "^9.18.0",
+    "eslint": "^10.6.0",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.3"
+    "typescript": "^6.0.3"
   }
 }

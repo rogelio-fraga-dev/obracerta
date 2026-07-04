@@ -29,15 +29,15 @@
     "clean": "rimraf dist .turbo"
   },
   "peerDependencies": {
-    "zod": "^3.24.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@obracerta/config": "workspace:*",
-    "eslint": "^9.18.0",
+    "eslint": "^10.6.0",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.3",
-    "vitest": "^2.1.8",
-    "zod": "^3.24.1"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9",
+    "zod": "^4.4.3"
   }
 }
