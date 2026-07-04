@@ -1,22 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   formatCentavos,
   professionalPlanCatalog,
   professionalPlansOrdered,
   contractorPlanCatalog,
   contractorPlansOrdered,
-  type ProfessionalPlan,
+  type ProfessionalPlanInfo,
+  type Subscription,
 } from "@obracerta/shared";
 import { Badge, Button, Card } from "@obracerta/ui";
-import { bff } from "@/lib/client";
 import { FEATURE_UI, CONTRACTOR_FEATURE_UI } from "@/lib/billing-ui";
+import { formatDateTimeBR } from "@/lib/format";
+import { CheckoutDialog } from "./CheckoutDialog";
 
 interface MeuPlanoProps {
   plano: string | null;
   features: string[];
+  subscription: Subscription | null;
   /** Tipo da conta — define qual catálogo de planos exibir. */
   tipo?: string;
 }
@@ -26,12 +28,11 @@ interface MeuPlanoProps {
  * (com upgrade dentro do app) e contratante/empresa veem os planos de acesso do
  * contratante, com as features na ótica correta de cada um.
  */
-export function MeuPlano({ plano, features, tipo }: MeuPlanoProps) {
-  const router = useRouter();
+export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps) {
   const isProfissional = tipo === "PROFISSIONAL";
   const liberadas = new Set(features);
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [checkoutPlano, setCheckoutPlano] = useState<ProfessionalPlanInfo | null>(null);
+  const [loadingCancel, setLoadingCancel] = useState(false);
 
   const featureUi = isProfissional ? FEATURE_UI : CONTRACTOR_FEATURE_UI;
   const atual = isProfissional
@@ -42,25 +43,40 @@ export function MeuPlano({ plano, features, tipo }: MeuPlanoProps) {
   const ordered = isProfissional ? professionalPlansOrdered : contractorPlansOrdered;
   const superiores = ordered.filter((p) => p.precoCentavos > precoAtual);
 
-  async function fazerUpgrade(novo: ProfessionalPlan) {
-    setError(null);
-    setLoading(novo);
-    try {
-      await bff.post("/api/billing/upgrade", { plano: novo });
-      router.refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Não foi possível fazer o upgrade.");
-    } finally {
-      setLoading(null);
+  const planoAtualInfo = isProfissional
+    ? (professionalPlanCatalog[plano as keyof typeof professionalPlanCatalog] ?? null)
+    : null;
+
+  const handleCancel = async () => {
+    if (!confirm("Tem certeza que deseja cancelar sua assinatura? O acesso premium continuará ativo até o fim do ciclo mensal.")) {
+      return;
     }
-  }
+    setLoadingCancel(true);
+    try {
+      const res = await fetch("/api/billing/cancel", { method: "POST" });
+      if (!res.ok) throw new Error("Erro ao processar cancelamento.");
+      window.location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro desconhecido.");
+    } finally {
+      setLoadingCancel(false);
+    }
+  };
 
   return (
+    <>
     <Card className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-black text-foreground">Meu plano</h2>
         <Badge tone={plano ? "success" : "neutral"}>{atual?.nome ?? "Sem plano ativo"}</Badge>
       </div>
+
+      {isProfissional && subscription?.status === "CANCELADA" && subscription.proximaCobranca && (
+        <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-warning-foreground">
+          ⚠️ Sua assinatura do plano <strong>{atual?.nome}</strong> foi cancelada.
+          Você continuará com acesso aos recursos premium até o dia <strong>{formatDateTimeBR(subscription.proximaCobranca)}</strong>.
+        </div>
+      )}
 
       {/* Funções reconhecidas pelo plano (rótulos na ótica da persona) */}
       <ul className="space-y-2">
@@ -87,11 +103,6 @@ export function MeuPlano({ plano, features, tipo }: MeuPlanoProps) {
         superiores.length > 0 ? (
           <div className="space-y-3 border-t border-border pt-4">
             <p className="text-sm font-bold text-foreground">Fazer upgrade</p>
-            {error && (
-              <p role="alert" className="rounded-md bg-danger/10 px-3 py-2 text-sm font-medium text-danger">
-                {error}
-              </p>
-            )}
             <div className="grid gap-3 sm:grid-cols-2">
               {superiores.map((p) => (
                 <div
@@ -109,10 +120,9 @@ export function MeuPlano({ plano, features, tipo }: MeuPlanoProps) {
                   <Button
                     className="mt-3 w-full"
                     size="sm"
-                    onClick={() => fazerUpgrade(p.plano as ProfessionalPlan)}
-                    disabled={loading !== null}
+                    onClick={() => setCheckoutPlano(p as ProfessionalPlanInfo)}
                   >
-                    {loading === p.plano ? "Atualizando…" : `Mudar para ${p.nome}`}
+                    {`Mudar para ${p.nome}`}
                   </Button>
                 </div>
               ))}
@@ -159,6 +169,30 @@ export function MeuPlano({ plano, features, tipo }: MeuPlanoProps) {
           </p>
         </div>
       )}
+
+      {isProfissional && subscription && (subscription.status === "ATIVA" || subscription.status === "EM_GRACA") && subscription.plano !== "INICIANTE" && (
+        <div className="border-t border-border pt-4 flex justify-end">
+          <Button
+            variant="secondary"
+            className="text-danger border border-danger/20 hover:bg-danger/5"
+            size="sm"
+            onClick={handleCancel}
+            disabled={loadingCancel}
+          >
+            {loadingCancel ? "Cancelando..." : "Cancelar Plano"}
+          </Button>
+        </div>
+      )}
     </Card>
+
+      {/* Checkout multi-step (profissional) */}
+      {checkoutPlano && (
+        <CheckoutDialog
+          plano={checkoutPlano}
+          planoAtual={planoAtualInfo}
+          onClose={() => setCheckoutPlano(null)}
+        />
+      )}
+    </>
   );
 }

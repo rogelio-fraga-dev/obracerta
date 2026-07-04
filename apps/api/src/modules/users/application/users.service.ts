@@ -148,4 +148,8 @@ export class UsersService {
     const url = await this.storage.putObject(key, file.buffer, file.mimetype);
     return this.setFoto(id, url);
   }
+
+  listAdmins(): Promise<User[]> {
+    return this.users.findAdmins();
+  }
 }

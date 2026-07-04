@@ -75,10 +75,19 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
 
   return (
     <section aria-labelledby="buscar-heading" className="space-y-5">
-      <BackLink href="/inicio" label="Início" />
-      <h1 id="buscar-heading" className="font-display text-2xl font-black text-foreground">
-        Encontrar profissional
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <BackLink href="/inicio" label="Início" />
+          <h1 id="buscar-heading" className="font-display text-2xl font-black text-foreground">
+            Encontrar profissional
+          </h1>
+        </div>
+        <Link href="/ranking">
+          <Button size="sm" variant="secondary" className="flex items-center gap-1.5 border border-primary/20 hover:bg-primary/5 text-primary">
+            🏆 Ver Ranking de Profissionais
+          </Button>
+        </Link>
+      </div>
 
       <Suspense fallback={<div className="text-sm text-muted-foreground">Carregando filtros…</div>}>
         <SearchFilters />

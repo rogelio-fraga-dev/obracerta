@@ -137,4 +137,12 @@ export class DrizzleUsersRepository implements UsersRepository {
       .set({ senhaHash: hash })
       .where(eq(users.id, id));
   }
+
+  async findAdmins(): Promise<User[]> {
+    const rows = await this.db
+      .select()
+      .from(users)
+      .where(sql`'ADMIN' = any(${users.roles})`);
+    return rows.map(rowToUser);
+  }
 }

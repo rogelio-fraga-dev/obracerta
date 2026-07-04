@@ -13,6 +13,7 @@ import { ModerationService } from "../application/moderation.service.js";
 import type { ModerationScheduler } from "../application/moderation.scheduler.js";
 import { DrizzleReportRepository } from "./drizzle-report.repository.js";
 import { DrizzleSuspensionRepository } from "./drizzle-suspension.repository.js";
+import type { InboxService } from "../../notifications/application/inbox.service.js";
 
 config({ path: "../../.env" });
 
@@ -34,6 +35,7 @@ describe("ModerationService — auto-lift de suspensão (integração)", () => {
     scheduleSuspensionLift: () => Promise.resolve(),
   } as unknown as ModerationScheduler;
   const auditStub = { record: () => Promise.resolve(undefined) } as unknown as AuditService;
+  const inboxStub = { record: () => Promise.resolve() } as unknown as InboxService;
   const service = new ModerationService(
     reportRepo,
     suspRepo,
@@ -41,6 +43,7 @@ describe("ModerationService — auto-lift de suspensão (integração)", () => {
     usersService,
     schedulerStub,
     auditStub,
+    inboxStub,
   );
 
   const sufixo = Date.now().toString().slice(-9);

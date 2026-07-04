@@ -1,4 +1,4 @@
-import { type Invoice, type Refund } from "@obracerta/shared";
+import { type Invoice, type Refund, type Subscription } from "@obracerta/shared";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BackLink } from "../_shell/BackLink";
@@ -10,10 +10,11 @@ interface EntitlementsView {
 }
 
 export default async function CobrancasPage() {
-  const [invoices, refunds, ent, hint] = await Promise.all([
+  const [invoices, refunds, ent, sub, hint] = await Promise.all([
     serverApi<Invoice[]>("GET", "/invoices/me"),
     serverApi<Refund[]>("GET", "/refunds/me"),
     serverApi<EntitlementsView>("GET", "/me/entitlements"),
+    serverApi<Subscription | null>("GET", "/subscriptions/me").catch(() => null),
     getProfileHint(),
   ]);
 
@@ -29,6 +30,7 @@ export default async function CobrancasPage() {
         refunds={refunds}
         plano={ent.plano}
         features={ent.features}
+        subscription={sub}
         tipo={hint?.tipo}
       />
     </section>

@@ -2,18 +2,31 @@ import { ApiEnvelopeError, formatCentavos, type Refund, type HealthSnapshot } fr
 import { Card, Badge } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
+import { BackLink } from "../../_shell/BackLink";
 import { Resolver } from "../_components/Resolver";
 import { FinanceChart } from "./_components/FinanceChart";
+import { PAYMENT_METHOD_LABEL } from "@/lib/billing-ui";
+
+interface DetailedRefund extends Refund {
+  cliente: { nome: string; email: string } | null;
+  fatura: {
+    valorCentavos: number;
+    vencimentoEm: string;
+    pagoEm: string | null;
+    metodo: string | null;
+    gatewayId: string | null;
+  } | null;
+}
 
 /**
  * Fila do financeiro (FINANCEIRO/ADMIN): reembolsos pendentes para aprovar/recusar.
  * Auto-protegida pela API (403 → restrito).
  */
 export default async function FinanceiroPage() {
-  let pendentes: Refund[] = [];
+  let pendentes: DetailedRefund[] = [];
   let metrics: HealthSnapshot | null = null;
   try {
-    pendentes = await serverApi<Refund[]>("GET", "/refunds/pending");
+    pendentes = await serverApi<DetailedRefund[]>("GET", "/refunds/pending");
     metrics = await serverApi<HealthSnapshot>("GET", "/admin/metrics");
   } catch (e) {
     if (e instanceof ApiEnvelopeError) {
@@ -31,6 +44,7 @@ export default async function FinanceiroPage() {
 
   return (
     <section aria-labelledby="fin-heading" className="space-y-8">
+      <BackLink href="/admin" label="Painel" />
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 id="fin-heading" className="font-display text-3xl font-black text-foreground">
@@ -108,6 +122,44 @@ export default async function FinanceiroPage() {
                   </div>
                   <Badge tone="warning">Pendente</Badge>
                 </div>
+
+                <div className="rounded-lg bg-muted/30 p-3 space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Solicitante:</span>
+                    <span className="font-semibold text-foreground">
+                      {r.cliente ? `${r.cliente.nome} (${r.cliente.email})` : "Desconhecido"}
+                    </span>
+                  </div>
+                  {r.fatura && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Valor Pago:</span>
+                        <span className="font-semibold text-foreground">
+                          {formatCentavos(r.fatura.valorCentavos)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Método Pago:</span>
+                        <span className="font-semibold text-foreground">
+                          {r.fatura.metodo ? PAYMENT_METHOD_LABEL[r.fatura.metodo as keyof typeof PAYMENT_METHOD_LABEL] : "Desconhecido"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Paga em:</span>
+                        <span className="font-semibold text-foreground">
+                          {r.fatura.pagoEm ? formatDateTimeBR(r.fatura.pagoEm) : "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">ID da Transação:</span>
+                        <span className="font-semibold text-mono text-[10px] text-foreground">
+                          {r.fatura.gatewayId || "—"}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 <div className="p-3 bg-muted/30 rounded-lg text-sm text-foreground">
                   <span className="font-bold block mb-1">Motivo:</span>
                   {r.motivo}

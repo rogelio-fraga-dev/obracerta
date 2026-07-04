@@ -6,6 +6,7 @@ import type {
   SupportTicket,
 } from "@obracerta/shared";
 import { InboxService } from "../../notifications/application/inbox.service.js";
+import { UsersService } from "../../users/application/users.service.js";
 import {
   SUPPORT_REPOSITORY,
   type SupportRepository,
@@ -20,10 +21,23 @@ export class SupportService {
   constructor(
     @Inject(SUPPORT_REPOSITORY) private readonly repo: SupportRepository,
     private readonly inbox: InboxService,
+    private readonly users: UsersService,
   ) {}
 
-  create(userId: string, input: CreateSupportTicketInput): Promise<SupportTicket> {
-    return this.repo.create(userId, input);
+  async create(userId: string, input: CreateSupportTicketInput): Promise<SupportTicket> {
+    const ticket = await this.repo.create(userId, input);
+    try {
+      const admins = await this.users.listAdmins();
+      for (const admin of admins) {
+        await this.inbox.record(admin.id, "SISTEMA", "Novo chamado de suporte 💬", {
+          corpo: `Um chamado com o assunto "${ticket.assunto}" foi criado por um usuário.`,
+          link: "/admin/suporte",
+        });
+      }
+    } catch {
+      // Best effort notification
+    }
+    return ticket;
   }
 
   listMine(userId: string): Promise<SupportTicket[]> {

@@ -40,5 +40,7 @@ export const publicProfileSchema = z.object({
   avaliacoes: z.array(publicReviewSchema),
   /** Taxa de aceitação de pedidos (0–1); null sem histórico suficiente. */
   taxaAceitacao: z.number().min(0).max(1).nullable(),
+  /** Quantidade de obras concluídas na plataforma */
+  obrasConcluidas: z.number().int().min(0).default(0),
 });
 export type PublicProfile = z.infer<typeof publicProfileSchema>;

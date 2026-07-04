@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge, Card } from "@obracerta/ui";
-import { formatCentavos, type Invoice, type Refund } from "@obracerta/shared";
+import { formatCentavos, type Invoice, type Refund, type Subscription } from "@obracerta/shared";
 import { INVOICE_STATUS_UI, PAYMENT_METHOD_LABEL, REFUND_STATUS_UI } from "@/lib/billing-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { RefundButton } from "./RefundButton";
@@ -14,12 +14,13 @@ interface CobrancasClientProps {
   refunds: Refund[];
   plano: string | null;
   features: string[];
+  subscription: Subscription | null;
   tipo?: string;
 }
 
 type Tab = "plano" | "faturas" | "suporte";
 
-export function CobrancasClient({ invoices, refunds, plano, features, tipo }: CobrancasClientProps) {
+export function CobrancasClient({ invoices, refunds, plano, features, subscription, tipo }: CobrancasClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>("plano");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -85,7 +86,7 @@ export function CobrancasClient({ invoices, refunds, plano, features, tipo }: Co
       <div className="animate-fade-in">
         {/* ── TAB: Meu Plano ── */}
         {activeTab === "plano" && (
-          <MeuPlano plano={plano} features={features} tipo={tipo} />
+          <MeuPlano plano={plano} features={features} subscription={subscription} tipo={tipo} />
         )}
 
         {/* ── TAB: Faturas ── */}

@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import type { ProfessionalPlan, Subscription, SubscriptionStatus } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -100,5 +100,15 @@ export class DrizzleSubscriptionRepository implements SubscriptionRepository {
       .update(subscriptions)
       .set({ proximaCobranca: new Date(proximaCobranca), atualizadoEm: new Date() })
       .where(eq(subscriptions.id, id));
+  }
+
+  async findLastByUser(userId: string): Promise<Subscription | null> {
+    const [row] = await this.db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .orderBy(desc(subscriptions.criadoEm))
+      .limit(1);
+    return row ? rowToSubscription(row) : null;
   }
 }

@@ -17,7 +17,7 @@ describe("BillingService — plano baseline e gating", () => {
     user?: Partial<User> | null;
   }) {
     const subscriptions = {
-      findActiveByUser: jest.fn().mockResolvedValue(opts.activeSub ?? null),
+      findLastByUser: jest.fn().mockResolvedValue(opts.activeSub ?? null),
     } as unknown as SubscriptionRepository;
     const purchases = {
       findActiveByUser: jest.fn().mockResolvedValue(null),

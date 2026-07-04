@@ -32,6 +32,8 @@ export interface UsersRepository {
   updateProfile(id: string, data: { nomeCompleto?: string; email?: string }): Promise<User | null>;
   setFotoUrl(id: string, url: string): Promise<User | null>;
   updatePasswordHash(id: string, hash: string): Promise<void>;
+  /** Busca todos os usuários com papel ADMIN. */
+  findAdmins(): Promise<User[]>;
 }
 
 /** Token de DI para a porta (a interface some no runtime; o Symbol não). */

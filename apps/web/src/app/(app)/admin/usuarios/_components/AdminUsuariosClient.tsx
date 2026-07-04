@@ -71,7 +71,7 @@ export function AdminUsuariosClient({ initialUsers }: { initialUsers: User[] }) 
                 <tr key={u.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-6 py-4">
                     <Link href={`/admin/usuarios/${u.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                      <Avatar nome={u.nomeCompleto} size="sm" />
+                      <Avatar nome={u.nomeCompleto} src={u.fotoUrl ?? undefined} size="sm" />
                       <div>
                         <p className="font-bold text-foreground text-primary hover:underline">{u.nomeCompleto}</p>
                         <p className="text-xs text-muted-foreground font-mono">{u.id.substring(0, 8)}...</p>
@@ -123,7 +123,7 @@ export function AdminUsuariosClient({ initialUsers }: { initialUsers: User[] }) 
             <div key={u.id} className="p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <Link href={`/admin/usuarios/${u.id}`} className="flex items-center gap-3">
-                  <Avatar nome={u.nomeCompleto} size="sm" />
+                  <Avatar nome={u.nomeCompleto} src={u.fotoUrl ?? undefined} size="sm" />
                   <div>
                     <p className="font-bold text-foreground text-primary hover:underline">{u.nomeCompleto}</p>
                     <p className="text-[10px] text-muted-foreground font-mono">{u.id.substring(0, 8)}...</p>

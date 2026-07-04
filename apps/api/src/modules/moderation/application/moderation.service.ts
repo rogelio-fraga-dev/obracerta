@@ -33,6 +33,7 @@ import {
   type SuspensionRepository,
 } from "../domain/ports/suspension.repository.js";
 import { ModerationScheduler } from "./moderation.scheduler.js";
+import { InboxService } from "../../notifications/application/inbox.service.js";
 
 @Injectable()
 export class ModerationService {
@@ -43,6 +44,7 @@ export class ModerationService {
     private readonly users: UsersService,
     private readonly scheduler: ModerationScheduler,
     private readonly audit: AuditService,
+    private readonly inbox: InboxService,
   ) {}
 
   /**
@@ -74,6 +76,19 @@ export class ModerationService {
       entidadeId: report.id,
       dados: { entidade: input.entidade, entidadeId: input.entidadeId, motivo: input.motivo },
     });
+
+    try {
+      const admins = await this.users.listAdmins();
+      for (const admin of admins) {
+        await this.inbox.record(admin.id, "SISTEMA", "Nova denúncia recebida ⚠️", {
+          corpo: `Uma denúncia foi aberta sob o motivo "${report.motivo}".`,
+          link: "/admin/moderacao",
+        });
+      }
+    } catch {
+      // Best effort notification
+    }
+
     return report;
   }
 
@@ -147,6 +162,19 @@ export class ModerationService {
       entidadeId: input.suspensionId,
       dados: null,
     });
+
+    try {
+      const admins = await this.users.listAdmins();
+      for (const admin of admins) {
+        await this.inbox.record(admin.id, "SISTEMA", "Nova apelação de suspensão ⚖️", {
+          corpo: `Um usuário apelou contra a suspensão: "${updated.motivo}".`,
+          link: "/admin/moderacao",
+        });
+      }
+    } catch {
+      // Best effort notification
+    }
+
     return updated;
   }
 
@@ -207,8 +235,51 @@ export class ModerationService {
     return true;
   }
 
-  listOpenReports(): Promise<Report[]> {
-    return this.reports.listOpen();
+  async listOpenReports(): Promise<any[]> {
+    const rawReports = await this.reports.listOpen();
+    const detailed = [];
+    for (const r of rawReports) {
+      let denunciante = null;
+      if (r.denuncianteId) {
+        const u = await this.users.findById(r.denuncianteId);
+        if (u) denunciante = { nome: u.nomeCompleto || "Usuário", email: u.email };
+      }
+
+      let denunciado = null;
+      let reviewTarget = null;
+
+      if (r.entidade === "USER" || r.entidade === "PROFILE") {
+        const u = await this.users.findById(r.entidadeId);
+        if (u) {
+          const strikes = await this.reports.countProcedenteForOffender(u.id);
+          denunciado = { id: u.id, nome: u.nomeCompleto || "Usuário", email: u.email, tipo: u.tipo, totalPenalidades: strikes };
+        }
+      } else if (r.entidade === "REVIEW") {
+        const review = await this.reputation.getReview(r.entidadeId);
+        if (review) {
+          const author = await this.users.findById(review.autorId);
+          reviewTarget = {
+            autorNome: author?.nomeCompleto || "Usuário",
+            nota: review.nota,
+            comentario: review.comentario,
+            criadoEm: review.criadoEm,
+          };
+          const offender = await this.users.findById(review.autorId);
+          if (offender) {
+            const strikes = await this.reports.countProcedenteForOffender(offender.id);
+            denunciado = { id: offender.id, nome: offender.nomeCompleto || "Usuário", email: offender.email, tipo: offender.tipo, totalPenalidades: strikes };
+          }
+        }
+      }
+
+      detailed.push({
+        ...r,
+        denunciante,
+        denunciado,
+        reviewTarget,
+      });
+    }
+    return detailed;
   }
 
   listSuspensions(userId: string): Promise<Suspension[]> {
@@ -216,8 +287,21 @@ export class ModerationService {
   }
 
   /** Fila do moderador: suspensões apeladas aguardando julgamento. */
-  listAppealedSuspensions(): Promise<Suspension[]> {
-    return this.suspensions.listAppealed();
+  async listAppealedSuspensions(): Promise<any[]> {
+    const rawSuspensions = await this.suspensions.listAppealed();
+    const detailed = [];
+    for (const s of rawSuspensions) {
+      const u = await this.users.findById(s.userId);
+      let usuario = null;
+      if (u) {
+        usuario = { nome: u.nomeCompleto || "Usuário", email: u.email, tipo: u.tipo };
+      }
+      detailed.push({
+        ...s,
+        usuario,
+      });
+    }
+    return detailed;
   }
 
   /** Identifica o usuário ofensor de uma denúncia procedente. */

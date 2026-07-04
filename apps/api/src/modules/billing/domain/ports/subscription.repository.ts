@@ -25,6 +25,8 @@ export interface SubscriptionRepository {
   changePlan(id: string, plano: string, valorCentavos: number): Promise<Subscription | null>;
   /** Avança a data da próxima cobrança (renovação recorrente). */
   setProximaCobranca(id: string, proximaCobranca: string): Promise<void>;
+  /** Busca a última assinatura do usuário (ativa ou cancelada). */
+  findLastByUser(userId: string): Promise<Subscription | null>;
 }
 
 export const SUBSCRIPTION_REPOSITORY = Symbol("SUBSCRIPTION_REPOSITORY");

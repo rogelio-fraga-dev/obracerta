@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiEnvelopeError, type PublicProfile, professionalPlanCatalog } from "@obracerta/shared";
-import { Badge, Card } from "@obracerta/ui";
+import { Badge, Card, Button } from "@obracerta/ui";
 import { callApi } from "@/lib/server-api";
 import { config } from "@/lib/config";
 import { formatRelativeBR } from "@/lib/format";
@@ -102,6 +102,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           <Card className="space-y-4">
             <h2 className="font-display text-lg font-black text-foreground">Confiança</h2>
             <dl className="space-y-2 text-sm">
+              <Stat label="Obras concluídas" value={`${(profile as unknown as { obrasConcluidas?: number }).obrasConcluidas ?? 0}`} />
               <Stat label="Avaliações" value={`${profile.reputacao.totalAvaliacoes}`} />
               <Stat label="Nota média" value={`${profile.reputacao.mediaNota.toFixed(1)} / 5`} />
               {profile.taxaAceitacao !== null && (
@@ -156,34 +157,45 @@ export default async function PublicProfilePage({ params }: PageProps) {
               O que dizem os clientes
             </h2>
             {profile.avaliacoes.length > 0 ? (
-              <ul className="mt-3 space-y-3">
-                {profile.avaliacoes.map((av, i) => (
-                  <li key={`${av.criadoEm}-${i}`}>
-                    <Card className="space-y-2 p-5">
-                      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                        <div className="flex items-center gap-2">
-                          <Stars nota={av.nota} />
-                          <span className="text-sm font-bold text-foreground">{av.autorNome}</span>
+              <div className="mt-3 space-y-4">
+                <ul className="space-y-3">
+                  {profile.avaliacoes.slice(0, 2).map((av, i) => (
+                    <li key={`${av.criadoEm}-${i}`}>
+                      <Card className="space-y-2 p-5">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                          <div className="flex items-center gap-2">
+                            <Stars nota={av.nota} />
+                            <span className="text-sm font-bold text-foreground">{av.autorNome}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {formatRelativeBR(av.criadoEm)}
+                          </span>
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {formatRelativeBR(av.criadoEm)}
-                        </span>
-                      </div>
-                      {av.comentario && (
-                        <p className="text-sm leading-relaxed text-foreground">“{av.comentario}”</p>
-                      )}
-                      {av.resposta && (
-                        <div className="rounded-lg border border-border bg-muted/40 p-3">
-                          <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                            Resposta do profissional
-                          </p>
-                          <p className="mt-1 text-sm text-foreground">{av.resposta}</p>
-                        </div>
-                      )}
-                    </Card>
-                  </li>
-                ))}
-              </ul>
+                        {av.comentario && (
+                          <p className="text-sm leading-relaxed text-foreground">“{av.comentario}”</p>
+                        )}
+                        {av.resposta && (
+                          <div className="rounded-lg border border-border bg-muted/40 p-3">
+                            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                              Resposta do profissional
+                            </p>
+                            <p className="mt-1 text-sm text-foreground">{av.resposta}</p>
+                          </div>
+                        )}
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
+                {profile.reputacao.totalAvaliacoes > 2 && (
+                  <div className="text-center">
+                    <Link href={`/${profile.slug}/avaliacoes`}>
+                      <Button size="sm" variant="secondary" className="w-full sm:w-auto text-primary border border-primary/20 hover:bg-primary/5">
+                        Ver todas as avaliações ({profile.reputacao.totalAvaliacoes})
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
             ) : (
               <Card className="mt-3">
                 <p className="text-sm text-muted-foreground">
@@ -196,7 +208,7 @@ export default async function PublicProfilePage({ params }: PageProps) {
           <section aria-labelledby="portfolio-heading">
           <h2 id="portfolio-heading" className="font-display text-lg font-black text-foreground">Portfólio de obras</h2>
           {profile.portfolio.length > 0 ? (
-            <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {profile.portfolio.map((foto, i) => (
                 <li key={foto.url ?? i} className="overflow-hidden rounded-lg border border-border">
                   <img

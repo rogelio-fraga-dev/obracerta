@@ -150,9 +150,13 @@ export function MobileHeader({
           {/* User Info Section */}
           <div className="border-b border-border bg-muted/30 px-5 py-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-brand font-display text-sm font-black text-white">
-                {inicial}
-              </span>
+              {fotoUrl ? (
+                <Avatar nome={nome ?? inicial} src={fotoUrl} size="md" />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-brand font-display text-sm font-black text-white">
+                  {inicial}
+                </span>
+              )}
               <div className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-bold text-foreground">
                   {nome ?? "Meu perfil"}

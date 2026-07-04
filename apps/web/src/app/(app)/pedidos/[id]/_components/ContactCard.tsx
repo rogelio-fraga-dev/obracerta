@@ -1,8 +1,12 @@
 import type { BookingContact } from "@obracerta/shared";
 
-/** Só dígitos para montar o link wa.me (remove +, espaços, parênteses). */
-function waLink(whatsapp: string): string {
-  return `https://wa.me/${whatsapp.replace(/\D/g, "")}`;
+function waLink(whatsapp: string, nome: string): string {
+  let clean = whatsapp.replace(/\D/g, "");
+  if (clean.length === 10 || clean.length === 11) {
+    clean = `55${clean}`;
+  }
+  const text = `Olá, ${nome}! Vi seu contato no ObraCerta referente ao nosso agendamento.`;
+  return `https://wa.me/${clean}?text=${encodeURIComponent(text)}`;
 }
 
 /**
@@ -23,7 +27,7 @@ export function ContactCard({ contato, papel }: { contato: BookingContact; papel
       <p className="mt-2 font-display text-lg font-black text-foreground">{contato.nome}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         <a
-          href={waLink(contato.whatsapp)}
+          href={waLink(contato.whatsapp, contato.nome)}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-md bg-primary px-4 py-2 text-sm font-extrabold text-primary-foreground"

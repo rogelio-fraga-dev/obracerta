@@ -1,0 +1,146 @@
+# Deploy workflow — builda imagens Docker, pusha para GHCR, e faz deploy na EC2.
+# Roda após o CI verde no push para master/main. O deploy-ship local (scripts/)
+# continua funcionando como fallback — este workflow automatiza o mesmo fluxo.
+
+name: Deploy
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch: # permite deploy manual pelo GitHub UI
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false  # não cancela deploys em andamento
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/obracerta-api
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/obracerta-web
+
+jobs:
+  # ── 1. Verificação (mesmo do CI — garante que não publicamos algo quebrado) ──
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  # ── 2. Build e push das imagens Docker para GHCR ──
+  build-images:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: api
+            dockerfile: infra/docker/Dockerfile.api
+          - name: web
+            dockerfile: infra/docker/Dockerfile.web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Metadata (tags + labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/obracerta-${{ matrix.name }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build e push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── 3. Deploy na EC2 (pull das imagens + restart) ──
+  deploy:
+    needs: build-images
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            infra/docker
+          sparse-checkout-cone-mode: false
+
+      - name: Deploy na EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER || 'ec2-user' }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd ~/obracerta
+
+            echo "▶ 1/4 Atualizando repositório na EC2…"
+            git pull origin master
+
+            echo "▶ 2/4 Pullando imagens novas do GHCR…"
+            docker pull ${{ env.API_IMAGE }}:latest
+            docker pull ${{ env.WEB_IMAGE }}:latest
+
+            echo "▶ 3/4 Subindo stack…"
+            docker compose --env-file infra/docker/.env.prod \
+              -f infra/docker/docker-compose.prod.yml up -d
+
+            echo "▶ 4/4 Aplicando migrations…"
+            docker compose --env-file infra/docker/.env.prod \
+              -f infra/docker/docker-compose.prod.yml \
+              run --rm api sh -lc "pnpm db:migrate"
+
+            echo "Limpando imagens antigas…"
+            docker image prune -f > /dev/null
+
+            echo "✓ Deploy concluído."
+            docker compose --env-file infra/docker/.env.prod \
+              -f infra/docker/docker-compose.prod.yml ps

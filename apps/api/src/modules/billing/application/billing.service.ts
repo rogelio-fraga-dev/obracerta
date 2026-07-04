@@ -222,13 +222,45 @@ export class BillingService {
   }
 
   /**
+   * Cancelamento voluntário de plano pelo usuário. A assinatura é cancelada,
+   * mas as features continuam ativas até a data de vencimento (proximaCobranca).
+   */
+  async cancelSubscription(userId: string): Promise<Subscription> {
+    const ativa = await this.subscriptions.findActiveByUser(userId);
+    if (!ativa) {
+      throw new NotFoundException("Nenhuma assinatura ativa encontrada.");
+    }
+    const cancelada = await this.subscriptions.cancel(ativa.id);
+    if (!cancelada) {
+      throw new BadRequestException("Não foi possível cancelar a assinatura.");
+    }
+    await this.audit.record({
+      atorUserId: userId,
+      acao: "ASSINATURA_CANCELADA",
+      entidade: "subscription",
+      entidadeId: ativa.id,
+      dados: null,
+    });
+    return cancelada;
+  }
+
+  async getSubscription(userId: string): Promise<Subscription | null> {
+    return this.subscriptions.findLastByUser(userId);
+  }
+
+  /**
    * Renovação recorrente (job na próxima cobrança): se a assinatura ainda vale,
    * emite a próxima fatura, avança a próxima cobrança (+30d) e reagenda o ciclo.
    * O pagamento é confirmado pelo webhook (4.1); não pago → fatura VENCIDA (job).
    */
   async renewSubscriptionIfDue(subscriptionId: string): Promise<boolean> {
     const sub = await this.subscriptions.findById(subscriptionId);
-    if (!sub || !canRenew(sub.status)) return false;
+    if (!sub) return false;
+    if (sub.status === SubscriptionStatus.CANCELADA) {
+      await this.planSync.resetProfessionalPlano(sub.userId);
+      return true;
+    }
+    if (!canRenew(sub.status)) return false;
 
     const now = new Date();
     const venceEm = graceUntil(now).toISOString();
@@ -443,9 +475,25 @@ export class BillingService {
     return this.refunds.listForUser(userId);
   }
 
-  /** Fila do financeiro: reembolsos SOLICITADO aguardando decisão. */
-  listPendingRefunds(): Promise<Refund[]> {
-    return this.refunds.listPending();
+  async listPendingRefunds(): Promise<any[]> {
+    const rawRefunds = await this.refunds.listPending();
+    const detailed = [];
+    for (const r of rawRefunds) {
+      const user = await this.users.findById(r.userId);
+      const invoice = await this.invoices.findById(r.invoiceId);
+      detailed.push({
+        ...r,
+        cliente: user ? { nome: user.nomeCompleto || "Usuário", email: user.email } : null,
+        fatura: invoice ? {
+          valorCentavos: invoice.valorCentavos,
+          vencimentoEm: invoice.vencimentoEm,
+          pagoEm: invoice.pagoEm,
+          metodo: invoice.metodo,
+          gatewayId: invoice.gatewayId
+        } : null,
+      });
+    }
+    return detailed;
   }
 
   /**
@@ -600,12 +648,18 @@ export class BillingService {
    * perfil público sem assinatura); contratante/empresa sem compra → `null`.
    */
   private async activePlan(userId: string): Promise<Plan | null> {
-    const sub = await this.subscriptions.findActiveByUser(userId);
-    if (
-      sub &&
-      (sub.status === SubscriptionStatus.EM_GRACA || sub.status === SubscriptionStatus.ATIVA)
-    ) {
-      return sub.plano;
+    const sub = await this.subscriptions.findLastByUser(userId);
+    if (sub) {
+      if (sub.status === SubscriptionStatus.EM_GRACA || sub.status === SubscriptionStatus.ATIVA) {
+        return sub.plano;
+      }
+      if (
+        sub.status === SubscriptionStatus.CANCELADA &&
+        sub.proximaCobranca &&
+        new Date(sub.proximaCobranca).getTime() > Date.now()
+      ) {
+        return sub.plano;
+      }
     }
     const purchase = await this.purchases.findActiveByUser(userId);
     if (purchase?.expiraEm && new Date(purchase.expiraEm).getTime() > Date.now()) {

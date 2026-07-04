@@ -1,4 +1,5 @@
 import { serverApi } from "@/lib/server-api";
+import { BackLink } from "../../_shell/BackLink";
 import { AdminAvaliacoesClient } from "./_components/AdminAvaliacoesClient";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default async function AdminAvaliacoesPage() {
 
   return (
     <section aria-labelledby="admin-eval-heading" className="space-y-6">
+      <BackLink href="/admin" label="Painel" />
       <div>
         <h1 id="admin-eval-heading" className="font-display text-3xl font-black text-foreground">
           Gestão de Avaliações

@@ -109,11 +109,12 @@ export default async function InicioPage() {
     ? (reviews.reduce((acc, r) => acc + r.nota, 0) / reviews.length).toFixed(1)
     : "—";
 
-  // Próximos compromissos (os 3 mais próximos não concluídos)
-  const proximos = pedidos
-    .filter((p) => !["CONCLUIDO", "CANCELADO", "EXPIRADO"].includes(p.status))
+  // Próximos compromissos
+  const totalProximos = pedidos.filter((p) => !["CONCLUIDO", "CANCELADO", "EXPIRADO"].includes(p.status));
+  const maxCompromissos = isProfissional ? 3 : 2;
+  const proximos = [...totalProximos]
     .sort((a, b) => new Date(a.dataServico).getTime() - new Date(b.dataServico).getTime())
-    .slice(0, 3);
+    .slice(0, maxCompromissos);
 
   // Para profissionais: penalidades + passos de ativação (checklist do 1º acesso)
   let penaltyStats: PenaltySummary | null = null;
@@ -232,9 +233,16 @@ export default async function InicioPage() {
       {/* ── Próximos compromissos ── */}
       {proximos.length > 0 && (
         <div className="animate-fade-in delay-3">
-          <h2 className="mb-3 font-display text-xl font-black text-foreground">
-            Próximos compromissos
-          </h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-xl font-black text-foreground">
+              Próximos compromissos
+            </h2>
+            {totalProximos.length > maxCompromissos && (
+              <Link href="/pedidos?filtro=andamento" className="text-sm font-bold text-primary hover:underline">
+                Ver todos ({totalProximos.length})
+              </Link>
+            )}
+          </div>
           <div className="space-y-3">
             {proximos.map((p) => {
               const ui = BOOKING_STATUS_UI[p.status];

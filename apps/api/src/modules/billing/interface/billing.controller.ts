@@ -90,6 +90,20 @@ export class BillingController {
     return this.billing.changePlan(user.sub, input);
   }
 
+  /** Profissional cancela a assinatura vigente (grace period residual). */
+  @Post("subscriptions/cancel")
+  @UseGuards(JwtAuthGuard)
+  cancelSubscription(@CurrentUser() user: JwtClaims): Promise<Subscription> {
+    return this.billing.cancelSubscription(user.sub);
+  }
+
+  /** Assinatura recorrente do usuário logado, se houver. */
+  @Get("subscriptions/me")
+  @UseGuards(JwtAuthGuard)
+  mySubscription(@CurrentUser() user: JwtClaims): Promise<Subscription | null> {
+    return this.billing.getSubscription(user.sub);
+  }
+
   /** Contratante compra um plano avulso. */
   @Post("purchases")
   @UseGuards(JwtAuthGuard)

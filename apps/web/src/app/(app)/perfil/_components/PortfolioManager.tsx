@@ -76,7 +76,7 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
       )}
 
       {fotos.length > 0 && (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {fotos.map((f) => (
             <li key={f.id} className="group relative overflow-hidden rounded-lg border border-border">
               <img src={f.url} alt={f.legenda ?? "Obra do portfólio"} className="aspect-square w-full object-cover" />
@@ -144,7 +144,7 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
           Você atingiu o máximo de {MAX_PORTFOLIO_PHOTOS} fotos. Remova uma para adicionar outra.
         </p>
       ) : (
-        <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+        <div className="space-y-2 rounded-lg border border-dashed border-border p-2.5 sm:p-3">
           <Field label="Foto da obra">
             <input
               type="file"

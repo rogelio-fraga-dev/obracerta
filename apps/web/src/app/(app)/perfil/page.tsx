@@ -55,37 +55,41 @@ export default async function PerfilPage() {
     <section aria-labelledby="perfil-heading" className="space-y-6">
       <BackLink href="/inicio" label="Início" />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 id="perfil-heading" className="font-display text-3xl font-black text-foreground">
+        <h1 id="perfil-heading" className="font-display text-2xl font-black text-foreground sm:text-3xl">
           Perfil
         </h1>
         <Badge tone="success" className="animate-fade-in">Sessão ativa</Badge>
       </div>
 
       {/* Banner contextual por persona — comunica de imediato para qual conta o perfil é. */}
-      <div className="rounded-2xl bg-gradient-hero px-6 py-5 text-white">
-        <p className="text-xs font-extrabold uppercase tracking-[3px] text-white/70">{tipoLabel}</p>
-        <p className="mt-1 font-display text-lg font-black sm:text-xl">{personaTagline}</p>
+      <div className="rounded-2xl bg-gradient-hero px-4 py-4 text-white sm:px-6 sm:py-5">
+        <p className="text-[10px] font-extrabold uppercase tracking-[3px] text-white/70 sm:text-xs">{tipoLabel}</p>
+        <p className="mt-1 font-display text-base font-black sm:text-xl">{personaTagline}</p>
       </div>
 
       {/* ── Header do Perfil ── */}
-      <Card className="animate-fade-in flex flex-col gap-6 sm:flex-row sm:items-center">
-        <Avatar nome={user.nomeCompleto ?? "Usuário"} src={user.fotoUrl ?? undefined} size="xl" />
-        <div className="flex-1 space-y-3">
-          <div>
-            <h2 className="font-display text-2xl font-black text-foreground">
-              {user.nomeCompleto ?? "Usuário"}
-            </h2>
-            <p className="text-sm text-muted-foreground">{tipoLabel}</p>
-          </div>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <Badge tone="neutral">WhatsApp: {claims.whatsapp}</Badge>
-            {isProfissional && <Badge tone="primary">Conta verificada</Badge>}
+      <Card className="animate-fade-in flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
+        <div className="flex min-w-0 items-center gap-3 sm:contents">
+          <Avatar nome={user.nomeCompleto ?? "Usuário"} src={user.fotoUrl ?? undefined} size="lg" className="sm:h-20 sm:w-20" />
+          <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
+            <div className="min-w-0">
+              <h2 className="truncate font-display text-xl font-black text-foreground sm:text-2xl">
+                {user.nomeCompleto ?? "Usuário"}
+              </h2>
+              <p className="text-sm text-muted-foreground">{tipoLabel}</p>
+            </div>
+            <div className="flex flex-wrap gap-2 text-sm">
+              <Badge tone="neutral">WhatsApp: {claims.whatsapp}</Badge>
+              {isProfissional && <Badge tone="primary">Conta verificada</Badge>}
+            </div>
           </div>
         </div>
         {!isAdmin && (
-          <Link href="/cobrancas" className="sm:self-stretch w-full sm:w-auto">
-            <Card interactive className="flex h-full w-full flex-col items-center justify-center bg-muted/40 p-4">
-              <span className="font-semibold text-foreground text-center">Cobranças e reembolsos</span>
+          <Link href="/cobrancas" className="w-full shrink-0 sm:w-auto sm:self-stretch">
+            <Card interactive className="flex h-full w-full flex-col items-center justify-center bg-muted/40 p-3 sm:p-4">
+              <span className="text-center text-sm font-semibold text-foreground sm:text-base">
+                Cobranças e reembolsos
+              </span>
               <span aria-hidden className="mt-1 text-primary">→</span>
             </Card>
           </Link>
@@ -205,8 +209,8 @@ async function SuspensionPanel() {
           const ui = SUSPENSION_STATUS_UI[s.status];
           return (
             <Card key={s.id} className="border-danger/30 bg-danger/5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-bold text-danger">{s.motivo}</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                <span className="min-w-0 font-bold text-danger">{s.motivo}</span>
                 <Badge tone={ui.tone}>{ui.label}</Badge>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -235,7 +239,7 @@ async function ComportamentoPanel() {
     <div className="animate-fade-in delay-2 space-y-6">
       <div>
         <h2 className="mb-3 font-display text-xl font-black text-foreground">Comportamento</h2>
-        <Card className="flex flex-col gap-6 sm:flex-row sm:items-center">
+        <Card className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-6">
           <div className="flex flex-col items-center border-border sm:border-r sm:pr-8">
             <ProgressRing
               value={resumo.taxaAceitacao ? resumo.taxaAceitacao * 100 : 0}
@@ -246,9 +250,10 @@ async function ComportamentoPanel() {
               Taxa de aceitação
             </span>
           </div>
-          <div className="grid flex-1 grid-cols-2 gap-4">
-            <StatCard label="Aprovados" value={resumo.aprovados} detail={`de ${resumo.totalPedidos} pedidos`} />
+          <div className="grid w-full flex-1 grid-cols-2 gap-2 sm:gap-4">
+            <StatCard className="p-3 sm:p-5" label="Aprovados" value={resumo.aprovados} detail={`de ${resumo.totalPedidos} pedidos`} />
             <StatCard
+              className="p-3 sm:p-5"
               label="Penalidades"
               value={resumo.pontosPenalidade}
               tone={resumo.pontosPenalidade > 0 ? "danger" : "success"}
@@ -274,11 +279,11 @@ async function ComportamentoPanel() {
           <ul className="space-y-3">
             {penalidades.map((p) => (
               <Card key={p.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-3">
+                  <div className="min-w-0 flex-1">
                     <p className="font-bold text-foreground">{penaltyReasonLabel(p.motivo)}</p>
-                    <p className="text-sm text-muted-foreground">{formatDateTimeBR(p.criadoEm)}</p>
-                    {p.detalhe && <p className="mt-2 text-sm text-muted-foreground">{p.detalhe}</p>}
+                    <p className="text-xs text-muted-foreground sm:text-sm">{formatDateTimeBR(p.criadoEm)}</p>
+                    {p.detalhe && <p className="mt-1.5 text-xs text-muted-foreground sm:mt-2 sm:text-sm">{p.detalhe}</p>}
                   </div>
                   <Badge tone="danger" size="md">+{p.pontos} pts</Badge>
                 </div>

@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import {
   UserStatus,
   type PublicPortfolioPhoto,
   type PublicProfile,
   type PublicReview,
 } from "@obracerta/shared";
+import { and, eq, sql, count } from "drizzle-orm";
+import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
+import type { Database } from "../../../infrastructure/database/drizzle.js";
+import { bookingRequests } from "../../../infrastructure/database/schema/booking-requests.js";
 import { PortfolioService } from "../../profiles/application/portfolio.service.js";
 import { ProfilesService } from "../../profiles/application/profiles.service.js";
 import { Feature, planAllows } from "../../entitlements/domain/entitlements.js";
@@ -24,6 +28,7 @@ export class PublicProfileService {
     private readonly users: UsersService,
     private readonly reputation: ReputationService,
     private readonly penalties: PenaltyService,
+    @Inject(DRIZZLE) private readonly db: Database,
   ) {}
 
   /**
@@ -39,10 +44,11 @@ export class PublicProfileService {
       throw new NotFoundException("Perfil não encontrado.");
     }
 
-    const [reputacao, avaliacoes, taxaAceitacao] = await Promise.all([
+    const [reputacao, avaliacoes, taxaAceitacao, obrasConcluidas] = await Promise.all([
       this.reputation.getReputation(profile.userId),
       this.publicReviews(profile.userId),
       this.acceptanceRate(profile.userId),
+      this.countCompletedWorks(profile.userId),
     ]);
     return {
       slug: profile.slugPublico,
@@ -56,6 +62,7 @@ export class PublicProfileService {
       reputacao,
       avaliacoes,
       taxaAceitacao,
+      obrasConcluidas,
     };
   }
 
@@ -93,5 +100,91 @@ export class PublicProfileService {
     if (!planAllows(plano, Feature.PORTFOLIO)) return [];
     const fotos = await this.portfolio.list(userId);
     return fotos.map((f) => ({ url: f.url, legenda: f.legenda }));
+  }
+
+  private async countCompletedWorks(userId: string): Promise<number> {
+    const [c] = await this.db
+      .select({ total: count() })
+      .from(bookingRequests)
+      .where(
+        and(
+          eq(bookingRequests.professionalId, userId),
+          eq(bookingRequests.status, "CONCLUIDO"),
+        ),
+      );
+    return c?.total ?? 0;
+  }
+
+  async getRanking(): Promise<any[]> {
+    const res = await this.db.execute(sql`
+      select
+        pp.user_id as "userId",
+        pp.slug_publico as "slug",
+        pp.foto_url as "fotoUrl",
+        u.nome_completo as "nome",
+        count(br.id)::int as "obrasConcluidas",
+        coalesce(avg(rv.nota), 0)::float as "mediaNota",
+        count(distinct rv.id)::int as "totalAvaliacoes"
+      from professional_profiles pp
+      inner join users u on pp.user_id = u.id
+      left join booking_requests br on pp.user_id = br.professional_id and br.status = 'CONCLUIDO'
+      left join reviews rv on pp.user_id = rv.alvo_id and rv.status = 'REVELADA'
+      where u.status = 'ATIVO'
+      group by pp.user_id, pp.slug_publico, pp.foto_url, u.nome_completo
+      order by "obrasConcluidas" desc, "mediaNota" desc, "totalAvaliacoes" desc
+      limit 20
+    `);
+    return res.rows;
+  }
+
+  async listReviewsPaginated(
+    slug: string,
+    page: number,
+    limit: number,
+    nota?: number,
+  ): Promise<{ items: any[]; total: number }> {
+    const profile = await this.profiles.getProfessionalBySlug(slug);
+    if (!profile) throw new NotFoundException("Perfil não encontrado.");
+
+    const offset = (page - 1) * limit;
+    let filterSql = sql`r.alvo_id = ${profile.userId} and r.status = 'REVELADA'`;
+    if (nota && nota >= 1 && nota <= 5) {
+      filterSql = sql`r.alvo_id = ${profile.userId} and r.status = 'REVELADA' and r.nota = ${nota}`;
+    }
+
+    const rowsQuery = this.db.execute(sql`
+      select
+        r.id,
+        r.nota,
+        r.comentario,
+        r.criado_em as "criadoEm",
+        u.nome_completo as "autorNome",
+        resp.texto as "resposta"
+      from reviews r
+      inner join users u on r.autor_id = u.id
+      left join review_responses resp on r.id = resp.review_id
+      where ${filterSql}
+      order by r.criado_em desc
+      limit ${limit} offset ${offset}
+    `);
+
+    const countQuery = this.db.execute(sql`
+      select count(*)::int as total
+      from reviews r
+      where ${filterSql}
+    `);
+
+    const [rowsRes, countRes] = await Promise.all([rowsQuery, countQuery]);
+    const total = (countRes.rows[0] as { total: number })?.total ?? 0;
+
+    const items = rowsRes.rows.map((row: any) => ({
+      nota: row.nota,
+      comentario: row.comentario,
+      criadoEm: row.criadoEm instanceof Date ? row.criadoEm.toISOString() : new Date(row.criadoEm).toISOString(),
+      autorNome: nomeParcial(row.autorNome),
+      resposta: row.resposta || null,
+    }));
+
+    return { items, total };
   }
 }

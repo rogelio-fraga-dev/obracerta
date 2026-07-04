@@ -105,7 +105,7 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div className="rounded-2xl border border-border bg-background p-5">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-[2px] text-muted-foreground">Pedido</p>
             <h1 id="pedido-heading" className="font-display text-2xl font-black text-foreground">

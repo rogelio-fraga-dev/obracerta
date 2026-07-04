@@ -1,10 +1,13 @@
 name: obracerta-prod
 
-# Stack de produção/demo para uma única VPS ou EC2.
-# As imagens api/web são BUILDADAS na própria máquina (precisa de 4GB+ de RAM).
-#   Rode a partir da RAIZ do repo (o contexto de build é o repo inteiro):
-#   Subir:   docker compose --env-file infra/docker/.env.prod \
-#              -f infra/docker/docker-compose.prod.yml up -d --build
+# As imagens api/web são puxadas do GHCR (deploy por CI) ou BUILDADAS localmente
+# (deploy manual). Defina GHCR_OWNER no .env.prod para usar o registry:
+#   GHCR_OWNER=rogelio-fraga-dev
+# Sem essa variável, o compose usa as imagens locais (build: + image: obracerta-*).
+#   Subir (GHCR):  docker compose --env-file infra/docker/.env.prod \
+#                    -f infra/docker/docker-compose.prod.yml up -d
+#   Subir (local): docker compose --env-file infra/docker/.env.prod \
+#                    -f infra/docker/docker-compose.prod.yml up -d --build
 #   Migrar:  docker compose --env-file infra/docker/.env.prod \
 #              -f infra/docker/docker-compose.prod.yml \
 #              run --rm api sh -lc "pnpm db:migrate && pnpm db:seed"
@@ -62,7 +65,7 @@ services:
     networks: [internal]
 
   api:
-    image: obracerta-api:latest
+    image: ${GHCR_API_IMAGE:-obracerta-api:latest}
     build:
       context: ../..
       dockerfile: infra/docker/Dockerfile.api
@@ -102,7 +105,7 @@ services:
     networks: [internal]
 
   web:
-    image: obracerta-web:latest
+    image: ${GHCR_WEB_IMAGE:-obracerta-web:latest}
     build:
       context: ../..
       dockerfile: infra/docker/Dockerfile.web
