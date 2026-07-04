@@ -1,19 +1,28 @@
-# Varredura semanal de dependências (roadmap §9 — segurança).
-# Agrupa updates de dev/minor para reduzir ruído de PRs.
+# Varredura de dependências (roadmap §9 — segurança), com ruído mínimo:
+# TUDO agrupado num PR mensal por ecossistema (major separado, que pode quebrar).
+# Alertas de segurança continuam imediatos — o Dependabot ignora o schedule p/ CVEs.
 version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 3
     groups:
-      dev-and-minor:
+      deps-minor-e-patch:
         update-types:
           - "minor"
           - "patch"
+      deps-major:
+        update-types:
+          - "major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      actions:
+        patterns:
+          - "*"

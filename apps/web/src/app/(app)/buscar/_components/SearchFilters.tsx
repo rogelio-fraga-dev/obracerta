@@ -78,8 +78,10 @@ export function SearchFilters() {
         </Select>
       </Field>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Nota mínima" hint="Opcional">
+      {/* items-end + campos sem hint: os dois selects ficam na MESMA linha de base
+          (a dica "Opcional" só num deles desalinhava as alturas no celular). */}
+      <div className="grid grid-cols-2 items-end gap-3">
+        <Field label="Nota mínima">
           <Select value={notaMin} onChange={(e) => setNotaMin(e.target.value)}>
             <option value="">Qualquer nota</option>
             <option value="4.5">★ 4,5+</option>

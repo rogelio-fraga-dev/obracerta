@@ -132,18 +132,18 @@ export default async function InicioPage() {
 
   return (
     <section aria-labelledby="inicio-heading" className="space-y-6 sm:space-y-8">
-      {/* ── Hero com gradiente ── */}
-      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-5 py-6 text-background sm:px-7 sm:py-8">
+      {/* ── Hero com gradiente (compacto no celular) ── */}
+      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-4 py-4 text-background sm:px-7 sm:py-8">
         <div className="flex items-center gap-3 sm:gap-4">
           <Avatar nome={hint?.nome ?? "U"} src={me?.fotoUrl ?? undefined} size="lg" className="shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[2px] text-orange-300/80">
+            <p className="text-[10px] font-bold uppercase tracking-[2px] text-orange-300/80 sm:text-xs">
               {isProfissional ? "Profissional" : "Contratante"}
             </p>
-            <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-2xl font-black text-background sm:text-4xl">
+            <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-xl font-black text-background sm:text-4xl">
               {primeiroNome ? `Olá, ${primeiroNome}` : "Bem-vindo"}
             </h1>
-            <p className="mt-1 text-sm text-background/60">
+            <p className="mt-1 hidden text-sm text-background/60 sm:block">
               {isProfissional
                 ? "Gerencie sua agenda, pedidos e obras por aqui."
                 : "Encontre profissionais e acompanhe seus pedidos."}
@@ -196,10 +196,10 @@ export default async function InicioPage() {
         </Card>
       )}
 
-      {/* ── Stats KPIs — 2 colunas no celular (antes empilhava 4 cards enormes) ── */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+      {/* ── Stats KPIs — 2 colunas compactas no celular ── */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <StatCard
-          className="h-full animate-fade-in delay-1"
+          className="h-full animate-fade-in delay-1 p-3 sm:p-5"
           icon="📋"
           label="Pendentes"
           value={pendentes}
@@ -207,21 +207,21 @@ export default async function InicioPage() {
           detail={pendentes > 0 ? "Aguardando ação" : "Tudo em dia"}
         />
         <StatCard
-          className="h-full animate-fade-in delay-2"
+          className="h-full animate-fade-in delay-2 p-3 sm:p-5"
           icon="🔨"
           label="Em andamento"
           value={emAndamento}
           tone={emAndamento > 0 ? "primary" : "default"}
         />
         <StatCard
-          className="h-full animate-fade-in delay-3"
+          className="h-full animate-fade-in delay-3 p-3 sm:p-5"
           icon="✅"
           label="Concluídos"
           value={concluidos}
           tone="success"
         />
         <StatCard
-          className="h-full animate-fade-in delay-4"
+          className="h-full animate-fade-in delay-4 p-3 sm:p-5"
           icon="⭐"
           label="Avaliação média"
           value={mediaNotas}

@@ -19,6 +19,7 @@ import { Badge, Button, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { useAsyncAction } from "@/lib/use-async-action";
 import { ProfessionPicker } from "@/components/ProfessionPicker";
+import { WhatsappInput } from "@/components/WhatsappInput";
 import { AuthPanel } from "../_auth/AuthPanel";
 import { AuthDivider, GoogleButton } from "../_auth/SocialAuth";
 import { MethodTabs } from "../_auth/MethodTabs";
@@ -207,14 +208,8 @@ function EmailSignup({
           onChange={(e) => setPassword(e.target.value)}
         />
       </Field>
-      <Field label="WhatsApp" hint="Fica escondido até você aceitar um pedido.">
-        <Input
-          inputMode="tel"
-          autoComplete="tel"
-          placeholder="+5511999999999"
-          value={whatsapp}
-          onChange={(e) => setWhatsapp(e.target.value)}
-        />
+      <Field label="WhatsApp" hint="Só DDD e número — fica escondido até você aceitar um pedido.">
+        <WhatsappInput value={whatsapp} onValueChange={setWhatsapp} />
       </Field>
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Criando conta…" : "Criar conta"}
@@ -318,13 +313,8 @@ function WhatsappSignup() {
             requestOtp();
           }}
         >
-          <Field label="Seu WhatsApp" hint="Formato: +55 DDD 9XXXXXXXX">
-            <Input
-              placeholder="+5511999999999"
-              inputMode="tel"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-            />
+          <Field label="Seu WhatsApp" hint="Só DDD e número — o +55 já está aí">
+            <WhatsappInput value={whatsapp} onValueChange={setWhatsapp} />
           </Field>
           <PrimaryAction loading={loading}>Enviar código</PrimaryAction>
         </form>

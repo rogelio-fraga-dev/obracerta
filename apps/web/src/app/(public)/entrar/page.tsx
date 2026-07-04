@@ -11,6 +11,7 @@ import {
 import { Badge, Button, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { useAsyncAction } from "@/lib/use-async-action";
+import { WhatsappInput } from "@/components/WhatsappInput";
 import { AuthPanel } from "../_auth/AuthPanel";
 import { AuthDivider, GoogleButton } from "../_auth/SocialAuth";
 import { MethodTabs } from "../_auth/MethodTabs";
@@ -138,14 +139,6 @@ function WhatsappLogin({
   const [code, setCode] = useState("");
   const { error, loading, run } = useAsyncAction();
 
-  // Máscara ultra simples +55 DDD NÚMERO
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, "");
-    if (!val.startsWith("55")) val = "55" + val;
-    val = val.substring(0, 13); // +55 (11) 99999-9999 = 13 digitos max
-    setWhatsapp(val ? `+${val}` : "");
-  };
-
   const requestOtp = () =>
     run(async () => {
       const parsed = otpRequestSchema.safeParse({ whatsapp });
@@ -174,13 +167,8 @@ function WhatsappLogin({
     >
       {error && <ErrorBox message={error} />}
       {step === "numero" ? (
-        <Field label="Seu celular" hint="Digite o DDD e o número">
-          <Input
-            placeholder="+55 11 99999 9999"
-            inputMode="tel"
-            value={whatsapp}
-            onChange={handlePhoneChange}
-          />
+        <Field label="Seu celular" hint="Só DDD e número — o +55 já está aí">
+          <WhatsappInput value={whatsapp} onValueChange={setWhatsapp} />
         </Field>
       ) : (
         <Field label="Código recebido por WhatsApp" hint="Digite os 6 números recebidos">

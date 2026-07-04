@@ -15,7 +15,7 @@ test.describe("Páginas públicas", () => {
     await expect(page.getByRole("button", { name: "Entrar na minha conta" })).toBeVisible();
     // Aba WhatsApp continua acessível.
     await page.getByRole("tab", { name: "WhatsApp" }).click();
-    await expect(page.getByPlaceholder("+55 11 99999 9999")).toBeVisible();
+    await expect(page.getByPlaceholder("11 99999 9999")).toBeVisible();
     await expect(page.getByRole("button", { name: "Receber código" })).toBeVisible();
   });
 

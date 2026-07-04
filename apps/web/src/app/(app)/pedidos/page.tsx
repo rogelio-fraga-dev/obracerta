@@ -39,9 +39,9 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
   return (
     <section aria-labelledby="pedidos-heading" className="space-y-6">
       <BackLink href="/inicio" label="Início" />
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 id="pedidos-heading" className="font-display text-3xl font-black text-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 id="pedidos-heading" className="font-display text-2xl font-black text-foreground sm:text-3xl">
             Pedidos
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -51,8 +51,8 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
           </p>
         </div>
         {!isProfissional && (
-          <Link href="/pedidos/novo" className="w-fit">
-            <Button size="sm" className="w-full sm:w-auto">+ Novo pedido</Button>
+          <Link href="/pedidos/novo" className="shrink-0">
+            <Button size="sm">+ Novo pedido</Button>
           </Link>
         )}
       </div>
@@ -114,7 +114,7 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
             return (
               <li key={p.id}>
                 <Link href={`/pedidos/${p.id}`} className="block">
-                  <Card interactive>
+                  <Card interactive className="p-4 sm:p-6">
                     <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                       {p.outraParteNome ? (
                         <Avatar
@@ -130,7 +130,9 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="text-base font-bold text-foreground">{p.especialidade}</span>
+                          <span className="min-w-0 truncate text-base font-bold text-foreground">
+                            {p.especialidade}
+                          </span>
                           <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
                         </div>
                         {p.outraParteNome && (

@@ -12,8 +12,8 @@ test("onboarding do profissional até a área logada", async ({ page }) => {
   // O cadastro abre na aba e-mail — o assistente por OTP vive na aba WhatsApp.
   await page.getByRole("tab", { name: "WhatsApp" }).click();
 
-  // Passo 1: WhatsApp
-  await page.getByPlaceholder("+5511999999999").fill(whatsapp);
+  // Passo 1: WhatsApp (o +55 é prefixo fixo do campo; colar com +55 normaliza)
+  await page.getByPlaceholder("11 99999 9999").fill(whatsapp);
   await page.getByRole("button", { name: "Enviar código" }).click();
 
   // Passo 2: código (lido do Redis)
