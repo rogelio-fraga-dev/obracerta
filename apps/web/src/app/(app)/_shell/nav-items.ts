@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Receipt,
   FileText,
+  ScrollText,
   LayoutDashboard,
   Users,
   ShieldAlert,
@@ -35,6 +36,7 @@ const OBRAS: NavItem = { href: "/obras", label: "Obras", Icon: HardHat };
 const BUSCAR: NavItem = { href: "/buscar", label: "Buscar profissionais", shortLabel: "Buscar", Icon: Search };
 const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", shortLabel: "Agenda", Icon: CalendarDays };
 const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", shortLabel: "Docs", Icon: FileText };
+const ORCAMENTOS: NavItem = { href: "/orcamentos", label: "Orçamentos", shortLabel: "Orçam.", Icon: ScrollText };
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
 const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: Star };
 const FAVORITOS: NavItem = { href: "/favoritos", label: "Favoritos", Icon: Heart };
@@ -50,18 +52,18 @@ export interface NavSet {
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
-  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, ORCAMENTOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [NOTIFICACOES, OBRAS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [NOTIFICACOES, OBRAS, ORCAMENTOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [NOTIFICACOES, PEDIDOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [NOTIFICACOES, PEDIDOS, ORCAMENTOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 /**

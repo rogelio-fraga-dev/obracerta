@@ -5,6 +5,7 @@ import type { WorkOrder, WorkOrderStatus, WorkUrgency } from "@obracerta/shared"
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { workOrders } from "../../../infrastructure/database/schema/work-orders.js";
+import { proposals } from "../../../infrastructure/database/schema/proposals.js";
 import type {
   CreateWorkOrderData,
   ListOpenWorkOrdersFilters,
@@ -98,6 +99,16 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
       .where(eq(workOrders.contractorId, contractorId))
       .orderBy(desc(workOrders.criadoEm));
     return rows.map(rowToWorkOrder);
+  }
+
+  async listWonByProfessional(professionalId: string): Promise<WorkOrder[]> {
+    const rows = await this.db
+      .select({ wo: workOrders })
+      .from(workOrders)
+      .innerJoin(proposals, eq(proposals.workOrderId, workOrders.id))
+      .where(and(eq(proposals.professionalId, professionalId), eq(proposals.status, "ACEITA")))
+      .orderBy(desc(workOrders.criadoEm));
+    return rows.map((r) => rowToWorkOrder(r.wo));
   }
 
   async transitionStatus(

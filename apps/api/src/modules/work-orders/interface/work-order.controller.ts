@@ -81,6 +81,12 @@ export class WorkOrderController {
     return this.orders.listMine(user.sub);
   }
 
+  /** Obras que o profissional autenticado venceu (em andamento). Antes de `:id`. */
+  @Get("work-orders/me/professional")
+  mineWon(@CurrentUser() user: JwtClaims): Promise<WorkOrder[]> {
+    return this.orders.listWonByProfessional(user.sub);
+  }
+
   /** Detalhe de uma obra. */
   @Get("work-orders/:id")
   get(@Param("id") id: string): Promise<WorkOrder> {

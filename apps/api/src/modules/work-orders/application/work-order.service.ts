@@ -147,6 +147,11 @@ export class WorkOrderService {
     return this.orders.listForContractor(contractorId);
   }
 
+  /** Obras que o profissional autenticado venceu (lance ACEITA) — em andamento. */
+  listWonByProfessional(professionalId: string): Promise<WorkOrder[]> {
+    return this.orders.listWonByProfessional(professionalId);
+  }
+
   /** Descoberta: obras abertas (filtro por cidade/especialidade), paginado. */
   async listOpen(query: WorkOrderQuery): Promise<WorkOrdersPage> {
     const { page, limit } = query;

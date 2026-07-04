@@ -6,6 +6,7 @@ import { getProfileHint } from "@/lib/session";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
 import { formatRelativeBR } from "@/lib/format";
 import { BackLink } from "../_shell/BackLink";
+import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { PedidosIcon } from "../_shell/icons";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -35,6 +36,11 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
   const visiveis = filtro.statuses
     ? pedidos.filter((p) => filtro.statuses!.includes(p.status))
     : pedidos;
+  const tabs: FilterTab[] = FILTROS.map((f) => ({
+    key: f.key,
+    label: f.label,
+    count: f.statuses ? pedidos.filter((p) => f.statuses!.includes(p.status)).length : pedidos.length,
+  }));
 
   return (
     <section aria-labelledby="pedidos-heading" className="space-y-6">
@@ -58,28 +64,12 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
       </div>
 
       {/* Filtro por estado — URL como estado (compartilhável, voltar/avançar). */}
-      <nav aria-label="Filtrar pedidos" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {FILTROS.map((f) => {
-          const count = f.statuses
-            ? pedidos.filter((p) => f.statuses!.includes(p.status)).length
-            : pedidos.length;
-          const active = f.key === filtro.key;
-          return (
-            <Link
-              key={f.key}
-              href={f.key === "todos" ? "/pedidos" : `/pedidos?filtro=${f.key}`}
-              aria-current={active ? "page" : undefined}
-              className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
-                active
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border text-muted-foreground hover:border-primary/50"
-              }`}
-            >
-              {f.label} <span className="text-xs opacity-70">({count})</span>
-            </Link>
-          );
-        })}
-      </nav>
+      <FilterTabs
+        ariaLabel="Filtrar pedidos"
+        tabs={tabs}
+        activeKey={filtro.key}
+        hrefFor={(k) => (k === "todos" ? "/pedidos" : `/pedidos?filtro=${k}`)}
+      />
 
       {visiveis.length === 0 ? (
         <EmptyState

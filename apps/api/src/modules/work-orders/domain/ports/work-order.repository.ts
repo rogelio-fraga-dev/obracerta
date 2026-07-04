@@ -36,6 +36,8 @@ export interface WorkOrderRepository {
   listOpen(filters: ListOpenWorkOrdersFilters): Promise<WorkOrderPage>;
   /** Obras de um contratante (todos os status), mais recentes primeiro. */
   listForContractor(contractorId: string): Promise<WorkOrder[]>;
+  /** Obras adjudicadas a um profissional (lance ACEITA) — as que ele venceu. */
+  listWonByProfessional(professionalId: string): Promise<WorkOrder[]>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transitionStatus(id: string, from: WorkOrderStatus, to: WorkOrderStatus): Promise<WorkOrder | null>;
   /** Persiste a URL da foto ilustrativa da obra. */
