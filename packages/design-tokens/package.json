@@ -20,7 +20,10 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "src/tokens.css"],
+  "files": [
+    "dist",
+    "src/tokens.css"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -30,9 +33,9 @@
   },
   "devDependencies": {
     "@obracerta/config": "workspace:*",
-    "eslint": "^9.18.0",
-    "rimraf": "^6.0.1",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.3"
+    "eslint": "^9.39.4",
+    "rimraf": "^6.1.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   }
 }

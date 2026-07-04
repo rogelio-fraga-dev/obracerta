@@ -20,15 +20,15 @@
     "typecheck": "echo \"(config package — no type-check needed)\""
   },
   "dependencies": {
-    "@eslint/js": "^9.18.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.37.3",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "globals": "^15.14.0",
-    "typescript-eslint": "^8.20.0"
+    "@eslint/js": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
+    "typescript-eslint": "^8.62.1"
   },
   "devDependencies": {
-    "eslint": "^9.18.0"
+    "eslint": "^9.39.4"
   },
   "peerDependencies": {
     "eslint": "^9.18.0",
