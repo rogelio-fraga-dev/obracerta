@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { type BookingRequest, createBookingSchema } from "@obracerta/shared";
 import { Button, Card, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
+import { BackLink } from "../../_shell/BackLink";
 import { uploadBookingFotoAction } from "../actions";
 
 /**
@@ -56,6 +57,7 @@ export default function NovoPedidoPage() {
 
   return (
     <section aria-labelledby="novo-heading" className="space-y-4">
+      <BackLink href="/pedidos" label="Pedidos" />
       <h1 id="novo-heading" className="font-display text-2xl font-black text-foreground">
         Novo pedido
       </h1>

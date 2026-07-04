@@ -8,6 +8,7 @@ import type {
   PortfolioPhoto,
   ProfessionalProfile,
   Review,
+  User,
 } from "@obracerta/shared";
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
@@ -94,14 +95,15 @@ export default async function InicioPage() {
 
   // Buscar dados reais para o dashboard
   const endpoint = isProfissional ? "/bookings/me/professional" : "/bookings/me/contractor";
-  const [pedidos, reviews] = await Promise.all([
+  const [pedidos, reviews, me] = await Promise.all([
     serverApi<BookingRequest[]>("GET", endpoint).catch(() => [] as BookingRequest[]),
     serverApi<Review[]>("GET", "/reviews/received").catch(() => [] as Review[]),
+    serverApi<User>("GET", "/auth/me/profile").catch(() => null),
   ]);
 
   // Calcular stats
   const pendentes = pedidos.filter((p) => p.status === "PENDENTE").length;
-  const emAndamento = pedidos.filter((p) => ["ACEITO", "EM_ANDAMENTO"].includes(p.status)).length;
+  const emAndamento = pedidos.filter((p) => ["APROVADO", "INICIADO"].includes(p.status)).length;
   const concluidos = pedidos.filter((p) => p.status === "CONCLUIDO").length;
   const mediaNotas = reviews.length > 0
     ? (reviews.reduce((acc, r) => acc + r.nota, 0) / reviews.length).toFixed(1)
@@ -133,7 +135,7 @@ export default async function InicioPage() {
       {/* ── Hero com gradiente ── */}
       <div className="animate-fade-in rounded-2xl bg-gradient-hero px-5 py-6 text-background sm:px-7 sm:py-8">
         <div className="flex items-center gap-3 sm:gap-4">
-          <Avatar nome={hint?.nome ?? "U"} size="lg" className="shrink-0" />
+          <Avatar nome={hint?.nome ?? "U"} src={me?.fotoUrl ?? undefined} size="lg" className="shrink-0" />
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[2px] text-orange-300/80">
               {isProfissional ? "Profissional" : "Contratante"}

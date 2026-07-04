@@ -69,8 +69,10 @@ export class ProfilesService {
     return `${base}-${randomUUID().slice(0, 8)}`;
   }
 
-  getProfessional(userId: string): Promise<ProfessionalProfile | null> {
-    return this.profiles.findProfessionalByUserId(userId);
+  /** Recomputa a completude na leitura (self-heal: a foto pode ter sido espelhada da conta). */
+  async getProfessional(userId: string): Promise<ProfessionalProfile | null> {
+    const profile = await this.profiles.findProfessionalByUserId(userId);
+    return profile ? this.recompute(profile) : null;
   }
 
   getProfessionalBySlug(slug: string): Promise<ProfessionalProfile | null> {

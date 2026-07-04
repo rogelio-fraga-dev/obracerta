@@ -2,6 +2,7 @@ import type { ReceivedReview } from "@obracerta/shared";
 import { Card, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatRelativeBR } from "@/lib/format";
+import { BackLink } from "../_shell/BackLink";
 import { RespostaForm } from "../perfil/_components/RespostaForm";
 import { ReportDialog } from "../perfil/_components/ReportDialog";
 
@@ -22,6 +23,7 @@ export default async function AvaliacoesPage() {
 
   return (
     <section aria-labelledby="eval-heading" className="space-y-6">
+      <BackLink href="/inicio" label="Início" />
       <div>
         <h1 id="eval-heading" className="font-display text-3xl font-black text-foreground">
           Avaliações

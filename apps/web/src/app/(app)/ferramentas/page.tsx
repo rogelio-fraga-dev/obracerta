@@ -4,6 +4,7 @@ import { Badge, Button, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
 import { DOCUMENT_TYPE_UI } from "@/lib/document-ui";
+import { BackLink } from "../_shell/BackLink";
 
 /**
  * Ferramentas do profissional (§8.5): lista de orçamentos e recibos. Premium —
@@ -17,6 +18,7 @@ export default async function FerramentasPage() {
   if (!canUseTools) {
     return (
       <section aria-labelledby="ferr-heading" className="space-y-4">
+        <BackLink href="/inicio" label="Início" />
         <h1 id="ferr-heading" className="font-display text-2xl font-black text-foreground">
           Orçamentos e recibos
         </h1>
@@ -40,6 +42,7 @@ export default async function FerramentasPage() {
 
   return (
     <section aria-labelledby="ferr-heading" className="space-y-5">
+      <BackLink href="/inicio" label="Início" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 id="ferr-heading" className="font-display text-2xl font-black text-foreground">
           Orçamentos e recibos

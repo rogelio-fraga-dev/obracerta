@@ -6,6 +6,7 @@ import {
 } from "@obracerta/shared";
 import { Avatar, Badge, Button, Card, EmptyState, type BadgeTone } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
+import { BackLink } from "../_shell/BackLink";
 import { FavoriteButton } from "../buscar/_components/FavoriteButton";
 
 const PLANO_TONE: Record<ProfessionalPlan, BadgeTone> = {
@@ -23,6 +24,7 @@ export default async function FavoritosPage() {
 
   return (
     <section aria-labelledby="fav-heading" className="space-y-5">
+      <BackLink href="/inicio" label="Início" />
       <div>
         <h1 id="fav-heading" className="font-display text-2xl font-black text-foreground">
           Favoritos

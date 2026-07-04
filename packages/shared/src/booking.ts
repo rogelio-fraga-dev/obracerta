@@ -31,6 +31,16 @@ export const bookingRequestSchema = z.object({
 export type BookingRequest = z.infer<typeof bookingRequestSchema>;
 
 /**
+ * Item da listagem de pedidos: o pedido + identificação da **outra parte**
+ * (nome/foto são públicos — o que fica selado até o aceite é o CONTATO, §24).
+ */
+export const bookingListItemSchema = bookingRequestSchema.extend({
+  outraParteNome: z.string().nullable(),
+  outraParteFotoUrl: z.string().nullable(),
+});
+export type BookingListItem = z.infer<typeof bookingListItemSchema>;
+
+/**
  * Contato de uma das partes, liberado **só após o aceite** (§24, double-blind).
  * Até o profissional aprovar o pedido, ninguém vê WhatsApp/e-mail do outro — a
  * plataforma intermedia a conexão; o contrato em si é direto entre as partes.

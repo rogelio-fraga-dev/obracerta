@@ -23,6 +23,8 @@ import {
 import { AuditService } from "../../audit/application/audit.service.js";
 import { BillingService } from "../../billing/application/billing.service.js";
 import { Feature } from "../../entitlements/domain/entitlements.js";
+import { InboxService } from "../../notifications/application/inbox.service.js";
+import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
 import { UsersService } from "../../users/application/users.service.js";
 import {
   canAcceptWorkOrder,
@@ -42,6 +44,13 @@ import {
 } from "../domain/ports/proposal.repository.js";
 import { WorkOrderScheduler } from "./work-order.scheduler.js";
 
+/** Formatos aceitos na foto da obra → extensão do objeto no storage. */
+const ALLOWED_IMAGE_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
 @Injectable()
 export class WorkOrderService {
   constructor(
@@ -51,6 +60,8 @@ export class WorkOrderService {
     private readonly scheduler: WorkOrderScheduler,
     private readonly audit: AuditService,
     private readonly billing: BillingService,
+    @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    private readonly inbox: InboxService,
   ) {}
 
   /** Contratante abre uma obra; a urgência define a expiração (job BullMQ). */
@@ -80,6 +91,33 @@ export class WorkOrderService {
       dados: { especialidade: input.especialidade, urgencia: input.urgencia },
     });
     return order;
+  }
+
+  /**
+   * Dono anexa uma foto ilustrativa à obra (enquanto ABERTA). A imagem vai pro
+   * storage; persistimos só a URL — mesmo padrão da foto do pedido (§8.4).
+   */
+  async uploadFoto(
+    contractorId: string,
+    id: string,
+    file: { buffer: Buffer; mimetype: string },
+  ): Promise<WorkOrder> {
+    const order = await this.getOrderOr404(id);
+    if (order.contractorId !== contractorId) {
+      throw new ForbiddenException("Esta obra não é sua.");
+    }
+    if (order.status !== WorkOrderStatus.ABERTA) {
+      throw new ConflictException("Só dá para anexar foto enquanto a obra está aberta.");
+    }
+    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    if (!ext) {
+      throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
+    }
+    const key = `work-orders/${id}/foto-${Date.now()}.${ext}`;
+    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const updated = await this.orders.setFoto(id, url);
+    if (!updated) throw new NotFoundException("Obra não encontrada.");
+    return updated;
   }
 
   /** Obras do contratante autenticado (todos os status), mais recentes primeiro. */
@@ -173,6 +211,10 @@ export class WorkOrderService {
       entidadeId: workOrderId,
       dados: { valorCentavos: input.valorCentavos },
     });
+    await this.inbox.record(order.contractorId, "OBRA", "Novo lance na sua obra", {
+      corpo: `"${order.titulo}" recebeu um lance. Compare as propostas com calma.`,
+      link: `/obras/${order.id}`,
+    });
     return proposal;
   }
 
@@ -214,6 +256,10 @@ export class WorkOrderService {
       entidade: "work_order",
       entidadeId: order.id,
       dados: { proposalId, professionalId: proposal.professionalId },
+    });
+    await this.inbox.record(proposal.professionalId, "OBRA", "Seu lance foi aceito 🎉", {
+      corpo: `Você venceu a obra "${order.titulo}". Combine os próximos passos com o contratante.`,
+      link: `/obras/${order.id}`,
     });
     return aceita ?? proposal;
   }

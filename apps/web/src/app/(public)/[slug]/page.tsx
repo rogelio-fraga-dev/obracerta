@@ -6,6 +6,8 @@ import { Badge, Card } from "@obracerta/ui";
 import { callApi } from "@/lib/server-api";
 import { config } from "@/lib/config";
 import { formatRelativeBR } from "@/lib/format";
+import { getSession } from "@/lib/session";
+import { BackButton } from "@/components/BackButton";
 import { ShareButton } from "./ShareButton";
 
 interface PageProps {
@@ -41,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 export default async function PublicProfilePage({ params }: PageProps) {
   const { slug } = await params;
-  const profile = await loadProfile(slug);
+  const [profile, session] = await Promise.all([loadProfile(slug), getSession()]);
   if (!profile) notFound();
 
   const nome = profile.nome ?? "Profissional";
@@ -49,6 +51,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
 
   return (
     <section aria-labelledby="profile-heading" className="mx-auto max-w-5xl px-6 py-10">
+      {/* Volta para a busca (histórico preserva os filtros); deslogado cai na home. */}
+      <div className="mb-4">
+        <BackButton
+          fallback={session ? "/buscar" : "/"}
+          label={session ? "Voltar à busca" : "Voltar"}
+        />
+      </div>
       {/* Header hero — vitrine do profissional */}
       <header className="relative overflow-hidden rounded-3xl bg-gradient-hero px-6 py-8 text-white sm:px-10 sm:py-10">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -127,13 +136,15 @@ export default async function PublicProfilePage({ params }: PageProps) {
           </Card>
           <Card className="space-y-3 text-center">
             <p className="text-sm text-muted-foreground">
-              Para agendar com {nome}, entre na sua conta — protegemos os contatos até a aprovação.
+              {session
+                ? `Para agendar com ${nome}, use o botão Agendar no card dele na busca.`
+                : `Para agendar com ${nome}, entre na sua conta — protegemos os contatos até a aprovação.`}
             </p>
             <Link
-              href="/entrar"
+              href={session ? "/buscar" : "/entrar"}
               className="inline-block rounded-md bg-primary px-5 py-2.5 font-extrabold text-primary-foreground transition-colors hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
             >
-              Entrar para agendar
+              {session ? "Ir para a busca" : "Entrar para agendar"}
             </Link>
           </Card>
         </aside>

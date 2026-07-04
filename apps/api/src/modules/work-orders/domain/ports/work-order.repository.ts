@@ -38,6 +38,8 @@ export interface WorkOrderRepository {
   listForContractor(contractorId: string): Promise<WorkOrder[]>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transitionStatus(id: string, from: WorkOrderStatus, to: WorkOrderStatus): Promise<WorkOrder | null>;
+  /** Persiste a URL da foto ilustrativa da obra. */
+  setFoto(id: string, url: string): Promise<WorkOrder | null>;
   /** Atualiza o piso de dignidade (recalculado a cada lance). */
   setPiso(id: string, pisoCentavos: number | null): Promise<void>;
 }

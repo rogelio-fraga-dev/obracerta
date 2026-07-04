@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import {
   createWorkOrderSchema,
   submitProposalSchema,
@@ -16,6 +28,12 @@ import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { WorkOrderService } from "../application/work-order.service.js";
 
+/** Arquivo recebido via multipart (subset do que o Multer entrega). */
+interface MultipartFile {
+  buffer: Buffer;
+  mimetype: string;
+}
+
 @Controller()
 @UseGuards(JwtAuthGuard)
 export class WorkOrderController {
@@ -28,6 +46,18 @@ export class WorkOrderController {
     @Body(new ZodValidationPipe(createWorkOrderSchema)) input: CreateWorkOrderInput,
   ): Promise<WorkOrder> {
     return this.orders.openWorkOrder(user.sub, input);
+  }
+
+  /** Dono anexa a foto ilustrativa da obra (multipart, campo `file`). */
+  @Post("work-orders/:id/foto")
+  @UseInterceptors(FileInterceptor("file"))
+  uploadFoto(
+    @CurrentUser() user: JwtClaims,
+    @Param("id") id: string,
+    @UploadedFile() file: MultipartFile | undefined,
+  ): Promise<WorkOrder> {
+    if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
+    return this.orders.uploadFoto(user.sub, id, { buffer: file.buffer, mimetype: file.mimetype });
   }
 
   /** Descoberta: obras abertas (filtro por cidade/especialidade), paginado. */

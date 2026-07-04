@@ -25,6 +25,14 @@ export async function uploadPortfolioPhotoAction(formData: FormData) {
   revalidatePath("/perfil");
 }
 
+/** Edita a legenda de uma foto do portfólio. */
+export async function updatePortfolioLegendaAction(photoId: string, legenda: string | null) {
+  await serverApi("PATCH", `/profiles/professional/me/portfolio/${photoId}`, {
+    body: { legenda },
+  });
+  revalidatePath("/perfil");
+}
+
 /** Remove uma foto do portfólio. */
 export async function deletePortfolioPhotoAction(photoId: string) {
   await serverApi("DELETE", `/profiles/professional/me/portfolio/${photoId}`);

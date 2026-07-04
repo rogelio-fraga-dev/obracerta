@@ -4,6 +4,7 @@ import type { AvailabilityService } from "../../availability/application/availab
 import type { BillingService } from "../../billing/application/billing.service.js";
 import type { PenaltyService } from "../../decline-penalty/application/penalty.service.js";
 import type { NotificationProvider } from "../../notifications/domain/notification.provider.js";
+import type { InboxService } from "../../notifications/application/inbox.service.js";
 import type { StoragePort } from "../../storage/domain/storage.port.js";
 import type { UsersService } from "../../users/application/users.service.js";
 import { Feature } from "../../entitlements/domain/entitlements.js";
@@ -51,6 +52,7 @@ describe("BookingService — gating booking.receive", () => {
       billing,
       {} as StoragePort,
       notifications,
+      { record: jest.fn().mockResolvedValue(undefined) } as unknown as InboxService,
     );
     return { service, repo, billing };
   }

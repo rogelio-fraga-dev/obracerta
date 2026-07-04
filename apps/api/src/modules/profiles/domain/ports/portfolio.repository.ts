@@ -13,6 +13,7 @@ export interface PortfolioRepository {
   listForProfessional(professionalId: string): Promise<PortfolioPhoto[]>;
   countForProfessional(professionalId: string): Promise<number>;
   findById(id: string): Promise<PortfolioPhoto | null>;
+  updateLegenda(id: string, legenda: string | null): Promise<PortfolioPhoto | null>;
   delete(id: string): Promise<void>;
 }
 

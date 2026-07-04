@@ -163,6 +163,25 @@
   .delay-6 { animation-delay: 450ms; }
 }
 
+/* ── Impressão: só a área do documento (resumo do serviço) aparece no papel. ── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    max-width: none;
+    border: none;
+    box-shadow: none;
+  }
+}
+
 /* Respeita "movimento reduzido" do sistema: zera animações/transições (WCAG 2.3.3). */
 @media (prefers-reduced-motion: reduce) {
   *,

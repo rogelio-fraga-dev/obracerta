@@ -4,7 +4,11 @@ import { useState, useTransition } from "react";
 import { MAX_PORTFOLIO_PHOTOS, type PortfolioPhoto } from "@obracerta/shared";
 import { Button, Field, Input } from "@obracerta/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { deletePortfolioPhotoAction, uploadPortfolioPhotoAction } from "../portfolio-actions";
+import {
+  deletePortfolioPhotoAction,
+  updatePortfolioLegendaAction,
+  uploadPortfolioPhotoAction,
+} from "../portfolio-actions";
 
 /**
  * Gerencia o portfólio do profissional: grade de fotos com remover + upload de
@@ -15,6 +19,8 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
   const [legenda, setLegenda] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [removendoId, setRemovendoId] = useState<string | null>(null);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [legendaEdit, setLegendaEdit] = useState("");
   const [pending, startTransition] = useTransition();
 
   const cheio = fotos.length >= MAX_PORTFOLIO_PHOTOS;
@@ -32,6 +38,18 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
         setLegenda("");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erro ao enviar a foto.");
+      }
+    });
+  }
+
+  function salvarLegenda(id: string) {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await updatePortfolioLegendaAction(id, legendaEdit.trim() || null);
+        setEditandoId(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Erro ao editar a legenda.");
       }
     });
   }
@@ -62,20 +80,60 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
           {fotos.map((f) => (
             <li key={f.id} className="group relative overflow-hidden rounded-lg border border-border">
               <img src={f.url} alt={f.legenda ?? "Obra do portfólio"} className="aspect-square w-full object-cover" />
-              {f.legenda && (
-                <span className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1 text-xs text-white">
-                  {f.legenda}
-                </span>
+              {editandoId === f.id ? (
+                <div className="absolute inset-x-0 bottom-0 flex items-center gap-1 bg-black/70 p-1.5">
+                  <input
+                    value={legendaEdit}
+                    onChange={(e) => setLegendaEdit(e.target.value)}
+                    maxLength={140}
+                    autoFocus
+                    placeholder="Legenda da obra"
+                    className="min-w-0 flex-1 rounded bg-white/95 px-2 py-1 text-xs text-black"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") salvarLegenda(f.id);
+                      if (e.key === "Escape") setEditandoId(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => salvarLegenda(f.id)}
+                    disabled={pending}
+                    aria-label="Salvar legenda"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-success text-xs font-bold text-white"
+                  >
+                    ✓
+                  </button>
+                </div>
+              ) : (
+                f.legenda && (
+                  <span className="absolute inset-x-0 bottom-0 bg-black/55 px-2 py-1 text-xs text-white">
+                    {f.legenda}
+                  </span>
+                )
               )}
-              <button
-                type="button"
-                onClick={() => setRemovendoId(f.id)}
-                disabled={pending}
-                aria-label="Remover foto"
-                className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-danger"
-              >
-                ✕
-              </button>
+              <div className="absolute right-1.5 top-1.5 flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditandoId(f.id);
+                    setLegendaEdit(f.legenda ?? "");
+                  }}
+                  disabled={pending}
+                  aria-label="Editar legenda"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-primary"
+                >
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRemovendoId(f.id)}
+                  disabled={pending}
+                  aria-label="Remover foto"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-danger"
+                >
+                  ✕
+                </button>
+              </div>
             </li>
           ))}
         </ul>

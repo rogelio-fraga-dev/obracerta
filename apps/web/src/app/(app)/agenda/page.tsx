@@ -2,6 +2,7 @@ import type { AvailabilitySlot, CalendarDay } from "@obracerta/shared";
 import { Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
+import { BackLink } from "../_shell/BackLink";
 import { AgendaEditor } from "./_components/AgendaEditor";
 
 /**
@@ -34,6 +35,7 @@ export default async function AgendaPage() {
 
   return (
     <section aria-labelledby="agenda-heading" className="space-y-5">
+      <BackLink href="/inicio" label="Início" />
       <div>
         <h1 id="agenda-heading" className="font-display text-2xl font-black text-foreground">
           Agenda

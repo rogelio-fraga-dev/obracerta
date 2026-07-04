@@ -31,3 +31,6 @@ export * from "./professional-tools.js";
 export * from "./search.js";
 export * from "./public-profile.js";
 export * from "./admin.js";
+export * from "./address.js";
+export * from "./chat.js";
+export * from "./notifications.js";

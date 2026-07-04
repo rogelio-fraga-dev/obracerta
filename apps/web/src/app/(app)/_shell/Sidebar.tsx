@@ -20,6 +20,8 @@ interface SidebarProps {
   fotoUrl?: string;
   /** Pedidos aguardando ação — badge no item Pedidos. */
   pendingPedidos?: number;
+  /** Notificações não lidas — badge no item Notificações. */
+  naoLidas?: number;
   /** Slot do rodapé (ex.: botão Sair). */
   children?: ReactNode;
 }
@@ -36,6 +38,7 @@ export function Sidebar({
   isAdmin,
   fotoUrl,
   pendingPedidos = 0,
+  naoLidas = 0,
   children,
 }: SidebarProps) {
   const pathname = usePathname();
@@ -48,7 +51,8 @@ export function Sidebar({
 
   const renderItem = ({ href, label, Icon }: NavItem) => {
     const active = isActive(href);
-    const badge = href === "/pedidos" && pendingPedidos > 0 ? pendingPedidos : 0;
+    const badge =
+      href === "/pedidos" ? pendingPedidos : href === "/notificacoes" ? naoLidas : 0;
     return (
       <li key={href}>
         <Link

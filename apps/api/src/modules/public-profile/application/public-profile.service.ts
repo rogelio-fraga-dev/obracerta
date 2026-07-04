@@ -51,7 +51,7 @@ export class PublicProfileService {
       bairro: profile.bairro,
       anosExperiencia: profile.anosExperiencia,
       plano: profile.plano,
-      fotoUrl: publicFoto(profile.fotoUrl, profile.plano),
+      fotoUrl: publicFoto(profile.fotoUrl ?? user.fotoUrl ?? null, profile.plano),
       portfolio: await this.publicPortfolio(profile.userId, profile.plano),
       reputacao,
       avaliacoes,

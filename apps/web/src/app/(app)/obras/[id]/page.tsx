@@ -95,7 +95,17 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
         {obra.descricao && (
           <div className="border-t border-border pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Descrição</p>
-            <p className="mt-1 text-sm text-foreground">{obra.descricao}</p>
+            <p className="mt-1 whitespace-pre-line text-sm text-foreground">{obra.descricao}</p>
+          </div>
+        )}
+        {obra.fotoUrl && (
+          <div className="border-t border-border pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Foto da obra</p>
+            <img
+              src={obra.fotoUrl}
+              alt={`Foto da obra ${obra.titulo}`}
+              className="mt-2 max-h-72 w-full rounded-lg object-cover"
+            />
           </div>
         )}
       </div>

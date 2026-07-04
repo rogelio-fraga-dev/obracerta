@@ -120,6 +120,13 @@
       "when": 1783099963855,
       "tag": "0016_bright_wallop",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1783119035337,
+      "tag": "0017_clear_angel",
+      "breakpoints": true
     }
   ]
 }

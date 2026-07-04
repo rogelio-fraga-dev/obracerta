@@ -13,6 +13,7 @@ import { getProfileHint, getMyRoles } from "@/lib/session";
 import { penaltyReasonLabel } from "@/lib/penalty-ui";
 import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
+import { BackLink } from "../_shell/BackLink";
 import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
 import { ProfileQrCard } from "./_components/ProfileQrCard";
@@ -52,7 +53,8 @@ export default async function PerfilPage() {
 
   return (
     <section aria-labelledby="perfil-heading" className="space-y-6">
-      <div className="flex items-center justify-between">
+      <BackLink href="/inicio" label="Início" />
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 id="perfil-heading" className="font-display text-3xl font-black text-foreground">
           Perfil
         </h1>

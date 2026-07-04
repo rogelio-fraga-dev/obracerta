@@ -1,11 +1,14 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ApiEnvelopeError,
   type BookingContact,
+  type BookingMessage,
   type BookingRequest,
   type BookingReviewStatus,
   type BookingStatus,
   isBookingContactReleased,
+  type JwtClaims,
   type TermsAcceptance,
   type UserType,
 } from "@obracerta/shared";
@@ -19,6 +22,7 @@ import { Fact } from "../../_shell/Fact";
 import { AgendaIcon, ClockIcon } from "../../_shell/icons";
 import { BookingStepper } from "./_components/BookingStepper";
 import { BookingActions } from "./_components/BookingActions";
+import { ChatCard } from "./_components/ChatCard";
 import { ContactCard } from "./_components/ContactCard";
 import { TermsCard } from "./_components/TermsCard";
 import { ReviewForm } from "./_components/ReviewForm";
@@ -51,13 +55,27 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
   const offpath = OFFPATH[booking.status];
 
   // Contato é double-blind: só busca quando o pedido foi aceito (§8.4/§24).
+  // O chat abre na mesma janela do contato — busca o histórico + quem sou eu.
   let contato: BookingContact | null = null;
+  let mensagens: BookingMessage[] | null = null;
+  let meuId: string | null = null;
   if (isBookingContactReleased(booking.status)) {
-    try {
-      contato = await serverApi<BookingContact>("GET", `/bookings/${booking.id}/contato`);
-    } catch (e) {
-      if (!(e instanceof ApiEnvelopeError)) throw e;
-    }
+    const [contatoRes, mensagensRes, claimsRes] = await Promise.all([
+      serverApi<BookingContact>("GET", `/bookings/${booking.id}/contato`).catch((e: unknown) => {
+        if (!(e instanceof ApiEnvelopeError)) throw e;
+        return null;
+      }),
+      serverApi<BookingMessage[]>("GET", `/bookings/${booking.id}/mensagens`).catch(
+        (e: unknown) => {
+          if (!(e instanceof ApiEnvelopeError)) throw e;
+          return null;
+        },
+      ),
+      serverApi<JwtClaims>("POST", "/auth/me").catch(() => null),
+    ]);
+    contato = contatoRes;
+    mensagens = mensagensRes;
+    meuId = claimsRes?.sub ?? null;
   }
   const outraParte = tipo === "PROFISSIONAL" ? "Cliente" : "Profissional";
 
@@ -74,7 +92,17 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
 
   return (
     <section aria-labelledby="pedido-heading" className="space-y-4">
-      <BackLink href="/pedidos" label="Pedidos" />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BackLink href="/pedidos" label="Pedidos" />
+        {isBookingContactReleased(booking.status) && (
+          <Link
+            href={`/pedidos/${booking.id}/resumo`}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            📄 Exportar resumo do serviço
+          </Link>
+        )}
+      </div>
 
       <div className="rounded-2xl border border-border bg-background p-5">
         <div className="flex items-start justify-between gap-3">
@@ -125,6 +153,15 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
       </div>
 
       {contato && <ContactCard contato={contato} papel={outraParte} />}
+
+      {mensagens !== null && meuId && (
+        <ChatCard
+          bookingId={booking.id}
+          meuId={meuId}
+          initialMensagens={mensagens}
+          outraParte={outraParte}
+        />
+      )}
 
       <BookingActions bookingId={booking.id} status={booking.status} tipo={tipo} />
 

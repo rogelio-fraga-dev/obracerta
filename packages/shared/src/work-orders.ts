@@ -21,6 +21,8 @@ export const workOrderSchema = z.object({
   descricao: z.string().trim().max(2000).nullable(),
   urgencia: workUrgencySchema,
   bairro: z.string().trim().max(120).nullable(),
+  /** Foto ilustrativa da obra (anexada pelo dono após criar, multipart). */
+  fotoUrl: z.string().url().nullable(),
   geo: geoPointSchema.nullable(),
   pisoCentavos: centavosSchema.nullable(),
   status: workOrderStatusSchema,

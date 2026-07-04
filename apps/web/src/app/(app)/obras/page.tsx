@@ -4,6 +4,7 @@ import { Badge, Button, Card, EmptyState } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
+import { BackLink } from "../_shell/BackLink";
 import { ObrasIcon } from "../_shell/icons";
 
 /**
@@ -20,6 +21,7 @@ export default async function ObrasPage() {
 
   return (
     <section aria-labelledby="obras-heading" className="space-y-6">
+      <BackLink href="/inicio" label="Início" />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 id="obras-heading" className="font-display text-3xl font-black text-foreground">
@@ -63,7 +65,15 @@ export default async function ObrasPage() {
             return (
               <li key={o.id} className={`animate-fade-in delay-${Math.min(i + 1, 6)}`}>
                 <Link href={`/obras/${o.id}`} className="block h-full">
-                  <Card interactive className="flex h-full flex-col gap-3">
+                  <Card interactive className="flex h-full flex-col gap-3 overflow-hidden">
+                    {o.fotoUrl && (
+                      <img
+                        src={o.fotoUrl}
+                        alt=""
+                        aria-hidden
+                        className="-mx-6 -mt-6 h-32 w-[calc(100%+3rem)] max-w-none object-cover"
+                      />
+                    )}
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <h3 className="text-base font-bold text-foreground">{o.titulo}</h3>

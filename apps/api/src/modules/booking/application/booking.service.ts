@@ -12,6 +12,7 @@ import {
   UserType,
   isBookingContactReleased,
   type BookingContact,
+  type BookingListItem,
   type BookingRequest,
   type CreateBookingInput,
   type DeclineReason,
@@ -25,6 +26,7 @@ import {
   NOTIFICATION_PROVIDER,
   type NotificationProvider,
 } from "../../notifications/domain/notification.provider.js";
+import { InboxService } from "../../notifications/application/inbox.service.js";
 import { UsersService } from "../../users/application/users.service.js";
 import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
 import { computeExpiry, exceedsPendingLimit, serviceBlockWindow } from "../domain/booking-state.js";
@@ -53,6 +55,7 @@ export class BookingService {
     private readonly billing: BillingService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
+    private readonly inbox: InboxService,
   ) {}
 
   /** Contratante cria um pedido para um profissional (estado inicial PENDENTE). */
@@ -97,6 +100,10 @@ export class BookingService {
 
     await this.scheduler.scheduleExpiry(booking.id, expiraEm);
     await this.notify(professional.whatsapp, "Você recebeu um novo pedido de agendamento.");
+    await this.inbox.record(professional.id, "PEDIDO", "Você recebeu um novo pedido", {
+      corpo: `${booking.especialidade} — responda em até 24h para não perder o cliente.`,
+      link: `/pedidos/${booking.id}`,
+    });
     return booking;
   }
 
@@ -172,6 +179,10 @@ export class BookingService {
     }
 
     await this.notifyUser(updated.contractorId, "Seu pedido de agendamento foi aprovado.");
+    await this.inbox.record(updated.contractorId, "PEDIDO", "Pedido aprovado 🎉", {
+      corpo: `${updated.especialidade} confirmado — o contato foi liberado e o chat está aberto.`,
+      link: `/pedidos/${updated.id}`,
+    });
     return updated;
   }
 
@@ -200,6 +211,10 @@ export class BookingService {
 
     await this.penalties.penalizeDecline(professionalId, id, reason, detalhe);
     await this.notifyUser(updated.contractorId, "Seu pedido de agendamento foi recusado.");
+    await this.inbox.record(updated.contractorId, "PEDIDO", "Pedido recusado", {
+      corpo: `O profissional recusou o pedido de ${updated.especialidade}. Busque outro profissional disponível.`,
+      link: `/pedidos/${updated.id}`,
+    });
     return updated;
   }
 
@@ -231,6 +246,10 @@ export class BookingService {
     );
     if (!updated) throw new ConflictException("O pedido não está mais iniciado.");
     await this.notifyUser(updated.contractorId, "Sua obra foi marcada como concluída.");
+    await this.inbox.record(updated.contractorId, "AVALIACAO", "Serviço concluído — avalie", {
+      corpo: `${updated.especialidade} foi concluído. Sua avaliação ajuda toda a comunidade.`,
+      link: `/pedidos/${updated.id}`,
+    });
     await this.scheduleReviewReminders(updated.id, updated.contractorId, updated.professionalId);
     return updated;
   }
@@ -250,6 +269,10 @@ export class BookingService {
       await this.availability.removeBlocksForBooking(id);
     }
     await this.notifyUser(updated.professionalId, "Um pedido de agendamento foi cancelado.");
+    await this.inbox.record(updated.professionalId, "PEDIDO", "Pedido cancelado", {
+      corpo: `O contratante cancelou o pedido de ${updated.especialidade}.`,
+      link: `/pedidos/${updated.id}`,
+    });
     return updated;
   }
 
@@ -283,12 +306,35 @@ export class BookingService {
     return this.getOr404(id);
   }
 
-  listForContractor(contractorId: string): Promise<BookingRequest[]> {
-    return this.repo.listForContractor(contractorId);
+  async listForContractor(contractorId: string): Promise<BookingListItem[]> {
+    const bookings = await this.repo.listForContractor(contractorId);
+    return this.withCounterpart(bookings, (b) => b.professionalId);
   }
 
-  listForProfessional(professionalId: string): Promise<BookingRequest[]> {
-    return this.repo.listForProfessional(professionalId);
+  async listForProfessional(professionalId: string): Promise<BookingListItem[]> {
+    const bookings = await this.repo.listForProfessional(professionalId);
+    return this.withCounterpart(bookings, (b) => b.contractorId);
+  }
+
+  /**
+   * Anexa nome/foto da outra parte a cada pedido da lista (nome é público; o
+   * CONTATO continua selado até o aceite, §24). Busca cada usuário uma vez só.
+   */
+  private async withCounterpart(
+    bookings: BookingRequest[],
+    counterpartId: (b: BookingRequest) => string,
+  ): Promise<BookingListItem[]> {
+    const ids = [...new Set(bookings.map(counterpartId))];
+    const users = await Promise.all(ids.map((id) => this.users.findById(id)));
+    const byId = new Map(ids.map((id, i) => [id, users[i]]));
+    return bookings.map((b) => {
+      const other = byId.get(counterpartId(b));
+      return {
+        ...b,
+        outraParteNome: other?.nomeCompleto ?? null,
+        outraParteFotoUrl: other?.fotoUrl ?? null,
+      };
+    });
   }
 
   findAll(): Promise<BookingRequest[]> {

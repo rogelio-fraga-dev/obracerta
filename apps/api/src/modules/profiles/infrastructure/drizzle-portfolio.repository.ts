@@ -60,6 +60,15 @@ export class DrizzlePortfolioRepository implements PortfolioRepository {
     return row ? rowToPortfolioPhoto(row) : null;
   }
 
+  async updateLegenda(id: string, legenda: string | null): Promise<PortfolioPhoto | null> {
+    const [row] = await this.db
+      .update(portfolioPhotos)
+      .set({ legenda })
+      .where(eq(portfolioPhotos.id, id))
+      .returning();
+    return row ? rowToPortfolioPhoto(row) : null;
+  }
+
   async delete(id: string): Promise<void> {
     await this.db.delete(portfolioPhotos).where(eq(portfolioPhotos.id, id));
   }

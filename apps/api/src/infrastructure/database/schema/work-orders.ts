@@ -38,6 +38,8 @@ export const workOrders = pgTable(
     descricao: text("descricao"),
     urgencia: workUrgencyEnum("urgencia").notNull(),
     bairro: varchar("bairro", { length: 120 }),
+    /** Foto ilustrativa da obra (URL no storage) — anexada pelo dono após criar. */
+    fotoUrl: text("foto_url"),
     geo: geometry("geo", { type: "point", mode: "xy", srid: 4326 }),
     pisoCentavos: integer("piso_centavos"),
     status: workOrderStatusEnum("status").notNull().default("ABERTA"),

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { BookingRequest, User } from "@obracerta/shared";
+import type { BookingRequest, NotificationSummary, User } from "@obracerta/shared";
 import { config } from "@/lib/config";
 import { serverApi } from "@/lib/server-api";
 import { getMyRoles, getProfileHint, requireSession } from "@/lib/session";
@@ -23,16 +23,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const inicial = (hint?.nome ?? config.brand.name).charAt(0).toUpperCase();
   const isProfissional = hint?.tipo === "PROFISSIONAL";
 
-  // Foto do usuário (humaniza o shell) + pendências do profissional (badge no menu).
-  const [user, pendingPedidos] = await Promise.all([
+  // Foto do usuário (humaniza o shell) + pendências do profissional (badge no
+  // menu) + notificações não lidas (sino).
+  const [user, pendingPedidos, notifSummary] = await Promise.all([
     serverApi<User>("GET", "/auth/me/profile").catch(() => null),
     isProfissional
       ? serverApi<BookingRequest[]>("GET", "/bookings/me/professional")
           .then((b) => b.filter((p) => p.status === "PENDENTE").length)
           .catch(() => 0)
       : Promise.resolve(0),
+    serverApi<NotificationSummary>("GET", "/notifications/me/summary").catch(() => null),
   ]);
   const fotoUrl = user?.fotoUrl ?? undefined;
+  const naoLidas = notifSummary?.naoLidas ?? 0;
 
   return (
     <ToastProvider>
@@ -45,6 +48,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         isAdmin={isAdmin}
         fotoUrl={fotoUrl}
         pendingPedidos={pendingPedidos}
+        naoLidas={naoLidas}
       >
         <LogoutButton className="w-full" />
       </Sidebar>
@@ -58,11 +62,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           isAdmin={isAdmin}
           fotoUrl={fotoUrl}
           pendingPedidos={pendingPedidos}
+          naoLidas={naoLidas}
         />
 
         <main
           id="main-content"
-          className="mx-auto w-full max-w-[1600px] flex-1 px-5 py-6 pb-12 lg:px-12 lg:py-10 lg:pb-12"
+          className="mx-auto w-full min-w-0 max-w-[1600px] flex-1 overflow-x-clip px-5 py-6 pb-12 lg:px-12 lg:py-10 lg:pb-12"
         >
           {children}
         </main>

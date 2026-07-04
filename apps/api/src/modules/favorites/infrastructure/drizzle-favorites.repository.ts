@@ -40,7 +40,8 @@ export class DrizzleFavoritesRepository implements FavoritesRepository {
   async listProfessionals(userId: string): Promise<SearchResult[]> {
     const result = await this.db.execute(sql`
       select u.id as user_id, u.nome_completo as nome, pp.slug_publico as slug,
-             pp.especialidades, pp.bairro, pp.plano, pp.anos_experiencia, pp.foto_url,
+             pp.especialidades, pp.bairro, pp.plano, pp.anos_experiencia,
+             coalesce(pp.foto_url, u.foto_url) as foto_url,
              coalesce(r.media, 0) as media_nota, coalesce(r.total, 0) as total_avaliacoes
       from favorites f
       join professional_profiles pp on pp.user_id = f.professional_id

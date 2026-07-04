@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, count } from "drizzle-orm";
+import { eq, count, sql } from "drizzle-orm";
 import type { User } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -123,6 +123,11 @@ export class DrizzleUsersRepository implements UsersRepository {
       .set({ fotoUrl: url })
       .where(eq(users.id, id))
       .returning();
+    // A foto da conta é a mesma exibida na busca e no perfil público, que leem
+    // `professional_profiles.foto_url` — espelha para manter as duas em sincronia.
+    await this.db.execute(
+      sql`update professional_profiles set foto_url = ${url} where user_id = ${id}`,
+    );
     return res.length > 0 ? rowToUser(res[0]!) : null;
   }
 

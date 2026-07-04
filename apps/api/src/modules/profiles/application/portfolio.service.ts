@@ -61,6 +61,22 @@ export class PortfolioService {
     return this.repo.create({ professionalId, url, legenda: legenda?.trim() || null });
   }
 
+  /** Edita a legenda de uma foto — só o profissional dono. */
+  async updateLegenda(
+    professionalId: string,
+    photoId: string,
+    legenda: string | null,
+  ): Promise<PortfolioPhoto> {
+    const photo = await this.repo.findById(photoId);
+    if (!photo) throw new NotFoundException("Foto não encontrada.");
+    if (photo.professionalId !== professionalId) {
+      throw new ForbiddenException("Esta foto não é sua.");
+    }
+    const updated = await this.repo.updateLegenda(photoId, legenda?.trim() || null);
+    if (!updated) throw new NotFoundException("Foto não encontrada.");
+    return updated;
+  }
+
   /** Remove uma foto do portfólio — só o profissional dono. */
   async removePhoto(professionalId: string, photoId: string): Promise<void> {
     const photo = await this.repo.findById(photoId);

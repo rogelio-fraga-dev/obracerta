@@ -1,9 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Bell,
   Home,
   ClipboardList,
   HardHat,
   Heart,
+  MapPin,
   User,
   Search,
   CalendarDays,
@@ -35,6 +37,8 @@ const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recib
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
 const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: Star };
 const FAVORITOS: NavItem = { href: "/favoritos", label: "Favoritos", Icon: Heart };
+const ENDERECOS: NavItem = { href: "/enderecos", label: "Endereços", shortLabel: "Endereços", Icon: MapPin };
+const NOTIFICACOES: NavItem = { href: "/notificacoes", label: "Notificações", shortLabel: "Avisos", Icon: Bell };
 
 export interface NavSet {
   primary: NavItem[];
@@ -44,18 +48,18 @@ export interface NavSet {
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
-  secondary: [AGENDA, FERRAMENTAS, AVALIACOES, COBRANCAS],
+  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS],
 };
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [OBRAS, FAVORITOS, AVALIACOES, COBRANCAS],
+  secondary: [NOTIFICACOES, OBRAS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [PEDIDOS, FAVORITOS, AVALIACOES, COBRANCAS],
+  secondary: [NOTIFICACOES, PEDIDOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS],
 };
 
 /**

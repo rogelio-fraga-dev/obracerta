@@ -24,6 +24,7 @@ export function rowToWorkOrder(row: WorkOrderRow): WorkOrder {
     descricao: row.descricao,
     urgencia: row.urgencia as WorkUrgency,
     bairro: row.bairro,
+    fotoUrl: row.fotoUrl,
     geo: row.geo ? { lng: row.geo.x, lat: row.geo.y } : null,
     pisoCentavos: row.pisoCentavos,
     status: row.status as WorkOrderStatus,
@@ -108,6 +109,15 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
       .update(workOrders)
       .set({ status: to, atualizadoEm: new Date() })
       .where(and(eq(workOrders.id, id), eq(workOrders.status, from)))
+      .returning();
+    return row ? rowToWorkOrder(row) : null;
+  }
+
+  async setFoto(id: string, url: string): Promise<WorkOrder | null> {
+    const [row] = await this.db
+      .update(workOrders)
+      .set({ fotoUrl: url, atualizadoEm: new Date() })
+      .where(eq(workOrders.id, id))
       .returning();
     return row ? rowToWorkOrder(row) : null;
   }

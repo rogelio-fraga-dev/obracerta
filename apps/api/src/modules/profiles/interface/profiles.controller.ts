@@ -18,6 +18,8 @@ import {
   type JwtClaims,
   type PortfolioPhoto,
   type ProfessionalProfile,
+  type UpdatePortfolioPhotoInput,
+  updatePortfolioPhotoSchema,
   type UpdateProfessionalProfileInput,
   updateProfessionalProfileSchema,
 } from "@obracerta/shared";
@@ -110,6 +112,17 @@ export class ProfilesController {
       { buffer: file.buffer, mimetype: file.mimetype },
       legenda ?? null,
     );
+  }
+
+  /** Edita a legenda de uma foto do portfólio. */
+  @Patch("professional/me/portfolio/:photoId")
+  @UseGuards(JwtAuthGuard)
+  updatePortfolioPhoto(
+    @CurrentUser() user: JwtClaims,
+    @Param("photoId") photoId: string,
+    @Body(new ZodValidationPipe(updatePortfolioPhotoSchema)) body: UpdatePortfolioPhotoInput,
+  ): Promise<PortfolioPhoto> {
+    return this.portfolio.updateLegenda(user.sub, photoId, body.legenda);
   }
 
   /** Remove uma foto do portfólio; devolve a galeria atualizada. */

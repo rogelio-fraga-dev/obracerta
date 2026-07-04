@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Body,
   Controller,
@@ -12,6 +12,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import {
   type BookingContact,
+  type BookingListItem,
   type BookingRequest,
   createBookingSchema,
   type CreateBookingInput,
@@ -64,13 +65,13 @@ export class BookingController {
 
   /** Pedidos em que sou o contratante. */
   @Get("me/contractor")
-  listAsContractor(@CurrentUser() user: JwtClaims): Promise<BookingRequest[]> {
+  listAsContractor(@CurrentUser() user: JwtClaims): Promise<BookingListItem[]> {
     return this.bookings.listForContractor(user.sub);
   }
 
   /** Pedidos em que sou o profissional. */
   @Get("me/professional")
-  listAsProfessional(@CurrentUser() user: JwtClaims): Promise<BookingRequest[]> {
+  listAsProfessional(@CurrentUser() user: JwtClaims): Promise<BookingListItem[]> {
     return this.bookings.listForProfessional(user.sub);
   }
 

@@ -36,6 +36,13 @@ describe("WorkOrderService (integração)", () => {
   const schedulerStub = { scheduleExpiry: () => Promise.resolve() } as unknown as WorkOrderScheduler;
   // Gating: neste fluxo os profissionais podem dar lances (Especialista).
   const billingStub = { can: () => Promise.resolve(true) } as unknown as BillingService;
+  // Este fluxo não exercita upload de foto — storage stub inerte.
+  const storageStub = {
+    putObject: () => Promise.reject(new Error("sem storage no teste")),
+  } as unknown as import("../../storage/domain/storage.port.js").StoragePort;
+  const inboxStub = {
+    record: () => Promise.resolve(undefined),
+  } as unknown as import("../../notifications/application/inbox.service.js").InboxService;
   const service = new WorkOrderService(
     orderRepo,
     proposalRepo,
@@ -43,6 +50,8 @@ describe("WorkOrderService (integração)", () => {
     schedulerStub,
     auditStub,
     billingStub,
+    storageStub,
+    inboxStub,
   );
 
   const sufixo = Date.now().toString().slice(-9);

@@ -19,6 +19,7 @@ import { NotificationsModule } from "./modules/notifications/notifications.modul
 import { OnboardingModule } from "./modules/onboarding/onboarding.module.js";
 import { AvailabilityModule } from "./modules/availability/availability.module.js";
 import { BookingModule } from "./modules/booking/booking.module.js";
+import { BookingChatModule } from "./modules/booking-chat/booking-chat.module.js";
 import { AuditModule } from "./modules/audit/audit.module.js";
 import { TermsModule } from "./modules/terms/terms.module.js";
 import { DeclinePenaltyModule } from "./modules/decline-penalty/decline-penalty.module.js";
@@ -31,6 +32,7 @@ import { PublicProfileModule } from "./modules/public-profile/public-profile.mod
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
 import { ProfessionalToolsModule } from "./modules/professional-tools/professional-tools.module.js";
 import { CitiesModule } from "./modules/cities/cities.module.js";
+import { AddressesModule } from "./modules/addresses/addresses.module.js";
 import { AdminModule } from "./modules/admin/admin.module.js";
 import { ObservabilityModule } from "./modules/observability/observability.module.js";
 import { MetricsInterceptor } from "./modules/observability/interface/metrics.interceptor.js";
@@ -82,6 +84,7 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     OnboardingModule,
     AvailabilityModule,
     BookingModule,
+    BookingChatModule,
     AuditModule,
     TermsModule,
     DeclinePenaltyModule,
@@ -94,6 +97,7 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     WorkOrdersModule,
     ProfessionalToolsModule,
     CitiesModule,
+    AddressesModule,
     AdminModule,
     ObservabilityModule,
   ],

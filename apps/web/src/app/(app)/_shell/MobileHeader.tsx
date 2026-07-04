@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X, ArrowRight } from "lucide-react";
+import { X, ArrowRight, Bell } from "lucide-react";
 import { Avatar, cn } from "@obracerta/ui";
 import { firstName } from "@/lib/format";
 import { navForTipo, tipoLabel, ADMIN_NAV } from "./nav-items";
@@ -19,6 +19,8 @@ interface MobileHeaderProps {
   fotoUrl?: string;
   /** Pedidos aguardando ação — ponto no Menu + badge no drawer. */
   pendingPedidos?: number;
+  /** Notificações não lidas — sino no header + badge no drawer. */
+  naoLidas?: number;
 }
 
 export function MobileHeader({
@@ -29,6 +31,7 @@ export function MobileHeader({
   isAdmin,
   fotoUrl,
   pendingPedidos = 0,
+  naoLidas = 0,
 }: MobileHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
@@ -62,6 +65,23 @@ export function MobileHeader({
             </span>
           </Link>
           <div className="flex items-center gap-2">
+            {!isAdmin && (
+              <Link
+                href="/notificacoes"
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                aria-label={naoLidas > 0 ? `Notificações (${naoLidas} não lidas)` : "Notificações"}
+              >
+                <Bell className="h-4 w-4" />
+                {naoLidas > 0 && (
+                  <span
+                    aria-hidden
+                    className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white ring-2 ring-background"
+                  >
+                    {naoLidas > 9 ? "9+" : naoLidas}
+                  </span>
+                )}
+              </Link>
+            )}
             <Link
               href={isAdmin ? "/admin" : "/inicio"}
               className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
@@ -166,12 +186,13 @@ export function MobileHeader({
                     >
                       <Icon className="h-5 w-5 shrink-0" />
                       <span className="flex-1">{label}</span>
-                      {href === "/pedidos" && pendingPedidos > 0 && (
+                      {((href === "/pedidos" && pendingPedidos > 0) ||
+                        (href === "/notificacoes" && naoLidas > 0)) && (
                         <span
-                          aria-label={`${pendingPedidos} pendente(s)`}
+                          aria-label="pendências"
                           className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
                         >
-                          {pendingPedidos}
+                          {href === "/pedidos" ? pendingPedidos : naoLidas}
                         </span>
                       )}
                       <ArrowRight className={cn("h-4 w-4 opacity-0 transition-opacity", active && "opacity-40")} />

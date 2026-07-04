@@ -12,3 +12,4 @@ export { ProgressRing, type ProgressRingProps } from "./progress-ring.js";
 export { Select, type SelectProps } from "./select.js";
 export { Skeleton, SkeletonCard, type SkeletonProps } from "./skeleton.js";
 export { StatCard, type StatCardProps } from "./stat-card.js";
+export { Textarea, type TextareaProps } from "./textarea.js";

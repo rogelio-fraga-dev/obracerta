@@ -20,6 +20,12 @@ export const portfolioPhotoSchema = z.object({
 });
 export type PortfolioPhoto = z.infer<typeof portfolioPhotoSchema>;
 
+/** Edição de uma foto do portfólio (por ora, só a legenda). */
+export const updatePortfolioPhotoSchema = z.object({
+  legenda: z.string().trim().max(140).nullable(),
+});
+export type UpdatePortfolioPhotoInput = z.infer<typeof updatePortfolioPhotoSchema>;
+
 /** Foto do portfólio como exibida publicamente (sem ids internos). */
 export const publicPortfolioPhotoSchema = z.object({
   url: z.string().url(),
