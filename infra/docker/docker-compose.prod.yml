@@ -1,11 +1,14 @@
 name: obracerta-prod
 
 # As imagens api/web são puxadas do GHCR (deploy por CI) ou BUILDADAS localmente
-# (deploy manual). Defina GHCR_OWNER no .env.prod para usar o registry:
-#   GHCR_OWNER=rogelio-fraga-dev
-# Sem essa variável, o compose usa as imagens locais (build: + image: obracerta-*).
+# (deploy manual). Para usar o registry, defina as imagens completas no .env.prod:
+#   GHCR_API_IMAGE=ghcr.io/<owner>/obracerta-api:latest
+#   GHCR_WEB_IMAGE=ghcr.io/<owner>/obracerta-web:latest
+# Sem essas variáveis, o compose usa as imagens locais (build: + image: obracerta-*).
+# O workflow de CI (.github/workflows/deploy.yml) exporta essas variáveis no shell
+# da EC2, então sobe com `up -d --no-build` (usa exatamente o que foi pullado).
 #   Subir (GHCR):  docker compose --env-file infra/docker/.env.prod \
-#                    -f infra/docker/docker-compose.prod.yml up -d
+#                    -f infra/docker/docker-compose.prod.yml up -d --no-build
 #   Subir (local): docker compose --env-file infra/docker/.env.prod \
 #                    -f infra/docker/docker-compose.prod.yml up -d --build
 #   Migrar:  docker compose --env-file infra/docker/.env.prod \

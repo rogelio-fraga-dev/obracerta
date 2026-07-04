@@ -122,16 +122,22 @@ jobs:
             set -euo pipefail
             cd ~/obracerta
 
+            # Aponta o compose para as imagens recém-publicadas no GHCR. O env do
+            # shell tem precedência sobre o --env-file na interpolação do compose,
+            # então o stack sobe SEM buildar na EC2 (usa exatamente o que foi pullado).
+            export GHCR_API_IMAGE=${{ env.API_IMAGE }}:latest
+            export GHCR_WEB_IMAGE=${{ env.WEB_IMAGE }}:latest
+
             echo "▶ 1/4 Atualizando repositório na EC2…"
             git pull origin master
 
             echo "▶ 2/4 Pullando imagens novas do GHCR…"
-            docker pull ${{ env.API_IMAGE }}:latest
-            docker pull ${{ env.WEB_IMAGE }}:latest
+            docker pull "$GHCR_API_IMAGE"
+            docker pull "$GHCR_WEB_IMAGE"
 
             echo "▶ 3/4 Subindo stack…"
             docker compose --env-file infra/docker/.env.prod \
-              -f infra/docker/docker-compose.prod.yml up -d
+              -f infra/docker/docker-compose.prod.yml up -d --no-build
 
             echo "▶ 4/4 Aplicando migrations…"
             docker compose --env-file infra/docker/.env.prod \

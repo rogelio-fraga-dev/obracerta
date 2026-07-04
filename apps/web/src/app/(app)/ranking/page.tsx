@@ -27,16 +27,11 @@ export default async function RankingPage() {
   const podium = ranking.slice(0, 3);
   const remaining = ranking.slice(3);
 
-  // Ordenar o pódio para exibição visual: [2º colocado, 1º colocado, 3º colocado] para ficar bonito
-  const podiumVisual = [...podium];
-  if (podiumVisual.length === 3) {
-    const first = podiumVisual[0];
-    const second = podiumVisual[1];
-    const third = podiumVisual[2];
-    podiumVisual[0] = second; // 2º na esquerda
-    podiumVisual[1] = first;  // 1º no centro
-    podiumVisual[2] = third;  // 3º na direita
-  }
+  // Ordenar o pódio para exibição visual: [2º colocado, 1º colocado, 3º colocado] para ficar bonito.
+  // A checagem de truthiness estreita os três de `RankingItem | undefined` para `RankingItem`.
+  const [first, second, third] = podium;
+  const podiumVisual: RankingItem[] =
+    first && second && third ? [second, first, third] : podium;
 
   const PODIUM_STYLES = [
     {
