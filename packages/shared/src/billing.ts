@@ -95,6 +95,24 @@ export const refundSchema = z.object({
 export type Refund = z.infer<typeof refundSchema>;
 
 /**
+ * Reembolso enriquecido para a fila do financeiro (admin): dados do solicitante
+ * e da fatura de origem, para decidir sem consultar outras telas.
+ */
+export const pendingRefundDetailSchema = refundSchema.extend({
+  cliente: z.object({ nome: z.string(), email: z.string() }).nullable(),
+  fatura: z
+    .object({
+      valorCentavos: centavosSchema,
+      vencimentoEm: isoTimestampSchema,
+      pagoEm: isoTimestampSchema.nullable(),
+      metodo: z.string().nullable(),
+      gatewayId: z.string().nullable(),
+    })
+    .nullable(),
+});
+export type PendingRefundDetail = z.infer<typeof pendingRefundDetailSchema>;
+
+/**
  * Cobrança Pix de uma fatura (QR Code + copia-e-cola). Em sandbox o payload é
  * gerado localmente (EMV fictício) e `simulavel: true` habilita o botão de
  * confirmar o pagamento de mentira; com gateway real, vem do provedor.

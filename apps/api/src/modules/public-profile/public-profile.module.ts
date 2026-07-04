@@ -4,6 +4,8 @@ import { ProfilesModule } from "../profiles/profiles.module.js";
 import { ReputationModule } from "../reputation/reputation.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { PublicProfileService } from "./application/public-profile.service.js";
+import { PUBLIC_QUERY_REPOSITORY } from "./domain/ports/public-query.repository.js";
+import { DrizzlePublicQueryRepository } from "./infrastructure/drizzle-public-query.repository.js";
 import { PublicProfileController } from "./interface/public-profile.controller.js";
 
 /**
@@ -14,7 +16,10 @@ import { PublicProfileController } from "./interface/public-profile.controller.j
 @Module({
   imports: [ProfilesModule, UsersModule, ReputationModule, DeclinePenaltyModule],
   controllers: [PublicProfileController],
-  providers: [PublicProfileService],
+  providers: [
+    PublicProfileService,
+    { provide: PUBLIC_QUERY_REPOSITORY, useClass: DrizzlePublicQueryRepository },
+  ],
   exports: [PublicProfileService],
 })
 export class PublicProfileModule {}

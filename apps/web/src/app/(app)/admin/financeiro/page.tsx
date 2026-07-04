@@ -1,4 +1,4 @@
-import { ApiEnvelopeError, formatCentavos, type Refund, type HealthSnapshot } from "@obracerta/shared";
+import { ApiEnvelopeError, formatCentavos, type PendingRefundDetail, type HealthSnapshot } from "@obracerta/shared";
 import { Card, Badge } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
@@ -7,16 +7,7 @@ import { Resolver } from "../_components/Resolver";
 import { FinanceChart } from "./_components/FinanceChart";
 import { PAYMENT_METHOD_LABEL } from "@/lib/billing-ui";
 
-interface DetailedRefund extends Refund {
-  cliente: { nome: string; email: string } | null;
-  fatura: {
-    valorCentavos: number;
-    vencimentoEm: string;
-    pagoEm: string | null;
-    metodo: string | null;
-    gatewayId: string | null;
-  } | null;
-}
+type DetailedRefund = PendingRefundDetail;
 
 /**
  * Fila do financeiro (FINANCEIRO/ADMIN): reembolsos pendentes para aprovar/recusar.

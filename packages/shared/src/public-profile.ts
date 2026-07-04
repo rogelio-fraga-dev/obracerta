@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isoTimestampSchema, slugSchema } from "./primitives.js";
+import { isoTimestampSchema, slugSchema, uuidSchema } from "./primitives.js";
 import { professionalPlanSchema } from "./enums.js";
 import { reputationSummarySchema } from "./reputation.js";
 import { publicPortfolioPhotoSchema } from "./portfolio.js";
@@ -44,3 +44,22 @@ export const publicProfileSchema = z.object({
   obrasConcluidas: z.number().int().min(0).default(0),
 });
 export type PublicProfile = z.infer<typeof publicProfileSchema>;
+
+/** Item do ranking público (pódio + lista): volume de obras + reputação. */
+export const rankingEntrySchema = z.object({
+  userId: uuidSchema,
+  slug: slugSchema,
+  fotoUrl: z.string().nullable(),
+  nome: z.string(),
+  obrasConcluidas: z.number().int().min(0),
+  mediaNota: z.number().min(0).max(5),
+  totalAvaliacoes: z.number().int().min(0),
+});
+export type RankingEntry = z.infer<typeof rankingEntrySchema>;
+
+/** Página de avaliações públicas (paginada, filtrável por nota). */
+export const publicReviewsPageSchema = z.object({
+  items: z.array(publicReviewSchema),
+  total: z.number().int().min(0),
+});
+export type PublicReviewsPage = z.infer<typeof publicReviewsPageSchema>;

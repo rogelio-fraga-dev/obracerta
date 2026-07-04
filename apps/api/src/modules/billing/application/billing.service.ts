@@ -21,6 +21,7 @@ import {
   type CreatePurchaseInput,
   type CreateSubscriptionInput,
   type Invoice,
+  type PendingRefundDetail,
   type Purchase,
   type Refund,
   type Subscription,
@@ -475,25 +476,32 @@ export class BillingService {
     return this.refunds.listForUser(userId);
   }
 
-  async listPendingRefunds(): Promise<any[]> {
+  /** Fila do financeiro: reembolsos SOLICITADO enriquecidos com solicitante + fatura. */
+  async listPendingRefunds(): Promise<PendingRefundDetail[]> {
     const rawRefunds = await this.refunds.listPending();
-    const detailed = [];
-    for (const r of rawRefunds) {
-      const user = await this.users.findById(r.userId);
-      const invoice = await this.invoices.findById(r.invoiceId);
-      detailed.push({
-        ...r,
-        cliente: user ? { nome: user.nomeCompleto || "Usuário", email: user.email } : null,
-        fatura: invoice ? {
-          valorCentavos: invoice.valorCentavos,
-          vencimentoEm: invoice.vencimentoEm,
-          pagoEm: invoice.pagoEm,
-          metodo: invoice.metodo,
-          gatewayId: invoice.gatewayId
-        } : null,
-      });
-    }
-    return detailed;
+    // Sem N+1 sequencial: cada reembolso resolve usuário + fatura em paralelo,
+    // e todos os reembolsos resolvem em paralelo.
+    return Promise.all(
+      rawRefunds.map(async (r) => {
+        const [user, invoice] = await Promise.all([
+          this.users.findById(r.userId),
+          this.invoices.findById(r.invoiceId),
+        ]);
+        return {
+          ...r,
+          cliente: user ? { nome: user.nomeCompleto || "Usuário", email: user.email ?? "" } : null,
+          fatura: invoice
+            ? {
+                valorCentavos: invoice.valorCentavos,
+                vencimentoEm: invoice.vencimentoEm,
+                pagoEm: invoice.pagoEm,
+                metodo: invoice.metodo,
+                gatewayId: invoice.gatewayId,
+              }
+            : null,
+        };
+      }),
+    );
   }
 
   /**

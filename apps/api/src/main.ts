@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import type { NextFunction, Request, Response } from "express";
 import { AppModule } from "./app.module.js";
 import type { AppConfig } from "./config/configuration.js";
@@ -12,8 +13,13 @@ interface TracedRequest extends Request {
 }
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config: ConfigService<AppConfig, true> = app.get(ConfigService);
+
+  // Atrás do Caddy (1 proxy reverso) em produção: confia no X-Forwarded-For para
+  // que o rate-limiting (ThrottlerGuard) enxergue o IP REAL do cliente e não o do
+  // proxy — senão todo mundo cairia no mesmo balde e um abuso derrubaria os demais.
+  app.set("trust proxy", 1);
 
   // Correlation id (observabilidade Fase 6): reaproveita o `x-request-id` recebido
   // ou gera um; ecoa na resposta. O MetricsInterceptor o inclui no log estruturado.

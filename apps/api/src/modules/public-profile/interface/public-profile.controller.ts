@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
-import type { PublicProfile } from "@obracerta/shared";
+import type { PublicProfile, PublicReviewsPage, RankingEntry } from "@obracerta/shared";
 import { PublicProfileService } from "../application/public-profile.service.js";
 
 /**
@@ -12,7 +12,7 @@ export class PublicProfileController {
 
   /** Top profissionais por volume de obras e notas. */
   @Get("ranking")
-  ranking(): Promise<any[]> {
+  ranking(): Promise<RankingEntry[]> {
     return this.publicProfile.getRanking();
   }
 
@@ -23,7 +23,7 @@ export class PublicProfileController {
     @Query("page") page?: string,
     @Query("limit") limit?: string,
     @Query("nota") nota?: string,
-  ): Promise<{ items: any[]; total: number }> {
+  ): Promise<PublicReviewsPage> {
     const p = page ? Math.max(1, parseInt(page, 10)) : 1;
     const l = limit ? Math.max(1, parseInt(limit, 10)) : 10;
     const n = nota ? parseInt(nota, 10) : undefined;

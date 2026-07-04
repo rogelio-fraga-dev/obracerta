@@ -1,24 +1,15 @@
 import Link from "next/link";
+import type { RankingEntry } from "@obracerta/shared";
 import { serverApi } from "@/lib/server-api";
 import { Avatar, Badge, Card } from "@obracerta/ui";
 import { BackLink } from "../_shell/BackLink";
 
 export const revalidate = 60; // Cache por 1 minuto
 
-interface RankingItem {
-  userId: string;
-  slug: string;
-  fotoUrl: string | null;
-  nome: string;
-  obrasConcluidas: number;
-  mediaNota: number;
-  totalAvaliacoes: number;
-}
-
 export default async function RankingPage() {
-  let ranking: RankingItem[] = [];
+  let ranking: RankingEntry[] = [];
   try {
-    ranking = await serverApi<RankingItem[]>("GET", "/public/ranking");
+    ranking = await serverApi<RankingEntry[]>("GET", "/public/ranking");
   } catch {
     // Silently fall back to empty ranking
   }
@@ -30,7 +21,7 @@ export default async function RankingPage() {
   // Ordenar o pódio para exibição visual: [2º colocado, 1º colocado, 3º colocado] para ficar bonito.
   // A checagem de truthiness estreita os três de `RankingItem | undefined` para `RankingItem`.
   const [first, second, third] = podium;
-  const podiumVisual: RankingItem[] =
+  const podiumVisual: RankingEntry[] =
     first && second && third ? [second, first, third] : podium;
 
   const PODIUM_STYLES = [

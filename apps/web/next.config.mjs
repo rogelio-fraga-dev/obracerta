@@ -1,5 +1,12 @@
+import path from "node:path";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Build de produção enxuto: só o servidor + node_modules realmente usados
+  // (traçados). Reduz RAM e tamanho da imagem Docker na EC2 e acelera o pull do GHCR.
+  output: "standalone",
+  // Monorepo: o tracing precisa enxergar a raiz do repo para incluir os workspaces.
+  outputFileTracingRoot: path.join(import.meta.dirname, "../../"),
   reactStrictMode: true,
   // Workspace packages are pre-built (tsup), but transpiling lets us consume
   // their TS/JSX directly during dev without a separate build step.

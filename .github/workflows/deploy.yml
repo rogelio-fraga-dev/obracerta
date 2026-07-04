@@ -117,7 +117,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER || 'ec2-user' }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
             set -euo pipefail
             cd ~/obracerta

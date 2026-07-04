@@ -1,8 +1,10 @@
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import type { ExecutionContext } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import type { Request } from "express";
 import { type AppConfig, configuration } from "./config/configuration.js";
 import { validateEnv } from "./config/env.validation.js";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter.js";
@@ -72,9 +74,17 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
       },
     }),
     // Rate limiting GLOBAL (anti-abuso/scraping/brute force): 120 req/60s por IP.
-    // Rotas sensíveis (login/OTP) endurecem com @Throttle. Storage em memória
-    // (suficiente p/ instância única; trocar por Redis no deploy multi-instância).
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
+    // Rotas sensíveis (login/OTP) endurecem com @Throttle. O IP real vem do
+    // X-Forwarded-For (ver `trust proxy` no main.ts). Health/metrics ficam de fora
+    // para não estourar o balde com uptime checks e scrapes do Prometheus. Storage
+    // em memória (ok p/ instância única; trocar por Redis no deploy multi-instância).
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 120 }],
+      skipIf: (ctx: ExecutionContext) => {
+        const path = ctx.switchToHttp().getRequest<Request>().path ?? "";
+        return path.startsWith("/health") || path.startsWith("/metrics");
+      },
+    }),
     DatabaseModule,
     RedisModule,
     StorageModule,
