@@ -489,13 +489,18 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 ## 13. Próximos Passos Imediatos _(revisado jul/2026 — pós-MVP, demo no ar)_
 
 > Estado: MVP completo (Fases 0–8) + Google/Pix sandbox + paridade de UX com o segmento
-> (favoritos, reviews públicas, busca avançada, faixa de preço, checklist de ativação).
+> (favoritos, reviews públicas, busca avançada, faixa de preço, checklist de ativação) +
+> pacote jul/2026: chat no pedido e na obra, notificações in-app + Web Push, lembretes
+> diários, endereços com CEP, galeria de fotos da obra, resumo exportável ("contrato"),
+> central de ajuda + suporte, autocomplete de profissional, backup diário e E2E.
 > Demo pública na EC2 (`app.<IP>.sslip.io`). **O código deixou de ser o gargalo** —
 > os itens abaixo estão em ordem de prioridade.
 
 ### 13.1 Proteger o que existe (código, curto)
-- [ ] **Backup automático do Postgres** — hoje o banco da demo vive num único container
-      **sem backup** (maior risco técnico atual). `pg_dump` diário → S3/MinIO via cron no host.
+- [x] ~~**Backup automático do Postgres**~~ _(jul/2026)_ — `pg_dump` diário (cron 03:10 UTC na
+      EC2) com retenção local (14) + espelho no MinIO (30d). Scripts em `infra/backup/`
+      (backup/restore/instalador). **Limite:** o espelho vive no MESMO host — proteger contra
+      perda da EC2 exige S3/R2 externo (quando houver conta, §13.3/13.4).
 - [ ] **Deploy via CI** (GitHub Actions builda a imagem → EC2 puxa) — substitui o upload de
       ~630MB da máquina local (`scripts/deploy-ship.sh`) e a dependência do IP liberado no SG.
 - [ ] **Monitoramento mínimo** — a API já expõe `/metrics` (Prometheus); plugar Grafana Cloud
@@ -514,11 +519,14 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 - [ ] **Asaas sandbox** — Pix real (UI + pipeline de webhook prontos; trocar o adapter).
 - [ ] **WhatsApp Cloud API + SMS fallback** — OTP real.
 - [ ] **Google OAuth** — credenciais reais (`GOOGLE_CLIENT_ID/SECRET`; o fluxo já alterna sozinho).
-- [ ] **Push VAPID** + `PAYMENT_WEBHOOK_SECRET` de produção (M-11).
+- [x] ~~**Push VAPID**~~ _(jul/2026)_ — Web Push completo (inscrição por aparelho, envio junto
+      do inbox, opt-in em /notificacoes); chaves geradas p/ dev e prod. Falta só o
+      `PAYMENT_WEBHOOK_SECRET` de produção (M-11).
 
 ### 13.5 Qualidade na fila
-- [ ] **E2E Playwright** dos 2 fluxos críticos (cadastro→pedido→aceite→conclusão→avaliação;
-      busca→agendar) — maior lacuna de testes.
+- [x] ~~**E2E Playwright** dos 2 fluxos críticos~~ _(jul/2026)_ — busca→agendar→aceite→chat→cancela
+      e obra→lance→adjudicação→chat (`apps/web/e2e/{pedido,obra}-flow.spec.ts`); specs antigas
+      atualizadas; suíte completa verde. Rodar com a stack local no ar: `pnpm --filter @obracerta/web e2e`.
 - [ ] Rodada de **review multi-agente** (security/react/database/silent-failure — ver `docs/skills-ecc.md`).
 - [ ] Perf diferida do backend (M-8/9/10) + `serverApiFormData` (FE-5).
 
