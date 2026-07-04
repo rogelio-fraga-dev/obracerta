@@ -124,7 +124,7 @@ jobs:
           # O SSM roda como root; runuser executa o deploy como ec2-user (dono do
           # repo e do docker). git pull traz o remote-deploy.sh atualizado e o script
           # puxa as imagens do GHCR + sobe o stack sem buildar.
-          REMOTE="cd ~/obracerta && git pull origin master && GHCR_API_IMAGE='$API_TAG' GHCR_WEB_IMAGE='$WEB_TAG' bash infra/deploy/remote-deploy.sh"
+          REMOTE="cd ~/obracerta && git fetch origin master -q && git reset --hard FETCH_HEAD && GHCR_API_IMAGE='$API_TAG' GHCR_WEB_IMAGE='$WEB_TAG' bash infra/deploy/remote-deploy.sh"
           CMD="runuser -l ec2-user -c \"$REMOTE\""
           jq -n --arg c "$CMD" '{commands:[$c]}' > ssm-params.json
 

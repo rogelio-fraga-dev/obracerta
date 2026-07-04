@@ -4,7 +4,7 @@
 # do GHCR e sobe o stack SEM buildar. Idempotente.
 #
 # Uso manual:
-#   cd ~/obracerta && git pull origin master && \
+#   cd ~/obracerta && git fetch origin master -q && git reset --hard FETCH_HEAD && \
 #     GHCR_API_IMAGE=ghcr.io/<owner>/obracerta-api:latest \
 #     GHCR_WEB_IMAGE=ghcr.io/<owner>/obracerta-web:latest \
 #     bash infra/deploy/remote-deploy.sh
