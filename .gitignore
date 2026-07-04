@@ -56,3 +56,6 @@ infra/deploy.env
 
 # Tars temporarios de deploy (docker save)
 deploy-temp/
+
+# credenciais da demo (arquivo local p/ compartilhar; ja documentadas em docs/)
+credenciais-demo.txt
