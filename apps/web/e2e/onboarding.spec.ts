@@ -9,6 +9,9 @@ test("onboarding do profissional até a área logada", async ({ page }) => {
   const whatsapp = genWhatsapp();
   await page.goto("/cadastro");
 
+  // O cadastro abre na aba e-mail — o assistente por OTP vive na aba WhatsApp.
+  await page.getByRole("tab", { name: "WhatsApp" }).click();
+
   // Passo 1: WhatsApp
   await page.getByPlaceholder("+5511999999999").fill(whatsapp);
   await page.getByRole("button", { name: "Enviar código" }).click();
@@ -25,8 +28,8 @@ test("onboarding do profissional até a área logada", async ({ page }) => {
   await page.getByLabel("Nome completo").fill("Profissional E2E");
   await page.getByRole("button", { name: "Criar conta" }).click();
 
-  // Passo 4: atuação
-  await page.getByLabel("Especialidades").fill("Pintura");
+  // Passo 4: atuação — o catálogo virou chips (ProfessionPicker)
+  await page.getByRole("button", { name: "Pedreiro" }).click();
   await page.getByLabel("Bairro de atuação").fill("Centro");
   await page.getByRole("button", { name: "Continuar" }).click();
 
@@ -35,5 +38,6 @@ test("onboarding do profissional até a área logada", async ({ page }) => {
   await page.getByRole("button", { name: "Começar grátis" }).click();
 
   await expect(page).toHaveURL(/\/inicio$/);
-  await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
+  // Âncora independente de viewport (a sidebar é desktop-only): o hero do painel.
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });

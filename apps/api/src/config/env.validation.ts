@@ -41,6 +41,12 @@ export const envSchema = z.object({
   // Onboarding (roadmap §5). speedup>1 acelera as mensagens em dev (1 = dias reais).
   ONBOARDING_SPEEDUP: z.coerce.number().positive().default(1),
 
+  // Web Push (PWA). Sem as chaves VAPID, o push fica desabilitado (in-app segue).
+  // Gerar par: npx web-push generate-vapid-keys
+  VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  VAPID_SUBJECT: z.string().default("mailto:produtoobra@gmail.com"),
+
   // Billing (roadmap §7.1). Segredo HMAC dos webhooks do gateway de pagamento.
   PAYMENT_WEBHOOK_SECRET: z
     .string()

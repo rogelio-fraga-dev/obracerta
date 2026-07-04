@@ -43,6 +43,11 @@ describe("WorkOrderService (integração)", () => {
   const inboxStub = {
     record: () => Promise.resolve(undefined),
   } as unknown as import("../../notifications/application/inbox.service.js").InboxService;
+  const photosStub = {
+    add: () => Promise.reject(new Error("sem galeria no teste")),
+    listForWorkOrder: () => Promise.resolve([]),
+    countForWorkOrder: () => Promise.resolve(0),
+  } as unknown as import("../domain/ports/work-order-photos.repository.js").WorkOrderPhotosRepository;
   const service = new WorkOrderService(
     orderRepo,
     proposalRepo,
@@ -51,6 +56,7 @@ describe("WorkOrderService (integração)", () => {
     auditStub,
     billingStub,
     storageStub,
+    photosStub,
     inboxStub,
   );
 

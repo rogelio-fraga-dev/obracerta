@@ -10,9 +10,13 @@ test.describe("Páginas públicas", () => {
 
   test("/entrar mostra o formulário de login", async ({ page }) => {
     await page.goto("/entrar");
-    await expect(page.getByRole("heading", { name: "Entrar" })).toBeVisible();
-    await expect(page.getByPlaceholder("+5511999999999")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Enviar código" })).toBeVisible();
+    // Aba padrão: e-mail e senha (o login ganhou abas + Google no pacote visual).
+    await expect(page.getByPlaceholder("voce@email.com")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Entrar na minha conta" })).toBeVisible();
+    // Aba WhatsApp continua acessível.
+    await page.getByRole("tab", { name: "WhatsApp" }).click();
+    await expect(page.getByPlaceholder("+55 11 99999 9999")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Receber código" })).toBeVisible();
   });
 
   test("landing sem violações sérias de acessibilidade (WCAG AA)", async ({ page }) => {

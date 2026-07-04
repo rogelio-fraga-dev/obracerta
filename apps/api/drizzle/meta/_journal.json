@@ -127,6 +127,13 @@
       "when": 1783119035337,
       "tag": "0017_clear_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1783136635481,
+      "tag": "0018_quick_thunderball",
+      "breakpoints": true
     }
   ]
 }

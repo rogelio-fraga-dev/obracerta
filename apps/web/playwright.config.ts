@@ -6,9 +6,15 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // Sequencial: o /auth/login tem rate-limit (5/min por IP) e os fluxos usam
+  // as mesmas contas de demo — paralelismo gera 429 e corrida de dados.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  // Fluxos multi-login em dev (Next compila cada rota na 1ª visita) estouram
+  // os 30s default com folga — o budget maior evita falso negativo.
+  timeout: 120_000,
   reporter: [["list"]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",

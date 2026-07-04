@@ -2,6 +2,7 @@ import type { Notification } from "@obracerta/shared";
 import { serverApi } from "@/lib/server-api";
 import { BackLink } from "../_shell/BackLink";
 import { NotificationList } from "./_components/NotificationList";
+import { PushOptIn } from "./_components/PushOptIn";
 
 /** Notificações: avisos e lembretes da conta (pedidos, obras, mensagens…). */
 export default async function NotificacoesPage() {
@@ -18,6 +19,7 @@ export default async function NotificacoesPage() {
           O que aconteceu na sua conta — pedidos, obras, mensagens e avaliações.
         </p>
       </div>
+      <PushOptIn />
       <NotificationList notificacoes={notificacoes} />
     </section>
   );

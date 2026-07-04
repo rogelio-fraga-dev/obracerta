@@ -8,6 +8,7 @@ import {
   NOTIFICATIONS_REPOSITORY,
   type NotificationsRepository,
 } from "../domain/ports/notifications.repository.js";
+import { PushService } from "./push.service.js";
 
 /** Quantas notificações a página mostra (não é histórico infinito). */
 const LIST_LIMIT = 50;
@@ -23,9 +24,13 @@ export class InboxService {
 
   constructor(
     @Inject(NOTIFICATIONS_REPOSITORY) private readonly repo: NotificationsRepository,
+    private readonly push: PushService,
   ) {}
 
-  /** Registra um aviso para o usuário. Nunca lança — loga e segue. */
+  /**
+   * Registra um aviso para o usuário (in-app) e replica via Web Push quando
+   * habilitado. Nunca lança — loga e segue.
+   */
   async record(
     userId: string,
     tipo: NotificationType,
@@ -37,6 +42,7 @@ export class InboxService {
     } catch (error: unknown) {
       this.logger.warn(`Falha ao registrar notificação p/ ${userId}: ${String(error)}`);
     }
+    await this.push.sendToUser(userId, { titulo, corpo: opts.corpo, link: opts.link });
   }
 
   list(userId: string): Promise<Notification[]> {

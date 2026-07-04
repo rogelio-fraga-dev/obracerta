@@ -5,6 +5,7 @@ import {
   ClipboardList,
   HardHat,
   Heart,
+  LifeBuoy,
   MapPin,
   User,
   Search,
@@ -39,6 +40,7 @@ const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: 
 const FAVORITOS: NavItem = { href: "/favoritos", label: "Favoritos", Icon: Heart };
 const ENDERECOS: NavItem = { href: "/enderecos", label: "Endereços", shortLabel: "Endereços", Icon: MapPin };
 const NOTIFICACOES: NavItem = { href: "/notificacoes", label: "Notificações", shortLabel: "Avisos", Icon: Bell };
+const AJUDA: NavItem = { href: "/ajuda", label: "Ajuda e suporte", shortLabel: "Ajuda", Icon: LifeBuoy };
 
 export interface NavSet {
   primary: NavItem[];
@@ -48,18 +50,18 @@ export interface NavSet {
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
-  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS],
+  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [NOTIFICACOES, OBRAS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS],
+  secondary: [NOTIFICACOES, OBRAS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [NOTIFICACOES, PEDIDOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS],
+  secondary: [NOTIFICACOES, PEDIDOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 /**
@@ -99,6 +101,7 @@ const ADM_PEDIDOS: NavItem = { href: "/admin/pedidos", label: "Gestão de pedido
 const ADM_AVALIACOES: NavItem = { href: "/admin/avaliacoes", label: "Gestão de avaliações", shortLabel: "Reviews", Icon: Star };
 const ADM_MODERACAO: NavItem = { href: "/admin/moderacao", label: "Moderação", Icon: ShieldAlert };
 const ADM_FINANCEIRO: NavItem = { href: "/admin/financeiro", label: "Financeiro", shortLabel: "Financ.", Icon: Landmark };
+const ADM_SUPORTE: NavItem = { href: "/admin/suporte", label: "Suporte", Icon: LifeBuoy };
 
 /**
  * Painel administrativo — **fonte única** (Sidebar desktop + drawer mobile), com
@@ -112,4 +115,5 @@ export const ADMIN_NAV: NavItem[] = [
   ADM_AVALIACOES,
   ADM_MODERACAO,
   ADM_FINANCEIRO,
+  ADM_SUPORTE,
 ];

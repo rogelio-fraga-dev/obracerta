@@ -30,9 +30,12 @@ import { FavoritesModule } from "./modules/favorites/favorites.module.js";
 import { SearchModule } from "./modules/search/search.module.js";
 import { PublicProfileModule } from "./modules/public-profile/public-profile.module.js";
 import { WorkOrdersModule } from "./modules/work-orders/work-orders.module.js";
+import { WorkOrderChatModule } from "./modules/work-order-chat/work-order-chat.module.js";
 import { ProfessionalToolsModule } from "./modules/professional-tools/professional-tools.module.js";
 import { CitiesModule } from "./modules/cities/cities.module.js";
 import { AddressesModule } from "./modules/addresses/addresses.module.js";
+import { EngagementModule } from "./modules/engagement/engagement.module.js";
+import { SupportModule } from "./modules/support/support.module.js";
 import { AdminModule } from "./modules/admin/admin.module.js";
 import { ObservabilityModule } from "./modules/observability/observability.module.js";
 import { MetricsInterceptor } from "./modules/observability/interface/metrics.interceptor.js";
@@ -95,9 +98,12 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     SearchModule,
     PublicProfileModule,
     WorkOrdersModule,
+    WorkOrderChatModule,
     ProfessionalToolsModule,
     CitiesModule,
     AddressesModule,
+    EngagementModule,
+    SupportModule,
     AdminModule,
     ObservabilityModule,
   ],

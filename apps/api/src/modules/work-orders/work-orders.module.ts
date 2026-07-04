@@ -11,8 +11,10 @@ import {
 import { WorkOrderService } from "./application/work-order.service.js";
 import { WORK_ORDER_REPOSITORY } from "./domain/ports/work-order.repository.js";
 import { PROPOSAL_REPOSITORY } from "./domain/ports/proposal.repository.js";
+import { WORK_ORDER_PHOTOS_REPOSITORY } from "./domain/ports/work-order-photos.repository.js";
 import { DrizzleWorkOrderRepository } from "./infrastructure/drizzle-work-order.repository.js";
 import { DrizzleProposalRepository } from "./infrastructure/drizzle-proposal.repository.js";
+import { DrizzleWorkOrderPhotosRepository } from "./infrastructure/drizzle-work-order-photos.repository.js";
 import { WorkOrderExpiryProcessor } from "./infrastructure/work-order-expiry.processor.js";
 import { WorkOrderController } from "./interface/work-order.controller.js";
 
@@ -36,6 +38,7 @@ import { WorkOrderController } from "./interface/work-order.controller.js";
     WorkOrderExpiryProcessor,
     { provide: WORK_ORDER_REPOSITORY, useClass: DrizzleWorkOrderRepository },
     { provide: PROPOSAL_REPOSITORY, useClass: DrizzleProposalRepository },
+    { provide: WORK_ORDER_PHOTOS_REPOSITORY, useClass: DrizzleWorkOrderPhotosRepository },
   ],
   exports: [WorkOrderService],
 })

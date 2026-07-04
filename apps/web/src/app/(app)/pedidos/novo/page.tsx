@@ -7,6 +7,10 @@ import { Button, Card, Field, Input } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 import { BackLink } from "../../_shell/BackLink";
 import { uploadBookingFotoAction } from "../actions";
+import {
+  ProfessionalSearchField,
+  type SelectedProfessional,
+} from "./_components/ProfessionalSearchField";
 
 /**
  * Contratante cria um pedido. O profissional-alvo vem por query (`?prof=&esp=`)
@@ -16,7 +20,16 @@ import { uploadBookingFotoAction } from "../actions";
 export default function NovoPedidoPage() {
   const router = useRouter();
   const params = useSearchParams();
-  const [professionalId, setProfessionalId] = useState(params.get("prof") ?? "");
+  // Chegou pela busca/perfil (?prof=&esp=&nome=) → já vem selecionado.
+  const [profissional, setProfissional] = useState<SelectedProfessional | null>(() => {
+    const prof = params.get("prof");
+    if (!prof) return null;
+    return {
+      id: prof,
+      nome: params.get("nome") ?? "Profissional selecionado",
+      especialidades: params.get("esp") ? [params.get("esp")!] : [],
+    };
+  });
   const [especialidade, setEspecialidade] = useState(params.get("esp") ?? "");
   const [descricao, setDescricao] = useState("");
   const [quando, setQuando] = useState("");
@@ -28,9 +41,10 @@ export default function NovoPedidoPage() {
     setError(null);
     setLoading(true);
     try {
+      if (!profissional) throw new Error("Escolha o profissional pelo nome.");
       if (!quando) throw new Error("Escolha a data e a hora do serviço.");
       const payload = {
-        professionalId,
+        professionalId: profissional.id,
         especialidade,
         descricao: descricao.trim() || undefined,
         dataServico: new Date(quando).toISOString(),
@@ -69,19 +83,37 @@ export default function NovoPedidoPage() {
           </p>
         )}
 
-        <Field label="Profissional" hint="Identificador do profissional (vem do perfil dele)">
-          <Input
-            value={professionalId}
-            onChange={(e) => setProfessionalId(e.target.value)}
-            placeholder="ID do profissional"
-          />
-        </Field>
+        <ProfessionalSearchField
+          selected={profissional}
+          onSelect={(p) => {
+            setProfissional(p);
+            // Sugere a 1ª especialidade do profissional quando o campo está vazio.
+            if (p && !especialidade && p.especialidades[0]) setEspecialidade(p.especialidades[0]);
+          }}
+        />
         <Field label="Especialidade">
-          <Input
-            value={especialidade}
-            onChange={(e) => setEspecialidade(e.target.value)}
-            placeholder="Ex.: Pedreiro"
-          />
+          {profissional && profissional.especialidades.length > 0 ? (
+            <select
+              value={especialidade}
+              onChange={(e) => setEspecialidade(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3.5 py-2.5 font-sans text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-orange-200"
+            >
+              {!profissional.especialidades.includes(especialidade) && especialidade && (
+                <option value={especialidade}>{especialidade}</option>
+              )}
+              {profissional.especialidades.map((esp) => (
+                <option key={esp} value={esp}>
+                  {esp}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <Input
+              value={especialidade}
+              onChange={(e) => setEspecialidade(e.target.value)}
+              placeholder="Ex.: Pedreiro"
+            />
+          )}
         </Field>
         <Field label="Data e hora">
           <Input type="datetime-local" value={quando} onChange={(e) => setQuando(e.target.value)} />

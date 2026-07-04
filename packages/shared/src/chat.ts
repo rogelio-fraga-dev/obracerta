@@ -24,3 +24,18 @@ export const createBookingMessageSchema = z.object({
   texto: z.string().trim().min(1, "Escreva uma mensagem.").max(2000),
 });
 export type CreateBookingMessageInput = z.infer<typeof createBookingMessageSchema>;
+
+/** Mensagem do chat de uma obra (pós-adjudicação: dono ↔ profissional vencedor). */
+export const workOrderMessageSchema = z.object({
+  id: uuidSchema,
+  workOrderId: uuidSchema,
+  senderId: uuidSchema,
+  senderNome: z.string().nullable(),
+  texto: z.string().min(1).max(2000),
+  criadoEm: isoTimestampSchema,
+});
+export type WorkOrderMessage = z.infer<typeof workOrderMessageSchema>;
+
+/** Envio de mensagem no chat da obra (mesmo corpo do chat do pedido). */
+export const createWorkOrderMessageSchema = createBookingMessageSchema;
+export type CreateWorkOrderMessageInput = z.infer<typeof createWorkOrderMessageSchema>;

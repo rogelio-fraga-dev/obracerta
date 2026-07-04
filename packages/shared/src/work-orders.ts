@@ -75,6 +75,18 @@ export const submitProposalSchema = z.object({
 });
 export type SubmitProposalInput = z.infer<typeof submitProposalSchema>;
 
+/** Máximo de fotos na galeria de uma obra. */
+export const MAX_WORK_ORDER_PHOTOS = 6;
+
+/** Foto da galeria da obra. */
+export const workOrderPhotoSchema = z.object({
+  id: uuidSchema,
+  workOrderId: uuidSchema,
+  url: z.string().url(),
+  criadoEm: isoTimestampSchema,
+});
+export type WorkOrderPhoto = z.infer<typeof workOrderPhotoSchema>;
+
 /** Filtros + paginação da descoberta de obras abertas. */
 export const workOrderQuerySchema = z.object({
   cidadeId: uuidSchema.optional(),

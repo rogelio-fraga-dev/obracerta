@@ -2,11 +2,15 @@ import { notFound } from "next/navigation";
 import {
   ApiEnvelopeError,
   formatCentavos,
+  type JwtClaims,
   type Proposal,
   type UserType,
   type WorkOrder,
+  type WorkOrderMessage,
+  type WorkOrderPhoto,
 } from "@obracerta/shared";
 import { Badge } from "@obracerta/ui";
+import { ChatCard } from "@/components/ChatCard";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
@@ -32,12 +36,12 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
   }
 
   // Sigilo: o backend escopa as propostas (dono vê todas; profissional só a sua).
-  let proposals: Proposal[] = [];
-  try {
-    proposals = await serverApi<Proposal[]>("GET", `/work-orders/${id}/proposals`);
-  } catch {
-    proposals = [];
-  }
+  const [proposals, fotos] = await Promise.all([
+    serverApi<Proposal[]>("GET", `/work-orders/${id}/proposals`).catch(() => [] as Proposal[]),
+    serverApi<WorkOrderPhoto[]>("GET", `/work-orders/${id}/fotos`).catch(
+      () => [] as WorkOrderPhoto[],
+    ),
+  ]);
 
   // Gating: lances são dos planos pagos (Pro+ — feature bid.submit).
   let canBid = false;
@@ -48,6 +52,22 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
     } catch {
       canBid = false;
     }
+  }
+
+  // Chat da obra: abre com a adjudicação, só para os participantes (o GET
+  // devolve 403 para quem não participa — aí o card simplesmente não aparece).
+  let mensagens: WorkOrderMessage[] | null = null;
+  let meuId: string | null = null;
+  if (obra.status === "ADJUDICADA") {
+    const [mensagensRes, claimsRes] = await Promise.all([
+      serverApi<WorkOrderMessage[]>("GET", `/work-orders/${id}/mensagens`).catch((e: unknown) => {
+        if (!(e instanceof ApiEnvelopeError)) throw e;
+        return null;
+      }),
+      serverApi<JwtClaims>("POST", "/auth/me").catch(() => null),
+    ]);
+    mensagens = mensagensRes;
+    meuId = claimsRes?.sub ?? null;
   }
 
   const status = WORK_ORDER_STATUS_UI[obra.status];
@@ -98,17 +118,44 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
             <p className="mt-1 whitespace-pre-line text-sm text-foreground">{obra.descricao}</p>
           </div>
         )}
-        {obra.fotoUrl && (
+        {(fotos.length > 0 || obra.fotoUrl) && (
           <div className="border-t border-border pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Foto da obra</p>
-            <img
-              src={obra.fotoUrl}
-              alt={`Foto da obra ${obra.titulo}`}
-              className="mt-2 max-h-72 w-full rounded-lg object-cover"
-            />
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Fotos da obra
+            </p>
+            {fotos.length > 1 ? (
+              <ul className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {fotos.map((f, i) => (
+                  <li key={f.id}>
+                    <a href={f.url} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={f.url}
+                        alt={`Foto ${i + 1} da obra ${obra.titulo}`}
+                        className="aspect-square w-full rounded-lg border border-border object-cover"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <img
+                src={fotos[0]?.url ?? obra.fotoUrl ?? ""}
+                alt={`Foto da obra ${obra.titulo}`}
+                className="mt-2 max-h-72 w-full rounded-lg object-cover"
+              />
+            )}
           </div>
         )}
       </div>
+
+      {mensagens !== null && meuId && (
+        <ChatCard
+          endpoint={`/api/work-orders/${obra.id}/mensagens`}
+          meuId={meuId}
+          initialMensagens={mensagens}
+          outraParte={tipo === "PROFISSIONAL" ? "o contratante" : "o profissional"}
+        />
+      )}
 
       {tipo === "PROFISSIONAL" ? (
         <ObraBid

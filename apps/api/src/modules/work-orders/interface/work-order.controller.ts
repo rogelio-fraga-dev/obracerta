@@ -20,6 +20,7 @@ import {
   type Proposal,
   type SubmitProposalInput,
   type WorkOrder,
+  type WorkOrderPhoto,
   type WorkOrderQuery,
   type WorkOrdersPage,
 } from "@obracerta/shared";
@@ -58,6 +59,12 @@ export class WorkOrderController {
   ): Promise<WorkOrder> {
     if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
     return this.orders.uploadFoto(user.sub, id, { buffer: file.buffer, mimetype: file.mimetype });
+  }
+
+  /** Galeria de fotos da obra (ordem de envio). */
+  @Get("work-orders/:id/fotos")
+  fotos(@Param("id") id: string): Promise<WorkOrderPhoto[]> {
+    return this.orders.listFotos(id);
   }
 
   /** Descoberta: obras abertas (filtro por cidade/especialidade), paginado. */

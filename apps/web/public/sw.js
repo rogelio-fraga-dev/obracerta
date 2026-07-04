@@ -23,6 +23,41 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+/* ── Web Push: mostra a notificação e abre o link ao clicar. ── */
+self.addEventListener("push", (event) => {
+  let data = { title: "ObraCerta", body: "", link: "/notificacoes" };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch {
+    /* payload não-JSON: usa os defaults */
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { link: data.link },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const link = (event.notification.data && event.notification.data.link) || "/notificacoes";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      // Reaproveita uma aba aberta do app se existir; senão abre uma nova.
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(link);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(link);
+    }),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;

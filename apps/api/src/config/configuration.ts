@@ -29,6 +29,11 @@ export interface AppConfig {
   };
   onboardingSpeedup: number;
   paymentWebhookSecret: string;
+  vapid: {
+    publicKey: string | null;
+    privateKey: string | null;
+    subject: string;
+  };
 }
 
 /**
@@ -63,5 +68,10 @@ export function configuration(): AppConfig {
     },
     onboardingSpeedup: env.ONBOARDING_SPEEDUP,
     paymentWebhookSecret: env.PAYMENT_WEBHOOK_SECRET,
+    vapid: {
+      publicKey: env.VAPID_PUBLIC_KEY ?? null,
+      privateKey: env.VAPID_PRIVATE_KEY ?? null,
+      subject: env.VAPID_SUBJECT,
+    },
   };
 }

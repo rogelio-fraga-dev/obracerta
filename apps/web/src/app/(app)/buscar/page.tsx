@@ -166,7 +166,7 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                       </Button>
                     </Link>
                     <Link
-                      href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}`}
+                      href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}&nome=${encodeURIComponent(p.nome)}`}
                       className="min-w-0"
                     >
                       <Button size="sm" className="w-full sm:w-auto">Agendar</Button>

@@ -1,20 +1,57 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
 import {
   type JwtClaims,
   type Notification,
   type NotificationSummary,
+  type PushPublicKey,
+  pushSubscribeSchema,
+  type PushSubscribeInput,
   uuidSchema,
+  z,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { InboxService } from "../application/inbox.service.js";
+import { PushService } from "../application/push.service.js";
 
-/** Notificações in-app do usuário autenticado. */
+const unsubscribeSchema = z.object({ endpoint: z.string().url().max(2000) });
+
+/** Notificações in-app + Web Push do usuário autenticado. */
 @Controller("notifications")
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
-  constructor(private readonly inbox: InboxService) {}
+  constructor(
+    private readonly inbox: InboxService,
+    private readonly push: PushService,
+  ) {}
+
+  /** Chave pública VAPID (null = push desabilitado no servidor). */
+  @Get("push/public-key")
+  publicKey(): PushPublicKey {
+    return { key: this.push.getPublicKey() };
+  }
+
+  /** Registra a inscrição de push deste browser. */
+  @Post("push/subscribe")
+  @HttpCode(HttpStatus.OK)
+  async subscribe(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(pushSubscribeSchema)) body: PushSubscribeInput,
+  ): Promise<{ subscribed: true }> {
+    await this.push.subscribe(user.sub, body.endpoint, body.keys);
+    return { subscribed: true };
+  }
+
+  /** Remove a inscrição de push deste browser. */
+  @Delete("push/subscribe")
+  @HttpCode(HttpStatus.OK)
+  async unsubscribe(
+    @Body(new ZodValidationPipe(unsubscribeSchema)) body: { endpoint: string },
+  ): Promise<{ subscribed: false }> {
+    await this.push.unsubscribe(body.endpoint);
+    return { subscribed: false };
+  }
 
   /** Últimas notificações (mais recentes primeiro). */
   @Get("me")

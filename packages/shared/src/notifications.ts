@@ -35,3 +35,17 @@ export const notificationSummarySchema = z.object({
   naoLidas: z.number().int().min(0),
 });
 export type NotificationSummary = z.infer<typeof notificationSummarySchema>;
+
+/** Inscrição de Web Push enviada pelo browser (shape do PushSubscription.toJSON). */
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().url().max(2000),
+  keys: z.object({
+    p256dh: z.string().min(1).max(255),
+    auth: z.string().min(1).max(255),
+  }),
+});
+export type PushSubscribeInput = z.infer<typeof pushSubscribeSchema>;
+
+/** Chave pública VAPID (null = push desabilitado no servidor). */
+export const pushPublicKeySchema = z.object({ key: z.string().nullable() });
+export type PushPublicKey = z.infer<typeof pushPublicKeySchema>;

@@ -75,7 +75,7 @@ export default async function FavoritosPage() {
                 <div className="flex shrink-0 items-center gap-2 w-full sm:w-auto">
                   <FavoriteButton professionalId={p.userId} initialFavorited />
                   <Link
-                    href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(p.especialidades[0] ?? "")}`}
+                    href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(p.especialidades[0] ?? "")}&nome=${encodeURIComponent(p.nome)}`}
                     className="min-w-0 flex-1 sm:flex-none"
                   >
                     <Button size="sm" className="w-full sm:w-auto">Agendar</Button>

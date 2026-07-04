@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
+  MAX_WORK_ORDER_PHOTOS,
   ProposalStatus,
   UserType,
   WorkOrderStatus,
@@ -16,6 +17,7 @@ import {
   type Proposal,
   type SubmitProposalInput,
   type WorkOrder,
+  type WorkOrderPhoto,
   type WorkOrderQuery,
   type WorkOrdersPage,
   type WorkUrgency,
@@ -42,6 +44,10 @@ import {
   PROPOSAL_REPOSITORY,
   type ProposalRepository,
 } from "../domain/ports/proposal.repository.js";
+import {
+  WORK_ORDER_PHOTOS_REPOSITORY,
+  type WorkOrderPhotosRepository,
+} from "../domain/ports/work-order-photos.repository.js";
 import { WorkOrderScheduler } from "./work-order.scheduler.js";
 
 /** Formatos aceitos na foto da obra → extensão do objeto no storage. */
@@ -61,6 +67,7 @@ export class WorkOrderService {
     private readonly audit: AuditService,
     private readonly billing: BillingService,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    @Inject(WORK_ORDER_PHOTOS_REPOSITORY) private readonly photos: WorkOrderPhotosRepository,
     private readonly inbox: InboxService,
   ) {}
 
@@ -94,8 +101,9 @@ export class WorkOrderService {
   }
 
   /**
-   * Dono anexa uma foto ilustrativa à obra (enquanto ABERTA). A imagem vai pro
-   * storage; persistimos só a URL — mesmo padrão da foto do pedido (§8.4).
+   * Dono anexa uma foto à galeria da obra (enquanto ABERTA, até
+   * {@link MAX_WORK_ORDER_PHOTOS}). A primeira foto vira a capa
+   * (`work_orders.foto_url`, thumbnail da lista).
    */
   async uploadFoto(
     contractorId: string,
@@ -113,11 +121,25 @@ export class WorkOrderService {
     if (!ext) {
       throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     }
+    const total = await this.photos.countForWorkOrder(id);
+    if (total >= MAX_WORK_ORDER_PHOTOS) {
+      throw new BadRequestException(
+        `A obra já tem o máximo de ${MAX_WORK_ORDER_PHOTOS} fotos.`,
+      );
+    }
     const key = `work-orders/${id}/foto-${Date.now()}.${ext}`;
     const url = await this.storage.putObject(key, file.buffer, file.mimetype);
-    const updated = await this.orders.setFoto(id, url);
-    if (!updated) throw new NotFoundException("Obra não encontrada.");
-    return updated;
+    await this.photos.add(id, url);
+    if (!order.fotoUrl) {
+      const updated = await this.orders.setFoto(id, url);
+      if (updated) return updated;
+    }
+    return this.getOrderOr404(id);
+  }
+
+  /** Galeria de fotos da obra (ordem de envio). */
+  listFotos(workOrderId: string): Promise<WorkOrderPhoto[]> {
+    return this.photos.listForWorkOrder(workOrderId);
   }
 
   /** Obras do contratante autenticado (todos os status), mais recentes primeiro. */
@@ -262,6 +284,22 @@ export class WorkOrderService {
       link: `/obras/${order.id}`,
     });
     return aceita ?? proposal;
+  }
+
+  /**
+   * Participantes do chat da obra: o dono e o profissional do lance ACEITO.
+   * `null` enquanto a obra não foi adjudicada (chat fechado — os lances são
+   * sigilosos até lá).
+   */
+  async getChatParticipants(
+    workOrderId: string,
+  ): Promise<{ contractorId: string; professionalId: string } | null> {
+    const order = await this.getOrderOr404(workOrderId);
+    if (order.status !== WorkOrderStatus.ADJUDICADA) return null;
+    const all = await this.proposals.listForWorkOrder(workOrderId);
+    const aceita = all.find((p) => p.status === ProposalStatus.ACEITA);
+    if (!aceita) return null;
+    return { contractorId: order.contractorId, professionalId: aceita.professionalId };
   }
 
   /** Job: expira a obra se ainda ABERTA (transição guardada). */

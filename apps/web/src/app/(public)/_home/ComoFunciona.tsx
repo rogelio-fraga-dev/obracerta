@@ -24,7 +24,8 @@ export function ComoFunciona() {
         className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl"
       />
       <div className="mx-auto max-w-[1600px]">
-        <span className="text-xs font-extrabold uppercase tracking-[3px] text-primary">Como funciona</span>
+        {/* orange-300 (não primary): contraste AA de texto 12px sobre o fundo escuro */}
+        <span className="text-xs font-extrabold uppercase tracking-[3px] text-orange-300">Como funciona</span>
         <h2 className="mt-3 font-display text-3xl font-black tracking-tight text-background sm:text-5xl">
           Simples para os <em className="italic text-primary">dois lados</em>
         </h2>
@@ -62,25 +63,24 @@ export function ComoFunciona() {
           Para quem <em className="italic text-primary">{persona.label.toLowerCase()}</em>
         </p>
 
-        <ol
-          id="persona-panel"
-          role="tabpanel"
-          aria-labelledby={`persona-tab-${personaId}`}
-          className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
-        >
-          {persona.steps.map((s, i) => (
-            <li key={s.titulo} className="rounded-2xl bg-background/[0.06] p-6">
-              <div className="flex items-start justify-between gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/15 text-sm font-black text-primary">
-                  {i + 1}
-                </span>
-                <span aria-hidden className="text-3xl">{s.emoji}</span>
-              </div>
-              <h3 className="mt-4 font-bold text-background">{s.titulo}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-background/60">{s.texto}</p>
-            </li>
-          ))}
-        </ol>
+        {/* O tabpanel envolve a lista — `role` no próprio <ol> destruiria a
+            semântica de lista (axe: listitem sem pai ul/ol). */}
+        <div id="persona-panel" role="tabpanel" aria-labelledby={`persona-tab-${personaId}`}>
+          <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {persona.steps.map((s, i) => (
+              <li key={s.titulo} className="rounded-2xl bg-background/[0.06] p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/30 bg-primary/15 text-sm font-black text-primary">
+                    {i + 1}
+                  </span>
+                  <span aria-hidden className="text-3xl">{s.emoji}</span>
+                </div>
+                <h3 className="mt-4 font-bold text-background">{s.titulo}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-background/60">{s.texto}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
 
         <Link
           href="/cadastro"

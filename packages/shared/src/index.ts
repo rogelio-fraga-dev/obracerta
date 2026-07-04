@@ -34,3 +34,4 @@ export * from "./admin.js";
 export * from "./address.js";
 export * from "./chat.js";
 export * from "./notifications.js";
+export * from "./support.js";
