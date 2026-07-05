@@ -8,9 +8,9 @@ export interface FilterTab {
 }
 
 /**
- * Abas de filtro em "pílulas", roláveis na horizontal **sem estourar a largura da
- * página no mobile** (sem margens negativas; a barra de rolagem fica oculta). Fonte
- * única para as telas de Pedidos e Obras — o estado do filtro vive na URL.
+ * Abas de filtro em "pílulas" que **quebram em linhas** (wrap) no mobile — nunca
+ * cortam nem exigem rolagem horizontal; todos os filtros ficam sempre visíveis.
+ * Fonte única para as telas de Pedidos e Obras — o estado do filtro vive na URL.
  */
 export function FilterTabs({
   tabs,
@@ -24,10 +24,7 @@ export function FilterTabs({
   ariaLabel: string;
 }) {
   return (
-    <nav
-      aria-label={ariaLabel}
-      className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
+    <nav aria-label={ariaLabel} className="flex flex-wrap gap-2">
       {tabs.map((t) => {
         const active = t.key === activeKey;
         return (
@@ -35,7 +32,7 @@ export function FilterTabs({
             key={t.key}
             href={hrefFor(t.key)}
             aria-current={active ? "page" : undefined}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+            className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
               active
                 ? "border-primary bg-primary/10 text-foreground"
                 : "border-border text-muted-foreground hover:border-primary/50"
