@@ -147,6 +147,10 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
             <img
               src={booking.fotoUrl}
               alt="Foto anexada ao pedido"
+              width={1200}
+              height={675}
+              loading="lazy"
+              decoding="async"
               className="mt-2 max-h-72 w-full rounded-lg object-cover"
             />
           </div>

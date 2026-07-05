@@ -257,6 +257,10 @@ function ObraGrid({ items }: { items: WorkOrder[] }) {
                     src={o.fotoUrl}
                     alt=""
                     aria-hidden
+                    width={640}
+                    height={128}
+                    loading="lazy"
+                    decoding="async"
                     className="-mx-6 -mt-6 h-32 w-[calc(100%+3rem)] max-w-none object-cover"
                   />
                 )}

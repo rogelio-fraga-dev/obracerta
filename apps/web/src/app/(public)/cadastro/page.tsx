@@ -50,6 +50,13 @@ function CadastroInner() {
   const googleEmail = params.get("email") ?? "";
   const googleNome = params.get("nome") ?? "";
 
+  // Persona declarada na landing (`?tipo=`) — a intenção do clique não se perde.
+  const tipoParam = params.get("tipo");
+  const initialTipo: UserType =
+    tipoParam === "CONTRATANTE" || tipoParam === "EMPRESA" || tipoParam === "PROFISSIONAL"
+      ? tipoParam
+      : "PROFISSIONAL";
+
   return (
     <AuthPanel
       eyebrow="Criar conta"
@@ -86,9 +93,9 @@ function CadastroInner() {
           ]}
         />
         {method === "email" ? (
-          <EmailSignup initialEmail={googleEmail} initialNome={googleNome} />
+          <EmailSignup initialEmail={googleEmail} initialNome={googleNome} initialTipo={initialTipo} />
         ) : (
-          <WhatsappSignup />
+          <WhatsappSignup initialTipo={initialTipo} />
         )}
       </div>
     </AuthPanel>
@@ -108,12 +115,14 @@ function ErrorBox({ message }: { message: string }) {
 function EmailSignup({
   initialEmail = "",
   initialNome = "",
+  initialTipo = "PROFISSIONAL",
 }: {
   initialEmail?: string;
   initialNome?: string;
+  initialTipo?: UserType;
 }) {
   const router = useRouter();
-  const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
+  const [tipo, setTipo] = useState<UserType>(initialTipo);
   const [nomeCompleto, setNomeCompleto] = useState(initialNome);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
@@ -223,13 +232,13 @@ type WhatsappStep = "whatsapp" | "codigo" | "perfil" | "especialidades" | "plano
 const WHATSAPP_STEPS: WhatsappStep[] = ["whatsapp", "codigo", "perfil", "especialidades", "plano"];
 
 /** Cadastro via WhatsApp (OTP) — assistente em passos (linguagem do prototipo2). */
-function WhatsappSignup() {
+function WhatsappSignup({ initialTipo = "PROFISSIONAL" }: { initialTipo?: UserType }) {
   const router = useRouter();
   const [step, setStep] = useState<WhatsappStep>("whatsapp");
   const [whatsapp, setWhatsapp] = useState("");
   const [code, setCode] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
-  const [tipo, setTipo] = useState<UserType>("PROFISSIONAL");
+  const [tipo, setTipo] = useState<UserType>(initialTipo);
   const [especialidades, setEspecialidades] = useState<string[]>([]);
   const [bairro, setBairro] = useState("");
   const [anos, setAnos] = useState("");

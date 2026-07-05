@@ -49,12 +49,17 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
   const [showForm, setShowForm] = useState(enderecos.length === 0);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+  // Erros de validação POR CAMPO (todos de uma vez, no lugar certo) — o `error`
+  // acima fica só para falhas do servidor.
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [cepLoading, setCepLoading] = useState(false);
   const [removendoId, setRemovendoId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function set<K extends keyof FormState>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
+    // Corrigiu o campo → o erro dele some na hora (feedback imediato).
+    setFieldErrors((fe) => (fe[key] ? { ...fe, [key]: undefined } : fe));
   }
 
   async function buscarCep(cepDigits: string) {
@@ -90,6 +95,7 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
 
   function salvar() {
     setError(null);
+    setFieldErrors({});
     const payload = {
       apelido: form.apelido,
       cep: form.cep,
@@ -102,7 +108,13 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
     };
     const parsed = createAddressSchema.safeParse(payload);
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Dados inválidos.");
+      // Todos os erros de uma vez, cada um no seu campo (nada de corrigir um por rodada).
+      const errs: Partial<Record<keyof FormState, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0] as keyof FormState | undefined;
+        if (key && !errs[key]) errs[key] = issue.message;
+      }
+      setFieldErrors(errs);
       return;
     }
     startTransition(async () => {
@@ -207,12 +219,13 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
       {showForm ? (
         <Card className="space-y-4">
           <h2 className="font-display text-lg font-black text-foreground">Novo endereço</h2>
-          <Field label="Nome do endereço" hint='Ex.: "Casa", "Obra da Vila Mariana"'>
-            <Input value={form.apelido} onChange={(e) => set("apelido", e.target.value)} maxLength={40} />
+          <Field label="Nome do endereço" hint='Ex.: "Casa", "Obra da Vila Mariana"' error={fieldErrors.apelido}>
+            <Input invalid={!!fieldErrors.apelido} value={form.apelido} onChange={(e) => set("apelido", e.target.value)} maxLength={40} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="CEP" hint={cepLoading ? "Buscando…" : "Preenche o resto sozinho"}>
+            <Field label="CEP" hint={cepLoading ? "Buscando…" : "Preenche o resto sozinho"} error={fieldErrors.cep}>
               <Input
+                invalid={!!fieldErrors.cep}
                 inputMode="numeric"
                 placeholder="00000-000"
                 value={formatCep(form.cep)}
@@ -223,8 +236,8 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
                 }}
               />
             </Field>
-            <Field label="UF">
-              <Select value={form.uf} onChange={(e) => set("uf", e.target.value)}>
+            <Field label="UF" error={fieldErrors.uf}>
+              <Select invalid={!!fieldErrors.uf} value={form.uf} onChange={(e) => set("uf", e.target.value)}>
                 {UFS.map((uf) => (
                   <option key={uf} value={uf}>
                     {uf}
@@ -233,23 +246,23 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
               </Select>
             </Field>
           </div>
-          <Field label="Rua / Avenida">
-            <Input value={form.logradouro} onChange={(e) => set("logradouro", e.target.value)} maxLength={200} />
+          <Field label="Rua / Avenida" error={fieldErrors.logradouro}>
+            <Input invalid={!!fieldErrors.logradouro} value={form.logradouro} onChange={(e) => set("logradouro", e.target.value)} maxLength={200} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Número" hint="Opcional">
-              <Input value={form.numero} onChange={(e) => set("numero", e.target.value)} maxLength={20} />
+            <Field label="Número" hint="Opcional" error={fieldErrors.numero}>
+              <Input invalid={!!fieldErrors.numero} value={form.numero} onChange={(e) => set("numero", e.target.value)} maxLength={20} />
             </Field>
-            <Field label="Complemento" hint="Opcional">
-              <Input value={form.complemento} onChange={(e) => set("complemento", e.target.value)} maxLength={100} />
+            <Field label="Complemento" hint="Opcional" error={fieldErrors.complemento}>
+              <Input invalid={!!fieldErrors.complemento} value={form.complemento} onChange={(e) => set("complemento", e.target.value)} maxLength={100} />
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Bairro" hint="Opcional">
-              <Input value={form.bairro} onChange={(e) => set("bairro", e.target.value)} maxLength={120} />
+            <Field label="Bairro" hint="Opcional" error={fieldErrors.bairro}>
+              <Input invalid={!!fieldErrors.bairro} value={form.bairro} onChange={(e) => set("bairro", e.target.value)} maxLength={120} />
             </Field>
-            <Field label="Cidade">
-              <Input value={form.cidade} onChange={(e) => set("cidade", e.target.value)} maxLength={120} />
+            <Field label="Cidade" error={fieldErrors.cidade}>
+              <Input invalid={!!fieldErrors.cidade} value={form.cidade} onChange={(e) => set("cidade", e.target.value)} maxLength={120} />
             </Field>
           </div>
           <div className="flex gap-2">

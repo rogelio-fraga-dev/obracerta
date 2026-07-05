@@ -48,14 +48,15 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
+              {/* A persona declarada segue na URL — o cadastro abre já pré-selecionado. */}
               <Link
-                href="/cadastro"
+                href="/cadastro?tipo=CONTRATANTE"
                 className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 font-extrabold text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-orange-400"
               >
                 Quero contratar →
               </Link>
               <Link
-                href="/cadastro"
+                href="/cadastro?tipo=PROFISSIONAL"
                 className="inline-flex items-center gap-2 rounded-xl border-2 border-border px-6 py-3 font-bold text-foreground transition-colors hover:bg-foreground hover:text-background"
               >
                 Sou profissional
