@@ -11,7 +11,16 @@ import globals from "globals";
  */
 export default [
   {
-    ignores: ["**/dist/**", "**/.next/**", "**/.turbo/**", "**/node_modules/**", "**/coverage/**"],
+    ignores: [
+      "**/dist/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/node_modules/**",
+      "**/coverage/**",
+      // Temporário efêmero do tsup (some no fim do build) — lint em paralelo no
+      // Turbo pode globá-lo e falhar com ENOENT (flake visto no CI).
+      "**/tsup.config.bundled_*",
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
