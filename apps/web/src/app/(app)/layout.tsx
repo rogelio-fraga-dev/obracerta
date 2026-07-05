@@ -8,6 +8,7 @@ import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
 import { InstallPrompt } from "./_shell/InstallPrompt";
 import { MobileHeader } from "./_shell/MobileHeader";
+import { BottomNav } from "./_shell/BottomNav";
 
 /**
  * Shell da área logada (route group `(app)`) — o PWA, **PC-first com
@@ -67,11 +68,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
         <main
           id="main-content"
-          className="mx-auto w-full min-w-0 max-w-[1600px] flex-1 overflow-x-clip px-4 py-5 pb-12 sm:px-5 sm:py-6 lg:px-12 lg:py-10 lg:pb-12"
+          // pb-28 no mobile abre espaço para o BottomNav fixo; no desktop volta ao normal.
+          className="mx-auto w-full min-w-0 max-w-[1600px] flex-1 overflow-x-clip px-4 py-5 pb-28 sm:px-5 sm:py-6 lg:px-12 lg:py-10 lg:pb-12"
         >
           {children}
         </main>
       </div>
+
+      <BottomNav tipo={hint?.tipo} isAdmin={isAdmin} pendingPedidos={pendingPedidos} />
 
       <InstallPrompt />
     </div>

@@ -82,12 +82,7 @@ export function MobileHeader({
                 )}
               </Link>
             )}
-            <Link
-              href={isAdmin ? "/admin" : "/inicio"}
-              className="flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              Início
-            </Link>
+            {/* "Início" saiu do header — o BottomNav cobre os destinos primários. */}
             <button
               type="button"
               onClick={() => setIsOpen(true)}

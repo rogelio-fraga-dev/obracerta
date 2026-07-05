@@ -94,24 +94,19 @@ export default async function AvaliacoesPage({
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground shrink-0 mr-2">
           Filtrar por nota:
         </span>
-        <Link href={buildFilterHref(undefined)}>
-          <Button
-            size="sm"
-            variant={nota === undefined ? "primary" : "secondary"}
-          >
-            Todas ({data.total})
-          </Button>
-        </Link>
+        <Button asChild size="sm" variant={nota === undefined ? "primary" : "secondary"}>
+          <Link href={buildFilterHref(undefined)}>Todas ({data.total})</Link>
+        </Button>
         {[5, 4, 3, 2, 1].map((star) => (
-          <Link key={star} href={buildFilterHref(star)}>
-            <Button
-              size="sm"
-              variant={nota === star ? "primary" : "secondary"}
-              className="flex items-center gap-1"
-            >
-              {star}★
-            </Button>
-          </Link>
+          <Button
+            asChild
+            key={star}
+            size="sm"
+            variant={nota === star ? "primary" : "secondary"}
+            className="flex items-center gap-1"
+          >
+            <Link href={buildFilterHref(star)}>{star}★</Link>
+          </Button>
         ))}
       </div>
 
@@ -154,9 +149,9 @@ export default async function AvaliacoesPage({
           {totalPages > 1 && (
             <nav aria-label="Paginação de avaliações" className="flex items-center justify-between gap-3 pt-4 border-t border-border">
               {page > 1 ? (
-                <Link href={buildPageHref(page - 1)}>
-                  <Button size="sm" variant="secondary">← Anterior</Button>
-                </Link>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href={buildPageHref(page - 1)}>← Anterior</Link>
+                </Button>
               ) : (
                 <span />
               )}
@@ -164,9 +159,9 @@ export default async function AvaliacoesPage({
                 {page} / {totalPages}
               </span>
               {page < totalPages ? (
-                <Link href={buildPageHref(page + 1)}>
-                  <Button size="sm" variant="secondary">Próxima →</Button>
-                </Link>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href={buildPageHref(page + 1)}>Próxima →</Link>
+                </Button>
               ) : (
                 <span />
               )}

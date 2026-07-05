@@ -85,9 +85,11 @@ export function ProfileQrCard({ slug }: { slug: string }) {
             {copied ? "Link copiado ✓" : "Copiar link"}
           </Button>
           {qrDataUrl && (
-            <a href={qrDataUrl} download="meu-perfil-obracerta.png">
-              <Button size="sm">Baixar QR</Button>
-            </a>
+            <Button asChild size="sm">
+              <a href={qrDataUrl} download="meu-perfil-obracerta.png">
+                Baixar QR
+              </a>
+            </Button>
           )}
         </div>
       </div>

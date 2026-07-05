@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatCentavos, type Proposal, type WorkOrderStatus } from "@obracerta/shared";
 import { Badge, Button, Card, Field, Input } from "@obracerta/ui";
@@ -67,16 +68,18 @@ export function ObraBid({
   if (!canBid) {
     return (
       <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-        <span className="text-3xl">🔒</span>
+        <span aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+          <Lock className="h-6 w-6" />
+        </span>
         <h2 className="font-display text-lg font-black text-foreground">
           Dar lances é dos planos pagos
         </h2>
         <p className="text-sm text-muted-foreground">
           Faça upgrade para o plano Pro ou Especialista e envie propostas sigilosas em obras abertas.
         </p>
-        <Link href="/cobrancas" className="block">
-          <Button className="w-full">Fazer upgrade</Button>
-        </Link>
+        <Button asChild className="w-full">
+          <Link href="/cobrancas">Fazer upgrade</Link>
+        </Button>
       </Card>
     );
   }

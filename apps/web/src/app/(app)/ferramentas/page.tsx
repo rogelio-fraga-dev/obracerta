@@ -62,9 +62,9 @@ export default async function FerramentasPage() {
             </p>
           </div>
           {canUseTools && (
-            <Link href="/ferramentas/novo" className="shrink-0">
-              <Button size="sm">Novo documento</Button>
-            </Link>
+            <Button asChild size="sm" className="shrink-0">
+              <Link href="/ferramentas/novo">Novo documento</Link>
+            </Button>
           )}
         </div>
 
@@ -79,9 +79,9 @@ export default async function FerramentasPage() {
             <p className="text-sm text-muted-foreground">
               Monte orçamentos detalhados e emita recibos para seus clientes — direto pela plataforma.
             </p>
-            <Link href="/cobrancas" className="block">
-              <Button className="w-full">Fazer upgrade</Button>
-            </Link>
+            <Button asChild className="w-full">
+              <Link href="/cobrancas">Fazer upgrade</Link>
+            </Button>
           </Card>
         ) : docs.length === 0 ? (
           <Card>

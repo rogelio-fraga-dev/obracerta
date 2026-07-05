@@ -73,9 +73,9 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
             Suas obras publicadas e os lances recebidos.
           </p>
         </div>
-        <Link href="/obras/nova" className="w-fit shrink-0">
-          <Button size="sm">+ Nova obra</Button>
-        </Link>
+        <Button asChild size="sm" className="w-fit shrink-0">
+          <Link href="/obras/nova">+ Nova obra</Link>
+        </Button>
       </div>
 
       <FilterTabs
@@ -96,9 +96,9 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
           }
           action={
             filtro.key === "todas" && (
-              <Link href="/obras/nova">
-                <Button size="sm">Publicar obra</Button>
-              </Link>
+              <Button asChild size="sm">
+                <Link href="/obras/nova">Publicar obra</Link>
+              </Button>
             )
           }
         />

@@ -24,9 +24,9 @@ export function AcceptedServicesList({
         title="Nenhum serviço aceito ainda"
         description="Assim que um pedido for aprovado, ele aparece aqui para você gerar o resumo/orçamento do serviço."
         action={
-          <Link href="/pedidos">
-            <Button size="sm">Ver pedidos</Button>
-          </Link>
+          <Button asChild size="sm">
+            <Link href="/pedidos">Ver pedidos</Link>
+          </Button>
         }
       />
     );
@@ -56,12 +56,12 @@ export function AcceptedServicesList({
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap gap-2">
-                <Link href={`/pedidos/${p.id}/resumo`}>
-                  <Button size="sm">Gerar orçamento/resumo</Button>
-                </Link>
-                <Link href={`/pedidos/${p.id}`}>
-                  <Button size="sm" variant="secondary">Ver pedido</Button>
-                </Link>
+                <Button asChild size="sm">
+                  <Link href={`/pedidos/${p.id}/resumo`}>Gerar orçamento/resumo</Link>
+                </Button>
+                <Button asChild size="sm" variant="secondary">
+                  <Link href={`/pedidos/${p.id}`}>Ver pedido</Link>
+                </Button>
               </div>
             </Card>
           </li>

@@ -188,11 +188,11 @@ export default async function PublicProfilePage({ params }: PageProps) {
                 </ul>
                 {profile.reputacao.totalAvaliacoes > 2 && (
                   <div className="text-center">
-                    <Link href={`/${profile.slug}/avaliacoes`}>
-                      <Button size="sm" variant="secondary" className="w-full sm:w-auto text-primary border border-primary/20 hover:bg-primary/5">
+                    <Button asChild size="sm" variant="secondary" className="w-full sm:w-auto text-primary border border-primary/20 hover:bg-primary/5">
+                      <Link href={`/${profile.slug}/avaliacoes`}>
                         Ver todas as avaliações ({profile.reputacao.totalAvaliacoes})
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 )}
               </div>

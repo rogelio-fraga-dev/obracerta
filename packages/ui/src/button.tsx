@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, Ref } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  type ButtonHTMLAttributes,
+  type ReactElement,
+  type Ref,
+} from "react";
 import { cn } from "./cn.js";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
@@ -8,6 +14,12 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   ref?: Ref<HTMLButtonElement>;
+  /**
+   * Renderiza o **filho** com as classes do botão em vez de criar um `<button>`.
+   * Use com `<Link>`/`<a>`: `<Button asChild><Link href="…">Ir</Link></Button>` —
+   * evita `<a><button>` aninhados (HTML inválido e hostil a leitores de tela).
+   */
+  asChild?: boolean;
 }
 
 const base =
@@ -43,14 +55,23 @@ export function Button({
   className,
   type = "button",
   ref,
+  asChild = false,
+  children,
   ...props
 }: ButtonProps) {
+  const classes = cn(base, variants[variant], sizes[size], className);
+
+  if (asChild && isValidElement(children)) {
+    const child = children as ReactElement<{ className?: string }>;
+    return cloneElement(child, {
+      ...props,
+      className: cn(classes, child.props.className),
+    });
+  }
+
   return (
-    <button
-      ref={ref}
-      type={type}
-      className={cn(base, variants[variant], sizes[size], className)}
-      {...props}
-    />
+    <button ref={ref} type={type} className={classes} {...props}>
+      {children}
+    </button>
   );
 }

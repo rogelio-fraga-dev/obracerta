@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { Trophy } from "lucide-react";
 import {
   formatCentavos,
   professionalPlanCatalog,
@@ -82,11 +83,12 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
             Encontrar profissional
           </h1>
         </div>
-        <Link href="/ranking">
-          <Button size="sm" variant="secondary" className="flex items-center gap-1.5 border border-primary/20 hover:bg-primary/5 text-primary">
-            🏆 Ver Ranking de Profissionais
-          </Button>
-        </Link>
+        <Button asChild size="sm" variant="secondary" className="border border-primary/20 hover:bg-primary/5 text-primary">
+          <Link href="/ranking" className="flex items-center gap-1.5">
+            <Trophy aria-hidden className="h-4 w-4" />
+            Ver Ranking de Profissionais
+          </Link>
+        </Button>
       </div>
 
       <Suspense fallback={<div className="text-sm text-muted-foreground">Carregando filtros…</div>}>
@@ -169,17 +171,16 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                     )}
                   </div>
                   <div className="grid grid-cols-2 gap-2 border-t border-border pt-3 sm:flex sm:justify-end">
-                    <Link href={`/${p.slug}`} className="min-w-0">
-                      <Button size="sm" variant="secondary" className="w-full sm:w-auto">
-                        Ver perfil
-                      </Button>
-                    </Link>
-                    <Link
-                      href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}&nome=${encodeURIComponent(p.nome)}`}
-                      className="min-w-0"
-                    >
-                      <Button size="sm" className="w-full sm:w-auto">Agendar</Button>
-                    </Link>
+                    <Button asChild size="sm" variant="secondary" className="min-w-0 w-full sm:w-auto">
+                      <Link href={`/${p.slug}`}>Ver perfil</Link>
+                    </Button>
+                    <Button asChild size="sm" className="min-w-0 w-full sm:w-auto">
+                      <Link
+                        href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(esp)}&nome=${encodeURIComponent(p.nome)}`}
+                      >
+                        Agendar
+                      </Link>
+                    </Button>
                   </div>
                 </Card>
               </li>
@@ -192,9 +193,9 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
       {totalPages > 1 && (
         <nav aria-label="Paginação" className="flex items-center justify-between gap-3">
           {currentPage > 1 ? (
-            <Link href={pageHref(params, currentPage - 1)}>
-              <Button size="sm" variant="secondary">← Anterior</Button>
-            </Link>
+            <Button asChild size="sm" variant="secondary">
+              <Link href={pageHref(params, currentPage - 1)}>← Anterior</Link>
+            </Button>
           ) : (
             <span />
           )}
@@ -202,9 +203,9 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
             {currentPage} / {totalPages}
           </span>
           {currentPage < totalPages ? (
-            <Link href={pageHref(params, currentPage + 1)}>
-              <Button size="sm" variant="secondary">Próxima →</Button>
-            </Link>
+            <Button asChild size="sm" variant="secondary">
+              <Link href={pageHref(params, currentPage + 1)}>Próxima →</Link>
+            </Button>
           ) : (
             <span />
           )}

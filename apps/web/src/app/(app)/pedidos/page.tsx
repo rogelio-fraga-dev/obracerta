@@ -57,9 +57,9 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
           </p>
         </div>
         {!isProfissional && (
-          <Link href="/pedidos/novo" className="shrink-0">
-            <Button size="sm">+ Novo pedido</Button>
-          </Link>
+          <Button asChild size="sm" className="shrink-0">
+            <Link href="/pedidos/novo">+ Novo pedido</Link>
+          </Button>
         )}
       </div>
 
@@ -91,9 +91,9 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
           action={
             filtro.key === "todos" &&
             !isProfissional && (
-              <Link href="/buscar">
-                <Button size="sm">Buscar profissional</Button>
-              </Link>
+              <Button asChild size="sm">
+                <Link href="/buscar">Buscar profissional</Link>
+              </Button>
             )
           }
         />
@@ -120,7 +120,7 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="min-w-0 truncate text-base font-bold text-foreground">
+                          <span className="min-w-0 max-w-full truncate text-base font-bold text-foreground">
                             {p.especialidade}
                           </span>
                           <Badge tone={ui.tone} size="sm">{ui.label}</Badge>
@@ -130,10 +130,10 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
                             {isProfissional ? "Cliente" : "Profissional"}: {p.outraParteNome}
                           </p>
                         )}
-                        <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                        {/* Quebra em até 2 linhas (line-clamp) — sem estourar o card no celular. */}
+                        <p className="mt-0.5 line-clamp-2 break-words text-sm text-muted-foreground">
                           {formatRelativeBR(p.dataServico)}
-                          {p.descricao &&
-                            ` · ${p.descricao.substring(0, 50)}${p.descricao.length > 50 ? "…" : ""}`}
+                          {p.descricao && ` · ${p.descricao}`}
                         </p>
                       </div>
                       <span aria-hidden className="hidden text-lg text-muted-foreground sm:block">→</span>

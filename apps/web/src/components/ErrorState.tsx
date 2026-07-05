@@ -34,9 +34,9 @@ export function ErrorState({
       </p>
       <div className="flex flex-wrap justify-center gap-2">
         <Button onClick={reset}>Tentar de novo</Button>
-        <Link href={home}>
-          <Button variant="secondary">{homeLabel}</Button>
-        </Link>
+        <Button asChild variant="secondary">
+          <Link href={home}>{homeLabel}</Link>
+        </Button>
       </div>
     </div>
   );

@@ -40,9 +40,9 @@ export default async function FavoritosPage() {
           title="Nenhum favorito ainda"
           description="Toque no coração de um profissional na busca para salvá-lo aqui."
           action={
-            <Link href="/buscar">
-              <Button size="sm">Buscar profissionais</Button>
-            </Link>
+            <Button asChild size="sm">
+              <Link href="/buscar">Buscar profissionais</Link>
+            </Button>
           }
         />
       ) : (
@@ -74,12 +74,13 @@ export default async function FavoritosPage() {
                 </div>
                 <div className="flex shrink-0 items-center gap-2 w-full sm:w-auto">
                   <FavoriteButton professionalId={p.userId} initialFavorited />
-                  <Link
-                    href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(p.especialidades[0] ?? "")}&nome=${encodeURIComponent(p.nome)}`}
-                    className="min-w-0 flex-1 sm:flex-none"
-                  >
-                    <Button size="sm" className="w-full sm:w-auto">Agendar</Button>
-                  </Link>
+                  <Button asChild size="sm" className="min-w-0 flex-1 sm:flex-none">
+                    <Link
+                      href={`/pedidos/novo?prof=${p.userId}&esp=${encodeURIComponent(p.especialidades[0] ?? "")}&nome=${encodeURIComponent(p.nome)}`}
+                    >
+                      Agendar
+                    </Link>
+                  </Button>
                 </div>
               </Card>
             </li>
