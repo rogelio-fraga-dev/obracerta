@@ -81,7 +81,7 @@ export function RescheduleCard({
         </p>
       )}
 
-      {pendente ? (
+      {pendente && !open ? (
         <div className="rounded-lg border border-primary/30 bg-primary/[0.04] p-3">
           <p className="text-sm font-bold text-foreground">
             Nova data proposta: {formatDateTimeBR(reagendamentoData)}
@@ -95,9 +95,14 @@ export function RescheduleCard({
               <Button size="sm" onClick={() => void send("reschedule-accept")} disabled={loading}>
                 Aceitar nova data
               </Button>
+              {/* Contrapropor substitui a proposta (os papéis se invertem) — a
+                  recusa deixa de ser um beco sem saída. */}
+              <Button size="sm" variant="secondary" onClick={() => setOpen(true)} disabled={loading}>
+                Propor outra data
+              </Button>
               <Button
                 size="sm"
-                variant="secondary"
+                variant="ghost"
                 onClick={() => void send("reschedule-reject")}
                 disabled={loading}
               >

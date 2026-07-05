@@ -348,7 +348,7 @@ export class BookingService {
     if (proposerId) {
       await this.notifyUser(proposerId, "Sua proposta de nova data foi recusada.");
       await this.inbox.record(proposerId, "PEDIDO", "Nova data recusada", {
-        corpo: `A remarcação de "${booking.especialidade}" foi recusada — a data original permanece.`,
+        corpo: `A remarcação de "${booking.especialidade}" foi recusada — a data original permanece. Se precisar, proponha outra data no pedido.`,
         link: `/pedidos/${booking.id}`,
       });
     }
