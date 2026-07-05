@@ -14,10 +14,12 @@ export function ProfileQrCard({ slug }: { slug: string }) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
     const publicUrl = `${window.location.origin}/${slug}`;
     setUrl(publicUrl);
+    setCanShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
     let active = true;
     QRCode.toDataURL(publicUrl, { width: 220, margin: 1 })
       .then((data) => {
@@ -38,6 +40,18 @@ export function ProfileQrCard({ slug }: { slug: string }) {
       setTimeout(() => setCopied(false), 2500);
     } catch {
       /* clipboard bloqueado */
+    }
+  }
+
+  async function compartilhar() {
+    try {
+      await navigator.share({
+        title: "Meu perfil profissional",
+        text: "Veja meu perfil com avaliações e portfólio:",
+        url,
+      });
+    } catch {
+      /* usuário cancelou ou share indisponível — o "Copiar link" continua como alternativa */
     }
   }
 
@@ -62,6 +76,11 @@ export function ProfileQrCard({ slug }: { slug: string }) {
         </p>
         <p className="truncate text-xs font-semibold text-primary">{url}</p>
         <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+          {canShare && (
+            <Button size="sm" onClick={compartilhar}>
+              Compartilhar
+            </Button>
+          )}
           <Button size="sm" variant="secondary" onClick={copiar}>
             {copied ? "Link copiado ✓" : "Copiar link"}
           </Button>
