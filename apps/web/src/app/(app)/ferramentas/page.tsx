@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import {
   type BookingListItem,
   formatCentavos,
@@ -69,7 +70,9 @@ export default async function FerramentasPage() {
 
         {!canUseTools ? (
           <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-            <span className="text-3xl">🔒</span>
+            <span aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+              <Lock className="h-6 w-6" />
+            </span>
             <h3 className="font-display text-base font-black text-foreground">
               Ferramentas do plano Especialista
             </h3>

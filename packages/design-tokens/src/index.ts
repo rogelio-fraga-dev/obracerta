@@ -22,6 +22,8 @@ export const colors = {
   dark: { DEFAULT: "#18160f", soft: "#221f16" },
   cream: { DEFAULT: "#faf7f0", soft: "#f2ede0" },
   border: "#e8e0cc",
+  /** Borda de controles interativos — 3:1 sobre cream (WCAG 1.4.11). */
+  borderStrong: "#8f8674",
   mutedForeground: "#5a5348",
   success: "#1a9e5c",
   warning: "#e8a00a",

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { BookingRequest, NotificationSummary, User } from "@obracerta/shared";
+import type { NotificationSummary, User } from "@obracerta/shared";
 import { config } from "@/lib/config";
 import { serverApi } from "@/lib/server-api";
 import { getMyRoles, getProfileHint, requireSession } from "@/lib/session";
@@ -28,8 +28,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const [user, pendingPedidos, notifSummary] = await Promise.all([
     serverApi<User>("GET", "/auth/me/profile").catch(() => null),
     isProfissional
-      ? serverApi<BookingRequest[]>("GET", "/bookings/me/professional")
-          .then((b) => b.filter((p) => p.status === "PENDENTE").length)
+      ? serverApi<{ total: number }>("GET", "/bookings/me/professional/pending-count")
+          .then((r) => r.total)
           .catch(() => 0)
       : Promise.resolve(0),
     serverApi<NotificationSummary>("GET", "/notifications/me/summary").catch(() => null),

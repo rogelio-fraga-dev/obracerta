@@ -77,6 +77,12 @@ export class BookingController {
     return this.bookings.listForProfessional(user.sub);
   }
 
+  /** Contagem de pendentes do profissional (badge do menu — evita listar tudo). */
+  @Get("me/professional/pending-count")
+  async pendingCount(@CurrentUser() user: JwtClaims): Promise<{ total: number }> {
+    return { total: await this.bookings.countPendingForProfessional(user.sub) };
+  }
+
   /** Detalhe (apenas participantes). */
   @Get(":id")
   get(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<BookingRequest> {

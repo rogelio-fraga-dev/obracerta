@@ -35,6 +35,9 @@
   --color-muted: var(--color-cream-soft);
   --color-muted-foreground: #5a5348;
   --color-border: #e8e0cc;
+  /* Borda de CONTROLES (inputs/selects): 3:1 sobre cream (WCAG 1.4.11, contraste
+     não-textual). A --color-border clara fica para superfícies decorativas (cards). */
+  --color-border-strong: #8f8674;
 
   --color-success: #1a9e5c;
   --color-warning: #e8a00a;
@@ -64,6 +67,8 @@
   --shadow-xl: 0 20px 25px -5px rgb(24 22 15 / 0.08), 0 8px 10px -6px rgb(24 22 15 / 0.04);
   --shadow-card: 0 1px 3px 0 rgb(24 22 15 / 0.04), 0 0 0 1px rgb(232 224 204 / 0.6);
   --shadow-card-hover: 0 8px 16px -4px rgb(24 22 15 / 0.1), 0 0 0 1px rgb(196 68 8 / 0.15);
+  /* Glow de CTA primário (hero) — derivado da marca via color-mix (rebrand-safe). */
+  --shadow-cta: 0 4px 24px color-mix(in srgb, var(--color-orange-500) 30%, transparent);
 
   /* ── Transitions ── */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);

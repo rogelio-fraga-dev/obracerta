@@ -10,6 +10,7 @@ import type {
   Review,
   User,
 } from "@obracerta/shared";
+import { CheckCircle2, ClipboardList, Hammer, Star } from "lucide-react";
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
 import { serverApi } from "@/lib/server-api";
@@ -237,7 +238,7 @@ export default async function InicioPage() {
       <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
         <StatCard
           className="h-full animate-fade-in delay-1 p-3 sm:p-5"
-          icon="📋"
+          icon={<ClipboardList className="h-4 w-4 sm:h-5 sm:w-5" />}
           label="Pendentes"
           value={pendentes}
           tone={pendentes > 0 ? "warning" : "default"}
@@ -245,21 +246,21 @@ export default async function InicioPage() {
         />
         <StatCard
           className="h-full animate-fade-in delay-2 p-3 sm:p-5"
-          icon="🔨"
+          icon={<Hammer className="h-4 w-4 sm:h-5 sm:w-5" />}
           label="Em andamento"
           value={emAndamento}
           tone={emAndamento > 0 ? "primary" : "default"}
         />
         <StatCard
           className="h-full animate-fade-in delay-3 p-3 sm:p-5"
-          icon="✅"
+          icon={<CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />}
           label="Concluídos"
           value={concluidos}
           tone="success"
         />
         <StatCard
           className="h-full animate-fade-in delay-4 p-3 sm:p-5"
-          icon="⭐"
+          icon={<Star className="h-4 w-4 sm:h-5 sm:w-5" />}
           label="Avaliação média"
           value={mediaNotas}
           detail={`${reviews.length} avaliação(ões)`}

@@ -35,7 +35,9 @@ const PEDIDOS: NavItem = { href: "/pedidos", label: "Pedidos", Icon: ClipboardLi
 const OBRAS: NavItem = { href: "/obras", label: "Obras", Icon: HardHat };
 const BUSCAR: NavItem = { href: "/buscar", label: "Buscar profissionais", shortLabel: "Buscar", Icon: Search };
 const AGENDA: NavItem = { href: "/agenda", label: "Minha agenda", shortLabel: "Agenda", Icon: CalendarDays };
-const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos e recibos", shortLabel: "Docs", Icon: FileText };
+// Mesmo conceito nas duas personas: o profissional cai em /ferramentas (serviços
+// fechados + gerador de documentos); contratante/empresa em /orcamentos.
+const FERRAMENTAS: NavItem = { href: "/ferramentas", label: "Orçamentos", shortLabel: "Orçam.", Icon: FileText };
 const ORCAMENTOS: NavItem = { href: "/orcamentos", label: "Orçamentos", shortLabel: "Orçam.", Icon: ScrollText };
 const COBRANCAS: NavItem = { href: "/cobrancas", label: "Cobranças", Icon: Receipt };
 const AVALIACOES: NavItem = { href: "/avaliacoes", label: "Avaliações", Icon: Star };

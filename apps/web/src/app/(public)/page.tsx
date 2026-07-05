@@ -50,7 +50,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/cadastro"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 font-extrabold text-white shadow-[0_4px_24px_rgba(232,86,10,0.3)] transition-colors hover:bg-orange-400"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 font-extrabold text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-orange-400"
               >
                 Quero contratar →
               </Link>

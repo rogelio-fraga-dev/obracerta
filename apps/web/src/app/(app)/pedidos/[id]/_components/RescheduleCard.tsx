@@ -8,6 +8,13 @@ import { formatDateTimeBR } from "@/lib/format";
 
 type RescheduleAction = "reschedule" | "reschedule-accept" | "reschedule-reject";
 
+/** Agora em formato `datetime-local` (horário local) — bloqueia datas passadas no picker. */
+function minDateTimeLocal(): string {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+}
+
 /**
  * Reagendamento bilateral de um pedido APROVADO: qualquer participante propõe uma
  * nova data; a **outra parte** confirma ou recusa. Quando há proposta pendente,
@@ -104,6 +111,7 @@ export function RescheduleCard({
           <Field label="Nova data e hora">
             <Input
               type="datetime-local"
+              min={minDateTimeLocal()}
               value={novaData}
               onChange={(e) => setNovaData(e.target.value)}
             />

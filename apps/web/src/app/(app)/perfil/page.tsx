@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Lock } from "lucide-react";
 import type {
   CompanyProfile,
   JwtClaims,
@@ -54,12 +55,9 @@ export default async function PerfilPage() {
   return (
     <section aria-labelledby="perfil-heading" className="space-y-6">
       <BackLink href="/inicio" label="Início" />
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 id="perfil-heading" className="font-display text-2xl font-black text-foreground sm:text-3xl">
-          Perfil
-        </h1>
-        <Badge tone="success" className="animate-fade-in">Sessão ativa</Badge>
-      </div>
+      <h1 id="perfil-heading" className="font-display text-2xl font-black text-foreground sm:text-3xl">
+        Perfil
+      </h1>
 
       {/* Banner contextual por persona — comunica de imediato para qual conta o perfil é. */}
       <div className="rounded-2xl bg-gradient-hero px-4 py-4 text-white sm:px-6 sm:py-5">
@@ -184,7 +182,9 @@ async function PortfolioPanel() {
         <PortfolioManager fotos={fotos} />
       ) : (
         <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-          <span className="text-3xl">🔒</span>
+          <span aria-hidden className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+            <Lock className="h-6 w-6" />
+          </span>
           <p className="text-sm text-muted-foreground">
             O portfólio de obras é um benefício dos planos pagos. Faça upgrade para montar sua galeria.
           </p>

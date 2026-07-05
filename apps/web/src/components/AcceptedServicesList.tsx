@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import type { BookingListItem } from "@obracerta/shared";
 import { Badge, Button, Card, EmptyState } from "@obracerta/ui";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
@@ -19,7 +20,7 @@ export function AcceptedServicesList({
   if (services.length === 0) {
     return (
       <EmptyState
-        icon="📄"
+        icon={<FileText className="h-8 w-8" />}
         title="Nenhum serviço aceito ainda"
         description="Assim que um pedido for aprovado, ele aparece aqui para você gerar o resumo/orçamento do serviço."
         action={

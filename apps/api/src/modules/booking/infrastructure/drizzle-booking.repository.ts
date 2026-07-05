@@ -80,6 +80,19 @@ export class DrizzleBookingRepository implements BookingRepository {
     return row?.total ?? 0;
   }
 
+  async countPendingForProfessional(professionalId: string): Promise<number> {
+    const [row] = await this.db
+      .select({ total: count() })
+      .from(bookingRequests)
+      .where(
+        and(
+          eq(bookingRequests.professionalId, professionalId),
+          eq(bookingRequests.status, "PENDENTE"),
+        ),
+      );
+    return row?.total ?? 0;
+  }
+
   async listForProfessional(professionalId: string): Promise<BookingRequest[]> {
     const rows = await this.db
       .select()

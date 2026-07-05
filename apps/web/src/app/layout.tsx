@@ -1,4 +1,5 @@
 import "@obracerta/design-tokens/tokens.css";
+import { colors } from "@obracerta/design-tokens";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
@@ -46,7 +47,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#e8560a",
+  // Cor da marca vem dos tokens (marca não é final — nunca hardcodar; CLAUDE.md).
+  themeColor: colors.orange[500],
   // Tela cheia edge-to-edge no PWA; os insets de safe-area cuidam do notch/island.
   viewportFit: "cover",
 };

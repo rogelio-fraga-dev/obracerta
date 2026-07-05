@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@obracerta/ui";
 
 /**
@@ -20,8 +21,11 @@ export function ErrorState({
 }) {
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
-      <span aria-hidden className="text-5xl">
-        ⚠️
+      <span
+        aria-hidden
+        className="flex h-16 w-16 items-center justify-center rounded-2xl bg-warning/10 text-warning"
+      >
+        <AlertTriangle className="h-8 w-8" />
       </span>
       <h1 className="font-display text-2xl font-black text-foreground">Algo deu errado</h1>
       <p className="text-sm text-muted-foreground">

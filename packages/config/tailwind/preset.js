@@ -45,7 +45,11 @@ export default {
           DEFAULT: "var(--color-muted)",
           foreground: "var(--color-muted-foreground)",
         },
-        border: "var(--color-border)",
+        border: {
+          DEFAULT: "var(--color-border)",
+          // Controles interativos (inputs/selects) — 3:1 sobre o fundo (WCAG 1.4.11).
+          strong: "var(--color-border-strong)",
+        },
         success: "var(--color-success)",
         warning: "var(--color-warning)",
         danger: "var(--color-danger)",

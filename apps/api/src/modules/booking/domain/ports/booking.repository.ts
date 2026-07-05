@@ -17,6 +17,8 @@ export interface BookingRepository {
   setFoto(id: string, url: string): Promise<BookingRequest | null>;
   findById(id: string): Promise<BookingRequest | null>;
   countPending(contractorId: string, especialidade: string): Promise<number>;
+  /** Pedidos PENDENTE aguardando ação do profissional (badge do menu). */
+  countPendingForProfessional(professionalId: string): Promise<number>;
   listForProfessional(professionalId: string): Promise<BookingRequest[]>;
   listForContractor(contractorId: string): Promise<BookingRequest[]>;
   findAll(): Promise<BookingRequest[]>;

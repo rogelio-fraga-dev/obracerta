@@ -20,7 +20,7 @@ export function Input({ className, invalid = false, ref, ...props }: InputProps)
     <input
       ref={ref}
       aria-invalid={invalid || undefined}
-      className={cn(base, invalid ? "border-danger" : "border-border", className)}
+      className={cn(base, invalid ? "border-danger" : "border-border-strong", className)}
       {...props}
     />
   );

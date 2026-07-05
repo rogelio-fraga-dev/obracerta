@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { MapPin } from "lucide-react";
 import { type Address, createAddressSchema, UFS } from "@obracerta/shared";
 import { Badge, Button, Card, EmptyState, Field, Input, Select } from "@obracerta/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -150,7 +151,7 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
 
       {enderecos.length === 0 && !showForm && (
         <EmptyState
-          icon="📍"
+          icon={<MapPin className="h-8 w-8" />}
           title="Nenhum endereço salvo"
           description="Cadastre o endereço da sua casa ou obra para agilizar pedidos e orçamentos."
         />
@@ -162,8 +163,9 @@ export function EnderecosClient({ enderecos }: { enderecos: Address[] }) {
             <li key={e.id}>
               <Card className="flex h-full flex-col gap-2 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-display text-base font-black text-foreground">
-                    📍 {e.apelido}
+                  <span className="flex items-center gap-1.5 font-display text-base font-black text-foreground">
+                    <MapPin aria-hidden className="h-4 w-4 shrink-0 text-primary" />
+                    {e.apelido}
                   </span>
                   {e.principal && <Badge tone="primary" size="sm">Principal</Badge>}
                 </div>

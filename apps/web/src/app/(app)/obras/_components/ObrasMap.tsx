@@ -51,12 +51,13 @@ export function ObrasMap({ obras }: { obras: ObraPin[] }) {
       }).addTo(map);
 
       // Pino desenhado inline (divIcon) — evita depender das imagens de marcador do
-      // Leaflet (que quebram com bundlers) e de assets externos.
+      // Leaflet (que quebram com bundlers) e de assets externos. Cor via token
+      // (var(--color-primary)) — marca não é final, nunca hardcodar.
       const icon = L.divIcon({
         className: "",
         html:
-          '<span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50% 50% 50% 0;background:#e8560a;transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,.4)">' +
-          '<span style="transform:rotate(45deg);font-size:14px;line-height:1">🔨</span></span>',
+          '<span style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50% 50% 50% 0;background:var(--color-primary);transform:rotate(-45deg);box-shadow:0 1px 4px rgba(0,0,0,.4)">' +
+          '<span style="width:10px;height:10px;border-radius:50%;background:#fff"></span></span>',
         iconSize: [28, 28],
         iconAnchor: [14, 28],
         popupAnchor: [0, -26],

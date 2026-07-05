@@ -412,6 +412,11 @@ export class BookingService {
     return this.withCounterpart(bookings, (b) => b.professionalId);
   }
 
+  /** Contagem barata de pendentes do profissional (badge do menu, a cada navegação). */
+  countPendingForProfessional(professionalId: string): Promise<number> {
+    return this.repo.countPendingForProfessional(professionalId);
+  }
+
   async listForProfessional(professionalId: string): Promise<BookingListItem[]> {
     const bookings = await this.repo.listForProfessional(professionalId);
     return this.withCounterpart(bookings, (b) => b.contractorId);

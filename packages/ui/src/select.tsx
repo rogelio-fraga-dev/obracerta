@@ -24,7 +24,7 @@ export function Select({ className, invalid = false, ref, children, ...props }: 
       <select
         ref={ref}
         aria-invalid={invalid || undefined}
-        className={cn(base, invalid ? "border-danger" : "border-border", className)}
+        className={cn(base, invalid ? "border-danger" : "border-border-strong", className)}
         {...props}
       >
         {children}

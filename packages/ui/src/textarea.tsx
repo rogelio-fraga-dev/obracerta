@@ -21,7 +21,7 @@ export function Textarea({ className, invalid = false, rows = 4, ref, ...props }
       ref={ref}
       rows={rows}
       aria-invalid={invalid || undefined}
-      className={cn(base, invalid ? "border-danger" : "border-border", className)}
+      className={cn(base, invalid ? "border-danger" : "border-border-strong", className)}
       {...props}
     />
   );
