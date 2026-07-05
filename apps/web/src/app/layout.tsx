@@ -47,6 +47,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#e8560a",
+  // Tela cheia edge-to-edge no PWA; os insets de safe-area cuidam do notch/island.
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {

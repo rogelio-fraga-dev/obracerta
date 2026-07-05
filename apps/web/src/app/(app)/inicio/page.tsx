@@ -153,6 +153,42 @@ export default async function InicioPage() {
         </div>
       </div>
 
+      {/* ── Primeiros passos do contratante (1º acesso, sem pedidos ainda) ── */}
+      {!isProfissional && pedidos.length === 0 && (
+        <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">
+          <h2 className="font-display text-lg font-black text-foreground">
+            Bem-vindo(a)! Comece por aqui
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Dois caminhos para o seu primeiro serviço:
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <Link href="/buscar">
+              <Card interactive className="flex items-center gap-3 p-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <SearchIcon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-base font-bold text-foreground">Buscar profissional</span>
+                  <span className="block text-sm text-muted-foreground">Escolha e agende direto</span>
+                </span>
+              </Card>
+            </Link>
+            <Link href="/obras/nova">
+              <Card interactive className="flex items-center gap-3 p-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                  <PlusIcon className="h-5 w-5" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-base font-bold text-foreground">Publicar uma obra</span>
+                  <span className="block text-sm text-muted-foreground">Receba lances de vários</span>
+                </span>
+              </Card>
+            </Link>
+          </div>
+        </Card>
+      )}
+
       {/* ── Checklist de ativação (profissional com passos pendentes) ── */}
       {checklist.length > 0 && (
         <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">

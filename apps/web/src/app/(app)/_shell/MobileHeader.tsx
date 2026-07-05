@@ -50,7 +50,7 @@ export function MobileHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur lg:hidden">
+      <header className="pt-safe sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur lg:hidden">
         <div className="flex items-center justify-between px-5 py-3">
           <Link href="/perfil" className="flex items-center gap-2.5 min-w-0" aria-label="Meu perfil">
             {fotoUrl ? (
@@ -122,7 +122,7 @@ export function MobileHeader({
         {/* Drawer content container */}
         <div
           className={cn(
-            "absolute inset-y-0 right-0 w-full max-w-xs bg-background shadow-2xl flex flex-col transition-transform duration-300 ease-in-out transform",
+            "pt-safe absolute inset-y-0 right-0 w-full max-w-xs bg-background shadow-2xl flex flex-col transition-transform duration-300 ease-in-out transform",
             isOpen ? "translate-x-0" : "translate-x-full"
           )}
         >
@@ -208,7 +208,7 @@ export function MobileHeader({
           </nav>
 
           {/* Drawer Footer */}
-          <div className="border-t border-border p-4">
+          <div className="pb-safe border-t border-border p-4">
             <LogoutButton className="w-full py-2.5" />
           </div>
         </div>

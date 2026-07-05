@@ -28,6 +28,19 @@
     font-family: var(--font-display);
     line-height: 1.15;
   }
+
+  /* Foco de teclado visível e consistente (WCAG 2.4.7) — só no foco por teclado. */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 /* ── Animations ── */
@@ -152,6 +165,14 @@
 
   .animate-count-up {
     animation: count-up var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* Safe-area (PWA em tela cheia): respeita notch/dynamic island e a barra inferior. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* Staggered animation delays */
