@@ -68,7 +68,7 @@ export function MobileHeader({
             {!isAdmin && (
               <Link
                 href="/notificacoes"
-                className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                 aria-label={naoLidas > 0 ? `Notificações (${naoLidas} não lidas)` : "Notificações"}
               >
                 <Bell className="h-4 w-4" />
@@ -86,7 +86,7 @@ export function MobileHeader({
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              className="relative flex h-9 items-center justify-center rounded-lg border border-border px-3 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              className="relative flex h-11 items-center justify-center rounded-lg border border-border px-4 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               aria-label={pendingPedidos > 0 ? `Abrir menu (${pendingPedidos} pendente(s))` : "Abrir menu"}
             >
               Menu

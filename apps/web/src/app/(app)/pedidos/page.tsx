@@ -8,6 +8,7 @@ import { formatRelativeBR } from "@/lib/format";
 import { BackLink } from "../_shell/BackLink";
 import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { PedidosIcon } from "../_shell/icons";
+import { Reveal } from "@/components/Reveal";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -99,6 +100,7 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
         />
       ) : (
         <ul className="space-y-3">
+          <Reveal step={20}>
           {visiveis.map((p) => {
             const ui = BOOKING_STATUS_UI[p.status];
             return (
@@ -143,6 +145,7 @@ export default async function PedidosPage({ searchParams }: { searchParams: Sear
               </li>
             );
           })}
+          </Reveal>
         </ul>
       )}
     </section>

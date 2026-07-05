@@ -32,7 +32,8 @@ export function FilterTabs({
             key={t.key}
             href={hrefFor(t.key)}
             aria-current={active ? "page" : undefined}
-            className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors ${
+            // py-2 ≈ 40px de alvo de toque (perto dos 44px da HIG sem inchar o layout).
+            className={`rounded-full border px-3.5 py-2 text-sm font-semibold transition-colors ${
               active
                 ? "border-primary bg-primary/10 text-foreground"
                 : "border-border text-muted-foreground hover:border-primary/50"

@@ -14,6 +14,7 @@ import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { ObrasIcon } from "../_shell/icons";
 import { EspecialidadeFilter } from "./_components/EspecialidadeFilter";
 import { ObrasMap, type ObraPin } from "./_components/ObrasMap";
+import { Reveal } from "@/components/Reveal";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -245,6 +246,7 @@ async function ProfessionalObras({
 function ObraGrid({ items }: { items: WorkOrder[] }) {
   return (
     <ul className="grid gap-4 sm:grid-cols-2">
+      <Reveal step={20}>
       {items.map((o, i) => {
         const status = WORK_ORDER_STATUS_UI[o.status];
         const urg = WORK_URGENCY_UI[o.urgencia];
@@ -287,6 +289,7 @@ function ObraGrid({ items }: { items: WorkOrder[] }) {
           </li>
         );
       })}
+      </Reveal>
     </ul>
   );
 }
