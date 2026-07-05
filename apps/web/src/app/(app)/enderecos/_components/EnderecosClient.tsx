@@ -3,8 +3,7 @@
 import { useState, useTransition } from "react";
 import { MapPin } from "lucide-react";
 import { type Address, createAddressSchema, UFS } from "@obracerta/shared";
-import { Badge, Button, Card, EmptyState, Field, Input, Select } from "@obracerta/ui";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Badge, Button, Card, ConfirmDialog, EmptyState, Field, Input, Select } from "@obracerta/ui";
 import { useToast } from "@/components/Toast";
 import {
   createAddressAction,

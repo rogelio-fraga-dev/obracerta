@@ -40,7 +40,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <ToastProvider>
-    <div className="flex min-h-dvh bg-background">
+    {/* overflow-x-clip + min-w-0: nenhum filho consegue alargar o documento além
+        do viewport (a causa do corte à direita no mobile — flex row sem min-width). */}
+    <div className="flex min-h-dvh overflow-x-clip bg-background">
       <Sidebar
         brandName={config.brand.name}
         inicial={inicial}
@@ -54,7 +56,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <LogoutButton className="w-full" />
       </Sidebar>
 
-      <div className="flex min-h-dvh flex-1 flex-col">
+      <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         <MobileHeader
           brandName={config.brand.name}
           inicial={inicial}

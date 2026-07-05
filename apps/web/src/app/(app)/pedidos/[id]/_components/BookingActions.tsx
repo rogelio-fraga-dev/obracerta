@@ -8,9 +8,8 @@ import {
   declineReasonSchema,
   type UserType,
 } from "@obracerta/shared";
-import { Button, Field, Input, Select } from "@obracerta/ui";
+import { Button, ConfirmDialog, Field, Input, Select } from "@obracerta/ui";
 import { bff } from "@/lib/client";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { type BookingAction, bookingActionsFor, DECLINE_REASON_UI } from "@/lib/booking-ui";
 
 const DECLINE_REASONS = Object.keys(DECLINE_REASON_UI) as DeclineReason[];

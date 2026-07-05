@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { MAX_PORTFOLIO_PHOTOS, type PortfolioPhoto } from "@obracerta/shared";
-import { Button, Field, Input } from "@obracerta/ui";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Button, ConfirmDialog, Field, Input } from "@obracerta/ui";
 import {
   deletePortfolioPhotoAction,
   updatePortfolioLegendaAction,

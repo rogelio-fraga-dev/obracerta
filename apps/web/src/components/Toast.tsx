@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 
 /**
  * Toasts do app: feedback flutuante e não-bloqueante para ações rápidas
@@ -68,7 +69,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 : "border-danger/30 bg-background text-foreground"
             }`}
           >
-            <span aria-hidden>{t.tone === "success" ? "✅" : "⚠️"}</span>
+            <span aria-hidden className={t.tone === "success" ? "text-success" : "text-danger"}>
+              {t.tone === "success" ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+            </span>
             {t.msg}
           </div>
         ))}
