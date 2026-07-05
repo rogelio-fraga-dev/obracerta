@@ -2,10 +2,13 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGu
 import {
   type JwtClaims,
   type Notification,
+  type NotificationPreference,
   type NotificationSummary,
   type PushPublicKey,
   pushSubscribeSchema,
   type PushSubscribeInput,
+  updateNotificationPreferenceSchema,
+  type UpdateNotificationPreferenceInput,
   uuidSchema,
   z,
 } from "@obracerta/shared";
@@ -14,6 +17,7 @@ import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { InboxService } from "../application/inbox.service.js";
 import { PushService } from "../application/push.service.js";
+import { NotificationPreferencesService } from "../application/notification-preferences.service.js";
 
 const unsubscribeSchema = z.object({ endpoint: z.string().url().max(2000) });
 
@@ -24,7 +28,26 @@ export class NotificationsController {
   constructor(
     private readonly inbox: InboxService,
     private readonly push: PushService,
+    private readonly preferences: NotificationPreferencesService,
   ) {}
+
+  /** Preferências de push por categoria (o sino in-app é sempre registrado). */
+  @Get("preferences")
+  listPreferences(@CurrentUser() user: JwtClaims): Promise<NotificationPreference[]> {
+    return this.preferences.list(user.sub);
+  }
+
+  /** Liga/desliga o push de uma categoria; devolve a lista atualizada. */
+  @Post("preferences")
+  @HttpCode(HttpStatus.OK)
+  async setPreference(
+    @CurrentUser() user: JwtClaims,
+    @Body(new ZodValidationPipe(updateNotificationPreferenceSchema))
+    body: UpdateNotificationPreferenceInput,
+  ): Promise<NotificationPreference[]> {
+    await this.preferences.set(user.sub, body.tipo, body.pushEnabled);
+    return this.preferences.list(user.sub);
+  }
 
   /** Chave pública VAPID (null = push desabilitado no servidor). */
   @Get("push/public-key")

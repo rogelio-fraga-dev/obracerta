@@ -9,6 +9,7 @@ import {
   type NotificationsRepository,
 } from "../domain/ports/notifications.repository.js";
 import { PushService } from "./push.service.js";
+import { NotificationPreferencesService } from "./notification-preferences.service.js";
 
 /** Quantas notificações a página mostra (não é histórico infinito). */
 const LIST_LIMIT = 50;
@@ -25,6 +26,7 @@ export class InboxService {
   constructor(
     @Inject(NOTIFICATIONS_REPOSITORY) private readonly repo: NotificationsRepository,
     private readonly push: PushService,
+    private readonly preferences: NotificationPreferencesService,
   ) {}
 
   /**
@@ -42,7 +44,14 @@ export class InboxService {
     } catch (error: unknown) {
       this.logger.warn(`Falha ao registrar notificação p/ ${userId}: ${String(error)}`);
     }
-    await this.push.sendToUser(userId, { titulo, corpo: opts.corpo, link: opts.link });
+    // O sino (in-app) sempre registra; o Web Push respeita a preferência da
+    // categoria (best-effort: se a checagem falhar, mantém o padrão e envia).
+    const pushOn = await this.preferences
+      .isPushEnabled(userId, tipo)
+      .catch(() => true);
+    if (pushOn) {
+      await this.push.sendToUser(userId, { titulo, corpo: opts.corpo, link: opts.link });
+    }
   }
 
   list(userId: string): Promise<Notification[]> {

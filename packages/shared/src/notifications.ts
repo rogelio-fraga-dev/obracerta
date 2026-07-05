@@ -49,3 +49,19 @@ export type PushSubscribeInput = z.infer<typeof pushSubscribeSchema>;
 /** Chave pública VAPID (null = push desabilitado no servidor). */
 export const pushPublicKeySchema = z.object({ key: z.string().nullable() });
 export type PushPublicKey = z.infer<typeof pushPublicKeySchema>;
+
+/**
+ * Preferência de notificação por categoria. O aviso **in-app** (sino) é sempre
+ * registrado; `pushEnabled` controla apenas o **Web Push** daquela categoria.
+ */
+export const notificationPreferenceSchema = z.object({
+  tipo: notificationTypeSchema,
+  pushEnabled: z.boolean(),
+});
+export type NotificationPreference = z.infer<typeof notificationPreferenceSchema>;
+
+/** Atualização de uma preferência (mesma forma). */
+export const updateNotificationPreferenceSchema = notificationPreferenceSchema;
+export type UpdateNotificationPreferenceInput = z.infer<
+  typeof updateNotificationPreferenceSchema
+>;
