@@ -52,7 +52,9 @@ export interface NavSet {
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
-  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, ORCAMENTOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  // "Orçamentos e recibos" (FERRAMENTAS) já reúne os serviços fechados + o gerador
+  // de documentos — sem item "Orçamentos" separado para não duplicar.
+  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
 };
 
 const NAV_CONTRATANTE: NavSet = {
