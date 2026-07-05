@@ -109,10 +109,14 @@ export function Sidebar({
           <>
             <ul className="space-y-1">{primary.map(renderItem)}</ul>
             <div className="mx-4 my-6 h-px bg-border/60" />
-            <p className="px-4 pb-3 text-xs font-extrabold uppercase tracking-wider text-muted-foreground/60">
-              Atalhos
-            </p>
-            <ul className="space-y-1">{secondary.map(renderItem)}</ul>
+            {secondary.map((group) => (
+              <div key={group.label} className="mb-5">
+                <p className="px-4 pb-2 text-xs font-extrabold uppercase tracking-wider text-muted-foreground/60">
+                  {group.label}
+                </p>
+                <ul className="space-y-1">{group.items.map(renderItem)}</ul>
+              </div>
+            ))}
           </>
         )}
       </nav>

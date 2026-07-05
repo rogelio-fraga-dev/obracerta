@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { NotificationPreference, NotificationType } from "@obracerta/shared";
-import { Card } from "@obracerta/ui";
+import { Card, Switch } from "@obracerta/ui";
 import { bff } from "@/lib/client";
 
 /** Rótulos amigáveis de cada categoria de notificação. */
@@ -63,24 +63,12 @@ export function NotificationPreferences({ initial }: { initial: NotificationPref
         {prefs.map((p) => (
           <li key={p.tipo} className="flex items-center justify-between gap-3 py-2.5">
             <span className="text-sm font-semibold text-foreground">{LABELS[p.tipo]}</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={p.pushEnabled}
+            <Switch
+              checked={p.pushEnabled}
+              onCheckedChange={(next) => void toggle(p.tipo, next)}
               aria-label={`Push de ${LABELS[p.tipo]}`}
               disabled={saving === p.tipo}
-              onClick={() => void toggle(p.tipo, !p.pushEnabled)}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-                p.pushEnabled ? "bg-primary" : "bg-muted"
-              }`}
-            >
-              <span
-                aria-hidden
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  p.pushEnabled ? "translate-x-[22px]" : "translate-x-0.5"
-                }`}
-              />
-            </button>
+            />
           </li>
         ))}
       </ul>

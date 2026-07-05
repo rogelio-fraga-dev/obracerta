@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { X, ArrowRight, Bell } from "lucide-react";
 import { Avatar, cn } from "@obracerta/ui";
 import { firstName } from "@/lib/format";
-import { navForTipo, tipoLabel, ADMIN_NAV } from "./nav-items";
+import { navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 import { LogoutButton } from "./LogoutButton";
 
 interface MobileHeaderProps {
@@ -42,10 +42,41 @@ export function MobileHeader({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const menuItems = isAdmin ? ADMIN_NAV : [...primary, ...secondary];
-
   const handleLinkClick = () => {
     setIsOpen(false);
+  };
+
+  /** Item do drawer (compartilhado entre a lista primária e os grupos). */
+  const renderDrawerItem = ({ href, label, Icon }: NavItem) => {
+    const active = isActive(href);
+    return (
+      <li key={href}>
+        <Link
+          href={href}
+          onClick={handleLinkClick}
+          aria-current={active ? "page" : undefined}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-3 text-base font-bold transition-all duration-200",
+            active
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+        >
+          <Icon className="h-5 w-5 shrink-0" />
+          <span className="flex-1">{label}</span>
+          {((href === "/pedidos" && pendingPedidos > 0) ||
+            (href === "/notificacoes" && naoLidas > 0)) && (
+            <span
+              aria-label="pendências"
+              className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
+            >
+              {href === "/pedidos" ? pendingPedidos : naoLidas}
+            </span>
+          )}
+          <ArrowRight className={cn("h-4 w-4 opacity-0 transition-opacity", active && "opacity-40")} />
+        </Link>
+      </li>
+    );
   };
 
   return (
@@ -165,41 +196,23 @@ export function MobileHeader({
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links — primários + grupos com header (padrão Notion). */}
           <nav className="flex-1 overflow-y-auto px-4 py-4">
-            <ul className="space-y-1">
-              {menuItems.map(({ href, label, Icon }) => {
-                const active = isActive(href);
-                return (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      onClick={handleLinkClick}
-                      aria-current={active ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-3 text-base font-bold transition-all duration-200",
-                        active
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" />
-                      <span className="flex-1">{label}</span>
-                      {((href === "/pedidos" && pendingPedidos > 0) ||
-                        (href === "/notificacoes" && naoLidas > 0)) && (
-                        <span
-                          aria-label="pendências"
-                          className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
-                        >
-                          {href === "/pedidos" ? pendingPedidos : naoLidas}
-                        </span>
-                      )}
-                      <ArrowRight className={cn("h-4 w-4 opacity-0 transition-opacity", active && "opacity-40")} />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            {isAdmin ? (
+              <ul className="space-y-1">{ADMIN_NAV.map(renderDrawerItem)}</ul>
+            ) : (
+              <>
+                <ul className="space-y-1">{primary.map(renderDrawerItem)}</ul>
+                {secondary.map((group) => (
+                  <div key={group.label} className="mt-4">
+                    <p className="px-3 pb-1.5 text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground/60">
+                      {group.label}
+                    </p>
+                    <ul className="space-y-1">{group.items.map(renderDrawerItem)}</ul>
+                  </div>
+                ))}
+              </>
+            )}
           </nav>
 
           {/* Drawer Footer */}

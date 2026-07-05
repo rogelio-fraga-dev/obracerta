@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { ComponentType, SVGProps } from "react";
+import { Suspense, type ComponentType, type SVGProps } from "react";
+import { CheckCircle2, ClipboardList, Hammer, Star } from "lucide-react";
 import type {
   AvailabilitySlot,
   BookingRequest,
@@ -10,7 +11,6 @@ import type {
   Review,
   User,
 } from "@obracerta/shared";
-import { CheckCircle2, ClipboardList, Hammer, Star } from "lucide-react";
 import { Badge, Card, StatCard, Avatar } from "@obracerta/ui";
 import { getMyRoles, getProfileHint } from "@/lib/session";
 import { serverApi } from "@/lib/server-api";
@@ -85,24 +85,186 @@ const ACOES_CONTRATANTE: Acao[] = [
   { href: "/cobrancas", titulo: "Cobranças", desc: "Faturas e reembolsos", Icon: PlanoIcon },
 ];
 
-/** Início — painel inicial com stats reais, próximos compromissos e ações rápidas. */
+/**
+ * Início — painel com stats reais, próximos compromissos e ações rápidas.
+ * **Streaming por seção** (padrão Vercel): o esqueleto da página pinta imediatamente
+ * e cada bloco chega quando os SEUS dados chegam — nada de bloquear a tela inteira
+ * atrás de 7 chamadas de API.
+ */
 export default async function InicioPage() {
   const [hint, roles] = await Promise.all([getProfileHint(), getMyRoles()]);
   if (roles.includes("ADMIN")) redirect("/admin");
 
-  const primeiroNome = firstName(hint?.nome);
   const isProfissional = hint?.tipo === "PROFISSIONAL";
   const acoes = isProfissional ? ACOES_PROFISSIONAL : ACOES_CONTRATANTE;
 
-  // Buscar dados reais para o dashboard
+  return (
+    <section aria-labelledby="inicio-heading" className="space-y-6 sm:space-y-8">
+      <Suspense fallback={<HeroSkeleton />}>
+        <HeroSection nome={hint?.nome} isProfissional={isProfissional} />
+      </Suspense>
+
+      {isProfissional && (
+        <Suspense fallback={null}>
+          <ChecklistSection />
+        </Suspense>
+      )}
+
+      <Suspense fallback={<AtividadeSkeleton />}>
+        <AtividadeSection isProfissional={isProfissional} />
+      </Suspense>
+
+      {isProfissional && (
+        <Suspense fallback={null}>
+          <ComportamentoSection />
+        </Suspense>
+      )}
+
+      {/* ── Ações rápidas (estático — pinta imediatamente) ── */}
+      <div>
+        <h2 className="mb-3 font-display text-xl font-black text-foreground">
+          Ações rápidas
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {acoes.map(({ href, titulo, desc, Icon }, i) => (
+            <Link key={href} href={href}>
+              <Card
+                interactive
+                className={`flex items-center gap-3 p-4 sm:gap-4 sm:p-6 animate-fade-in delay-${i + 1}`}
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary sm:h-12 sm:w-12">
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-base font-bold text-foreground">{titulo}</span>
+                  <span className="block truncate text-sm text-muted-foreground">{desc}</span>
+                </span>
+                <span aria-hidden className="text-lg text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
+                  →
+                </span>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Skeletons por seção ── */
+
+function HeroSkeleton() {
+  return <div className="animate-skeleton h-[104px] rounded-2xl bg-muted sm:h-36" />;
+}
+
+function AtividadeSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="animate-skeleton h-24 rounded-xl bg-muted sm:h-28" />
+      ))}
+    </div>
+  );
+}
+
+/* ── Seções (cada uma busca os próprios dados; o fetch é memoizado por request) ── */
+
+/** Hero com avatar — o fetch do perfil coincide com o do layout (memoizado). */
+async function HeroSection({
+  nome,
+  isProfissional,
+}: {
+  nome: string | undefined;
+  isProfissional: boolean;
+}) {
+  const me = await serverApi<User>("GET", "/auth/me/profile").catch(() => null);
+  const primeiroNome = firstName(nome);
+
+  return (
+    <div className="animate-fade-in rounded-2xl bg-gradient-hero px-4 py-4 text-background sm:px-7 sm:py-8">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <Avatar nome={nome ?? "U"} src={me?.fotoUrl ?? undefined} size="lg" className="shrink-0" />
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[2px] text-orange-300/80 sm:text-xs">
+            {isProfissional ? "Profissional" : "Contratante"}
+          </p>
+          <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-xl font-black text-background sm:text-4xl">
+            {primeiroNome ? `Olá, ${primeiroNome}` : "Bem-vindo"}
+          </h1>
+          <p className="mt-1 hidden text-sm text-background/60 sm:block">
+            {isProfissional
+              ? "Gerencie sua agenda, pedidos e obras por aqui."
+              : "Encontre profissionais e acompanhe seus pedidos."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Checklist de ativação do profissional (só aparece com passos pendentes). */
+async function ChecklistSection() {
+  const [perfil, agenda, portfolio] = await Promise.all([
+    serverApi<ProfessionalProfile>("GET", "/profiles/professional/me").catch(() => null),
+    serverApi<AvailabilitySlot[]>("GET", "/availability/me").catch(() => [] as AvailabilitySlot[]),
+    // 403 no plano sem portfólio → não vira passo pendente
+    serverApi<PortfolioPhoto[]>("GET", "/profiles/professional/me/portfolio").catch(() => null),
+  ]);
+  const checklist = buildChecklist(perfil, agenda, portfolio);
+  if (checklist.length === 0) return null;
+
+  return (
+    <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-display text-lg font-black text-foreground">
+          Comece bem: ative seu perfil
+        </h2>
+        <span className="text-xs font-bold text-muted-foreground">
+          {checklist.filter((c) => c.done).length}/{checklist.length} concluídos
+        </span>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Perfis completos aparecem melhor na busca e recebem mais pedidos.
+      </p>
+      <ul className="mt-3 space-y-2">
+        {checklist.map((item) => (
+          <li key={item.titulo}>
+            <Link
+              href={item.href}
+              className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:border-primary/40"
+            >
+              <span
+                aria-hidden
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${
+                  item.done ? "bg-success text-white" : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {item.done ? "✓" : "•"}
+              </span>
+              <span
+                className={`flex-1 text-sm font-semibold ${
+                  item.done ? "text-muted-foreground line-through" : "text-foreground"
+                }`}
+              >
+                {item.titulo}
+              </span>
+              {!item.done && <span aria-hidden className="text-muted-foreground">→</span>}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+/** Onboarding do contratante + KPIs + próximos compromissos (mesma fonte de dados). */
+async function AtividadeSection({ isProfissional }: { isProfissional: boolean }) {
   const endpoint = isProfissional ? "/bookings/me/professional" : "/bookings/me/contractor";
-  const [pedidos, reviews, me] = await Promise.all([
+  const [pedidos, reviews] = await Promise.all([
     serverApi<BookingRequest[]>("GET", endpoint).catch(() => [] as BookingRequest[]),
     serverApi<Review[]>("GET", "/reviews/received").catch(() => [] as Review[]),
-    serverApi<User>("GET", "/auth/me/profile").catch(() => null),
   ]);
 
-  // Calcular stats
   const pendentes = pedidos.filter((p) => p.status === "PENDENTE").length;
   const emAndamento = pedidos.filter((p) => ["APROVADO", "INICIADO"].includes(p.status)).length;
   const concluidos = pedidos.filter((p) => p.status === "CONCLUIDO").length;
@@ -110,50 +272,14 @@ export default async function InicioPage() {
     ? (reviews.reduce((acc, r) => acc + r.nota, 0) / reviews.length).toFixed(1)
     : "—";
 
-  // Próximos compromissos
   const totalProximos = pedidos.filter((p) => !["CONCLUIDO", "CANCELADO", "EXPIRADO"].includes(p.status));
   const maxCompromissos = isProfissional ? 3 : 2;
   const proximos = [...totalProximos]
     .sort((a, b) => new Date(a.dataServico).getTime() - new Date(b.dataServico).getTime())
     .slice(0, maxCompromissos);
 
-  // Para profissionais: penalidades + passos de ativação (checklist do 1º acesso)
-  let penaltyStats: PenaltySummary | null = null;
-  let checklist: ChecklistItem[] = [];
-  if (isProfissional) {
-    const [penalties, perfil, agenda, portfolio] = await Promise.all([
-      serverApi<PenaltySummary>("GET", "/penalties/me/summary").catch(() => null),
-      serverApi<ProfessionalProfile>("GET", "/profiles/professional/me").catch(() => null),
-      serverApi<AvailabilitySlot[]>("GET", "/availability/me").catch(() => [] as AvailabilitySlot[]),
-      // 403 no plano sem portfólio → não vira passo pendente
-      serverApi<PortfolioPhoto[]>("GET", "/profiles/professional/me/portfolio").catch(() => null),
-    ]);
-    penaltyStats = penalties;
-    checklist = buildChecklist(perfil, agenda, portfolio);
-  }
-
   return (
-    <section aria-labelledby="inicio-heading" className="space-y-6 sm:space-y-8">
-      {/* ── Hero com gradiente (compacto no celular) ── */}
-      <div className="animate-fade-in rounded-2xl bg-gradient-hero px-4 py-4 text-background sm:px-7 sm:py-8">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Avatar nome={hint?.nome ?? "U"} src={me?.fotoUrl ?? undefined} size="lg" className="shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[2px] text-orange-300/80 sm:text-xs">
-              {isProfissional ? "Profissional" : "Contratante"}
-            </p>
-            <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-xl font-black text-background sm:text-4xl">
-              {primeiroNome ? `Olá, ${primeiroNome}` : "Bem-vindo"}
-            </h1>
-            <p className="mt-1 hidden text-sm text-background/60 sm:block">
-              {isProfissional
-                ? "Gerencie sua agenda, pedidos e obras por aqui."
-                : "Encontre profissionais e acompanhe seus pedidos."}
-            </p>
-          </div>
-        </div>
-      </div>
-
+    <>
       {/* ── Primeiros passos do contratante (1º acesso, sem pedidos ainda) ── */}
       {!isProfissional && pedidos.length === 0 && (
         <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">
@@ -187,50 +313,6 @@ export default async function InicioPage() {
               </Card>
             </Link>
           </div>
-        </Card>
-      )}
-
-      {/* ── Checklist de ativação (profissional com passos pendentes) ── */}
-      {checklist.length > 0 && (
-        <Card className="animate-fade-in border-primary/25 bg-primary/[0.04] p-4 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-display text-lg font-black text-foreground">
-              Comece bem: ative seu perfil
-            </h2>
-            <span className="text-xs font-bold text-muted-foreground">
-              {checklist.filter((c) => c.done).length}/{checklist.length} concluídos
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Perfis completos aparecem melhor na busca e recebem mais pedidos.
-          </p>
-          <ul className="mt-3 space-y-2">
-            {checklist.map((item) => (
-              <li key={item.titulo}>
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:border-primary/40"
-                >
-                  <span
-                    aria-hidden
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${
-                      item.done ? "bg-success text-white" : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {item.done ? "✓" : "•"}
-                  </span>
-                  <span
-                    className={`flex-1 text-sm font-semibold ${
-                      item.done ? "text-muted-foreground line-through" : "text-foreground"
-                    }`}
-                  >
-                    {item.titulo}
-                  </span>
-                  {!item.done && <span aria-hidden className="text-muted-foreground">→</span>}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </Card>
       )}
 
@@ -301,69 +383,48 @@ export default async function InicioPage() {
           </div>
         </div>
       )}
+    </>
+  );
+}
 
-      {/* ── Painel de comportamento (profissional) ── */}
-      {isProfissional && penaltyStats && (
-        <div className="animate-fade-in delay-4">
-          <Card className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="text-center shrink-0">
-              <div className="font-display text-4xl font-black text-primary">
-                {penaltyStats.taxaAceitacao != null
-                  ? `${Math.round(penaltyStats.taxaAceitacao * 100)}%`
-                  : "—"}
-              </div>
-              <p className="mt-0.5 text-xs font-semibold text-muted-foreground">Taxa de aceitação</p>
-            </div>
-            <div className="h-px w-full sm:h-12 sm:w-px bg-border" />
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-sm">
-                <span className="text-muted-foreground">
-                  <strong className="text-foreground">{penaltyStats.aprovados}</strong> aprovados
-                </span>
-                <span className="text-muted-foreground">
-                  <strong className="text-foreground">{penaltyStats.recusados}</strong> recusados
-                </span>
-                {penaltyStats.pontosPenalidade > 0 && (
-                  <Badge tone="danger">
-                    {penaltyStats.pontosPenalidade} pts de penalidade
-                  </Badge>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Recusas com justificativa não penalizam.
-              </p>
-            </div>
-          </Card>
-        </div>
-      )}
+/** Painel de comportamento do profissional (taxa de aceitação + penalidades). */
+async function ComportamentoSection() {
+  const penaltyStats = await serverApi<PenaltySummary>("GET", "/penalties/me/summary").catch(
+    () => null,
+  );
+  if (!penaltyStats) return null;
 
-      {/* ── Ações rápidas ── */}
-      <div>
-        <h2 className="mb-3 font-display text-xl font-black text-foreground">
-          Ações rápidas
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {acoes.map(({ href, titulo, desc, Icon }, i) => (
-            <Link key={href} href={href}>
-              <Card
-                interactive
-                className={`flex items-center gap-3 p-4 sm:gap-4 sm:p-6 animate-fade-in delay-${i + 1}`}
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary sm:h-12 sm:w-12">
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-base font-bold text-foreground">{titulo}</span>
-                  <span className="block truncate text-sm text-muted-foreground">{desc}</span>
-                </span>
-                <span aria-hidden className="text-lg text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
-                  →
-                </span>
-              </Card>
-            </Link>
-          ))}
+  return (
+    <div className="animate-fade-in delay-4">
+      <Card className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        <div className="text-center shrink-0">
+          <div className="font-display text-4xl font-black text-primary">
+            {penaltyStats.taxaAceitacao != null
+              ? `${Math.round(penaltyStats.taxaAceitacao * 100)}%`
+              : "—"}
+          </div>
+          <p className="mt-0.5 text-xs font-semibold text-muted-foreground">Taxa de aceitação</p>
         </div>
-      </div>
-    </section>
+        <div className="h-px w-full sm:h-12 sm:w-px bg-border" />
+        <div className="flex-1 text-center sm:text-left">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-4 text-sm">
+            <span className="text-muted-foreground">
+              <strong className="text-foreground">{penaltyStats.aprovados}</strong> aprovados
+            </span>
+            <span className="text-muted-foreground">
+              <strong className="text-foreground">{penaltyStats.recusados}</strong> recusados
+            </span>
+            {penaltyStats.pontosPenalidade > 0 && (
+              <Badge tone="danger">
+                {penaltyStats.pontosPenalidade} pts de penalidade
+              </Badge>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Recusas com justificativa não penalizam.
+          </p>
+        </div>
+      </Card>
+    </div>
   );
 }

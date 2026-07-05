@@ -46,28 +46,50 @@ const ENDERECOS: NavItem = { href: "/enderecos", label: "Endereços", shortLabel
 const NOTIFICACOES: NavItem = { href: "/notificacoes", label: "Notificações", shortLabel: "Avisos", Icon: Bell };
 const AJUDA: NavItem = { href: "/ajuda", label: "Ajuda e suporte", shortLabel: "Ajuda", Icon: LifeBuoy };
 
+/** Grupo do menu secundário (header de seção no drawer/sidebar — padrão Notion). */
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
 export interface NavSet {
   primary: NavItem[];
-  secondary: NavItem[];
+  secondary: NavGroup[];
 }
+
+// Grupos comuns de conta/suporte (iguais nas três personas).
+const GRUPO_CONTA: NavGroup = { label: "Conta", items: [NOTIFICACOES, ENDERECOS, COBRANCAS] };
+const GRUPO_SUPORTE: NavGroup = { label: "Suporte", items: [AJUDA] };
 
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
 const NAV_PROFISSIONAL: NavSet = {
   primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
   // "Orçamentos e recibos" (FERRAMENTAS) já reúne os serviços fechados + o gerador
   // de documentos — sem item "Orçamentos" separado para não duplicar.
-  secondary: [NOTIFICACOES, AGENDA, FERRAMENTAS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [
+    { label: "Trabalho", items: [AGENDA, FERRAMENTAS, AVALIACOES] },
+    GRUPO_CONTA,
+    GRUPO_SUPORTE,
+  ],
 };
 
 const NAV_CONTRATANTE: NavSet = {
   primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
-  secondary: [NOTIFICACOES, OBRAS, ORCAMENTOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [
+    { label: "Trabalho", items: [OBRAS, ORCAMENTOS, FAVORITOS, AVALIACOES] },
+    GRUPO_CONTA,
+    GRUPO_SUPORTE,
+  ],
 };
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PERFIL],
-  secondary: [NOTIFICACOES, PEDIDOS, ORCAMENTOS, FAVORITOS, AVALIACOES, ENDERECOS, COBRANCAS, AJUDA],
+  secondary: [
+    { label: "Trabalho", items: [PEDIDOS, ORCAMENTOS, FAVORITOS, AVALIACOES] },
+    GRUPO_CONTA,
+    GRUPO_SUPORTE,
+  ],
 };
 
 /**
