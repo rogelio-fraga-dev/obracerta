@@ -25,6 +25,10 @@ export const bookingRequestSchema = z.object({
   status: bookingStatusSchema,
   expiraEm: isoTimestampSchema,
   motivoRecusa: z.string().trim().max(300).nullable(),
+  /** Reagendamento pendente: nova data proposta (null = sem proposta). */
+  reagendamentoData: isoTimestampSchema.nullable(),
+  /** Quem propôs o reagendamento (a OUTRA parte confirma). */
+  reagendamentoPor: uuidSchema.nullable(),
   criadoEm: isoTimestampSchema,
   atualizadoEm: isoTimestampSchema,
 });
@@ -89,3 +93,20 @@ export const declineBookingSchema = z
     path: ["detalhe"],
   });
 export type DeclineBookingInput = z.infer<typeof declineBookingSchema>;
+
+/**
+ * Proposta de reagendamento (roadmap §7): qualquer participante propõe uma nova
+ * data para um pedido APROVADO; a outra parte confirma ou recusa. `novaData` no
+ * futuro (validado também no servidor).
+ */
+export const rescheduleBookingSchema = z.object({
+  novaData: isoTimestampSchema,
+});
+export type RescheduleBookingInput = z.infer<typeof rescheduleBookingSchema>;
+
+/** Há um reagendamento pendente aguardando confirmação? Fonte única (API + web). */
+export function hasPendingReschedule(
+  booking: Pick<BookingRequest, "reagendamentoData">,
+): boolean {
+  return booking.reagendamentoData !== null;
+}

@@ -19,6 +19,8 @@ import {
   declineBookingSchema,
   type DeclineBookingInput,
   type JwtClaims,
+  rescheduleBookingSchema,
+  type RescheduleBookingInput,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
@@ -113,5 +115,27 @@ export class BookingController {
   @Post(":id/cancel")
   cancel(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<BookingRequest> {
     return this.bookings.cancel(user.sub, id);
+  }
+
+  /** Participante propõe uma nova data (a outra parte confirma). */
+  @Post(":id/reagendamento")
+  proposeReschedule(
+    @CurrentUser() user: JwtClaims,
+    @Param("id") id: string,
+    @Body(new ZodValidationPipe(rescheduleBookingSchema)) body: RescheduleBookingInput,
+  ): Promise<BookingRequest> {
+    return this.bookings.proposeReschedule(user.sub, id, body.novaData);
+  }
+
+  /** A outra parte confirma o reagendamento (move a data + o bloqueio de agenda). */
+  @Post(":id/reagendamento/aceitar")
+  acceptReschedule(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<BookingRequest> {
+    return this.bookings.acceptReschedule(user.sub, id);
+  }
+
+  /** A outra parte recusa o reagendamento (mantém a data original). */
+  @Post(":id/reagendamento/recusar")
+  rejectReschedule(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<BookingRequest> {
+    return this.bookings.rejectReschedule(user.sub, id);
   }
 }

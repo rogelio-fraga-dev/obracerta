@@ -254,6 +254,107 @@ export class BookingService {
     return updated;
   }
 
+  /**
+   * Qualquer participante propõe uma **nova data** para um pedido APROVADO. Não
+   * muda a data ainda — registra a proposta e avisa a outra parte, que confirma.
+   */
+  async proposeReschedule(userId: string, id: string, novaData: string): Promise<BookingRequest> {
+    const booking = await this.getForParticipant(userId, id);
+    if (booking.status !== BookingStatus.APROVADO) {
+      throw new ConflictException(
+        "Só dá para reagendar um pedido aprovado (ainda não iniciado).",
+      );
+    }
+    if (Date.parse(novaData) <= Date.now()) {
+      throw new BadRequestException("A nova data deve ser no futuro.");
+    }
+    const updated = await this.repo.proposeReschedule(id, novaData, userId);
+    if (!updated) throw new ConflictException("O pedido não está mais aprovado.");
+
+    const outroId =
+      booking.contractorId === userId ? booking.professionalId : booking.contractorId;
+    await this.notifyUser(outroId, "Propuseram uma nova data para um pedido — confirme ou recuse.");
+    await this.inbox.record(outroId, "PEDIDO", "Nova data proposta", {
+      corpo: `Pediram para remarcar "${booking.especialidade}". Abra o pedido para aceitar ou recusar.`,
+      link: `/pedidos/${booking.id}`,
+    });
+    return updated;
+  }
+
+  /**
+   * A **outra parte** confirma o reagendamento: move o bloqueio de agenda do
+   * profissional para a nova janela (compensa em caso de conflito) e efetiva a data.
+   */
+  async acceptReschedule(userId: string, id: string): Promise<BookingRequest> {
+    const booking = await this.getForParticipant(userId, id);
+    if (!booking.reagendamentoData) {
+      throw new ConflictException("Não há reagendamento pendente neste pedido.");
+    }
+    if (booking.reagendamentoPor === userId) {
+      throw new ForbiddenException("Quem propôs não confirma — quem confirma é a outra parte.");
+    }
+    if (booking.status !== BookingStatus.APROVADO) {
+      throw new ConflictException("O pedido não está mais aprovado.");
+    }
+
+    const novaData = booking.reagendamentoData;
+    const novaWindow = serviceBlockWindow(novaData);
+    // Remove o bloqueio antigo antes de checar conflito (evita auto-conflito). Se a
+    // nova janela colidir com outro compromisso, recria o bloqueio antigo e aborta.
+    await this.availability.removeBlocksForBooking(id);
+    if (await this.availability.conflictsWith(booking.professionalId, novaWindow)) {
+      const antiga = serviceBlockWindow(booking.dataServico);
+      await this.availability.blockForBooking(booking.professionalId, antiga.inicio, antiga.fim, id);
+      throw new ConflictException("A agenda do profissional está ocupada na nova data.");
+    }
+    await this.availability.blockForBooking(
+      booking.professionalId,
+      novaWindow.inicio,
+      novaWindow.fim,
+      id,
+    );
+
+    const updated = await this.repo.applyReschedule(id, novaData);
+    if (!updated) {
+      // Corrida: o pedido saiu de APROVADO — desfaz o novo bloqueio.
+      await this.availability.removeBlocksForBooking(id);
+      throw new ConflictException("O estado do pedido mudou; tente novamente.");
+    }
+
+    const proposerId = booking.reagendamentoPor;
+    if (proposerId) {
+      await this.notifyUser(proposerId, "Sua proposta de nova data foi aceita.");
+      await this.inbox.record(proposerId, "PEDIDO", "Nova data confirmada ✓", {
+        corpo: `A remarcação de "${booking.especialidade}" foi confirmada.`,
+        link: `/pedidos/${booking.id}`,
+      });
+    }
+    return updated;
+  }
+
+  /** A outra parte recusa o reagendamento: limpa a proposta; a data original fica. */
+  async rejectReschedule(userId: string, id: string): Promise<BookingRequest> {
+    const booking = await this.getForParticipant(userId, id);
+    if (!booking.reagendamentoData) {
+      throw new ConflictException("Não há reagendamento pendente neste pedido.");
+    }
+    if (booking.reagendamentoPor === userId) {
+      throw new ForbiddenException("Quem propôs não recusa a própria proposta.");
+    }
+    const updated = await this.repo.clearReschedule(id);
+    if (!updated) throw new ConflictException("O estado do pedido mudou; tente novamente.");
+
+    const proposerId = booking.reagendamentoPor;
+    if (proposerId) {
+      await this.notifyUser(proposerId, "Sua proposta de nova data foi recusada.");
+      await this.inbox.record(proposerId, "PEDIDO", "Nova data recusada", {
+        corpo: `A remarcação de "${booking.especialidade}" foi recusada — a data original permanece.`,
+        link: `/pedidos/${booking.id}`,
+      });
+    }
+    return updated;
+  }
+
   /** Contratante cancela (PENDENTE ou APROVADO → CANCELADO; libera a agenda). */
   async cancel(contractorId: string, id: string): Promise<BookingRequest> {
     const booking = await this.getOr404(id);

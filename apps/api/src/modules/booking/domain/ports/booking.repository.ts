@@ -32,6 +32,16 @@ export interface BookingRepository {
     to: BookingStatus,
     patch?: { motivoRecusa?: string },
   ): Promise<BookingRequest | null>;
+  /** Registra uma proposta de reagendamento (só enquanto APROVADO). */
+  proposeReschedule(
+    id: string,
+    novaData: string,
+    porUserId: string,
+  ): Promise<BookingRequest | null>;
+  /** Aplica o reagendamento aceito: move `dataServico` e limpa a proposta. */
+  applyReschedule(id: string, novaData: string): Promise<BookingRequest | null>;
+  /** Limpa a proposta de reagendamento (recusa). */
+  clearReschedule(id: string): Promise<BookingRequest | null>;
 }
 
 export const BOOKING_REPOSITORY = Symbol("BOOKING_REPOSITORY");

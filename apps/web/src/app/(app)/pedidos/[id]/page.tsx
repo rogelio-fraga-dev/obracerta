@@ -23,6 +23,7 @@ import { AgendaIcon, ClockIcon } from "../../_shell/icons";
 import { ChatCard } from "@/components/ChatCard";
 import { BookingStepper } from "./_components/BookingStepper";
 import { BookingActions } from "./_components/BookingActions";
+import { RescheduleCard } from "./_components/RescheduleCard";
 import { ContactCard } from "./_components/ContactCard";
 import { TermsCard } from "./_components/TermsCard";
 import { ReviewForm } from "./_components/ReviewForm";
@@ -160,6 +161,16 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
           meuId={meuId}
           initialMensagens={mensagens}
           outraParte={outraParte}
+        />
+      )}
+
+      {booking.status === "APROVADO" && meuId && (
+        <RescheduleCard
+          bookingId={booking.id}
+          meuId={meuId}
+          dataServico={booking.dataServico}
+          reagendamentoData={booking.reagendamentoData}
+          reagendamentoPor={booking.reagendamentoPor}
         />
       )}
 

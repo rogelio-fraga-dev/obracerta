@@ -1,0 +1,3 @@
+ALTER TABLE "booking_requests" ADD COLUMN "reagendamento_data" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "booking_requests" ADD COLUMN "reagendamento_por" uuid;--> statement-breakpoint
+ALTER TABLE "booking_requests" ADD CONSTRAINT "booking_requests_reagendamento_por_users_id_fk" FOREIGN KEY ("reagendamento_por") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;

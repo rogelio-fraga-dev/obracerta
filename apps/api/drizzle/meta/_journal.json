@@ -134,6 +134,13 @@
       "when": 1783136635481,
       "tag": "0018_quick_thunderball",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1783255536723,
+      "tag": "0019_marvelous_oracle",
+      "breakpoints": true
     }
   ]
 }

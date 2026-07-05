@@ -31,6 +31,12 @@ export const bookingRequests = pgTable(
     status: bookingStatusEnum("status").notNull().default("PENDENTE"),
     expiraEm: timestamp("expira_em", { withTimezone: true }).notNull(),
     motivoRecusa: varchar("motivo_recusa", { length: 300 }),
+    // Reagendamento (overlay sobre APROVADO, sem novo status): a data proposta e
+    // quem propôs — a OUTRA parte confirma/recusa. Ambos null = sem proposta pendente.
+    reagendamentoData: timestamp("reagendamento_data", { withTimezone: true }),
+    reagendamentoPor: uuid("reagendamento_por").references(() => users.id, {
+      onDelete: "set null",
+    }),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
     atualizadoEm: timestamp("atualizado_em", { withTimezone: true }).notNull().defaultNow(),
   },

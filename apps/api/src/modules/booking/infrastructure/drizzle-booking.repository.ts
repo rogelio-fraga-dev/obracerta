@@ -21,6 +21,8 @@ export function rowToBooking(row: BookingRow): BookingRequest {
     status: row.status as BookingStatus,
     expiraEm: row.expiraEm.toISOString(),
     motivoRecusa: row.motivoRecusa,
+    reagendamentoData: row.reagendamentoData ? row.reagendamentoData.toISOString() : null,
+    reagendamentoPor: row.reagendamentoPor,
     criadoEm: row.criadoEm.toISOString(),
     atualizadoEm: row.atualizadoEm.toISOString(),
   };
@@ -125,6 +127,47 @@ export class DrizzleBookingRepository implements BookingRepository {
       .update(bookingRequests)
       .set({ status: to, atualizadoEm: new Date(), ...patch })
       .where(and(eq(bookingRequests.id, id), eq(bookingRequests.status, expectedFrom)))
+      .returning();
+    return row ? rowToBooking(row) : null;
+  }
+
+  async proposeReschedule(
+    id: string,
+    novaData: string,
+    porUserId: string,
+  ): Promise<BookingRequest | null> {
+    // Guardado em APROVADO: evita corrida com iniciar/cancelar.
+    const [row] = await this.db
+      .update(bookingRequests)
+      .set({
+        reagendamentoData: new Date(novaData),
+        reagendamentoPor: porUserId,
+        atualizadoEm: new Date(),
+      })
+      .where(and(eq(bookingRequests.id, id), eq(bookingRequests.status, "APROVADO")))
+      .returning();
+    return row ? rowToBooking(row) : null;
+  }
+
+  async applyReschedule(id: string, novaData: string): Promise<BookingRequest | null> {
+    const [row] = await this.db
+      .update(bookingRequests)
+      .set({
+        dataServico: new Date(novaData),
+        reagendamentoData: null,
+        reagendamentoPor: null,
+        atualizadoEm: new Date(),
+      })
+      .where(and(eq(bookingRequests.id, id), eq(bookingRequests.status, "APROVADO")))
+      .returning();
+    return row ? rowToBooking(row) : null;
+  }
+
+  async clearReschedule(id: string): Promise<BookingRequest | null> {
+    const [row] = await this.db
+      .update(bookingRequests)
+      .set({ reagendamentoData: null, reagendamentoPor: null, atualizadoEm: new Date() })
+      .where(eq(bookingRequests.id, id))
       .returning();
     return row ? rowToBooking(row) : null;
   }

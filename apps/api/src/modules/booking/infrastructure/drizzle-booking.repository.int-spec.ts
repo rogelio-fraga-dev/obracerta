@@ -97,4 +97,36 @@ describe("DrizzleBookingRepository (integração)", () => {
     await availability.deleteBlocksForBooking(booking.id);
     expect((await availability.listBlocks(professionalId)).length).toBe(0);
   });
+
+  it("propõe, aplica e limpa um reagendamento (overlay sobre APROVADO)", async () => {
+    const dataServico = "2026-10-01T14:00:00.000Z";
+    const booking = await repo.create({
+      contractorId,
+      professionalId,
+      especialidade: "reagenda",
+      descricao: null,
+      dataServico,
+      expiraEm: computeExpiry(new Date()),
+    });
+    await repo.transitionStatus(booking.id, "PENDENTE", "APROVADO");
+
+    // propor: registra a data proposta + quem propôs, sem mudar a data ainda
+    const novaData = "2026-10-05T10:00:00.000Z";
+    const proposto = await repo.proposeReschedule(booking.id, novaData, contractorId);
+    expect(proposto?.reagendamentoData).toBe(novaData);
+    expect(proposto?.reagendamentoPor).toBe(contractorId);
+    expect(proposto?.dataServico).toBe(dataServico);
+
+    // aplicar: move a data do serviço e limpa a proposta
+    const aplicado = await repo.applyReschedule(booking.id, novaData);
+    expect(aplicado?.dataServico).toBe(novaData);
+    expect(aplicado?.reagendamentoData).toBeNull();
+    expect(aplicado?.reagendamentoPor).toBeNull();
+
+    // limpar (recusa) sobre uma nova proposta
+    await repo.proposeReschedule(booking.id, "2026-10-09T09:00:00.000Z", professionalId);
+    const limpo = await repo.clearReschedule(booking.id);
+    expect(limpo?.reagendamentoData).toBeNull();
+    expect(limpo?.reagendamentoPor).toBeNull();
+  });
 });
