@@ -9,6 +9,11 @@ export { Field, type FieldProps } from "./field.js";
 export { Input, type InputProps } from "./input.js";
 export { Label, type LabelProps } from "./label.js";
 export { ProgressRing, type ProgressRingProps } from "./progress-ring.js";
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+  type SegmentedOption,
+} from "./segmented-control.js";
 export { Select, type SelectProps } from "./select.js";
 export { Skeleton, SkeletonCard, type SkeletonProps } from "./skeleton.js";
 export { StatCard, type StatCardProps } from "./stat-card.js";

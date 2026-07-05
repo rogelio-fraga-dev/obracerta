@@ -14,6 +14,7 @@ import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { ObrasIcon } from "../_shell/icons";
 import { EspecialidadeFilter } from "./_components/EspecialidadeFilter";
 import { ObrasMap, type ObraPin } from "./_components/ObrasMap";
+import { VistaToggle } from "./_components/VistaToggle";
 import { Reveal } from "@/components/Reveal";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -110,21 +111,6 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
   );
 }
 
-/** Link de alternância (pílula) para Lista/Mapa na aba de busca. */
-function ViewToggleLink({ href, active, children }: { href: string; active: boolean; children: string }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "true" : undefined}
-      className={`rounded-full px-3 py-1 text-sm font-semibold transition-colors ${
-        active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
-
 /** Visão do profissional: procurar obras abertas (lista ou mapa) + em andamento. */
 async function ProfessionalObras({
   filtroKey,
@@ -165,10 +151,6 @@ async function ProfessionalObras({
       lng: o.geo!.lng,
     }));
 
-  const espQs = especialidade ? `especialidade=${encodeURIComponent(especialidade)}` : "";
-  const listaHref = espQs ? `/obras?${espQs}` : "/obras";
-  const mapaHref = espQs ? `/obras?vista=mapa&${espQs}` : "/obras?vista=mapa";
-
   return (
     <section aria-labelledby="obras-heading" className="space-y-6">
       <BackLink href="/inicio" label="Início" />
@@ -193,17 +175,7 @@ async function ProfessionalObras({
       {tab === "buscar" && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <EspecialidadeFilter value={especialidade ?? ""} />
-          <nav
-            aria-label="Ver obras como lista ou mapa"
-            className="flex shrink-0 gap-1 rounded-full border border-border p-1"
-          >
-            <ViewToggleLink href={listaHref} active={!isMapa}>
-              Lista
-            </ViewToggleLink>
-            <ViewToggleLink href={mapaHref} active={isMapa}>
-              Mapa
-            </ViewToggleLink>
-          </nav>
+          <VistaToggle vista={isMapa ? "mapa" : "lista"} especialidade={especialidade} />
         </div>
       )}
 
