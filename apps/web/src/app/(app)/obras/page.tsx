@@ -13,6 +13,7 @@ import { BackLink } from "../_shell/BackLink";
 import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { ObrasIcon } from "../_shell/icons";
 import { EspecialidadeFilter } from "./_components/EspecialidadeFilter";
+import { ObrasMap, type ObraPin } from "./_components/ObrasMap";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -41,7 +42,11 @@ export default async function ObrasPage({ searchParams }: { searchParams: Search
   return isOwner ? (
     <OwnerObras filtroKey={str(params.filtro)} />
   ) : (
-    <ProfessionalObras filtroKey={str(params.filtro)} especialidade={str(params.especialidade)} />
+    <ProfessionalObras
+      filtroKey={str(params.filtro)}
+      especialidade={str(params.especialidade)}
+      vista={str(params.vista)}
+    />
   );
 }
 
@@ -104,15 +109,33 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
   );
 }
 
-/** Visão do profissional: procurar obras abertas + obras em andamento (que venceu). */
+/** Link de alternância (pílula) para Lista/Mapa na aba de busca. */
+function ViewToggleLink({ href, active, children }: { href: string; active: boolean; children: string }) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "true" : undefined}
+      className={`rounded-full px-3 py-1 text-sm font-semibold transition-colors ${
+        active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+/** Visão do profissional: procurar obras abertas (lista ou mapa) + em andamento. */
 async function ProfessionalObras({
   filtroKey,
   especialidade,
+  vista,
 }: {
   filtroKey: string | undefined;
   especialidade: string | undefined;
+  vista: string | undefined;
 }) {
   const tab = filtroKey === "andamento" ? "andamento" : "buscar";
+  const isMapa = tab === "buscar" && vista === "mapa";
   const tabs: FilterTab[] = [
     { key: "buscar", label: "Procurar obras" },
     { key: "andamento", label: "Em andamento" },
@@ -129,6 +152,21 @@ async function ProfessionalObras({
               : "/work-orders",
           )
         ).items;
+
+  // Só obras com coordenadas viram marcadores (anúncios públicos; sem profissionais).
+  const pins: ObraPin[] = items
+    .filter((o) => o.geo !== null)
+    .map((o) => ({
+      id: o.id,
+      titulo: o.titulo,
+      especialidade: o.especialidade,
+      lat: o.geo!.lat,
+      lng: o.geo!.lng,
+    }));
+
+  const espQs = especialidade ? `especialidade=${encodeURIComponent(especialidade)}` : "";
+  const listaHref = espQs ? `/obras?${espQs}` : "/obras";
+  const mapaHref = espQs ? `/obras?vista=mapa&${espQs}` : "/obras?vista=mapa";
 
   return (
     <section aria-labelledby="obras-heading" className="space-y-6">
@@ -151,9 +189,34 @@ async function ProfessionalObras({
         hrefFor={(k) => (k === "buscar" ? "/obras" : `/obras?filtro=${k}`)}
       />
 
-      {tab === "buscar" && <EspecialidadeFilter value={especialidade ?? ""} />}
+      {tab === "buscar" && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <EspecialidadeFilter value={especialidade ?? ""} />
+          <nav
+            aria-label="Ver obras como lista ou mapa"
+            className="flex shrink-0 gap-1 rounded-full border border-border p-1"
+          >
+            <ViewToggleLink href={listaHref} active={!isMapa}>
+              Lista
+            </ViewToggleLink>
+            <ViewToggleLink href={mapaHref} active={isMapa}>
+              Mapa
+            </ViewToggleLink>
+          </nav>
+        </div>
+      )}
 
-      {items.length === 0 ? (
+      {isMapa ? (
+        pins.length > 0 ? (
+          <ObrasMap obras={pins} />
+        ) : (
+          <EmptyState
+            icon={<ObrasIcon className="h-8 w-8" />}
+            title="Nenhuma obra com localização no mapa"
+            description="As obras abertas com endereço no mapa aparecem aqui. Use a lista para ver todas."
+          />
+        )
+      ) : items.length === 0 ? (
         <EmptyState
           icon={<ObrasIcon className="h-8 w-8" />}
           title={
