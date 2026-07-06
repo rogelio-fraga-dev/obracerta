@@ -1,11 +1,17 @@
 /* global self, caches */
 /**
- * Service Worker do PWA (Melhoria #3). Estratégia conservadora:
- * - Navegações: **network-first** com fallback offline (mudanças sempre aparecem).
- * - Estáticos (`/_next/static`, ícone): cache com revalidação.
- * - `/api/*` (BFF) e cross-origin: **nunca** cacheados (dados/sessão sempre frescos).
+ * Service Worker do PWA. Estratégia:
+ * - Navegações: **network-first**; sucesso alimenta o cache de dados; sem rede,
+ *   serve a última versão vista da página (modo offline de LEITURA) e, se nunca
+ *   visitou, o offline.html.
+ * - Estáticos (`/_next/static`, marca, ícones): cache com revalidação.
+ * - GETs do BFF (`/api/*`): network-first com fallback ao último dado bom —
+ *   só usado quando a rede FALHA (nunca serve dado velho com rede ok).
+ * - Escritas (POST/PUT/…) e cross-origin: nunca cacheadas.
+ * - O cache de DADOS é apagado no logout (mensagem CLEAR_DATA do app).
  */
 const CACHE = "oc-shell-v3";
+const DATA_CACHE = "oc-data-v1";
 const OFFLINE_URL = "/offline.html";
 // Casca do PWA: offline + ícones + marca (renderizada em toda página) — evita
 // repetir essas requisições a cada navegação no 4G.
@@ -26,9 +32,20 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))),
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE && k !== DATA_CACHE).map((k) => caches.delete(k)),
+        ),
+      ),
   );
   self.clients.claim();
+});
+
+/* ── Logout: o app manda CLEAR_DATA e os dados pessoais saem do aparelho. ── */
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "CLEAR_DATA") {
+    event.waitUntil(caches.delete(DATA_CACHE));
+  }
 });
 
 /* ── Web Push: mostra a notificação e abre o link ao clicar. ── */
@@ -72,10 +89,42 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return; // só same-origin
-  if (url.pathname.startsWith("/api/")) return; // nunca cachear o BFF
+
+  // GETs do BFF: network-first; a última resposta boa fica no DATA_CACHE e só é
+  // servida quando a REDE FALHA (leitura offline). Escritas nunca passam por aqui.
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(DATA_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(request, { cacheName: DATA_CACHE })),
+    );
+    return;
+  }
 
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
+    // Página navegada com sucesso vira "última versão vista" — sem rede, o
+    // usuário reabre e ainda enxerga os dados de quando tinha sinal.
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(DATA_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches
+            .match(request, { cacheName: DATA_CACHE })
+            .then((cached) => cached || caches.match(OFFLINE_URL)),
+        ),
+    );
     return;
   }
 

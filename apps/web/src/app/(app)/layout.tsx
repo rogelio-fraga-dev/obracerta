@@ -4,6 +4,7 @@ import { config } from "@/lib/config";
 import { serverApi } from "@/lib/server-api";
 import { getMyRoles, getProfileHint, requireSession } from "@/lib/session";
 import { ToastProvider } from "@/components/Toast";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { Sidebar } from "./_shell/Sidebar";
 import { LogoutButton } from "./_shell/LogoutButton";
 import { InstallPrompt } from "./_shell/InstallPrompt";
@@ -57,6 +58,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </Sidebar>
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
+        <OfflineBanner />
         <MobileHeader
           brandName={config.brand.name}
           inicial={inicial}

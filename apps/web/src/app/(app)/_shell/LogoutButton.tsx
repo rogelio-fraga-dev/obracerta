@@ -22,6 +22,12 @@ export function LogoutButton({ className }: { className?: string }) {
     } catch {
       /* mesmo se falhar, seguimos pro login */
     }
+    // Modo offline: apaga o cache de LEITURA (dados pessoais) do service worker.
+    try {
+      navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_DATA" });
+    } catch {
+      /* sem SW ativo: nada a limpar */
+    }
     router.replace("/entrar");
     router.refresh();
   }

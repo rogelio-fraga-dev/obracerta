@@ -62,21 +62,23 @@ const GRUPO_CONTA: NavGroup = { label: "Conta", items: [NOTIFICACOES, ENDERECOS,
 const GRUPO_SUPORTE: NavGroup = { label: "Suporte", items: [AJUDA] };
 
 // Conjuntos por persona — a navegação reflete o que cada conta faz no sistema.
+// `primary` tem 5 destinos (máx. do Material 3 / HIG p/ bottom nav): o 5º item
+// de maior uso de cada persona saiu do drawer para a zona do polegar.
 const NAV_PROFISSIONAL: NavSet = {
-  primary: [INICIO, PEDIDOS, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
+  primary: [INICIO, PEDIDOS, AGENDA, OBRAS, PERFIL], // recebe pedidos, dá lances em obras
   // "Orçamentos e recibos" (FERRAMENTAS) já reúne os serviços fechados + o gerador
   // de documentos — sem item "Orçamentos" separado para não duplicar.
   secondary: [
-    { label: "Trabalho", items: [AGENDA, FERRAMENTAS, AVALIACOES] },
+    { label: "Trabalho", items: [FERRAMENTAS, AVALIACOES] },
     GRUPO_CONTA,
     GRUPO_SUPORTE,
   ],
 };
 
 const NAV_CONTRATANTE: NavSet = {
-  primary: [INICIO, BUSCAR, PEDIDOS, PERFIL], // busca profissionais, agenda, publica obras
+  primary: [INICIO, BUSCAR, PEDIDOS, OBRAS, PERFIL], // busca profissionais, agenda, publica obras
   secondary: [
-    { label: "Trabalho", items: [OBRAS, ORCAMENTOS, FAVORITOS, AVALIACOES] },
+    { label: "Trabalho", items: [ORCAMENTOS, FAVORITOS, AVALIACOES] },
     GRUPO_CONTA,
     GRUPO_SUPORTE,
   ],
@@ -84,9 +86,9 @@ const NAV_CONTRATANTE: NavSet = {
 
 // Empresa publica obras em escala — Obras vai para a navegação primária.
 const NAV_EMPRESA: NavSet = {
-  primary: [INICIO, BUSCAR, OBRAS, PERFIL],
+  primary: [INICIO, BUSCAR, OBRAS, PEDIDOS, PERFIL],
   secondary: [
-    { label: "Trabalho", items: [PEDIDOS, ORCAMENTOS, FAVORITOS, AVALIACOES] },
+    { label: "Trabalho", items: [ORCAMENTOS, FAVORITOS, AVALIACOES] },
     GRUPO_CONTA,
     GRUPO_SUPORTE,
   ],
