@@ -181,17 +181,19 @@ async function HeroSection({
   const primeiroNome = firstName(nome);
 
   return (
-    <div className="animate-fade-in rounded-2xl bg-gradient-hero px-4 py-4 text-background sm:px-7 sm:py-8">
+    // Texto em cream LITERAL (não semântico): o gradiente do hero é escuro nos
+    // dois temas — `text-background` viraria escuro-no-escuro no modo escuro.
+    <div className="animate-fade-in rounded-2xl bg-gradient-hero px-4 py-4 text-cream sm:px-7 sm:py-8">
       <div className="flex items-center gap-3 sm:gap-4">
         <Avatar nome={nome ?? "U"} src={me?.fotoUrl ?? undefined} size="lg" className="shrink-0" />
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-[2px] text-orange-300/80 sm:text-xs">
             {isProfissional ? "Profissional" : "Contratante"}
           </p>
-          <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-xl font-black text-background sm:text-4xl">
+          <h1 id="inicio-heading" className="mt-0.5 truncate font-display text-xl font-black text-cream sm:text-4xl">
             {primeiroNome ? `Olá, ${primeiroNome}` : "Bem-vindo"}
           </h1>
-          <p className="mt-1 hidden text-sm text-background/60 sm:block">
+          <p className="mt-1 hidden text-sm text-cream/60 sm:block">
             {isProfissional
               ? "Gerencie sua agenda, pedidos e obras por aqui."
               : "Encontre profissionais e acompanhe seus pedidos."}

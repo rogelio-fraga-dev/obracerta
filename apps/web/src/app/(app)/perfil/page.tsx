@@ -16,6 +16,7 @@ import { penaltyReasonLabel } from "@/lib/penalty-ui";
 import { SUSPENSION_STATUS_UI } from "@/lib/moderation-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { BackLink } from "../_shell/BackLink";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
 import { ProfileQrCard } from "./_components/ProfileQrCard";
@@ -103,6 +104,8 @@ export default async function PerfilPage() {
       <Suspense fallback={null}>
         <SuspensionPanel />
       </Suspense>
+
+      <ThemeToggle />
 
       {!isAdmin && <ProfileEditCard user={user} />}
 

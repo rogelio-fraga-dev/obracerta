@@ -83,3 +83,23 @@
   --gradient-hero: linear-gradient(160deg, #221f16 0%, #18160f 60%, #2d1a0a 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
+
+/* ── Modo escuro (opt-in via data-theme; padrão continua o cream da marca) ──
+   Paleta quente derivada da própria marca (dark/cream invertidos). O laranja
+   sobe um degrau (orange-400) para manter contraste sobre fundo escuro, com
+   texto ESCURO sobre ele (AA). Aplicado por toggle no app; o sistema não força. */
+:root[data-theme="dark"] {
+  --color-background: #16140e;
+  --color-foreground: var(--color-cream-soft);
+  --color-primary: var(--color-orange-400);
+  --color-primary-foreground: #201c12;
+  --color-muted: #221f16;
+  --color-muted-foreground: #a89f8e;
+  --color-border: #343023;
+  /* 3:1 sobre o fundo escuro (WCAG 1.4.11), espelhando o par claro. */
+  --color-border-strong: #756c5a;
+
+  /* Sombras baseadas em preto ficam sutis no escuro — reforça com borda. */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 0 0 1px rgb(52 48 35 / 0.8);
+  --shadow-card-hover: 0 8px 16px -4px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 122 61 / 0.25);
+}

@@ -60,6 +60,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="pt-BR" className={`${display.variable} ${sans.variable}`} nonce={nonce} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body>
+        {/* Aplica o tema salvo ANTES do primeiro paint (sem flash). Inline com o
+            nonce da CSP (strict-dynamic exige scripts assinados por request). */}
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('oc-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}",
+          }}
+        />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:font-bold focus:text-primary-foreground"
