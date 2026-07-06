@@ -3,7 +3,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import type { ExecutionContext } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
-import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { ClientIpThrottlerGuard } from "./common/guards/client-ip-throttler.guard.js";
 import type { Request } from "express";
 import { type AppConfig, configuration } from "./config/configuration.js";
 import { validateEnv } from "./config/env.validation.js";
@@ -118,8 +119,9 @@ import { MetricsInterceptor } from "./modules/observability/interface/metrics.in
     ObservabilityModule,
   ],
   providers: [
-    // Rate limiting global (aplica o ThrottlerModule a TODAS as rotas).
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Rate limiting global por IP REAL do usuário (o BFF repassa em x-client-ip;
+    // sem isso, todo o site compartilharia o balde do IP do container web).
+    { provide: APP_GUARD, useClass: ClientIpThrottlerGuard },
     // Outermost: mede duração total + status final de cada requisição.
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
     { provide: APP_INTERCEPTOR, useClass: ResponseEnvelopeInterceptor },

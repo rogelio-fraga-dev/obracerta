@@ -25,6 +25,7 @@ import {
   type WorkOrdersPage,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
+import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { WorkOrderService } from "../application/work-order.service.js";
@@ -51,7 +52,7 @@ export class WorkOrderController {
 
   /** Dono anexa a foto ilustrativa da obra (multipart, campo `file`). */
   @Post("work-orders/:id/foto")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
   uploadFoto(
     @CurrentUser() user: JwtClaims,
     @Param("id") id: string,

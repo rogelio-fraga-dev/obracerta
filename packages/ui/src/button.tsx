@@ -62,9 +62,12 @@ export function Button({
   const classes = cn(base, variants[variant], sizes[size], className);
 
   if (asChild && isValidElement(children)) {
-    const child = children as ReactElement<{ className?: string }>;
+    const child = children as ReactElement<{ className?: string; ref?: Ref<unknown> }>;
     return cloneElement(child, {
       ...props,
+      // Sem repassar a ref, `<Button asChild ref={r}>` silenciosamente não
+      // anexa a nada (r.current fica null) — armadilha p/ popovers/tooltips.
+      ...(ref ? { ref: ref as Ref<unknown> } : {}),
       className: cn(classes, child.props.className),
     });
   }

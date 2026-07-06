@@ -13,6 +13,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import {
   type CompanyProfile,
   type JwtClaims,
@@ -76,7 +77,7 @@ export class ProfilesController {
   /** Upload da foto de perfil (multipart, campo `file`). Recalcula completude. */
   @Post("professional/me/foto")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
   async uploadFoto(
     @CurrentUser() user: JwtClaims,
     @UploadedFile() file: MultipartFile | undefined,
@@ -100,7 +101,7 @@ export class ProfilesController {
   /** Adiciona uma foto ao portfólio (multipart, campo `file`; `legenda` opcional). Gated. */
   @Post("professional/me/portfolio")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
   addPortfolioPhoto(
     @CurrentUser() user: JwtClaims,
     @UploadedFile() file: MultipartFile | undefined,

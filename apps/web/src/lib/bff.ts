@@ -51,6 +51,9 @@ export async function handle(fn: () => Promise<NextResponse>): Promise<NextRespo
     if (e instanceof ApiEnvelopeError) {
       return jsonError(e.code, e.message, e.status && e.status >= 400 ? e.status : 400);
     }
+    // Bug real (não erro de negócio da API): loga com stack ANTES de virar 500
+    // genérico — sem isto, falhas em billing/moderação não deixam rastro nenhum.
+    console.error("[bff] erro inesperado no handler:", e);
     return jsonError("INTERNAL", "Erro inesperado. Tente novamente.", 500);
   }
 }

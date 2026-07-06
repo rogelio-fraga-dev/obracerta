@@ -54,6 +54,17 @@ export const envSchema = z.object({
     .default("dev-webhook-secret-change-me"),
 });
 
+/**
+ * Defaults de DEV que jamais podem valer em produção. Com qualquer um deles
+ * ativo e NODE_ENV=production, o boot FALHA (fail-fast) — um webhook de
+ * pagamento com segredo público conhecido é fraude financeira esperando
+ * acontecer. O deploy (infra/deploy/remote-deploy.sh) gera o segredo na
+ * primeira subida, então isso só dispara se a env for removida à mão.
+ */
+const DEV_ONLY_DEFAULTS: ReadonlyArray<{ key: keyof Env; devDefault: string }> = [
+  { key: "PAYMENT_WEBHOOK_SECRET", devDefault: "dev-webhook-secret-change-me" },
+];
+
 export type Env = z.infer<typeof envSchema>;
 
 /**
@@ -66,6 +77,26 @@ export function validateEnv(config: Record<string, unknown>): Env {
       .map((issue) => `  - ${issue.path.join(".") || "(root)"}: ${issue.message}`)
       .join("\n");
     throw new Error(`Invalid environment variables:\n${issues}`);
+  }
+
+  if (parsed.data.NODE_ENV === "production") {
+    const vazados = DEV_ONLY_DEFAULTS.filter(
+      ({ key, devDefault }) => parsed.data[key] === devDefault,
+    );
+    if (vazados.length > 0) {
+      throw new Error(
+        `Segredos com valor default de DEV em produção (defina valores reais):\n` +
+          vazados.map(({ key }) => `  - ${String(key)}`).join("\n"),
+      );
+    }
+    // S3 com credenciais de exemplo em prod: alerta alto, sem derrubar (o MinIO
+    // local do host usa essas credenciais desde o primeiro volume — rotacionar
+    // exige migração do storage, ver roadmap §13.4).
+    if (parsed.data.S3_SECRET_KEY === "obracerta123") {
+      console.warn(
+        "[env] AVISO: S3_SECRET_KEY está com o valor de exemplo em produção — rotacione junto com a migração para R2 (§13.4).",
+      );
+    }
   }
   return parsed.data;
 }

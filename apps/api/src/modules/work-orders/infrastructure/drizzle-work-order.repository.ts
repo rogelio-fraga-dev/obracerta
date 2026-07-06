@@ -1,11 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, ne } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
-import type { WorkOrder, WorkOrderStatus, WorkUrgency } from "@obracerta/shared";
+import type { Proposal, WorkOrder, WorkOrderStatus, WorkUrgency } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { workOrders } from "../../../infrastructure/database/schema/work-orders.js";
 import { proposals } from "../../../infrastructure/database/schema/proposals.js";
+import { rowToProposal } from "./drizzle-proposal.repository.js";
 import type {
   CreateWorkOrderData,
   ListOpenWorkOrdersFilters,
@@ -122,6 +123,45 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
       .where(and(eq(workOrders.id, id), eq(workOrders.status, from)))
       .returning();
     return row ? rowToWorkOrder(row) : null;
+  }
+
+  async adjudicate(
+    orderId: string,
+    proposalId: string,
+  ): Promise<{ order: WorkOrder; proposal: Proposal } | null> {
+    return this.db.transaction(async (tx) => {
+      // Transição guardada DENTRO da tx: se a obra não está mais ABERTA, aborta tudo.
+      const [orderRow] = await tx
+        .update(workOrders)
+        .set({ status: "ADJUDICADA", atualizadoEm: new Date() })
+        .where(and(eq(workOrders.id, orderId), eq(workOrders.status, "ABERTA")))
+        .returning();
+      if (!orderRow) return null;
+
+      const [proposalRow] = await tx
+        .update(proposals)
+        .set({ status: "ACEITA", atualizadoEm: new Date() })
+        .where(eq(proposals.id, proposalId))
+        .returning();
+      if (!proposalRow) {
+        // Lance sumiu no meio do caminho — o throw aborta a tx inteira
+        // (a transição da obra é desfeita junto).
+        throw new Error("Lance não encontrado durante a adjudicação.");
+      }
+
+      await tx
+        .update(proposals)
+        .set({ status: "RECUSADA", atualizadoEm: new Date() })
+        .where(
+          and(
+            eq(proposals.workOrderId, orderId),
+            ne(proposals.id, proposalId),
+            eq(proposals.status, "ENVIADA"),
+          ),
+        );
+
+      return { order: rowToWorkOrder(orderRow), proposal: rowToProposal(proposalRow) };
+    });
   }
 
   async setFoto(id: string, url: string): Promise<WorkOrder | null> {

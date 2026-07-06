@@ -30,8 +30,8 @@ export class AddressesService {
         `Você já tem o máximo de ${MAX_ADDRESSES} endereços. Remova um para adicionar outro.`,
       );
     }
+    // O repositório zera os demais principais NA MESMA transação do insert.
     const principal = input.principal || total === 0;
-    if (principal) await this.repo.clearPrincipal(userId);
     return this.repo.create(userId, { ...input, principal });
   }
 
@@ -43,11 +43,10 @@ export class AddressesService {
     return updated;
   }
 
-  /** Elege o endereço principal (único por usuário) — só o dono. */
+  /** Elege o endereço principal (único por usuário, atômico) — só o dono. */
   async setPrincipal(userId: string, id: string): Promise<Address> {
     await this.getOwned(userId, id);
-    await this.repo.clearPrincipal(userId);
-    const updated = await this.repo.setPrincipal(id);
+    const updated = await this.repo.setPrincipal(userId, id);
     if (!updated) throw new NotFoundException("Endereço não encontrado.");
     return updated;
   }

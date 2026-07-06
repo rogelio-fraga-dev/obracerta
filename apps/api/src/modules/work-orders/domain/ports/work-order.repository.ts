@@ -1,4 +1,4 @@
-import type { WorkOrder, WorkOrderStatus } from "@obracerta/shared";
+import type { Proposal, WorkOrder, WorkOrderStatus } from "@obracerta/shared";
 
 /** Dados para abrir uma obra (status inicial ABERTA; expira_em já calculado). */
 export interface CreateWorkOrderData {
@@ -40,6 +40,15 @@ export interface WorkOrderRepository {
   listWonByProfessional(professionalId: string): Promise<WorkOrder[]>;
   /** Transição guardada de status (só muda se o status atual for `from`). */
   transitionStatus(id: string, from: WorkOrderStatus, to: WorkOrderStatus): Promise<WorkOrder | null>;
+  /**
+   * Adjudica ATOMICAMENTE: obra ABERTA→ADJUDICADA + lance→ACEITA + demais
+   * ENVIADA→RECUSADA, numa única transação (crash no meio não deixa a obra
+   * adjudicada com concorrentes pendentes). `null` = a obra não estava ABERTA.
+   */
+  adjudicate(
+    orderId: string,
+    proposalId: string,
+  ): Promise<{ order: WorkOrder; proposal: Proposal } | null>;
   /** Persiste a URL da foto ilustrativa da obra. */
   setFoto(id: string, url: string): Promise<WorkOrder | null>;
   /** Atualiza o piso de dignidade (recalculado a cada lance). */

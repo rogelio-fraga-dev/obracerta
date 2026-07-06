@@ -17,12 +17,9 @@ import {
   type ProfilesRepository,
 } from "../domain/ports/profiles.repository.js";
 
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
+
 const MAX_SLUG_ATTEMPTS = 50;
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
 
 @Injectable()
 export class ProfilesService {
@@ -111,12 +108,13 @@ export class ProfilesService {
     userId: string,
     file: { buffer: Buffer; mimetype: string },
   ): Promise<ProfessionalProfile | null> {
-    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    // Valida o CONTEÚDO (magic bytes), não o mimetype do cliente (falsificável).
+    const ext = sniffImageExt(file.buffer);
     if (!ext) {
       throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     }
     const key = `profiles/${userId}/foto-${Date.now()}.${ext}`;
-    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
     return this.setFoto(userId, url);
   }
 

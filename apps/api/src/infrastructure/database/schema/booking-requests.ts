@@ -48,5 +48,10 @@ export const bookingRequests = pgTable(
     index("booking_pending_contractor_esp_idx")
       .on(t.contractorId, t.especialidade)
       .where(sql`${t.status} = 'PENDENTE'`),
+    // Contagem de pendentes do profissional (badge do menu, a cada navegação) —
+    // parcial: só linhas PENDENTE entram, o índice fica minúsculo e certeiro.
+    index("booking_pending_professional_idx")
+      .on(t.professionalId)
+      .where(sql`${t.status} = 'PENDENTE'`),
   ],
 );

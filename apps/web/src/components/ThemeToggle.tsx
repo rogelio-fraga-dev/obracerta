@@ -1,37 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Moon } from "lucide-react";
 import { Card, Switch } from "@obracerta/ui";
-
-const THEME_KEY = "oc-theme";
+import { useTheme } from "@/lib/use-theme";
 
 /**
- * Modo escuro (opt-in): alterna o `data-theme` do documento e persiste em
- * localStorage — o boot script do root layout reaplica antes do primeiro paint.
- * O padrão continua o tema claro da marca.
+ * Modo escuro (opt-in): card do Perfil. A fonte de verdade é o `data-theme` do
+ * documento (hook useTheme) — sincronizado com o botão sol/lua do header.
  */
 export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-
-  // Lê o estado real do documento após montar (o boot script já o aplicou).
-  useEffect(() => {
-    setDark(document.documentElement.dataset.theme === "dark");
-  }, []);
-
-  function toggle(next: boolean) {
-    setDark(next);
-    if (next) {
-      document.documentElement.dataset.theme = "dark";
-    } else {
-      delete document.documentElement.dataset.theme;
-    }
-    try {
-      localStorage.setItem(THEME_KEY, next ? "dark" : "light");
-    } catch {
-      /* armazenamento indisponível: o tema vale só nesta visita */
-    }
-  }
+  const { dark, setTheme } = useTheme();
 
   return (
     <Card className="flex items-center justify-between gap-3 p-4">
@@ -49,7 +27,7 @@ export function ThemeToggle() {
           </p>
         </div>
       </div>
-      <Switch checked={dark} onCheckedChange={toggle} aria-label="Modo escuro" />
+      <Switch checked={dark} onCheckedChange={setTheme} aria-label="Modo escuro" />
     </Card>
   );
 }

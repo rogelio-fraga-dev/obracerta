@@ -22,11 +22,13 @@ export class S3StorageAdapter implements StoragePort, OnModuleInit {
   private readonly client: S3Client;
   private readonly bucket: string;
   private readonly publicUrl: string;
+  private readonly isProduction: boolean;
 
   constructor(config: ConfigService<AppConfig, true>) {
     const s3 = config.get("s3", { infer: true });
     this.bucket = s3.bucket;
     this.publicUrl = s3.publicUrl;
+    this.isProduction = config.get("nodeEnv", { infer: true }) === "production";
     this.client = new S3Client({
       endpoint: s3.endpoint,
       region: s3.region,
@@ -62,6 +64,9 @@ export class S3StorageAdapter implements StoragePort, OnModuleInit {
     } catch {
       await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
     }
+    // Leitura pública automática é conveniência de DEV (MinIO local). Em produção
+    // a policy/CDN do bucket é gerida fora do app — jamais reaplicar `Principal:*`.
+    if (this.isProduction) return;
     const policy = {
       Version: "2012-10-17",
       Statement: [

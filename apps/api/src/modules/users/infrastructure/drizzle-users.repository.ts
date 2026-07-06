@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, count, sql } from "drizzle-orm";
+import { eq, count, inArray, sql } from "drizzle-orm";
 import type { User } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -57,6 +57,12 @@ export class DrizzleUsersRepository implements UsersRepository {
   async findById(id: string): Promise<User | null> {
     const res = await this.db.select().from(users).where(eq(users.id, id));
     return res.length > 0 ? rowToUser(res[0]!) : null;
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+    const res = await this.db.select().from(users).where(inArray(users.id, ids));
+    return res.map(rowToUser);
   }
 
   async findAll(): Promise<User[]> {

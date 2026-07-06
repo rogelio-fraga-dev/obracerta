@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, cn } from "@obracerta/ui";
-import { navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
+import { isNavActive, navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 
 interface SidebarProps {
   brandName: string;
@@ -18,10 +18,10 @@ interface SidebarProps {
   isAdmin?: boolean;
   /** Foto de perfil (avatar real em vez da inicial). */
   fotoUrl?: string;
-  /** Pedidos aguardando ação — badge no item Pedidos. */
-  pendingPedidos?: number;
-  /** Notificações não lidas — badge no item Notificações. */
-  naoLidas?: number;
+  /** Pedidos aguardando ação — badge no item Pedidos (`null` = erro ao carregar). */
+  pendingPedidos?: number | null;
+  /** Notificações não lidas — badge no item Notificações (`null` = erro ao carregar). */
+  naoLidas?: number | null;
   /** Slot do rodapé (ex.: botão Sair). */
   children?: ReactNode;
 }
@@ -44,15 +44,13 @@ export function Sidebar({
   const pathname = usePathname();
   const { primary, secondary } = navForTipo(tipo);
 
-  const isActive = (href: string) => {
-    if (href === "/admin") return pathname === "/admin";
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) => isNavActive(pathname, href);
 
   const renderItem = ({ href, label, Icon }: NavItem) => {
     const active = isActive(href);
-    const badge =
-      href === "/pedidos" ? pendingPedidos : href === "/notificacoes" ? naoLidas : 0;
+    // `null` = erro ao carregar → mostra "!" (nunca esconder pendência por falha).
+    const raw = href === "/pedidos" ? pendingPedidos : href === "/notificacoes" ? naoLidas : 0;
+    const badge = raw === null ? -1 : (raw ?? 0);
     return (
       <li key={href}>
         <Link
@@ -71,12 +69,12 @@ export function Sidebar({
           )}
           <Icon className="h-7 w-7 shrink-0 transition-transform duration-200 group-hover:scale-110" />
           <span className="flex-1">{label}</span>
-          {badge > 0 && (
+          {badge !== 0 && (
             <span
-              aria-label={`${badge} pendente(s)`}
+              aria-label={badge === -1 ? "não foi possível carregar" : `${badge} pendente(s)`}
               className="flex h-6 min-w-6 items-center justify-center rounded-full bg-danger px-1.5 text-xs font-black text-white"
             >
-              {badge}
+              {badge === -1 ? "!" : badge}
             </span>
           )}
         </Link>

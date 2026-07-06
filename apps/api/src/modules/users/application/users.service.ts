@@ -12,13 +12,7 @@ import {
   type UsersRepository,
 } from "../domain/ports/users.repository.js";
 import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
-
-/** Extensão segura derivada do mimetype validado (nunca do `originalname` do cliente). */
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
 
 /**
  * Casos de uso de usuário. Orquestra o domínio sobre a porta `UsersRepository`
@@ -78,6 +72,11 @@ export class UsersService {
 
   findById(id: string): Promise<User | null> {
     return this.users.findById(id);
+  }
+
+  /** Vários usuários numa única query (anexar contrapartes em listas). */
+  findByIds(ids: string[]): Promise<User[]> {
+    return this.users.findByIds(ids);
   }
 
   findAll(): Promise<User[]> {
@@ -142,10 +141,11 @@ export class UsersService {
     id: string,
     file: { buffer: Buffer; mimetype: string },
   ): Promise<User> {
-    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    // Valida o CONTEÚDO (magic bytes), não o mimetype do cliente (falsificável).
+    const ext = sniffImageExt(file.buffer);
     if (!ext) throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     const key = `users/${id}/foto-${Date.now()}.${ext}`;
-    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
     return this.setFoto(id, url);
   }
 

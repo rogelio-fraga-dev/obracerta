@@ -60,7 +60,12 @@ export function ConfirmDialog({
       aria-label={title}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      {/* Com ação em voo (loading), clicar fora NÃO fecha — fechar daria a
+          impressão de aborto enquanto a requisição continua rodando. */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={loading ? undefined : onClose}
+      />
       <div className="relative w-full max-w-sm rounded-2xl border border-border bg-background p-5 shadow-[var(--shadow-xl)] animate-scale-in">
         <div className="flex items-start gap-3">
           <span

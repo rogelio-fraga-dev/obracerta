@@ -27,17 +27,20 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   // Foto do usuário (humaniza o shell) + pendências do profissional (badge no
   // menu) + notificações não lidas (sino).
+  // `null` = ERRO ao carregar (≠ zero): pendente tem prazo de 24h com penalidade —
+  // esconder o badge numa falha de API pode custar caro ao profissional. A UI
+  // mostra "!" em vez de fingir que não há nada.
   const [user, pendingPedidos, notifSummary] = await Promise.all([
     serverApi<User>("GET", "/auth/me/profile").catch(() => null),
     isProfissional
       ? serverApi<{ total: number }>("GET", "/bookings/me/professional/pending-count")
           .then((r) => r.total)
-          .catch(() => 0)
+          .catch(() => null)
       : Promise.resolve(0),
     serverApi<NotificationSummary>("GET", "/notifications/me/summary").catch(() => null),
   ]);
   const fotoUrl = user?.fotoUrl ?? undefined;
-  const naoLidas = notifSummary?.naoLidas ?? 0;
+  const naoLidas = notifSummary ? notifSummary.naoLidas : null;
 
   return (
     <ToastProvider>

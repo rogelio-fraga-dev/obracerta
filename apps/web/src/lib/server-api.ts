@@ -1,6 +1,7 @@
 import "server-only";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { type AuthTokens, unwrapEnvelope } from "@obracerta/shared";
+import { ApiEnvelopeError, type AuthTokens, unwrapEnvelope } from "@obracerta/shared";
 import { config } from "./config";
 import {
   clearSessionCookies,
@@ -24,20 +25,54 @@ interface ApiCallOptions {
   requestId?: string;
 }
 
+/** Teto de espera por resposta da API — sem isto, uma API pendurada congela o SSR. */
+const API_TIMEOUT_MS = 8_000;
+
+/**
+ * IP real do navegador (via proxy → `x-forwarded-for`). Repassado à API em
+ * `x-client-ip` para o rate limit valer POR USUÁRIO — server-to-server, a API
+ * enxergaria sempre o IP do container web. Best-effort: fora de um request
+ * scope (raro), segue sem o header.
+ */
+async function clientIp(): Promise<string | null> {
+  try {
+    const h = await headers();
+    const fwd = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+    return fwd || h.get("x-real-ip") || null;
+  } catch {
+    return null;
+  }
+}
+
 /** Fetch cru contra a API (sem desembrulhar) — usado internamente para inspecionar status. */
 async function rawFetch(method: HttpMethod, path: string, options: ApiCallOptions): Promise<Response> {
   const { body, token, requestId } = options;
-  return fetch(`${config.apiUrl}${path}`, {
-    method,
-    headers: {
-      ...(body ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(requestId ? { "x-request-id": requestId } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    // Dados sempre frescos: a API é a fonte de verdade, sem cache do fetch.
-    cache: "no-store",
-  });
+  const ip = await clientIp();
+  try {
+    return await fetch(`${config.apiUrl}${path}`, {
+      method,
+      headers: {
+        ...(body ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(requestId ? { "x-request-id": requestId } : {}),
+        ...(ip ? { "x-client-ip": ip } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      // Dados sempre frescos: a API é a fonte de verdade, sem cache do fetch.
+      cache: "no-store",
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    });
+  } catch (e) {
+    // Timeout vira um erro do envelope (visível/tratável) em vez de SSR infinito.
+    if (e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError")) {
+      throw new ApiEnvelopeError(
+        "TIMEOUT",
+        "O servidor demorou para responder. Tente novamente em instantes.",
+        504,
+      );
+    }
+    throw e;
+  }
 }
 
 /**

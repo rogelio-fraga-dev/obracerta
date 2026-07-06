@@ -11,7 +11,12 @@ import { PortfolioService } from "./portfolio.service.js";
  */
 describe("PortfolioService", () => {
   const proId = "pro-1";
-  const file = { buffer: Buffer.from("x"), mimetype: "image/jpeg" };
+  // Buffer com magic bytes REAIS de JPEG — a validação agora olha o conteúdo,
+  // não o mimetype declarado (falsificável).
+  const file = {
+    buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]),
+    mimetype: "image/jpeg",
+  };
 
   function build(opts: { can?: boolean; count?: number; photoOwner?: string } = {}) {
     const repo = {
@@ -38,6 +43,13 @@ describe("PortfolioService", () => {
   it("recusa upload ao atingir o limite de fotos", async () => {
     const { service } = build({ can: true, count: MAX_PORTFOLIO_PHOTOS });
     await expect(service.addPhoto(proId, file, null)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it("recusa arquivo que mente o Content-Type (conteúdo não é imagem)", async () => {
+    const { service, storage } = build({ can: true, count: 0 });
+    const falso = { buffer: Buffer.from("#!/bin/sh\nrm -rf /"), mimetype: "image/jpeg" };
+    await expect(service.addPhoto(proId, falso, null)).rejects.toBeInstanceOf(BadRequestException);
+    expect(storage.putObject).not.toHaveBeenCalled();
   });
 
   it("sobe a foto e persiste a URL quando liberado", async () => {

@@ -17,6 +17,8 @@ export interface UserCredentials {
 export interface UsersRepository {
   create(input: CreateUserData): Promise<User>;
   findById(id: string): Promise<User | null>;
+  /** Busca vários de uma vez (1 query) — para anexar contrapartes em listas. */
+  findByIds(ids: string[]): Promise<User[]>;
   findByWhatsapp(whatsapp: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findAll(): Promise<User[]>;

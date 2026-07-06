@@ -23,6 +23,7 @@ import {
   type RescheduleBookingInput,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
+import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { BookingService } from "../application/booking.service.js";
@@ -49,7 +50,7 @@ export class BookingController {
 
   /** Contratante anexa a foto do serviço ao pedido (multipart, campo `file`). */
   @Post(":id/foto")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
   uploadFoto(
     @CurrentUser() user: JwtClaims,
     @Param("id") id: string,

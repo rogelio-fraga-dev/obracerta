@@ -38,14 +38,17 @@ export function BookingActions({
   const actions = bookingActionsFor(status, tipo);
   if (actions.length === 0) return null;
 
-  async function send(action: BookingAction, extra?: Record<string, unknown>) {
+  /** Devolve `true` só em sucesso — o modal de confirmação fecha apenas nesse caso. */
+  async function send(action: BookingAction, extra?: Record<string, unknown>): Promise<boolean> {
     setError(null);
     setLoading(true);
     try {
       await bff.post("/api/bookings/action", { id: bookingId, action, ...extra });
       router.refresh();
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível concluir a ação.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -122,8 +125,9 @@ export function BookingActions({
         cancelLabel="Manter pedido"
         loading={loading}
         onConfirm={async () => {
-          await send("cancel");
-          setConfirmingCancel(false);
+          // Falha mantém o modal aberto com o erro visível — fechar daria a
+          // impressão de cancelado quando não foi.
+          if (await send("cancel")) setConfirmingCancel(false);
         }}
         onClose={() => setConfirmingCancel(false)}
       />

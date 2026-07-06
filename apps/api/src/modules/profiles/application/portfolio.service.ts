@@ -14,11 +14,7 @@ import {
   type PortfolioRepository,
 } from "../domain/ports/portfolio.repository.js";
 
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
 
 @Injectable()
 export class PortfolioService {
@@ -46,7 +42,8 @@ export class PortfolioService {
         "O portfólio de obras é um benefício dos planos pagos. Faça upgrade em Cobranças.",
       );
     }
-    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    // Valida o CONTEÚDO (magic bytes), não o mimetype do cliente (falsificável).
+    const ext = sniffImageExt(file.buffer);
     if (!ext) {
       throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     }
@@ -57,7 +54,7 @@ export class PortfolioService {
       );
     }
     const key = `portfolio/${professionalId}/${Date.now()}.${ext}`;
-    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
     return this.repo.create({ professionalId, url, legenda: legenda?.trim() || null });
   }
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, ArrowRight, Bell } from "lucide-react";
 import { Avatar, cn } from "@obracerta/ui";
 import { firstName } from "@/lib/format";
-import { navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
+import { ThemeButton } from "@/components/ThemeButton";
+import { isNavActive, navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 import { LogoutButton } from "./LogoutButton";
 
 interface MobileHeaderProps {
@@ -17,10 +18,10 @@ interface MobileHeaderProps {
   isAdmin?: boolean;
   /** Foto de perfil (avatar real em vez da inicial). */
   fotoUrl?: string;
-  /** Pedidos aguardando ação — ponto no Menu + badge no drawer. */
-  pendingPedidos?: number;
-  /** Notificações não lidas — sino no header + badge no drawer. */
-  naoLidas?: number;
+  /** Pedidos aguardando ação — ponto no Menu + badge no drawer (`null` = erro). */
+  pendingPedidos?: number | null;
+  /** Notificações não lidas — sino no header + badge no drawer (`null` = erro). */
+  naoLidas?: number | null;
 }
 
 export function MobileHeader({
@@ -37,14 +38,21 @@ export function MobileHeader({
   const pathname = usePathname();
   const { primary, secondary } = navForTipo(tipo);
 
-  const isActive = (href: string) => {
-    if (href === "/admin") return pathname === "/admin";
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) => isNavActive(pathname, href);
 
   const handleLinkClick = () => {
     setIsOpen(false);
   };
+
+  // Escape fecha o drawer (padrão de dialog) — só escuta enquanto aberto.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
   /** Item do drawer (compartilhado entre a lista primária e os grupos). */
   const renderDrawerItem = ({ href, label, Icon }: NavItem) => {
@@ -64,15 +72,18 @@ export function MobileHeader({
         >
           <Icon className="h-5 w-5 shrink-0" />
           <span className="flex-1">{label}</span>
-          {((href === "/pedidos" && pendingPedidos > 0) ||
-            (href === "/notificacoes" && naoLidas > 0)) && (
-            <span
-              aria-label="pendências"
-              className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
-            >
-              {href === "/pedidos" ? pendingPedidos : naoLidas}
-            </span>
-          )}
+          {(() => {
+            const raw = href === "/pedidos" ? pendingPedidos : href === "/notificacoes" ? naoLidas : 0;
+            if (raw === 0 || raw === undefined) return null;
+            return (
+              <span
+                aria-label={raw === null ? "não foi possível carregar" : "pendências"}
+                className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-black text-white"
+              >
+                {raw === null ? "!" : raw}
+              </span>
+            );
+          })()}
           <ArrowRight className={cn("h-4 w-4 opacity-0 transition-opacity", active && "opacity-40")} />
         </Link>
       </li>
@@ -96,19 +107,26 @@ export function MobileHeader({
             </span>
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeButton />
             {!isAdmin && (
               <Link
                 href="/notificacoes"
                 className="relative flex h-11 w-11 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                aria-label={naoLidas > 0 ? `Notificações (${naoLidas} não lidas)` : "Notificações"}
+                aria-label={
+                  naoLidas === null
+                    ? "Notificações (não foi possível carregar)"
+                    : naoLidas > 0
+                      ? `Notificações (${naoLidas} não lidas)`
+                      : "Notificações"
+                }
               >
                 <Bell className="h-4 w-4" />
-                {naoLidas > 0 && (
+                {(naoLidas === null || naoLidas > 0) && (
                   <span
                     aria-hidden
                     className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-black text-white ring-2 ring-background"
                   >
-                    {naoLidas > 9 ? "9+" : naoLidas}
+                    {naoLidas === null ? "!" : naoLidas > 9 ? "9+" : naoLidas}
                   </span>
                 )}
               </Link>
@@ -118,10 +136,16 @@ export function MobileHeader({
               type="button"
               onClick={() => setIsOpen(true)}
               className="relative flex h-11 items-center justify-center rounded-lg border border-border px-4 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              aria-label={pendingPedidos > 0 ? `Abrir menu (${pendingPedidos} pendente(s))` : "Abrir menu"}
+              aria-label={
+                pendingPedidos && pendingPedidos > 0
+                  ? `Abrir menu (${pendingPedidos} pendente(s))`
+                  : "Abrir menu"
+              }
+              aria-expanded={isOpen}
+              aria-controls="mobile-drawer"
             >
               Menu
-              {pendingPedidos > 0 && (
+              {pendingPedidos !== null && pendingPedidos > 0 && (
                 <span
                   aria-hidden
                   className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-danger ring-2 ring-background"
@@ -147,6 +171,10 @@ export function MobileHeader({
 
         {/* Drawer content container */}
         <div
+          id="mobile-drawer"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu de navegação"
           className={cn(
             "pt-safe absolute inset-y-0 right-0 w-full max-w-xs bg-background shadow-2xl flex flex-col transition-transform duration-300 ease-in-out transform",
             isOpen ? "translate-x-0" : "translate-x-full"

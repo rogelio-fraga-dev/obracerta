@@ -35,18 +35,20 @@ export function Switch({
       aria-label={aria["aria-label"]}
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
+      // Layout por flex + padding (sem posicionamento absoluto): a bolinha vive
+      // DENTRO do trilho por construção — não tem como escapar em nenhum tema.
       className={cn(
-        "relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50",
+        "box-content flex h-5 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors disabled:opacity-50",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2",
-        checked ? "bg-primary" : "bg-muted",
+        checked ? "bg-primary" : "bg-muted-foreground/30",
         className,
       )}
     >
       <span
         aria-hidden
         className={cn(
-          "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
-          checked ? "translate-x-[22px]" : "translate-x-0.5",
+          "h-5 w-5 rounded-full bg-white shadow transition-transform",
+          checked ? "translate-x-5" : "translate-x-0",
         )}
       />
     </button>

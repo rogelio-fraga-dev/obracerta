@@ -60,7 +60,9 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
   ]);
 
   // Gating: lances são dos planos pagos (Pro+ — feature bid.submit).
+  // `null` = ERRO ao checar (≠ sem a feature) — a UI avisa em vez de mostrar upgrade.
   const canBid = entitlements?.features.includes("bid.submit") ?? false;
+  const planoIndisponivel = tipo === "PROFISSIONAL" && entitlements === null;
   // Chat da obra: abre com a adjudicação, só para os participantes (o GET devolve
   // 403 para quem não participa — aí o card simplesmente não aparece).
   const mensagens: WorkOrderMessage[] | null = mensagensRes;
@@ -157,6 +159,7 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
         <ObraBid
           workOrderId={obra.id}
           status={obra.status}
+          planoIndisponivel={planoIndisponivel}
           pisoCentavos={obra.pisoCentavos}
           minhaProposta={proposals[0] ?? null}
           canBid={canBid}

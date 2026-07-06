@@ -50,12 +50,7 @@ import {
 } from "../domain/ports/work-order-photos.repository.js";
 import { WorkOrderScheduler } from "./work-order.scheduler.js";
 
-/** Formatos aceitos na foto da obra → extensão do objeto no storage. */
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
 
 @Injectable()
 export class WorkOrderService {
@@ -117,7 +112,8 @@ export class WorkOrderService {
     if (order.status !== WorkOrderStatus.ABERTA) {
       throw new ConflictException("Só dá para anexar foto enquanto a obra está aberta.");
     }
-    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    // Valida o CONTEÚDO (magic bytes), não o mimetype do cliente (falsificável).
+    const ext = sniffImageExt(file.buffer);
     if (!ext) {
       throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     }
@@ -128,7 +124,7 @@ export class WorkOrderService {
       );
     }
     const key = `work-orders/${id}/foto-${Date.now()}.${ext}`;
-    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
     await this.photos.add(id, url);
     if (!order.fotoUrl) {
       const updated = await this.orders.setFoto(id, url);
@@ -267,15 +263,11 @@ export class WorkOrderService {
       throw new ConflictException("Esta obra não pode mais ser adjudicada.");
     }
 
-    const adjudicada = await this.orders.transitionStatus(
-      order.id,
-      WorkOrderStatus.ABERTA,
-      WorkOrderStatus.ADJUDICADA,
-    );
-    if (!adjudicada) throw new ConflictException("A obra mudou de estado; tente novamente.");
-
-    const aceita = await this.proposals.setStatus(proposalId, ProposalStatus.ACEITA);
-    await this.proposals.rejectOthers(order.id, proposalId);
+    // ATÔMICO: obra→ADJUDICADA + lance→ACEITA + concorrentes→RECUSADA numa única
+    // transação — crash no meio não deixa a obra adjudicada com lances pendentes.
+    const resultado = await this.orders.adjudicate(order.id, proposalId);
+    if (!resultado) throw new ConflictException("A obra mudou de estado; tente novamente.");
+    const aceita = resultado.proposal;
 
     await this.audit.record({
       atorUserId: contractorId,
@@ -288,7 +280,7 @@ export class WorkOrderService {
       corpo: `Você venceu a obra "${order.titulo}". Combine os próximos passos com o contratante.`,
       link: `/obras/${order.id}`,
     });
-    return aceita ?? proposal;
+    return aceita;
   }
 
   /**

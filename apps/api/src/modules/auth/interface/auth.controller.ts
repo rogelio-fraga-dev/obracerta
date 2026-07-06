@@ -24,6 +24,7 @@ import {
   updatePasswordSchema,
 } from "@obracerta/shared";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { UsersService } from "../../users/application/users.service.js";
 import { AuthService } from "../application/auth.service.js";
@@ -154,7 +155,7 @@ export class AuthController {
   @Post("me/foto")
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
   async uploadFoto(
     @CurrentUser() user: JwtClaims,
     @UploadedFile(

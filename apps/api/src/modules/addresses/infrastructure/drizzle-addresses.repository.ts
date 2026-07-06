@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import type { Address, CreateAddressInput, UpdateAddressInput, UF } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -53,21 +53,31 @@ export class DrizzleAddressesRepository implements AddressesRepository {
   }
 
   async create(userId: string, data: CreateAddressInput): Promise<Address> {
-    const [row] = await this.db
-      .insert(addresses)
-      .values({
-        userId,
-        apelido: data.apelido,
-        cep: data.cep,
-        logradouro: data.logradouro,
-        numero: data.numero ?? null,
-        complemento: data.complemento ?? null,
-        bairro: data.bairro ?? null,
-        cidade: data.cidade,
-        uf: data.uf,
-        principal: data.principal ?? false,
-      })
-      .returning();
+    // Principal novo zera os demais NA MESMA transação (o índice único parcial
+    // addresses_one_principal_idx garante a invariante mesmo sob corrida).
+    const [row] = await this.db.transaction(async (tx) => {
+      if (data.principal) {
+        await tx
+          .update(addresses)
+          .set({ principal: false, atualizadoEm: new Date() })
+          .where(eq(addresses.userId, userId));
+      }
+      return tx
+        .insert(addresses)
+        .values({
+          userId,
+          apelido: data.apelido,
+          cep: data.cep,
+          logradouro: data.logradouro,
+          numero: data.numero ?? null,
+          complemento: data.complemento ?? null,
+          bairro: data.bairro ?? null,
+          cidade: data.cidade,
+          uf: data.uf,
+          principal: data.principal ?? false,
+        })
+        .returning();
+    });
     if (!row) throw new Error("Falha ao salvar o endereço.");
     return rowToAddress(row);
   }
@@ -95,19 +105,20 @@ export class DrizzleAddressesRepository implements AddressesRepository {
     await this.db.delete(addresses).where(eq(addresses.id, id));
   }
 
-  async clearPrincipal(userId: string): Promise<void> {
-    await this.db
-      .update(addresses)
-      .set({ principal: false, atualizadoEm: new Date() })
-      .where(eq(addresses.userId, userId));
-  }
-
-  async setPrincipal(id: string): Promise<Address | null> {
-    const [row] = await this.db
-      .update(addresses)
-      .set({ principal: true, atualizadoEm: new Date() })
-      .where(eq(addresses.id, id))
-      .returning();
+  async setPrincipal(userId: string, id: string): Promise<Address | null> {
+    // Zera + elege numa única transação — sob corrida, o índice único parcial
+    // faz a segunda tx falhar em vez de deixar 2 principais.
+    const [row] = await this.db.transaction(async (tx) => {
+      await tx
+        .update(addresses)
+        .set({ principal: false, atualizadoEm: new Date() })
+        .where(eq(addresses.userId, userId));
+      return tx
+        .update(addresses)
+        .set({ principal: true, atualizadoEm: new Date() })
+        .where(and(eq(addresses.id, id), eq(addresses.userId, userId)))
+        .returning();
+    });
     return row ? rowToAddress(row) : null;
   }
 }

@@ -25,7 +25,9 @@ export class DrizzleAdminMetricsRepository implements AdminMetricsRepository {
       this.db.execute(sql`
         select count(*) total,
                count(*) filter (where tipo = 'PROFISSIONAL') prof,
-               count(*) filter (where tipo = 'CONTRATANTE') cont,
+               -- EMPRESA contrata (canHireServices) — conta como contratante,
+               -- senão o total do dashboard não fecha (prof + cont != total).
+               count(*) filter (where tipo in ('CONTRATANTE', 'EMPRESA')) cont,
                count(*) filter (where status = 'ATIVO') ativos,
                count(*) filter (where status = 'SUSPENSO') suspensos
         from users`),
@@ -128,7 +130,7 @@ export class DrizzleAdminMetricsRepository implements AdminMetricsRepository {
           select to_char(date_trunc('month', criado_em), 'YYYY-MM') mes,
                  count(*) cadastros,
                  count(*) filter (where tipo = 'PROFISSIONAL') profissionais,
-                 count(*) filter (where tipo = 'CONTRATANTE') contratantes
+                 count(*) filter (where tipo in ('CONTRATANTE', 'EMPRESA')) contratantes
           from users
           group by 1
           order by 1 desc

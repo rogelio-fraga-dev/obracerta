@@ -110,6 +110,15 @@ export function navForTipo(tipo: string | undefined): NavSet {
   }
 }
 
+/**
+ * Rota ativa — regra ÚNICA para Sidebar, drawer e bottom nav (antes triplicada;
+ * cópias divergem em silêncio na próxima mudança).
+ */
+export function isNavActive(pathname: string, href: string): boolean {
+  if (href === "/admin") return pathname === "/admin";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 /** Rótulo amigável do tipo de conta (inclui EMPRESA). */
 export function tipoLabel(tipo: string | undefined, isAdmin = false): string {
   if (isAdmin) return "Administração";

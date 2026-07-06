@@ -39,30 +39,35 @@ export function RescheduleCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function send(action: RescheduleAction, extra?: Record<string, unknown>) {
+  /** Devolve `true` só em sucesso — quem chama decide se fecha o form. */
+  async function send(action: RescheduleAction, extra?: Record<string, unknown>): Promise<boolean> {
     setError(null);
     setLoading(true);
     try {
       await bff.post("/api/bookings/action", { id: bookingId, action, ...extra });
       router.refresh();
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível concluir a ação.");
+      return false;
     } finally {
       setLoading(false);
     }
   }
 
-  function propor() {
+  async function propor() {
     if (!novaData) return;
     const iso = new Date(novaData).toISOString();
     if (Date.parse(iso) <= Date.now()) {
       setError("Escolha uma data e hora no futuro.");
       return;
     }
-    void send("reschedule", { novaData: iso }).then(() => {
+    // Só fecha (e limpa a data digitada) quando a proposta FOI aceita pela API —
+    // em falha de rede o form continua aberto com a data preservada.
+    if (await send("reschedule", { novaData: iso })) {
       setOpen(false);
       setNovaData("");
-    });
+    }
   }
 
   const pendente = reagendamentoData !== null;
@@ -125,7 +130,7 @@ export function RescheduleCard({
             <Button size="sm" variant="secondary" onClick={() => setOpen(false)} disabled={loading}>
               Voltar
             </Button>
-            <Button size="sm" onClick={propor} disabled={loading || !novaData}>
+            <Button size="sm" onClick={() => void propor()} disabled={loading || !novaData}>
               {loading ? "Enviando…" : "Propor nova data"}
             </Button>
           </div>

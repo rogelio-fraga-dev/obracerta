@@ -1,4 +1,14 @@
-import { pgTable, uuid, varchar, char, boolean, timestamp, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  varchar,
+  char,
+  boolean,
+  timestamp,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { users } from "./users.js";
 
 /**
@@ -27,5 +37,12 @@ export const addresses = pgTable(
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
     atualizadoEm: timestamp("atualizado_em", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("addresses_user_idx").on(t.userId)],
+  (t) => [
+    index("addresses_user_idx").on(t.userId),
+    // No máximo UM principal por usuário — garantido pelo banco, não só pela
+    // aplicação (corrida de dois setPrincipal não deixa 2 principais).
+    uniqueIndex("addresses_one_principal_idx")
+      .on(t.userId)
+      .where(sql`${t.principal} = true`),
+  ],
 );

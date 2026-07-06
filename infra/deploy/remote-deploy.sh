@@ -15,6 +15,20 @@ set -euo pipefail
 
 COMPOSE=(docker compose --env-file infra/docker/.env.prod -f infra/docker/docker-compose.prod.yml)
 
+# ── Bootstrap de segredos (idempotente) ─────────────────────────────────────
+# A API agora FALHA o boot em produção se PAYMENT_WEBHOOK_SECRET estiver no
+# default de dev (anti-fraude de webhook). Gera um segredo forte na primeira
+# subida e persiste no .env.prod — nunca versionado, nunca no log.
+ENV_PROD=infra/docker/.env.prod
+if ! grep -q '^PAYMENT_WEBHOOK_SECRET=' "$ENV_PROD" 2>/dev/null; then
+  echo "PAYMENT_WEBHOOK_SECRET=$(openssl rand -hex 32)" >> "$ENV_PROD"
+  echo "▶ PAYMENT_WEBHOOK_SECRET gerado e persistido em $ENV_PROD (primeira subida)."
+elif grep -q '^PAYMENT_WEBHOOK_SECRET=dev-webhook-secret-change-me$' "$ENV_PROD"; then
+  # Valor de exemplo copiado do template — troca por um segredo real.
+  sed -i "s|^PAYMENT_WEBHOOK_SECRET=dev-webhook-secret-change-me$|PAYMENT_WEBHOOK_SECRET=$(openssl rand -hex 32)|" "$ENV_PROD"
+  echo "▶ PAYMENT_WEBHOOK_SECRET estava no valor de exemplo — rotacionado."
+fi
+
 echo "▶ 1/4 Pullando imagens do GHCR…"
 docker pull "$GHCR_API_IMAGE"
 docker pull "$GHCR_WEB_IMAGE"

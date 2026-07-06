@@ -20,6 +20,7 @@ export function ObraBid({
   pisoCentavos,
   minhaProposta,
   canBid,
+  planoIndisponivel = false,
 }: {
   workOrderId: string;
   status: WorkOrderStatus;
@@ -27,6 +28,11 @@ export function ObraBid({
   minhaProposta: Proposal | null;
   /** O plano vigente libera dar lances (feature `bid.submit`)? */
   canBid: boolean;
+  /**
+   * Não deu para CONFIRMAR o plano (erro/timeout da API) — diferente de "sem
+   * plano": um Pro pagante não pode ver o cadeado de upgrade por falha transitória.
+   */
+  planoIndisponivel?: boolean;
 }) {
   const router = useRouter();
   const [valor, setValor] = useState("");
@@ -60,6 +66,22 @@ export function ObraBid({
     return (
       <Card>
         <p className="text-muted-foreground">Esta obra não está mais aberta para lances.</p>
+      </Card>
+    );
+  }
+
+  // Erro ao checar o plano ≠ plano sem a feature: avisa e pede pra tentar de
+  // novo, em vez de mostrar o cadeado de upgrade a um possível pagante.
+  if (planoIndisponivel) {
+    return (
+      <Card className="space-y-2 border-warning/30 bg-warning/5">
+        <h2 className="font-display text-base font-black text-foreground">
+          Não foi possível confirmar seu plano
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Falha temporária ao verificar seus benefícios. Recarregue a página para tentar de novo —
+          se você é Pro ou Especialista, seu lance continua disponível.
+        </p>
       </Card>
     );
   }

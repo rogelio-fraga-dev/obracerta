@@ -34,12 +34,17 @@ import { BOOKING_REPOSITORY, type BookingRepository } from "../domain/ports/book
 import { BookingScheduler } from "./booking.scheduler.js";
 import { ReviewReminderScheduler } from "./review-reminder.scheduler.js";
 
-/** Formatos de imagem aceitos no anexo do pedido → extensão do objeto. */
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-};
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
+
+/** Violação de EXCLUDE constraint do Postgres (23P01) — em qualquer nível do erro. */
+function isExclusionViolation(e: unknown): boolean {
+  let atual: unknown = e;
+  for (let i = 0; i < 3 && atual && typeof atual === "object"; i++) {
+    if ((atual as { code?: unknown }).code === "23P01") return true;
+    atual = (atual as { cause?: unknown }).cause;
+  }
+  return false;
+}
 
 @Injectable()
 export class BookingService {
@@ -124,12 +129,13 @@ export class BookingService {
     if (booking.status !== BookingStatus.PENDENTE) {
       throw new ConflictException("Só dá para anexar foto enquanto o pedido está pendente.");
     }
-    const ext = ALLOWED_IMAGE_TYPES[file.mimetype];
+    // Valida o CONTEÚDO (magic bytes), não o mimetype do cliente (falsificável).
+    const ext = sniffImageExt(file.buffer);
     if (!ext) {
       throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
     }
     const key = `bookings/${id}/foto-${Date.now()}.${ext}`;
-    const url = await this.storage.putObject(key, file.buffer, file.mimetype);
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
     const updated = await this.repo.setFoto(id, url);
     if (!updated) throw new NotFoundException("Pedido de agendamento não encontrado.");
     return updated;
@@ -167,7 +173,16 @@ export class BookingService {
     }
 
     // Bloqueia primeiro; se a transição falhar (corrida), compensa removendo o bloqueio.
-    await this.availability.blockForBooking(professionalId, window.inicio, window.fim, id);
+    // O check acima é a via amigável; a CONSTRAINT de exclusão (banco) é a garantia
+    // real sob corrida — duas aprovações simultâneas não furam a agenda.
+    try {
+      await this.availability.blockForBooking(professionalId, window.inicio, window.fim, id);
+    } catch (e) {
+      if (isExclusionViolation(e)) {
+        throw new ConflictException("Sua agenda já está bloqueada nesse horário.");
+      }
+      throw e;
+    }
     const updated = await this.repo.transitionStatus(
       id,
       BookingStatus.PENDENTE,
@@ -431,8 +446,9 @@ export class BookingService {
     counterpartId: (b: BookingRequest) => string,
   ): Promise<BookingListItem[]> {
     const ids = [...new Set(bookings.map(counterpartId))];
-    const users = await Promise.all(ids.map((id) => this.users.findById(id)));
-    const byId = new Map(ids.map((id, i) => [id, users[i]]));
+    // Uma query só (inArray) — antes eram N round-trips, um por contraparte.
+    const users = await this.users.findByIds(ids);
+    const byId = new Map(users.map((u) => [u.id, u]));
     return bookings.map((b) => {
       const other = byId.get(counterpartId(b));
       return {
