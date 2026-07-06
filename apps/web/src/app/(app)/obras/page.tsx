@@ -12,10 +12,17 @@ import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
 import { BackLink } from "../_shell/BackLink";
 import { FilterTabs, type FilterTab } from "../_shell/FilterTabs";
 import { ObrasIcon } from "../_shell/icons";
+import dynamic from "next/dynamic";
 import { EspecialidadeFilter } from "./_components/EspecialidadeFilter";
-import { ObrasMap, type ObraPin } from "./_components/ObrasMap";
+import type { ObraPin } from "./_components/ObrasMap";
 import { VistaToggle } from "./_components/VistaToggle";
 import { Reveal } from "@/components/Reveal";
+
+// Code-split do mapa: Leaflet (+CSS) só entra no bundle quando a vista Mapa é
+// aberta — a lista (caminho comum) não paga esse peso.
+const ObrasMap = dynamic(() =>
+  import("./_components/ObrasMap").then((m) => m.ObrasMap),
+);
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

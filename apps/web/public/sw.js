@@ -5,9 +5,17 @@
  * - Estáticos (`/_next/static`, ícone): cache com revalidação.
  * - `/api/*` (BFF) e cross-origin: **nunca** cacheados (dados/sessão sempre frescos).
  */
-const CACHE = "oc-shell-v2";
+const CACHE = "oc-shell-v3";
 const OFFLINE_URL = "/offline.html";
-const PRECACHE = [OFFLINE_URL, "/icon-192.png"];
+// Casca do PWA: offline + ícones + marca (renderizada em toda página) — evita
+// repetir essas requisições a cada navegação no 4G.
+const PRECACHE = [
+  OFFLINE_URL,
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
+  "/brand/obracerta-logo.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
@@ -71,7 +79,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  const cacheable = url.pathname.startsWith("/_next/static/") || url.pathname === "/icon-192.png";
+  const cacheable =
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/brand/") ||
+    url.pathname.startsWith("/illustrations/") ||
+    url.pathname.startsWith("/icon-") ||
+    url.pathname === "/apple-touch-icon.png";
   event.respondWith(
     caches.match(request).then((cached) => {
       const network = fetch(request)

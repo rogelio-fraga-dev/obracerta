@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Button } from "./button.js";
 
 /** Triângulo de alerta inline (sem dependência de ícones no DS). */
@@ -34,8 +34,12 @@ export interface ConfirmDialogProps {
 
 /**
  * Confirmação para ações destrutivas (cancelar pedido, remover foto) — substitui
- * o `window.confirm`. `role="alertdialog"`, fecha no backdrop e no Escape.
- * Importe **apenas de client components** (o estado `open` é do chamador).
+ * o `window.confirm`. `role="alertdialog"`, fecha no backdrop. Importe **apenas
+ * de client components** (o estado `open` é do chamador).
+ *
+ * SEM hooks de propósito: o pacote é um bundle único (tsup) importado por Server
+ * Components — um hook aqui derruba o compile RSC de todas as rotas. Escape/foco
+ * gerenciado ficam para um futuro Dialog com entry client separada.
  */
 export function ConfirmDialog({
   open,
@@ -47,16 +51,6 @@ export function ConfirmDialog({
   onConfirm,
   onClose,
 }: ConfirmDialogProps) {
-  // Escape fecha (padrão de dialog) — só escuta enquanto aberto.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   if (!open) return null;
 
   return (

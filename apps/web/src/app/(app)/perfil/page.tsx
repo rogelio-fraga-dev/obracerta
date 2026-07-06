@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Lock } from "lucide-react";
 import type {
   CompanyProfile,
@@ -41,8 +42,11 @@ export default async function PerfilPage() {
         ? "Empresa"
         : "Contratante";
 
-  const claims = await serverApi<JwtClaims>("POST", "/auth/me");
-  const user = await serverApi<User>("GET", "/auth/me/profile");
+  // Paralelo — nada aqui depende um do outro (evita waterfall de 2 round-trips).
+  const [claims, user] = await Promise.all([
+    serverApi<JwtClaims>("POST", "/auth/me"),
+    serverApi<User>("GET", "/auth/me/profile"),
+  ]);
 
   const personaTagline = isAdmin
     ? "Administração do sistema — moderação, financeiro e gestão de contas."
@@ -94,21 +98,46 @@ export default async function PerfilPage() {
         )}
       </Card>
 
-      <SuspensionPanel />
+      {/* Painéis async em Suspense próprio (streaming) — a página pinta na hora
+          e cada bloco chega quando os SEUS dados chegam (mesmo padrão do /inicio). */}
+      <Suspense fallback={null}>
+        <SuspensionPanel />
+      </Suspense>
 
       {!isAdmin && <ProfileEditCard user={user} />}
 
       {isAdmin && <AdminForms user={user} />}
 
-      {!isAdmin && isEmpresa && <EmpresaPanel />}
+      {!isAdmin && isEmpresa && (
+        <Suspense fallback={<PanelSkeleton />}>
+          <EmpresaPanel />
+        </Suspense>
+      )}
 
-      {!isAdmin && isProfissional && <QrPanel />}
+      {!isAdmin && isProfissional && (
+        <Suspense fallback={null}>
+          <QrPanel />
+        </Suspense>
+      )}
 
-      {!isAdmin && isProfissional && <PortfolioPanel />}
+      {!isAdmin && isProfissional && (
+        <Suspense fallback={<PanelSkeleton />}>
+          <PortfolioPanel />
+        </Suspense>
+      )}
 
-      {!isAdmin && isProfissional && <ComportamentoPanel />}
+      {!isAdmin && isProfissional && (
+        <Suspense fallback={<PanelSkeleton />}>
+          <ComportamentoPanel />
+        </Suspense>
+      )}
     </section>
   );
+}
+
+/** Placeholder de painel enquanto a seção carrega em streaming. */
+function PanelSkeleton() {
+  return <div className="animate-skeleton h-32 rounded-2xl bg-muted" />;
 }
 
 async function EmpresaPanel() {

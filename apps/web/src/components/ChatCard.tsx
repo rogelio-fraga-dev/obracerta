@@ -45,8 +45,10 @@ export function ChatCard({
   }, [mensagens.length]);
 
   // Polling: busca novas mensagens periodicamente enquanto a tela está aberta.
+  // Aba em background não gasta rede/bateria (importante no 4G do canteiro).
   useEffect(() => {
     const id = setInterval(() => {
+      if (document.hidden) return;
       bff
         .get<ChatMensagem[]>(endpoint)
         .then(setMensagens)

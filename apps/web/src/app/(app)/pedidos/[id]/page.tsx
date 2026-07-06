@@ -60,8 +60,12 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
   let contato: BookingContact | null = null;
   let mensagens: BookingMessage[] | null = null;
   let meuId: string | null = null;
+  // Já avaliou? Evita o ReviewForm reaparecer após enviar (e o 409 num 2º envio).
+  let jaAvaliou = false;
   if (isBookingContactReleased(booking.status)) {
-    const [contatoRes, mensagensRes, claimsRes] = await Promise.all([
+    // CONCLUIDO está no conjunto liberado — o status de avaliação entra no MESMO
+    // Promise.all (evita um round-trip sequencial extra).
+    const [contatoRes, mensagensRes, claimsRes, reviewRes] = await Promise.all([
       serverApi<BookingContact>("GET", `/bookings/${booking.id}/contato`).catch((e: unknown) => {
         if (!(e instanceof ApiEnvelopeError)) throw e;
         return null;
@@ -73,23 +77,21 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
         },
       ),
       serverApi<JwtClaims>("POST", "/auth/me").catch(() => null),
+      booking.status === "CONCLUIDO"
+        ? serverApi<BookingReviewStatus>("GET", `/reviews/booking/${booking.id}/mine`).catch(
+            (e: unknown) => {
+              if (!(e instanceof ApiEnvelopeError)) throw e;
+              return null;
+            },
+          )
+        : Promise.resolve(null),
     ]);
     contato = contatoRes;
     mensagens = mensagensRes;
     meuId = claimsRes?.sub ?? null;
+    jaAvaliou = reviewRes?.jaAvaliou ?? false;
   }
   const outraParte = tipo === "PROFISSIONAL" ? "Cliente" : "Profissional";
-
-  // Já avaliou? Evita o ReviewForm reaparecer após enviar (e o 409 num 2º envio).
-  let jaAvaliou = false;
-  if (booking.status === "CONCLUIDO") {
-    try {
-      const r = await serverApi<BookingReviewStatus>("GET", `/reviews/booking/${booking.id}/mine`);
-      jaAvaliou = r.jaAvaliou;
-    } catch (e) {
-      if (!(e instanceof ApiEnvelopeError)) throw e;
-    }
-  }
 
   return (
     <section aria-labelledby="pedido-heading" className="space-y-4">

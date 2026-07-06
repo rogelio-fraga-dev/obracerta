@@ -35,40 +35,36 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
     throw e;
   }
 
-  // Sigilo: o backend escopa as propostas (dono vê todas; profissional só a sua).
-  const [proposals, fotos] = await Promise.all([
+  // Tudo em UM Promise.all — nenhuma destas chamadas depende das outras (só de
+  // `obra`, já carregada): propostas/fotos + entitlements (gating de lance) +
+  // chat (só quando adjudicada). Evita 3 rodadas sequenciais de rede.
+  const [proposals, fotos, entitlements, mensagensRes, claimsRes] = await Promise.all([
     serverApi<Proposal[]>("GET", `/work-orders/${id}/proposals`).catch(() => [] as Proposal[]),
     serverApi<WorkOrderPhoto[]>("GET", `/work-orders/${id}/fotos`).catch(
       () => [] as WorkOrderPhoto[],
     ),
+    tipo === "PROFISSIONAL"
+      ? serverApi<{ features: string[] }>("GET", "/me/entitlements").catch(() => null)
+      : Promise.resolve(null),
+    obra.status === "ADJUDICADA"
+      ? serverApi<WorkOrderMessage[]>("GET", `/work-orders/${id}/mensagens`).catch(
+          (e: unknown) => {
+            if (!(e instanceof ApiEnvelopeError)) throw e;
+            return null;
+          },
+        )
+      : Promise.resolve(null),
+    obra.status === "ADJUDICADA"
+      ? serverApi<JwtClaims>("POST", "/auth/me").catch(() => null)
+      : Promise.resolve(null),
   ]);
 
   // Gating: lances são dos planos pagos (Pro+ — feature bid.submit).
-  let canBid = false;
-  if (tipo === "PROFISSIONAL") {
-    try {
-      const ent = await serverApi<{ features: string[] }>("GET", "/me/entitlements");
-      canBid = ent.features.includes("bid.submit");
-    } catch {
-      canBid = false;
-    }
-  }
-
-  // Chat da obra: abre com a adjudicação, só para os participantes (o GET
-  // devolve 403 para quem não participa — aí o card simplesmente não aparece).
-  let mensagens: WorkOrderMessage[] | null = null;
-  let meuId: string | null = null;
-  if (obra.status === "ADJUDICADA") {
-    const [mensagensRes, claimsRes] = await Promise.all([
-      serverApi<WorkOrderMessage[]>("GET", `/work-orders/${id}/mensagens`).catch((e: unknown) => {
-        if (!(e instanceof ApiEnvelopeError)) throw e;
-        return null;
-      }),
-      serverApi<JwtClaims>("POST", "/auth/me").catch(() => null),
-    ]);
-    mensagens = mensagensRes;
-    meuId = claimsRes?.sub ?? null;
-  }
+  const canBid = entitlements?.features.includes("bid.submit") ?? false;
+  // Chat da obra: abre com a adjudicação, só para os participantes (o GET devolve
+  // 403 para quem não participa — aí o card simplesmente não aparece).
+  const mensagens: WorkOrderMessage[] | null = mensagensRes;
+  const meuId: string | null = claimsRes?.sub ?? null;
 
   const status = WORK_ORDER_STATUS_UI[obra.status];
   const urg = WORK_URGENCY_UI[obra.urgencia];
