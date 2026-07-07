@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.6.1"
+    "tailwind-merge": "^3.6.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -42,11 +42,11 @@
     "@obracerta/design-tokens": "workspace:*",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.4",
+    "eslint": "^10.6.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "rimraf": "^6.1.3",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }
