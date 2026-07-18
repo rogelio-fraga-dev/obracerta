@@ -93,6 +93,17 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
   }
   const outraParte = tipo === "PROFISSIONAL" ? "Cliente" : "Profissional";
 
+  // Gating do aceite (homologação 18/07): o Iniciante recebe o pedido mas não
+  // pode aceitar (booking.respond é do Profissional+). Mostra o cadeado de
+  // upgrade em vez de deixar o botão falhar com 403 — recusar continua livre.
+  let podeResponder = true;
+  if (tipo === "PROFISSIONAL" && booking.status === "PENDENTE") {
+    const ent = await serverApi<{ features: string[] }>("GET", "/me/entitlements").catch(
+      () => null,
+    );
+    podeResponder = ent?.features.includes("booking.respond") ?? true;
+  }
+
   return (
     <section aria-labelledby="pedido-heading" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -180,7 +191,32 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
         />
       )}
 
-      <BookingActions bookingId={booking.id} status={booking.status} tipo={tipo} />
+      {!podeResponder && (
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/[0.04] p-5 text-center">
+          <span aria-hidden className="text-2xl">🔒</span>
+          <h2 className="mt-1 font-display text-lg font-black text-foreground">
+            Aceitar pedidos é do plano Profissional
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No Iniciante você recebe pedidos, mas o aceite (que libera o contato do cliente) exige
+            o plano Profissional. Faça upgrade para não perder este cliente — ou recuse abaixo para
+            avisá-lo.
+          </p>
+          <Link
+            href="/cobrancas"
+            className="mt-3 inline-flex rounded-lg bg-primary px-5 py-2.5 text-sm font-extrabold text-white transition-colors hover:bg-orange-400"
+          >
+            Fazer upgrade
+          </Link>
+        </div>
+      )}
+
+      <BookingActions
+        bookingId={booking.id}
+        status={booking.status}
+        tipo={tipo}
+        hideApprove={!podeResponder}
+      />
 
       {booking.status === "CONCLUIDO" &&
         (jaAvaliou ? (

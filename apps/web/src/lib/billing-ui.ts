@@ -65,6 +65,10 @@ export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
 export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string }> = {
   "search.geo": { label: "Busca por proximidade", desc: "Encontre profissionais perto de você." },
   "search.unlimited": { label: "Busca ilimitada", desc: "Veja todos os resultados, sem limite." },
+  "booking.request": {
+    label: "Solicitar agendamento",
+    desc: "Envie pedidos de agendamento e receba o contato após o aceite.",
+  },
   "bid.submit": {
     label: "Publicar obra para lances",
     desc: "Publique uma obra e receba propostas sigilosas dos profissionais.",

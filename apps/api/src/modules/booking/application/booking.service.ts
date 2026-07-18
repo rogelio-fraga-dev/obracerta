@@ -75,10 +75,15 @@ export class BookingService {
     if (!professional || professional.tipo !== UserType.PROFISSIONAL) {
       throw new NotFoundException("Profissional não encontrado.");
     }
-    // Gating de plano: o alvo precisa da feature RECEIVE_BOOKINGS para receber
-    // agendamentos. Todo plano do profissional a tem (inclusive Iniciante — a
-    // monetização acontece no aceite, via RESPOND_BOOKINGS); o gate permanece
-    // como trava do mecanismo (data-driven via ENTITLEMENTS).
+    // Gating dos dois lados (homologação 18/07): quem contrata precisa de um
+    // plano de acesso vigente (REQUEST_BOOKING — presente em todos os planos de
+    // contratante/empresa) e o alvo precisa de RECEIVE_BOOKINGS (todo plano do
+    // profissional a tem; a monetização do pro acontece no aceite).
+    if (!(await this.billing.can(contractorId, Feature.REQUEST_BOOKING))) {
+      throw new ForbiddenException(
+        "Solicitar agendamento exige um plano de acesso ativo. Assine um plano em Cobranças.",
+      );
+    }
     if (!(await this.billing.can(input.professionalId, Feature.RECEIVE_BOOKINGS))) {
       throw new ForbiddenException("Este profissional não está habilitado a receber pedidos.");
     }
@@ -402,7 +407,9 @@ export class BookingService {
 
   /**
    * Expira um pedido se ainda estiver PENDENTE (job de 24h) e penaliza a
-   * não-resposta do profissional.
+   * não-resposta do profissional. O **Iniciante não é penalizado**: o plano dele
+   * não permite aceitar (sem RESPOND_BOOKINGS) — punir a expiração seria cobrar
+   * uma ação que o plano proíbe (homologação 18/07).
    */
   async expireIfPending(id: string): Promise<BookingRequest | null> {
     const updated = await this.repo.transitionStatus(
@@ -411,7 +418,13 @@ export class BookingService {
       BookingStatus.EXPIRADO,
     );
     if (updated) {
-      await this.penalties.penalizeExpiration(updated.professionalId, updated.id);
+      const podeResponder = await this.billing.can(
+        updated.professionalId,
+        Feature.RESPOND_BOOKINGS,
+      );
+      if (podeResponder) {
+        await this.penalties.penalizeExpiration(updated.professionalId, updated.id);
+      }
     }
     return updated;
   }

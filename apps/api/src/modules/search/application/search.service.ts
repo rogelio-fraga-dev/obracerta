@@ -4,6 +4,10 @@ import type {
   SearchProfessionalsQuery,
   SearchProfessionalsResult,
 } from "@obracerta/shared";
+import {
+  publicFoto,
+  publicName,
+} from "../../public-profile/domain/public-profile-rules.js";
 import { buildMeta, geoFilter, offsetFor } from "../domain/search-rules.js";
 import { SEARCH_REPOSITORY, type SearchRepository } from "../domain/ports/search.repository.js";
 
@@ -30,7 +34,14 @@ export class SearchService {
       }),
       this.priceReference(query.especialidade ?? null),
     ]);
-    return { items, meta: buildMeta(total, page, limit), faixaPreco };
+    // Régua de visibilidade por plano (homologação 18/07) também na listagem:
+    // Iniciante aparece com primeiro nome e sem foto; pagos com nome completo.
+    const masked = items.map((i) => ({
+      ...i,
+      nome: publicName(i.nome, i.plano) ?? "Profissional",
+      fotoUrl: publicFoto(i.fotoUrl, i.plano),
+    }));
+    return { items: masked, meta: buildMeta(total, page, limit), faixaPreco };
   }
 
   /** Faixa de preço anônima da especialidade filtrada (null sem amostra mínima). */

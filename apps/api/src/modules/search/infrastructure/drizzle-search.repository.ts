@@ -53,16 +53,21 @@ export class DrizzleSearchRepository implements SearchRepository {
       ? sql`round((ST_Distance(pp.geo::geography, ${point}::geography) / 1000)::numeric, 2)`
       : sql`null`;
 
+    // Peso do plano na ordenação (homologação 18/07): Especialista no topo das
+    // buscas, depois Profissional, depois Iniciante.
+    const planoRank = sql`case pp.plano when 'ESPECIALISTA' then 0 when 'PRO' then 1 else 2 end`;
+
     // Ordenação: nota (melhor primeiro), distância (exige geo; senão cai na
-    // relevância) ou relevância (distância quando geo, senão nome).
+    // relevância) ou relevância (plano → distância quando geo → nome). Nas ordens
+    // explícitas do usuário (nota/distância) o plano entra como desempate.
     const orderBy =
       f.ordem === "nota"
-        ? sql`coalesce(r.media, 0) desc, coalesce(r.total, 0) desc, u.nome_completo`
+        ? sql`coalesce(r.media, 0) desc, coalesce(r.total, 0) desc, ${planoRank}, u.nome_completo`
         : f.ordem === "distancia" && point
-          ? sql`distancia_km asc nulls last, u.nome_completo`
+          ? sql`distancia_km asc nulls last, ${planoRank}, u.nome_completo`
           : point
-            ? sql`distancia_km asc nulls last, u.nome_completo`
-            : sql`u.nome_completo`;
+            ? sql`${planoRank}, distancia_km asc nulls last, u.nome_completo`
+            : sql`${planoRank}, u.nome_completo`;
 
     // reputação: agrega só as avaliações REVELADAS por alvo (LEFT JOIN — 0/0 se nenhuma)
     const reviewsJoin = sql`

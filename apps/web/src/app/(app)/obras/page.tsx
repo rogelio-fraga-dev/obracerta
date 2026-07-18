@@ -62,7 +62,12 @@ export default async function ObrasPage({ searchParams }: { searchParams: Search
 /** Visão do dono: todas as obras (todos os status), filtradas por estado na URL. */
 async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
   const filtro = OWNER_FILTERS.find((f) => f.key === filtroKey) ?? OWNER_FILTERS[0]!;
-  const all = await serverApi<WorkOrder[]>("GET", "/work-orders/me");
+  // Gating (homologação 18/07): publicar obra é do plano Lance / Empresa PRO.
+  const [all, ent] = await Promise.all([
+    serverApi<WorkOrder[]>("GET", "/work-orders/me"),
+    serverApi<{ features: string[] }>("GET", "/me/entitlements").catch(() => null),
+  ]);
+  const podePublicar = ent?.features.includes("bid.submit") ?? true;
   const visiveis = filtro.statuses ? all.filter((o) => filtro.statuses!.includes(o.status)) : all;
   const tabs: FilterTab[] = OWNER_FILTERS.map((f) => ({
     key: f.key,
@@ -82,10 +87,25 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
             Suas obras publicadas e os lances recebidos.
           </p>
         </div>
-        <Button asChild size="sm" className="w-fit shrink-0">
-          <Link href="/obras/nova">+ Nova obra</Link>
-        </Button>
+        {podePublicar && (
+          <Button asChild size="sm" className="w-fit shrink-0">
+            <Link href="/obras/nova">+ Nova obra</Link>
+          </Button>
+        )}
       </div>
+
+      {!podePublicar && (
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/[0.04] p-5">
+          <p className="text-sm text-foreground">
+            <span aria-hidden>🔒</span>{" "}
+            <strong>Publicar obras para receber lances</strong> é exclusivo do plano{" "}
+            <strong>Lance</strong> (Empresa PRO para empresas).{" "}
+            <Link href="/cobrancas" className="font-semibold text-primary hover:underline">
+              Assinar em Cobranças →
+            </Link>
+          </p>
+        </div>
+      )}
 
       <FilterTabs
         ariaLabel="Filtrar obras"
@@ -104,7 +124,8 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
               : "Troque o filtro acima para ver as demais obras."
           }
           action={
-            filtro.key === "todas" && (
+            filtro.key === "todas" &&
+            podePublicar && (
               <Button asChild size="sm">
                 <Link href="/obras/nova">Publicar obra</Link>
               </Button>

@@ -14,13 +14,13 @@ import type { ReviewReminderScheduler } from "./review-reminder.scheduler.js";
 import { BookingService } from "./booking.service.js";
 
 /**
- * Gating de plano no agendamento (roadmap §8.7): o agendamento exige a feature
- * `booking.receive` no profissional alvo. A trava real fica no serviço — este
- * teste prova que `createForContractor` recusa (quando a feature falta) antes de
- * tocar o repositório, e cria quando ela está liberada. (Pós-reprecificação Fase 8+
- * todos os planos recebem pedidos; o mecanismo do gate continua sendo testado aqui.)
+ * Gating de plano no agendamento (homologação 18/07): o pedido exige plano dos
+ * DOIS lados — quem contrata precisa de `booking.request` (plano de acesso
+ * vigente) e o profissional alvo de `booking.receive`. A trava real fica no
+ * serviço — este teste prova que `createForContractor` recusa antes de tocar o
+ * repositório, e cria quando as duas features estão liberadas.
  */
-describe("BookingService — gating booking.receive", () => {
+describe("BookingService — gating do agendamento (dois lados)", () => {
   const professionalId = "pro-1";
   const contractorId = "ct-1";
   const professional = { id: professionalId, tipo: UserType.PROFISSIONAL, whatsapp: "+5511" } as User;
@@ -31,7 +31,7 @@ describe("BookingService — gating booking.receive", () => {
     dataServico: new Date(Date.now() + 86_400_000).toISOString(),
   };
 
-  function build(can: boolean) {
+  function build(opts: { contractorCan: boolean; professionalCan: boolean }) {
     const repo = {
       countPending: jest.fn().mockResolvedValue(0),
       create: jest.fn().mockResolvedValue({ id: "bk-1" } as BookingRequest),
@@ -40,7 +40,11 @@ describe("BookingService — gating booking.receive", () => {
       findById: jest.fn().mockResolvedValue(professional),
     } as unknown as UsersService;
     const scheduler = { scheduleExpiry: jest.fn().mockResolvedValue(undefined) } as unknown as BookingScheduler;
-    const billing = { can: jest.fn().mockResolvedValue(can) } as unknown as BillingService;
+    const billing = {
+      can: jest.fn((userId: string) =>
+        Promise.resolve(userId === contractorId ? opts.contractorCan : opts.professionalCan),
+      ),
+    } as unknown as BillingService;
     const notifications = { sendMessage: jest.fn().mockResolvedValue(undefined) } as unknown as NotificationProvider;
     const service = new BookingService(
       repo,
@@ -57,8 +61,18 @@ describe("BookingService — gating booking.receive", () => {
     return { service, repo, billing };
   }
 
+  it("recusa quando o contratante não tem plano de acesso (booking.request)", async () => {
+    const { service, repo, billing } = build({ contractorCan: false, professionalCan: true });
+
+    await expect(service.createForContractor(contractorId, input)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(billing.can).toHaveBeenCalledWith(contractorId, Feature.REQUEST_BOOKING);
+    expect(repo.create).not.toHaveBeenCalled();
+  });
+
   it("recusa o pedido quando o profissional não tem booking.receive", async () => {
-    const { service, repo, billing } = build(false);
+    const { service, repo, billing } = build({ contractorCan: true, professionalCan: false });
 
     await expect(service.createForContractor(contractorId, input)).rejects.toBeInstanceOf(
       ForbiddenException,
@@ -67,8 +81,8 @@ describe("BookingService — gating booking.receive", () => {
     expect(repo.create).not.toHaveBeenCalled();
   });
 
-  it("cria o pedido quando o profissional tem booking.receive (plano pago)", async () => {
-    const { service, repo } = build(true);
+  it("cria o pedido quando os dois lados têm as features", async () => {
+    const { service, repo } = build({ contractorCan: true, professionalCan: true });
 
     const booking = await service.createForContractor(contractorId, input);
 

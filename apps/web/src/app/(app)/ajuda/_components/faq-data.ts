@@ -77,7 +77,7 @@ export const FAQ_PROFISSIONAL: FaqItem[] = [
   {
     pergunta: "O que cada plano libera?",
     resposta:
-      "Iniciante (grátis): receber pedidos. Pro: lances em obras, portfólio e destaque na busca. Especialista: tudo do Pro + orçamentos/recibos e prioridade máxima. Veja os detalhes em Cobranças.",
+      "Iniciante (R$ 19,90/mês, 7 dias grátis): aparecer nas buscas e receber pedidos. Profissional (R$ 49,90): perfil completo, portfólio e responder pedidos com contato liberado. Especialista (R$ 99,90): tudo do Profissional + lances em obras, topo das buscas e orçamentos/recibos. Veja os detalhes em Cobranças.",
   },
   {
     pergunta: "Como funciona o piso de dignidade nas obras?",

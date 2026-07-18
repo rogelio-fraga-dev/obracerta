@@ -1,4 +1,10 @@
-import { nomeParcial, isReducedVisibility, publicName, publicFoto } from "./public-profile-rules.js";
+import {
+  nomeParcial,
+  primeiroNome,
+  isReducedVisibility,
+  publicName,
+  publicFoto,
+} from "./public-profile-rules.js";
 
 describe("nomeParcial", () => {
   it("primeiro nome + inicial do sobrenome", () => {
@@ -15,6 +21,13 @@ describe("nomeParcial", () => {
   });
 });
 
+describe("primeiroNome", () => {
+  it("devolve só o primeiro nome", () => {
+    expect(primeiroNome("João Silva")).toBe("João");
+    expect(primeiroNome("  Ana Paula Souza ")).toBe("Ana");
+  });
+});
+
 describe("isReducedVisibility", () => {
   it("Iniciante tem visibilidade reduzida; pagos não", () => {
     expect(isReducedVisibility("INICIANTE")).toBe(true);
@@ -24,9 +37,14 @@ describe("isReducedVisibility", () => {
 });
 
 describe("publicName", () => {
-  it("oculta o nome no Iniciante; parcial nos pagos", () => {
-    expect(publicName("João Silva", "INICIANTE")).toBeNull();
-    expect(publicName("João Silva", "PRO")).toBe("João S.");
+  it("homologação 18/07: primeiro nome no Iniciante; completo nos pagos", () => {
+    expect(publicName("João Silva", "INICIANTE")).toBe("João");
+    expect(publicName("João Silva", "PRO")).toBe("João Silva");
+    expect(publicName("Ana Paula Souza", "ESPECIALISTA")).toBe("Ana Paula Souza");
+  });
+
+  it("nome vazio → null", () => {
+    expect(publicName("   ", "INICIANTE")).toBeNull();
   });
 });
 

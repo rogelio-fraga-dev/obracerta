@@ -72,6 +72,13 @@ export class WorkOrderService {
     if (!user || !canHireServices(user.tipo)) {
       throw new BadRequestException("Apenas contratantes e empresas abrem obras.");
     }
+    // Gating de plano (homologação 18/07): publicar obra para receber lances é
+    // exclusivo do plano Lance (contratante) / Empresa PRO (empresa).
+    if (!(await this.billing.can(contractorId, Feature.SUBMIT_BID))) {
+      throw new ForbiddenException(
+        "Publicar obras é exclusivo do plano Lance (Empresa PRO para empresas). Assine em Cobranças.",
+      );
+    }
     const expiraEm = workOrderDeadline(input.urgencia as WorkUrgency, new Date()).toISOString();
     const order = await this.orders.create({
       contractorId,

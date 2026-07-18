@@ -111,7 +111,11 @@ function ErrorBox({ message }: { message: string }) {
   );
 }
 
-/** Conta normal: coleta o essencial (tipo, nome, e-mail, senha, WhatsApp) e entra. */
+/**
+ * Conta normal: coleta o essencial (tipo, nome, e-mail, senha, WhatsApp) e entra.
+ * **Profissional** (homologação 18/07) segue para escolha de plano + cartão —
+ * mesma régua do fluxo por WhatsApp; contratante/empresa assinam em Cobranças.
+ */
 function EmailSignup({
   initialEmail = "",
   initialNome = "",
@@ -122,6 +126,7 @@ function EmailSignup({
   initialTipo?: UserType;
 }) {
   const router = useRouter();
+  const [fase, setFase] = useState<"dados" | "plano" | "cartao" | "pronto">("dados");
   const [tipo, setTipo] = useState<UserType>(initialTipo);
   const [nomeCompleto, setNomeCompleto] = useState(initialNome);
   const [email, setEmail] = useState(initialEmail);
@@ -129,6 +134,8 @@ function EmailSignup({
   const [whatsapp, setWhatsapp] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [razaoSocial, setRazaoSocial] = useState("");
+  const [plano, setPlano] = useState<ProfessionalPlan | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const { error, loading, run } = useAsyncAction();
 
   const isEmpresa = tipo === "EMPRESA";
@@ -151,8 +158,100 @@ function EmailSignup({
         if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
         await bff.post<{ user: User }>("/api/auth/register", parsed.data);
       }
-      router.replace("/inicio");
+      if (tipo === "PROFISSIONAL") setFase("plano");
+      else router.replace("/inicio");
     });
+
+  const assinarComCartao = (cartaoToken: string) =>
+    run(async () => {
+      if (!plano) throw new Error("Escolha um plano para continuar.");
+      const sub = await bff.post<Subscription>("/api/billing/subscribe", { plano, cartaoToken });
+      setSubscription(sub);
+      setFase("pronto");
+    });
+
+  if (fase === "plano") {
+    return (
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!plano) return;
+          setFase("cartao");
+        }}
+      >
+        {error && <ErrorBox message={error} />}
+        <p className="text-sm text-muted-foreground">
+          Conta criada! Agora escolha seu plano — dá para mudar depois.
+        </p>
+        <div className="space-y-3">
+          {professionalPlansOrdered.map((p) => (
+            <PlanCard
+              key={p.plano}
+              nome={p.nome}
+              preco={
+                p.trialDias
+                  ? `${p.trialDias} dias grátis · depois ${formatCentavos(p.precoCentavos)}/mês`
+                  : `${formatCentavos(p.precoCentavos)}/mês`
+              }
+              resumo={p.resumo}
+              beneficios={p.beneficios}
+              recomendado={p.recomendado}
+              selected={plano === p.plano}
+              onSelect={() => setPlano(p.plano)}
+            />
+          ))}
+        </div>
+        <PrimaryAction loading={loading}>Continuar para o cartão</PrimaryAction>
+      </form>
+    );
+  }
+
+  if (fase === "cartao" && plano) {
+    return (
+      <div className="space-y-4">
+        {error && <ErrorBox message={error} />}
+        <CartaoStep
+          plano={plano}
+          loading={loading}
+          onConfirm={assinarComCartao}
+          onBack={() => setFase("plano")}
+        />
+      </div>
+    );
+  }
+
+  if (fase === "pronto" && subscription) {
+    return (
+      <div className="space-y-3 text-center">
+        {plano === "INICIANTE" ? (
+          <>
+            <Badge tone="success">Teste grátis ativado</Badge>
+            <h2 className="text-xl font-bold text-foreground">Bem-vindo! 🎉</h2>
+            <p className="text-muted-foreground">
+              Seus <strong className="text-foreground">7 dias grátis</strong> começaram. Não há
+              cobrança durante o teste — cancele antes do fim e nenhum valor é cobrado. Depois, a
+              assinatura renova automaticamente por{" "}
+              <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
+            </p>
+          </>
+        ) : (
+          <>
+            <Badge tone="warning">Aguardando pagamento</Badge>
+            <h2 className="text-xl font-bold text-foreground">Assinatura criada 🎉</h2>
+            <p className="text-muted-foreground">
+              Geramos sua fatura de{" "}
+              <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
+              Pague em Cobranças para ativar todos os recursos.
+            </p>
+          </>
+        )}
+        <Button className="w-full" onClick={() => router.replace("/inicio")}>
+          Ir para o painel
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form

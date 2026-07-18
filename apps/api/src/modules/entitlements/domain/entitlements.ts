@@ -15,10 +15,12 @@ export const Feature = {
   ANALYTICS: "profile.analytics", // analytics do perfil (visitas)
   TOP_SEARCH: "search.top", // destaque no topo das buscas
   PRO_TOOLS: "tools.documents", // ferramentas: orçamento + recibo (§8.5)
+  // Contratante/empresa
+  REQUEST_BOOKING: "booking.request", // solicitar contato/agendamento com profissional
   // Comum (profissional/contratante)
   SEARCH_GEO: "search.geo",
   SEARCH_UNLIMITED: "search.unlimited",
-  SUBMIT_BID: "bid.submit", // dar lances em obras
+  SUBMIT_BID: "bid.submit", // profissional: dar lances · contratante: publicar obra p/ lances
 } as const;
 export type Feature = (typeof Feature)[keyof typeof Feature];
 
@@ -56,9 +58,14 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
     Feature.SEARCH_UNLIMITED,
     Feature.PRO_TOOLS,
   ],
-  [ContractorPlan.BASICO]: [Feature.SEARCH_GEO],
-  [ContractorPlan.COMPLETO]: [Feature.SEARCH_GEO, Feature.SEARCH_UNLIMITED],
-  [ContractorPlan.LANCE]: [Feature.SEARCH_GEO, Feature.SEARCH_UNLIMITED, Feature.SUBMIT_BID],
+  [ContractorPlan.BASICO]: [Feature.SEARCH_GEO, Feature.REQUEST_BOOKING],
+  [ContractorPlan.COMPLETO]: [Feature.SEARCH_GEO, Feature.SEARCH_UNLIMITED, Feature.REQUEST_BOOKING],
+  [ContractorPlan.LANCE]: [
+    Feature.SEARCH_GEO,
+    Feature.SEARCH_UNLIMITED,
+    Feature.REQUEST_BOOKING,
+    Feature.SUBMIT_BID,
+  ],
 };
 
 /** Função pura: o plano libera a feature? */

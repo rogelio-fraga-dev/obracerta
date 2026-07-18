@@ -11,9 +11,16 @@ describe("planAllows", () => {
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.SEARCH_UNLIMITED)).toBe(true);
   });
 
-  it("apenas o plano LANCE do contratante permite enviar lance", () => {
+  it("apenas o plano LANCE do contratante permite publicar obra para lances", () => {
     expect(planAllows(ContractorPlan.LANCE, Feature.SUBMIT_BID)).toBe(true);
     expect(planAllows(ContractorPlan.COMPLETO, Feature.SUBMIT_BID)).toBe(false);
+  });
+
+  it("todo plano de contratante/empresa permite solicitar agendamento; sem plano, não", () => {
+    expect(planAllows(ContractorPlan.BASICO, Feature.REQUEST_BOOKING)).toBe(true);
+    expect(planAllows(ContractorPlan.COMPLETO, Feature.REQUEST_BOOKING)).toBe(true);
+    expect(planAllows(ContractorPlan.LANCE, Feature.REQUEST_BOOKING)).toBe(true);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.REQUEST_BOOKING)).toBe(false);
   });
 
   it("todo plano do profissional recebe pedidos (Iniciante inclusive)", () => {

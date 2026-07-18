@@ -22,10 +22,13 @@ export function BookingActions({
   bookingId,
   status,
   tipo,
+  hideApprove = false,
 }: {
   bookingId: string;
   status: BookingStatus;
   tipo: UserType;
+  /** Esconde o "Aprovar" quando o plano não permite responder (o cadeado de upgrade fica na página). */
+  hideApprove?: boolean;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +38,9 @@ export function BookingActions({
   const [motivo, setMotivo] = useState<DeclineReason>("AGENDA_INDISPONIVEL");
   const [detalhe, setDetalhe] = useState("");
 
-  const actions = bookingActionsFor(status, tipo);
+  const actions = bookingActionsFor(status, tipo).filter(
+    (a) => !(hideApprove && a.action === "approve"),
+  );
   if (actions.length === 0) return null;
 
   /** Devolve `true` só em sucesso — o modal de confirmação fecha apenas nesse caso. */

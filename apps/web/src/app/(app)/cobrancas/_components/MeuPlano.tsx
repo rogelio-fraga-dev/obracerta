@@ -33,6 +33,7 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
   const liberadas = new Set(features);
   const [checkoutPlano, setCheckoutPlano] = useState<ProfessionalPlanInfo | null>(null);
   const [loadingCancel, setLoadingCancel] = useState(false);
+  const [loadingAssinar, setLoadingAssinar] = useState<string | null>(null);
 
   const featureUi = isProfissional ? FEATURE_UI : CONTRACTOR_FEATURE_UI;
   // Empresa vê o catálogo com preço próprio (homologação 18/07).
@@ -79,6 +80,25 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
       alert(err instanceof Error ? err.message : "Erro desconhecido.");
     } finally {
       setLoadingCancel(false);
+    }
+  };
+
+  const handleAssinarAcesso = async (planoEscolhido: string) => {
+    setLoadingAssinar(planoEscolhido);
+    try {
+      const res = await fetch("/api/billing/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plano: planoEscolhido }),
+      });
+      const json = (await res.json()) as { error?: { message?: string } };
+      if (!res.ok) throw new Error(json.error?.message ?? "Erro ao criar a assinatura.");
+      alert("Assinatura criada! Pague a fatura (Pix) abaixo para ativar o plano.");
+      window.location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro desconhecido.");
+    } finally {
+      setLoadingAssinar(null);
     }
   };
 
@@ -179,13 +199,23 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
                       <li key={b} className="text-xs text-muted-foreground">• {b}</li>
                     ))}
                   </ul>
+                  {!ehAtual && (
+                    <Button
+                      className="mt-3 w-full"
+                      size="sm"
+                      onClick={() => handleAssinarAcesso(p.plano)}
+                      disabled={loadingAssinar !== null}
+                    >
+                      {loadingAssinar === p.plano ? "Criando…" : "Assinar"}
+                    </Button>
+                  )}
                 </div>
               );
             })}
           </div>
           <p className="text-xs text-muted-foreground">
             Assinatura mensal com renovação automática — cancele quando quiser; o acesso continua
-            até o fim do período já pago.
+            até o fim do período já pago. Ao assinar, a fatura (Pix) aparece abaixo em Cobranças.
           </p>
           {atual && (
             <div className="flex justify-end">
