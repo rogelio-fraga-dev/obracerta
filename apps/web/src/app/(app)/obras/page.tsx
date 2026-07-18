@@ -253,7 +253,10 @@ function ObraGrid({ items }: { items: WorkOrder[] }) {
         return (
           <li key={o.id} className={`animate-fade-in delay-${Math.min(i + 1, 6)}`}>
             <Link href={`/obras/${o.id}`} className="block h-full">
-              <Card interactive className="flex h-full flex-col gap-3 overflow-hidden">
+              <Card
+                interactive
+                className={`flex h-full flex-col gap-3 overflow-hidden ${o.destaque ? "border-2 border-primary/50" : ""}`}
+              >
                 {o.fotoUrl && (
                   <img
                     src={o.fotoUrl}
@@ -265,6 +268,18 @@ function ObraGrid({ items }: { items: WorkOrder[] }) {
                     decoding="async"
                     className="-mx-6 -mt-6 h-32 w-[calc(100%+3rem)] max-w-none object-cover"
                   />
+                )}
+                {(o.destaque || o.empresa) && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {o.destaque && (
+                      <Badge tone="warning" size="sm">⭐ Destaque</Badge>
+                    )}
+                    {o.empresa && (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                        <span aria-hidden>🏢</span> {o.empresa.nome}
+                      </span>
+                    )}
+                  </div>
                 )}
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">

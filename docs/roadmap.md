@@ -475,21 +475,32 @@ seeding de oferta por cidade-piloto (operacional).
   cada push (trial EM_GRACA 1990c vencendo em +7d; busca mascarada/ordenada; booking 403 sem
   plano / 201 com plano; obra 403 no Completo; assinatura de acesso 1990c PENDENTE).
 
-**Backlog Fase 9+ (recursos anunciados na vitrine que ainda não existem — features novas, com
-escopo próprio):**
-- **"Analytics avançados do perfil"** (Especialista) — hoje só visitas; exige definir métricas
-  (conversão pedido→aceite, comparativos) + agregações + tela.
-- **"Oportunidades em primeira mão"** (Especialista) — notificação antecipada de obra nova por
-  plano (delay por tier + job + push/inbox).
-- **"Destaque das obras publicadas"** (Empresa PRO) — peso por plano do publicante na listagem
-  de obras (mesma receita do topo das buscas; o mais fácil da lista).
-- **"Relatórios da operação" + "indicadores de desempenho"** (Empresa PRO) — agregações por
-  empresa (obras, contratações, gastos) + telas.
-- **"Maior visibilidade da empresa"** (Empresa Completo) — exige um diretório/busca de
-  empresas, que não existe.
+- [x] **9.4 — Recursos da vitrine construídos** _(jul/2026 — os 6 do backlog viraram sistema)_:
+  - **Analytics do perfil + avançados**: `GET /profiles/professional/me/analytics` (agregados
+    read-only de pedidos/aceite/avaliações; bloco avançado — conversão de lances, ganho via
+    plataforma, tendência mensal — só Especialista via `profile.analytics.advanced`); página
+    **/desempenho** com cadeados de upgrade por tier. Iniciante 403 → PRO base → Especialista
+    completo (validado ao vivo).
+  - **Oportunidades em primeira mão** (`workorder.early`, Especialista): ao abrir obra,
+    Especialistas ativos da cidade que atendem a especialidade recebem inbox+push na hora
+    (best-effort, teto de 50 alvos).
+  - **Destaque das obras** (`workorder.featured`, Empresa PRO): obras de EMPRESA com plano
+    LANCE vigente sobem para o topo da descoberta com badge ⭐ (card e detalhe).
+  - **Identidade da empresa nas obras** (`company.visibility`, Empresa Completo+): cards e
+    detalhe carregam 🏢 nome fantasia/razão social (join `company_profiles`; plano vigente).
+  - **Relatórios da operação + indicadores** (`company.reports`, Empresa PRO):
+    `GET /work-orders/me/relatorio` (obras por status, propostas, contratações, valor total/
+    ticket médio, tempo médio até contratar, top especialidades) + página **/relatorios**;
+    gated por tipo EMPRESA + plano (403 com CTA fora dele).
+  - Entitlements: 5 features novas no mapa; rótulos no Meu Plano; navegação (Desempenho no
+    profissional, Relatórios na empresa). Sem migração de banco (tudo agregado read-only).
+
+**Backlog Fase 9+ (restante):**
 - **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.
 - **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o
   fluxo é fake/sandbox: token local + Pix simulado).
+- **Diretório público de empresas** (evolução da visibilidade PJ) — hoje a identidade aparece
+  nas obras; um diretório/busca de empresas fica para quando houver demanda.
 
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).

@@ -29,8 +29,41 @@ export const workOrderSchema = z.object({
   expiraEm: isoTimestampSchema,
   criadoEm: isoTimestampSchema,
   atualizadoEm: isoTimestampSchema,
+  /** Obra em destaque (dona é Empresa PRO com plano vigente) — sobe na listagem. */
+  destaque: z.boolean().optional(),
+  /** Identidade da empresa dona (visível a partir do plano Completo da empresa). */
+  empresa: z.object({ nome: z.string().min(1).max(160) }).nullable().optional(),
 });
 export type WorkOrder = z.infer<typeof workOrderSchema>;
+
+/**
+ * Relatório da operação da **empresa** (Empresa PRO — homologação 18/07):
+ * obras publicadas, propostas recebidas, contratações e indicadores.
+ */
+export const companyReportSchema = z.object({
+  obras: z.object({
+    total: z.number().int().min(0),
+    abertas: z.number().int().min(0),
+    emAndamento: z.number().int().min(0),
+    concluidas: z.number().int().min(0),
+    encerradasSemContratacao: z.number().int().min(0),
+  }),
+  propostas: z.object({
+    recebidas: z.number().int().min(0),
+    mediaPorObra: z.number().min(0),
+  }),
+  contratacoes: z.object({
+    total: z.number().int().min(0),
+    valorTotalCentavos: z.number().int().min(0),
+    valorMedioCentavos: z.number().int().min(0),
+    /** Horas médias entre abrir a obra e adjudicar (null sem contratação). */
+    tempoMedioAteContratarHoras: z.number().min(0).nullable(),
+  }),
+  topEspecialidades: z.array(
+    z.object({ especialidade: z.string(), total: z.number().int().min(0) }),
+  ),
+});
+export type CompanyReport = z.infer<typeof companyReportSchema>;
 
 /** Abertura de uma obra pelo contratante (urgência define a expiração no servidor). */
 export const createWorkOrderSchema = z.object({

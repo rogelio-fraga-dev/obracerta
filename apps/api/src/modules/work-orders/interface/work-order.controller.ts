@@ -15,6 +15,7 @@ import {
   createWorkOrderSchema,
   submitProposalSchema,
   workOrderQuerySchema,
+  type CompanyReport,
   type CreateWorkOrderInput,
   type JwtClaims,
   type Proposal,
@@ -86,6 +87,12 @@ export class WorkOrderController {
   @Get("work-orders/me/professional")
   mineWon(@CurrentUser() user: JwtClaims): Promise<WorkOrder[]> {
     return this.orders.listWonByProfessional(user.sub);
+  }
+
+  /** Relatório da operação da empresa (Empresa PRO). Antes de `:id`. */
+  @Get("work-orders/me/relatorio")
+  companyReport(@CurrentUser() user: JwtClaims): Promise<CompanyReport> {
+    return this.orders.companyReport(user.sub);
   }
 
   /** Detalhe de uma obra. */

@@ -1,4 +1,4 @@
-import type { Proposal, WorkOrder, WorkOrderStatus } from "@obracerta/shared";
+import type { CompanyReport, Proposal, WorkOrder, WorkOrderStatus } from "@obracerta/shared";
 
 /** Dados para abrir uma obra (status inicial ABERTA; expira_em já calculado). */
 export interface CreateWorkOrderData {
@@ -53,6 +53,17 @@ export interface WorkOrderRepository {
   setFoto(id: string, url: string): Promise<WorkOrder | null>;
   /** Atualiza o piso de dignidade (recalculado a cada lance). */
   setPiso(id: string, pisoCentavos: number | null): Promise<void>;
+  /**
+   * Especialistas ativos da cidade que atendem a especialidade — alvos da
+   * notificação "em primeira mão" (homologação 18/07). Limitado (anti-spam).
+   */
+  listEarlyNotifyTargets(
+    especialidade: string,
+    cidadeId: string,
+    limit: number,
+  ): Promise<{ userId: string }[]>;
+  /** Relatório da operação de uma empresa (agregado read-only das obras dela). */
+  companyReport(contractorId: string): Promise<CompanyReport>;
 }
 
 export const WORK_ORDER_REPOSITORY = Symbol("WORK_ORDER_REPOSITORY");

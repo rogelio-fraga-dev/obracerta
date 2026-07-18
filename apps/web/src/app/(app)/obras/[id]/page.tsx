@@ -87,6 +87,12 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Badge tone={urg.tone}>{urg.label}</Badge>
+          {obra.destaque && <Badge tone="warning">⭐ Destaque</Badge>}
+          {obra.empresa && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-semibold text-foreground">
+              <span aria-hidden>🏢</span> {obra.empresa.nome}
+            </span>
+          )}
           {obra.pisoCentavos !== null && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
               <MoneyIcon className="h-4 w-4" />

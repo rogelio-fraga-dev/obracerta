@@ -18,6 +18,7 @@ import {
   type CompanyProfile,
   type JwtClaims,
   type PortfolioPhoto,
+  type ProfessionalAnalytics,
   type ProfessionalProfile,
   type UpdatePortfolioPhotoInput,
   updatePortfolioPhotoSchema,
@@ -28,6 +29,7 @@ import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js"
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { PortfolioService } from "../application/portfolio.service.js";
+import { ProfileAnalyticsService } from "../application/profile-analytics.service.js";
 import { ProfilesService } from "../application/profiles.service.js";
 
 /** Subconjunto do arquivo multipart que usamos (evita depender de @types/multer global). */
@@ -41,6 +43,7 @@ export class ProfilesController {
   constructor(
     private readonly profiles: ProfilesService,
     private readonly portfolio: PortfolioService,
+    private readonly analytics: ProfileAnalyticsService,
   ) {}
 
   /** Perfil profissional do usuário autenticado. */
@@ -50,6 +53,13 @@ export class ProfilesController {
     const profile = await this.profiles.getProfessional(user.sub);
     if (!profile) throw new NotFoundException("Perfil profissional não encontrado.");
     return profile;
+  }
+
+  /** Analytics do perfil (Profissional+; bloco avançado só Especialista). */
+  @Get("professional/me/analytics")
+  @UseGuards(JwtAuthGuard)
+  myAnalytics(@CurrentUser() user: JwtClaims): Promise<ProfessionalAnalytics> {
+    return this.analytics.forProfessional(user.sub);
   }
 
   /** Perfil de empresa (PJ) do usuário autenticado (§8.6). */

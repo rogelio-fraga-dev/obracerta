@@ -12,6 +12,7 @@ import {
   UserType,
   WorkOrderStatus,
   canHireServices,
+  type CompanyReport,
   type CreateWorkOrderInput,
   type PaginatedResponse,
   type Proposal,
@@ -51,6 +52,9 @@ import {
 import { WorkOrderScheduler } from "./work-order.scheduler.js";
 
 import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
+
+/** Teto de Especialistas notificados "em primeira mão" por obra (anti-spam). */
+const EARLY_NOTIFY_MAX_TARGETS = 50;
 
 @Injectable()
 export class WorkOrderService {
@@ -99,7 +103,30 @@ export class WorkOrderService {
       entidadeId: order.id,
       dados: { especialidade: input.especialidade, urgencia: input.urgencia },
     });
+    // "Oportunidades em primeira mão" (homologação 18/07): Especialistas da
+    // cidade que atendem a especialidade sabem da obra na hora (inbox + push).
+    // Best-effort — falha na notificação não desfaz a obra criada.
+    await this.notifyEarlyOpportunity(order).catch(() => undefined);
     return order;
+  }
+
+  /** Notifica Especialistas elegíveis sobre a obra recém-aberta (em primeira mão). */
+  private async notifyEarlyOpportunity(order: WorkOrder): Promise<void> {
+    const targets = await this.orders.listEarlyNotifyTargets(
+      order.especialidade,
+      order.cidadeId,
+      EARLY_NOTIFY_MAX_TARGETS,
+    );
+    await Promise.all(
+      targets
+        .filter((t) => t.userId !== order.contractorId)
+        .map((t) =>
+          this.inbox.record(t.userId, "OBRA", "Nova obra em primeira mão 🥇", {
+            corpo: `${order.especialidade} — ${order.titulo}. Você viu antes: dê seu lance.`,
+            link: `/obras/${order.id}`,
+          }),
+        ),
+    );
   }
 
   /**
@@ -153,6 +180,24 @@ export class WorkOrderService {
   /** Obras que o profissional autenticado venceu (lance ACEITA) — em andamento. */
   listWonByProfessional(professionalId: string): Promise<WorkOrder[]> {
     return this.orders.listWonByProfessional(professionalId);
+  }
+
+  /**
+   * Relatório da operação da empresa (Empresa PRO — homologação 18/07): obras,
+   * propostas, contratações e indicadores. Exige conta EMPRESA + plano com a
+   * feature `company.reports` (Empresa PRO).
+   */
+  async companyReport(contractorId: string): Promise<CompanyReport> {
+    const user = await this.users.findById(contractorId);
+    if (!user || user.tipo !== UserType.EMPRESA) {
+      throw new ForbiddenException("Relatórios da operação são exclusivos de contas de empresa.");
+    }
+    if (!(await this.billing.can(contractorId, Feature.COMPANY_REPORTS))) {
+      throw new ForbiddenException(
+        "Relatórios da operação são exclusivos do plano Empresa PRO. Assine em Cobranças.",
+      );
+    }
+    return this.orders.companyReport(contractorId);
   }
 
   /** Descoberta: obras abertas (filtro por cidade/especialidade), paginado. */

@@ -1,11 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, count, desc, eq, ne } from "drizzle-orm";
+import { and, count, desc, eq, ne, sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
-import type { Proposal, WorkOrder, WorkOrderStatus, WorkUrgency } from "@obracerta/shared";
+import type {
+  CompanyReport,
+  Proposal,
+  WorkOrder,
+  WorkOrderStatus,
+  WorkUrgency,
+} from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { workOrders } from "../../../infrastructure/database/schema/work-orders.js";
 import { proposals } from "../../../infrastructure/database/schema/proposals.js";
+import { users } from "../../../infrastructure/database/schema/users.js";
+import { contractorProfiles } from "../../../infrastructure/database/schema/contractor-profiles.js";
+import { companyProfiles } from "../../../infrastructure/database/schema/company-profiles.js";
+import { professionalProfiles } from "../../../infrastructure/database/schema/professional-profiles.js";
 import { rowToProposal } from "./drizzle-proposal.repository.js";
 import type {
   CreateWorkOrderData,
@@ -60,8 +70,30 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
   }
 
   async findById(id: string): Promise<WorkOrder | null> {
-    const [row] = await this.db.select().from(workOrders).where(eq(workOrders.id, id)).limit(1);
-    return row ? rowToWorkOrder(row) : null;
+    // Mesmo enriquecimento da listagem (identidade da empresa/destaque) — o
+    // detalhe da obra mostra a mesma vitrine que o card.
+    const planoVigente = sql`${contractorProfiles.planoExpiraEm} is not null and ${contractorProfiles.planoExpiraEm} > now()`;
+    const destaque = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} = 'LANCE' and ${planoVigente})`;
+    const empresaVisivel = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} in ('COMPLETO','LANCE') and ${planoVigente})`;
+    const [row] = await this.db
+      .select({
+        wo: workOrders,
+        destaque,
+        empresaVisivel,
+        empresaNome: sql<string | null>`coalesce(${companyProfiles.nomeFantasia}, ${companyProfiles.razaoSocial})`,
+      })
+      .from(workOrders)
+      .leftJoin(users, eq(users.id, workOrders.contractorId))
+      .leftJoin(contractorProfiles, eq(contractorProfiles.userId, workOrders.contractorId))
+      .leftJoin(companyProfiles, eq(companyProfiles.userId, workOrders.contractorId))
+      .where(eq(workOrders.id, id))
+      .limit(1);
+    if (!row) return null;
+    return {
+      ...rowToWorkOrder(row.wo),
+      destaque: Boolean(row.destaque),
+      empresa: row.empresaVisivel && row.empresaNome ? { nome: row.empresaNome } : null,
+    };
   }
 
   async findAll(): Promise<WorkOrder[]> {
@@ -81,16 +113,35 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
     if (f.especialidade) conds.push(eq(workOrders.especialidade, f.especialidade));
     const where = and(...conds);
 
+    // Vitrine da homologação 18/07: obras de EMPRESA com plano vigente carregam
+    // a identidade da empresa (Completo+) e as do Empresa PRO sobem em destaque.
+    const planoVigente = sql`${contractorProfiles.planoExpiraEm} is not null and ${contractorProfiles.planoExpiraEm} > now()`;
+    const destaque = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} = 'LANCE' and ${planoVigente})`;
+    const empresaVisivel = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} in ('COMPLETO','LANCE') and ${planoVigente})`;
+
     const rows = await this.db
-      .select()
+      .select({
+        wo: workOrders,
+        destaque,
+        empresaVisivel,
+        empresaNome: sql<string | null>`coalesce(${companyProfiles.nomeFantasia}, ${companyProfiles.razaoSocial})`,
+      })
       .from(workOrders)
+      .leftJoin(users, eq(users.id, workOrders.contractorId))
+      .leftJoin(contractorProfiles, eq(contractorProfiles.userId, workOrders.contractorId))
+      .leftJoin(companyProfiles, eq(companyProfiles.userId, workOrders.contractorId))
       .where(where)
-      .orderBy(desc(workOrders.criadoEm))
+      .orderBy(sql`case when ${destaque} then 0 else 1 end`, desc(workOrders.criadoEm))
       .limit(f.limit)
       .offset(f.offset);
     const [c] = await this.db.select({ total: count() }).from(workOrders).where(where);
 
-    return { items: rows.map(rowToWorkOrder), total: c?.total ?? 0 };
+    const items = rows.map((r) => ({
+      ...rowToWorkOrder(r.wo),
+      destaque: Boolean(r.destaque),
+      empresa: r.empresaVisivel && r.empresaNome ? { nome: r.empresaNome } : null,
+    }));
+    return { items, total: c?.total ?? 0 };
   }
 
   async listForContractor(contractorId: string): Promise<WorkOrder[]> {
@@ -178,5 +229,92 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
       .update(workOrders)
       .set({ pisoCentavos, atualizadoEm: new Date() })
       .where(eq(workOrders.id, id));
+  }
+
+  async listEarlyNotifyTargets(
+    especialidade: string,
+    cidadeId: string,
+    limit: number,
+  ): Promise<{ userId: string }[]> {
+    // Plano no perfil é sincronizado pelo billing (PlanSyncPort) — ESPECIALISTA
+    // aqui = assinatura vigente. GIN `@>` no array de especialidades.
+    const rows = await this.db
+      .select({ userId: professionalProfiles.userId })
+      .from(professionalProfiles)
+      .innerJoin(users, eq(users.id, professionalProfiles.userId))
+      .where(
+        and(
+          eq(professionalProfiles.plano, "ESPECIALISTA"),
+          eq(users.status, "ATIVO"),
+          eq(users.cidadeId, cidadeId),
+          sql`${professionalProfiles.especialidades} @> ARRAY[${especialidade}]::text[]`,
+        ),
+      )
+      .limit(limit);
+    return rows;
+  }
+
+  async companyReport(contractorId: string): Promise<CompanyReport> {
+    // Agregado read-only (mesma receita do admin/metrics): contagens por status,
+    // propostas recebidas e indicadores das contratações (lances ACEITA).
+    const [obras] = await this.db
+      .select({
+        total: count(),
+        abertas: sql<number>`count(*) filter (where ${workOrders.status} = 'ABERTA')::int`,
+        emAndamento: sql<number>`count(*) filter (where ${workOrders.status} = 'ADJUDICADA')::int`,
+        concluidas: sql<number>`count(*) filter (where ${workOrders.status} = 'CONCLUIDA')::int`,
+        encerradas: sql<number>`count(*) filter (where ${workOrders.status} in ('CANCELADA','EXPIRADA'))::int`,
+      })
+      .from(workOrders)
+      .where(eq(workOrders.contractorId, contractorId));
+
+    const [props] = await this.db
+      .select({
+        recebidas: count(),
+        aceitas: sql<number>`count(*) filter (where ${proposals.status} = 'ACEITA')::int`,
+        valorTotal: sql<number>`coalesce(sum(${proposals.valorCentavos}) filter (where ${proposals.status} = 'ACEITA'), 0)::bigint`,
+        tempoMedioHoras: sql<
+          number | null
+        >`avg(extract(epoch from (${proposals.atualizadoEm} - ${workOrders.criadoEm})) / 3600) filter (where ${proposals.status} = 'ACEITA')`,
+      })
+      .from(proposals)
+      .innerJoin(workOrders, eq(workOrders.id, proposals.workOrderId))
+      .where(eq(workOrders.contractorId, contractorId));
+
+    const top = await this.db
+      .select({ especialidade: workOrders.especialidade, total: count() })
+      .from(workOrders)
+      .where(eq(workOrders.contractorId, contractorId))
+      .groupBy(workOrders.especialidade)
+      .orderBy(desc(count()))
+      .limit(5);
+
+    const totalObras = obras?.total ?? 0;
+    const recebidas = props?.recebidas ?? 0;
+    const aceitas = props?.aceitas ?? 0;
+    const valorTotal = Number(props?.valorTotal ?? 0);
+    return {
+      obras: {
+        total: totalObras,
+        abertas: obras?.abertas ?? 0,
+        emAndamento: obras?.emAndamento ?? 0,
+        concluidas: obras?.concluidas ?? 0,
+        encerradasSemContratacao: obras?.encerradas ?? 0,
+      },
+      propostas: {
+        recebidas,
+        mediaPorObra: totalObras > 0 ? Math.round((recebidas / totalObras) * 10) / 10 : 0,
+      },
+      contratacoes: {
+        total: aceitas,
+        valorTotalCentavos: valorTotal,
+        valorMedioCentavos: aceitas > 0 ? Math.round(valorTotal / aceitas) : 0,
+        tempoMedioAteContratarHoras:
+          props?.tempoMedioHoras === null || props?.tempoMedioHoras === undefined
+            ? null
+            : Math.round(Number(props.tempoMedioHoras) * 10) / 10,
+      },
+      topEspecialidades: top.map((t) => ({ especialidade: t.especialidade, total: t.total })),
+    };
   }
 }

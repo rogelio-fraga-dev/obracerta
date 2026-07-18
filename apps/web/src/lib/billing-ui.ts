@@ -46,10 +46,18 @@ export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
     label: "Responder pedidos",
     desc: "Aceite pedidos e libere o contato do cliente.",
   },
-  "profile.analytics": { label: "Analytics do perfil", desc: "Veja quantas pessoas visitaram seu perfil." },
+  "profile.analytics": { label: "Analytics do perfil", desc: "KPIs de pedidos, aceite e avaliações em Desempenho." },
+  "profile.analytics.advanced": {
+    label: "Analytics avançados",
+    desc: "Conversão de lances, ganho via plataforma e tendência mensal.",
+  },
   "search.geo": { label: "Busca por proximidade", desc: "Encontre/seja encontrado por perto." },
   "search.unlimited": { label: "Busca ilimitada", desc: "Sem limite de resultados." },
   "search.top": { label: "Destaque no topo", desc: "Apareça no topo das buscas da sua cidade." },
+  "workorder.early": {
+    label: "Oportunidades em primeira mão",
+    desc: "Seja avisado na hora quando uma obra da sua área abrir.",
+  },
   "bid.submit": { label: "Lances em obras", desc: "Dê propostas sigilosas em obras abertas." },
   "tools.documents": {
     label: "Orçamentos e recibos",
@@ -72,5 +80,17 @@ export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string
   "bid.submit": {
     label: "Publicar obra para lances",
     desc: "Publique uma obra e receba propostas sigilosas dos profissionais.",
+  },
+  "company.visibility": {
+    label: "Identidade da empresa nas obras",
+    desc: "Suas obras carregam o nome da empresa (só contas PJ).",
+  },
+  "workorder.featured": {
+    label: "Destaque das obras",
+    desc: "Suas obras sobem para o topo da descoberta (Empresa PRO).",
+  },
+  "company.reports": {
+    label: "Relatórios da operação",
+    desc: "Indicadores e histórico das contratações em Relatórios (só contas PJ).",
   },
 };

@@ -45,4 +45,26 @@ describe("planAllows", () => {
     expect(planAllows(ProfessionalPlan.PRO, Feature.PRO_TOOLS)).toBe(false);
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.PRO_TOOLS)).toBe(true);
   });
+
+  it("analytics: base a partir do Profissional; avançado só Especialista", () => {
+    expect(planAllows(ProfessionalPlan.INICIANTE, Feature.ANALYTICS)).toBe(false);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.ANALYTICS)).toBe(true);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.ADVANCED_ANALYTICS)).toBe(false);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.ADVANCED_ANALYTICS)).toBe(true);
+  });
+
+  it("oportunidades em primeira mão são exclusivas do Especialista", () => {
+    expect(planAllows(ProfessionalPlan.PRO, Feature.EARLY_OPPORTUNITIES)).toBe(false);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.EARLY_OPPORTUNITIES)).toBe(true);
+  });
+
+  it("empresa: visibilidade no Completo+; relatórios e destaque só no PRO (LANCE)", () => {
+    expect(planAllows(ContractorPlan.BASICO, Feature.COMPANY_VISIBILITY)).toBe(false);
+    expect(planAllows(ContractorPlan.COMPLETO, Feature.COMPANY_VISIBILITY)).toBe(true);
+    expect(planAllows(ContractorPlan.LANCE, Feature.COMPANY_VISIBILITY)).toBe(true);
+    expect(planAllows(ContractorPlan.COMPLETO, Feature.COMPANY_REPORTS)).toBe(false);
+    expect(planAllows(ContractorPlan.LANCE, Feature.COMPANY_REPORTS)).toBe(true);
+    expect(planAllows(ContractorPlan.COMPLETO, Feature.FEATURED_ORDERS)).toBe(false);
+    expect(planAllows(ContractorPlan.LANCE, Feature.FEATURED_ORDERS)).toBe(true);
+  });
 });

@@ -5,9 +5,12 @@ import { OnboardingModule } from "../onboarding/onboarding.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { CadastroService } from "./application/cadastro.service.js";
 import { PortfolioService } from "./application/portfolio.service.js";
+import { ProfileAnalyticsService } from "./application/profile-analytics.service.js";
 import { ProfilesService } from "./application/profiles.service.js";
+import { ANALYTICS_REPOSITORY } from "./domain/ports/analytics.repository.js";
 import { PROFILES_REPOSITORY } from "./domain/ports/profiles.repository.js";
 import { PORTFOLIO_REPOSITORY } from "./domain/ports/portfolio.repository.js";
+import { DrizzleAnalyticsRepository } from "./infrastructure/drizzle-analytics.repository.js";
 import { DrizzleProfilesRepository } from "./infrastructure/drizzle-profiles.repository.js";
 import { DrizzlePortfolioRepository } from "./infrastructure/drizzle-portfolio.repository.js";
 import { CadastroController } from "./interface/cadastro.controller.js";
@@ -25,8 +28,10 @@ import { ProfilesController } from "./interface/profiles.controller.js";
     CadastroService,
     ProfilesService,
     PortfolioService,
+    ProfileAnalyticsService,
     { provide: PROFILES_REPOSITORY, useClass: DrizzleProfilesRepository },
     { provide: PORTFOLIO_REPOSITORY, useClass: DrizzlePortfolioRepository },
+    { provide: ANALYTICS_REPOSITORY, useClass: DrizzleAnalyticsRepository },
   ],
   exports: [ProfilesService, PortfolioService],
 })
