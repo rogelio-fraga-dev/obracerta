@@ -4,6 +4,7 @@
 > **Base:** PRD v0.1 (26 seções) · Proposta de Valor v0.2 · Design System · Protótipos HTML · Apresentação técnica
 > **Mudança v1.0 → v2.0:** stack revisada após análise de mercado (ver `~/.claude/plans/voce-acha-que-essa-snappy-island.md`). Principais decisões: backend **NestJS/TypeScript**, frontend **único Next.js 15**, infra em **região São Paulo**, **WhatsApp Cloud API oficial + fallback SMS**, **Asaas** atrás de abstração, e adição de PostGIS, object storage, fila de jobs durável, observabilidade e camada de segurança/portfólio.
 > **Mudança v2.0 → v2.1:** nome de trabalho **QuemFaz** (placeholder — ver §1); reforço de que o produto é **web responsivo (mobile-first) + PWA instalável** — **sem app nativo**; adicionada a **Base de Design (§14)** extraída dos 3 protótipos HTML.
+> **Mudança v2.1 → v2.2 (jul/2026):** **homologação 18/07** — modelo comercial revisado (ver **Fase 9**): todos os planos pagos (Iniciante R$ 19,90 com **teste grátis de 7 dias + cartão obrigatório**), contratante/empresa em **assinatura mensal recorrente** (empresa com tabela própria), lances exclusivos do Especialista, responder pedidos a partir do Profissional, e alinhamento completo vitrine↔sistema (visibilidade por plano, topo das buscas, gating dos dois lados).
 > **Objetivo deste documento:** transformar o discovery feito num plano executável de construção do produto completo — da fundação técnica ao lançamento do MVP em Uberlândia/MG, com visão de evolução pós-lançamento.
 
 ---
@@ -216,8 +217,9 @@ Cada módulo com fronteira explícita (porta/adapter, hexagonal), controller/ser
 ## 7. Integrações (atrás de portas/adapters — hexagonal)
 
 ### 7.1 `PaymentGateway` → Asaas (primário)
-- Assinatura recorrente do profissional (Pro R$49 / Especialista R$99) com "7 dias de graça" (**nunca** "trial"); **Pix Automático** sem custo extra na recorrência.
-- Avulso do contratante (Básico R$19 / Completo R$39 / Lance R$69), **sem** recorrência.
+> **Revisado na homologação 18/07 (Fase 9):** todos os planos são pagos e recorrentes.
+- Assinatura recorrente do profissional: **Iniciante R$ 19,90 (teste grátis de 7 dias, cartão obrigatório — 1ª cobrança só após o teste) · Profissional R$ 49,90 · Especialista R$ 99,90**; **Pix Automático** sem custo extra na recorrência.
+- **Plano de acesso mensal** de contratante (Essencial R$ 19,90 / Completo R$ 39,90 / Lance R$ 69,90) e **empresa** (Essencial R$ 49,90 / Completo R$ 99,90 / Empresa PRO R$ 149,90 — mesmos códigos de plano, preço por tipo de conta), **com renovação automática** (fatura do próximo ciclo emitida antes do fim da vigência; pagar estende +30d sem comer dias pagos; cancelar interrompe só a renovação).
 - **Webhooks idempotentes** + reconciliação + máquina de estados de fatura. Pagar.me como adapter alternativo.
 
 ### 7.2 `NotificationProvider` → WhatsApp Cloud API oficial (+ SMS fallback)
@@ -429,6 +431,66 @@ Estimativa para 1–2 devs. Cada fase entrega valor verificável. **TDD nas regr
 da mensalidade (Asaas sandbox) · notificações reais (WhatsApp Cloud API + push VAPID) · SEO (pós-marca) ·
 seeding de oferta por cidade-piloto (operacional).
 
+### Fase 9 — Homologação 18/07 (jul/2026) ✅ _(landing + modelo comercial + alinhamento vitrine↔sistema)_
+
+> Origem: documento de homologação do fundador (18/07) sobre a demo no ar. Três entregas em
+> sequência, todas **deployadas via CI** (commits `867fae6`, `414163e`, `b2052c4`).
+
+- [x] **9.1 — Landing (13 itens do doc):** hero sem "Sem cartão de crédito" (agora "cobrança só
+  depois do teste"); seção Dores no formato numerado 01–06 (categoria + fala do cliente);
+  correções de copy ("Para quem **procura**", "vocês **validam** o valor", "fotos **para o**
+  portfólio"); "Apareça na busca" vira o último passo do fluxo do profissional; passos de
+  empresa reescritos; **planos com 3 abas** (Sou profissional / Quero contratar / **Sou
+  empresa**) com os preços e listas do doc; FAQ do teste grátis reescrita. _Pendente do doc:
+  **item 13 (WhatsApp do suporte)** — aguarda o número da empresa._
+- [x] **9.2 — Modelo comercial no sistema** (shared + billing + entitlements + web):
+  - **Catálogo:** todos os planos pagos — profissional 19,90/49,90/99,90 (Iniciante com
+    `trialDias: 7`), contratante mensal 19,90/39,90/69,90 (BASICO exibido como "Essencial"),
+    **empresa** 49,90/99,90/149,90 (mesmos códigos `ContractorPlan`, preço por tipo —
+    `hiringPlanCatalogFor`; **sem migração de banco**).
+  - **Trial com cartão:** `subscribe` aceita INICIANTE; `cartaoToken` obrigatório no trial;
+    1ª fatura vence no fim do teste (demais planos: janela curta de 3d). Cadastro
+    (WhatsApp **e** e-mail) passa por plano + cartão.
+  - **Acesso recorrente:** job `purchase-renew` emite a fatura do próximo ciclo 3d antes do
+    fim da vigência; pagamento **estende** `expira_em` (+30d do fim atual); `POST
+    /purchases/cancel` interrompe só a renovação (acesso até o fim do pago); guard no job de
+    expiração (não expira vigência estendida).
+  - **Entitlements (homologação):** nova feature `booking.respond` — **Iniciante recebe mas
+    não responde** pedidos (aceite gateado; contato do cliente só no Profissional+);
+    **lances exclusivos do Especialista** (sai do PRO); nova feature `booking.request` —
+    **agendar exige plano de acesso vigente** do contratante/empresa.
+  - **Termos:** página pública `/termos` (renovação automática, trial, cancelamento, CDC
+    art. 49) linkada no footer e no passo do cartão.
+- [x] **9.3 — Auditoria de alinhamento (9 discrepâncias fechadas):** régua de visibilidade
+  seguindo o doc (Iniciante = **primeiro nome, sem foto**; pagos = **nome completo + foto** —
+  no perfil público **e** na busca; substitui o "João S." parcial da §5.2); **"Topo das
+  buscas" implementado** (ordenação Especialista→Profissional→Iniciante, desempate nas ordens
+  explícitas); publicar obra gateada (Lance/Empresa PRO) com cadeado na UI; **Iniciante isento
+  da penalidade de expiração** (o plano proíbe o aceite — punir seria cobrar o impossível);
+  tela do pedido com cadeado de upgrade (esconde "Aprovar", mantém "Recusar"); rota BFF
+  `/api/billing/purchase` + botão **Assinar** no Meu Plano (contratante/empresa agora
+  conseguem assinar); FAQ interna do app atualizada.
+- **Entregável:** ✅ vitrine e sistema cobram/entregam a mesma coisa. **297 testes** (36
+  shared + 217 unit + 44 integração) verdes; fluxos exercitados ao vivo em localhost antes de
+  cada push (trial EM_GRACA 1990c vencendo em +7d; busca mascarada/ordenada; booking 403 sem
+  plano / 201 com plano; obra 403 no Completo; assinatura de acesso 1990c PENDENTE).
+
+**Backlog Fase 9+ (recursos anunciados na vitrine que ainda não existem — features novas, com
+escopo próprio):**
+- **"Analytics avançados do perfil"** (Especialista) — hoje só visitas; exige definir métricas
+  (conversão pedido→aceite, comparativos) + agregações + tela.
+- **"Oportunidades em primeira mão"** (Especialista) — notificação antecipada de obra nova por
+  plano (delay por tier + job + push/inbox).
+- **"Destaque das obras publicadas"** (Empresa PRO) — peso por plano do publicante na listagem
+  de obras (mesma receita do topo das buscas; o mais fácil da lista).
+- **"Relatórios da operação" + "indicadores de desempenho"** (Empresa PRO) — agregações por
+  empresa (obras, contratações, gastos) + telas.
+- **"Maior visibilidade da empresa"** (Empresa Completo) — exige um diretório/busca de
+  empresas, que não existe.
+- **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.
+- **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o
+  fluxo é fake/sandbox: token local + Pix simulado).
+
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).
 - Consulta jurídica (LGPD, termos, CDC). **Decisão final de nome + domínio.**
@@ -493,16 +555,19 @@ Não construir agora: chat interno, upload de documentos, geração de contratos
 > pacote jul/2026: chat no pedido e na obra, notificações in-app + Web Push, lembretes
 > diários, endereços com CEP, galeria de fotos da obra, resumo exportável ("contrato"),
 > central de ajuda + suporte, autocomplete de profissional, backup diário e E2E.
-> Demo pública na EC2 (`app.<IP>.sslip.io`). **O código deixou de ser o gargalo** —
-> os itens abaixo estão em ordem de prioridade.
+> **Fase 9 (homologação 18/07) concluída**: modelo comercial revisado no ar (todos os
+> planos pagos, trial com cartão, acesso recorrente, vitrine↔sistema alinhados).
+> Demo pública na EC2 (`app.<IP>.sslip.io`), **deploy via CI**. **O código deixou de ser
+> o gargalo** — os itens abaixo estão em ordem de prioridade.
 
 ### 13.1 Proteger o que existe (código, curto)
 - [x] ~~**Backup automático do Postgres**~~ _(jul/2026)_ — `pg_dump` diário (cron 03:10 UTC na
       EC2) com retenção local (14) + espelho no MinIO (30d). Scripts em `infra/backup/`
       (backup/restore/instalador). **Limite:** o espelho vive no MESMO host — proteger contra
       perda da EC2 exige S3/R2 externo (quando houver conta, §13.3/13.4).
-- [ ] **Deploy via CI** (GitHub Actions builda a imagem → EC2 puxa) — substitui o upload de
-      ~630MB da máquina local (`scripts/deploy-ship.sh`) e a dependência do IP liberado no SG.
+- [x] ~~**Deploy via CI**~~ _(jul/2026)_ — push no `master` → GitHub Actions builda → GHCR →
+      EC2 puxa via AWS SSM/OIDC. Workflows `CI` (verify) e `Deploy` separados; usado em toda a
+      Fase 9 (homologação 18/07).
 - [ ] **Monitoramento mínimo** — a API já expõe `/metrics` (Prometheus); plugar Grafana Cloud
       free ou ao menos um uptime-checker apontando pra demo.
 
