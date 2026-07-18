@@ -63,7 +63,7 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              ✓ <strong className="text-foreground">7 dias grátis</strong> para profissionais · Sem cartão de crédito
+              ✓ <strong className="text-foreground">7 dias grátis</strong> para profissionais · Cobrança só depois do teste
             </p>
 
             <div className="mt-12 flex flex-wrap gap-10 border-t border-border pt-8">
@@ -128,18 +128,18 @@ export default function HomePage() {
             As dores que a gente resolve
           </span>
           <h2 className="mt-3 max-w-2xl font-display text-3xl font-black leading-tight tracking-tight text-foreground sm:text-5xl">
-            Você ainda depende de indicação para achar os{" "}
-            <em className="italic text-primary">melhores profissionais?</em>
+            A parte mais difícil da obra ainda é encontrar quem faça{" "}
+            <em className="italic text-primary">um bom trabalho.</em>
           </h2>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {DORES.map((d) => (
-              <div
-                key={d.titulo}
-                className="rounded-2xl border-2 border-border bg-background p-6 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-[var(--shadow-md)]"
-              >
-                <span className="text-3xl">{d.emoji}</span>
-                <h3 className="mt-4 font-bold text-foreground">{d.titulo}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{d.texto}</p>
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {DORES.map((d, i) => (
+              <div key={d.categoria} className="bg-background p-7 transition-colors hover:bg-muted/40">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-sm font-black text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="mt-4 text-sm text-muted-foreground">{d.categoria}</div>
+                <div aria-hidden className="mt-2 h-0.5 w-8 bg-primary" />
+                <p className="mt-4 font-bold leading-snug text-foreground">“{d.frase}”</p>
               </div>
             ))}
           </div>

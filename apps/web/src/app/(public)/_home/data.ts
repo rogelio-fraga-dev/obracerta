@@ -33,7 +33,7 @@ export interface Persona {
 export const PERSONAS: Persona[] = [
   {
     id: "contratante",
-    label: "Procuro um profissional",
+    label: "Procura um profissional",
     shortLabel: "Sou cliente",
     icon: "🏠",
     tagline: "Pessoa física",
@@ -46,7 +46,7 @@ export const PERSONAS: Persona[] = [
       { emoji: "🔍", titulo: "Busque e compare", texto: "Filtre por profissão, cidade e nota. Veja portfólio, agenda e reputação antes de decidir." },
       { emoji: "📅", titulo: "Envie o pedido", texto: "Escolha um horário livre na agenda e mande o pedido com mensagem e fotos do serviço." },
       { emoji: "⏳", titulo: "Aguarde o aceite", texto: "O profissional confirma em até 24h. No aceite, telefone, e-mail e WhatsApp são liberados." },
-      { emoji: "🤝", titulo: "Combine direto", texto: "Com os contatos liberados, vocês alinham valor, data e escopo sem intermediário." },
+      { emoji: "🤝", titulo: "Combine direto", texto: "Com os contatos liberados, vocês validam o valor, data e escopo sem intermediário." },
       { emoji: "⭐", titulo: "Avalie no fim", texto: "Concluído o serviço, avalie. A nota é dupla-cega — justa para os dois lados." },
     ],
   },
@@ -59,14 +59,14 @@ export const PERSONAS: Persona[] = [
     heroTitle: "Sua próxima obra",
     heroAccent: "começa aqui",
     heroSub:
-      "Apareça nas buscas da sua cidade, receba pedidos diretos e construa uma reputação que vale mais que qualquer indicação. 7 dias do Pro grátis.",
+      "Apareça nas buscas da sua cidade, receba pedidos diretos e construa uma reputação que vale mais que qualquer indicação. 7 dias grátis para começar.",
     ctaLabel: "Criar perfil profissional",
     steps: [
-      { emoji: "👷", titulo: "Monte seu perfil", texto: "Escolha suas profissões no catálogo, suba fotos do portfólio e configure sua agenda." },
-      { emoji: "📣", titulo: "Apareça na busca", texto: "Clientes da sua cidade te acham por profissão e disponibilidade. Reputação melhor, posição mais alta." },
+      { emoji: "👷", titulo: "Monte seu perfil", texto: "Escolha suas profissões no catálogo, suba fotos para o portfólio e configure sua agenda." },
       { emoji: "📬", titulo: "Receba pedidos", texto: "A solicitação chega com a mensagem do cliente. Você tem 24h para aceitar ou recusar." },
       { emoji: "🛠️", titulo: "Aceite e execute", texto: "No aceite, seus contatos são liberados. Combine os detalhes e faça o serviço." },
       { emoji: "🏆", titulo: "Construa reputação", texto: "Cada obra vira avaliação e badge. No Pro, dê lances sigilosos em obras abertas." },
+      { emoji: "📣", titulo: "Apareça na busca", texto: "Clientes da sua cidade te acham por profissão e disponibilidade. Reputação melhor, posição mais alta." },
     ],
   },
   {
@@ -81,11 +81,11 @@ export const PERSONAS: Persona[] = [
       "Cadastre sua empresa, encontre profissionais verificados e publique obras para receber propostas. Gestão centralizada num único acesso.",
     ctaLabel: "Cadastrar empresa",
     steps: [
-      { emoji: "🏢", titulo: "Cadastre a empresa", texto: "CNPJ, razão social e dados da equipe num só administrador. Cadastro rápido." },
-      { emoji: "📢", titulo: "Busque ou publique", texto: "Ache profissionais por profissão e cidade, ou publique a obra para receber propostas." },
-      { emoji: "📥", titulo: "Receba lances", texto: "Profissionais enviam propostas sigilosas. Compare valor e prazo lado a lado." },
-      { emoji: "🤝", titulo: "Escolha e contrate", texto: "Selecione o melhor lance, libere os contatos e combine os detalhes diretamente." },
-      { emoji: "📊", titulo: "Acompanhe tudo", texto: "Veja o histórico de obras e avalie cada serviço. Sua reputação como contratante também conta." },
+      { emoji: "🏢", titulo: "Cadastre sua empresa", texto: "Crie seu perfil empresarial com CNPJ, dados da empresa e equipe em um só lugar." },
+      { emoji: "👥", titulo: "Apresente sua equipe ou encontre profissionais", texto: "Cadastre os profissionais da sua empresa ou encontre especialistas para complementar sua operação." },
+      { emoji: "📣", titulo: "Publique obras ou receba oportunidades", texto: "Divulgue suas demandas para receber propostas ou aumente sua visibilidade como empresa prestadora." },
+      { emoji: "🤝", titulo: "Escolha e contrate", texto: "Compare profissionais, propostas e escolha as melhores opções para cada necessidade." },
+      { emoji: "📊", titulo: "Acompanhe sua operação", texto: "Tenha histórico das obras, avaliações e acompanhe sua reputação dentro da plataforma." },
     ],
   },
 ];
@@ -102,13 +102,14 @@ export const HERO_CARDS = [
   { icon: "👨‍🔧", nome: "Roberto Silva", role: "Eletricista · Uberlândia, MG", rating: "⭐ 4.7 · 63 obras" },
 ];
 
+/** Seção "Dores" — formato numerado 01–06 (homologação 18/07): categoria + fala do cliente. */
 export const DORES = [
-  { emoji: "😰", titulo: "“Indiquei um conhecido e ele sumiu no meio da obra”", texto: "Sem histórico verificado, você só descobre que errou quando o estrago já está feito." },
-  { emoji: "📅", titulo: "“Precisava de alguém pra semana que vem e não achei ninguém”", texto: "Descobrir disponibilidade ainda exige ligar um por um, sem nenhuma agenda visível." },
-  { emoji: "💸", titulo: "“Paguei caro demais porque não sabia quanto devia custar”", texto: "Sem referência de preço, quem contrata sempre leva desvantagem na negociação." },
-  { emoji: "👻", titulo: "“Não sabia se podia confiar — nunca vi o trabalho dele”", texto: "Contratar sem ver portfólio ou avaliações reais é sempre um ato de fé." },
-  { emoji: "⏳", titulo: "“Perdi duas semanas só procurando um pedreiro de confiança”", texto: "O tempo gasto na busca já atrasa a obra antes mesmo de ela começar." },
-  { emoji: "🤷", titulo: "“A indicação era boa, mas ele não atendia na minha data”", texto: "Mesmo com boa indicação, achar alguém livre no momento certo continua difícil." },
+  { categoria: "Encontrar profissionais", frase: "Perco muito tempo procurando profissionais." },
+  { categoria: "Confiar na contratação", frase: "Não sei em quem posso confiar." },
+  { categoria: "Comparar opções", frase: "Não consigo comparar profissionais antes de contratar." },
+  { categoria: "Encontrar disponibilidade", frase: "Nunca encontro alguém disponível quando preciso." },
+  { categoria: "Entender o preço justo", frase: "Não sei quanto um serviço realmente custa." },
+  { categoria: "Reduzir o risco", frase: "Tenho medo de contratar errado e ter dor de cabeça." },
 ];
 
 export const DEPOIMENTOS = [
@@ -118,10 +119,10 @@ export const DEPOIMENTOS = [
 ];
 
 export const FAQ = [
-  { q: "O trial de 7 dias é gratuito mesmo?", a: "Sim, 100% gratuito. Não pedimos cartão para ativar o trial. Você experimenta o plano Pro por 7 dias completos e só decide se quer continuar depois disso." },
+  { q: "Como funciona o teste gratuito de 7 dias?", a: "Os 7 dias grátis são exclusivos do plano Iniciante (Sou Profissional). Para ativar, você precisa cadastrar um cartão de crédito. Não há cobrança durante o período de teste — se cancelar antes do fim dos 7 dias, nenhum valor é cobrado. Após os 7 dias, a assinatura é renovada automaticamente por R$ 19,90/mês." },
   { q: "Como funciona o sistema de lances? Os profissionais veem as propostas dos concorrentes?", a: "Não. O sistema de lances é sigiloso — cada profissional vê apenas a própria proposta. A competição é pelo mérito real, não por guerra de preços." },
   { q: "Por que o contato só é liberado após a aprovação?", a: "Para garantir compromisso real dos dois lados. O profissional aprova a solicitação em até 24h e, após isso, telefone, e-mail e WhatsApp são liberados para combinarem os detalhes." },
   { q: "O ObraCerta garante a qualidade do serviço contratado?", a: "O ObraCerta é uma plataforma de conexão — não é parte do contrato entre cliente e profissional. Oferecemos transparência (histórico verificado, avaliações reais e agenda visível) para você decidir com segurança, mas a contratação e a execução são responsabilidade das partes." },
-  { q: "Quanto custa para contratar um profissional?", a: "Buscar e contatar é o foco da plataforma. A receita vem da assinatura mensal dos profissionais — não cobramos comissão sobre o serviço contratado. Você combina o valor da obra diretamente com o profissional." },
+  { q: "Quanto custa para contratar um profissional?", a: "Quem contrata assina um plano mensal a partir de R$ 19,90 — cancele quando quiser. Não cobramos comissão sobre o serviço contratado: o valor da obra você combina diretamente com o profissional." },
   { q: "Posso cancelar minha assinatura quando quiser?", a: "Sim. Sem fidelidade, sem multa. Você cancela quando quiser pelo próprio app. Seu perfil e histórico ficam salvos caso queira voltar." },
 ];
