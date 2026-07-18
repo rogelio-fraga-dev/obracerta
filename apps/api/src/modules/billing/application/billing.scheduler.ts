@@ -12,6 +12,10 @@ export interface InvoiceDueJobData {
 export interface PurchaseExpiryJobData {
   purchaseId: string;
 }
+/** Job: renovar o plano de acesso (emitir a fatura do próximo ciclo) perto do fim da vigência. */
+export interface PurchaseRenewJobData {
+  purchaseId: string;
+}
 /** Job: renovar a assinatura (gerar a próxima fatura) na próxima cobrança. */
 export interface SubscriptionRenewJobData {
   subscriptionId: string;
@@ -23,6 +27,7 @@ export interface PlanReminderJobData {
 
 export const INVOICE_DUE_JOB = "invoice-due";
 export const PURCHASE_EXPIRY_JOB = "purchase-expire";
+export const PURCHASE_RENEW_JOB = "purchase-renew";
 export const SUBSCRIPTION_RENEW_JOB = "subscription-renew";
 export const PLAN_REMINDER_JOB = "plan-reminder";
 
@@ -55,6 +60,20 @@ export class BillingScheduler {
       {
         delay: Math.max(0, Date.parse(expiraEm) - Date.now()),
         jobId: `purchase:expire:${purchaseId}`,
+        removeOnComplete: true,
+        removeOnFail: 100,
+      },
+    );
+  }
+
+  async schedulePurchaseRenewal(purchaseId: string, renovarEm: string): Promise<void> {
+    await this.queue.add(
+      PURCHASE_RENEW_JOB,
+      { purchaseId } satisfies PurchaseRenewJobData,
+      {
+        delay: Math.max(0, Date.parse(renovarEm) - Date.now()),
+        // id estável: cada ciclo reagenda por cima, sem acúmulo de jobs
+        jobId: `purchase:renew:${purchaseId}`,
         removeOnComplete: true,
         removeOnFail: 100,
       },

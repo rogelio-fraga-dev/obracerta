@@ -473,7 +473,8 @@ function StepConfirmacao({
       </div>
 
       <p className="text-center text-[11px] text-muted-foreground">
-        Em ambiente de testes o upgrade é imediato. Em produção a cobrança passa pelo gateway Asaas.
+        Assinatura com renovação automática mensal — cancele quando quiser. Em ambiente de testes o
+        upgrade é imediato; em produção a cobrança passa pelo gateway Asaas.
       </p>
 
       <div className="flex gap-2">

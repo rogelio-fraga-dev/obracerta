@@ -76,9 +76,9 @@ export class BookingService {
       throw new NotFoundException("Profissional não encontrado.");
     }
     // Gating de plano: o alvo precisa da feature RECEIVE_BOOKINGS para receber
-    // agendamentos. Após a reprecificação (Fase 8+) o INICIANTE já tem a feature
-    // (receber pedidos virou grátis) — o gate permanece como trava do mecanismo
-    // (data-driven via ENTITLEMENTS), barrando apenas quem não a tiver.
+    // agendamentos. Todo plano do profissional a tem (inclusive Iniciante — a
+    // monetização acontece no aceite, via RESPOND_BOOKINGS); o gate permanece
+    // como trava do mecanismo (data-driven via ENTITLEMENTS).
     if (!(await this.billing.can(input.professionalId, Feature.RECEIVE_BOOKINGS))) {
       throw new ForbiddenException("Este profissional não está habilitado a receber pedidos.");
     }
@@ -165,6 +165,14 @@ export class BookingService {
     const booking = await this.getProfessionalBooking(professionalId, id);
     if (booking.status !== BookingStatus.PENDENTE) {
       throw new ConflictException("Só pedidos pendentes podem ser aprovados.");
+    }
+    // Gating de plano (homologação 18/07): o Iniciante recebe pedidos mas não
+    // responde — aceitar (que libera o contato do cliente) exige RESPOND_BOOKINGS.
+    // Recusar continua livre para não deixar o contratante sem resposta.
+    if (!(await this.billing.can(professionalId, Feature.RESPOND_BOOKINGS))) {
+      throw new ForbiddenException(
+        "Responder pedidos exige o plano Profissional. Faça upgrade para aceitar este pedido.",
+      );
     }
 
     const window = serviceBlockWindow(booking.dataServico);

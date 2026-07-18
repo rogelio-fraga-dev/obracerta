@@ -227,9 +227,16 @@ function EmailSignup({
   );
 }
 
-type WhatsappStep = "whatsapp" | "codigo" | "perfil" | "especialidades" | "plano" | "pagamento";
+type WhatsappStep =
+  | "whatsapp"
+  | "codigo"
+  | "perfil"
+  | "especialidades"
+  | "plano"
+  | "cartao"
+  | "pagamento";
 
-const WHATSAPP_STEPS: WhatsappStep[] = ["whatsapp", "codigo", "perfil", "especialidades", "plano"];
+const WHATSAPP_STEPS: WhatsappStep[] = ["whatsapp", "codigo", "perfil", "especialidades", "plano", "cartao"];
 
 /** Cadastro via WhatsApp (OTP) — assistente em passos (linguagem do prototipo2). */
 function WhatsappSignup({ initialTipo = "PROFISSIONAL" }: { initialTipo?: UserType }) {
@@ -287,11 +294,16 @@ function WhatsappSignup({ initialTipo = "PROFISSIONAL" }: { initialTipo?: UserTy
   const escolherPlano = () =>
     run(async () => {
       if (!plano) throw new Error("Escolha um plano para continuar.");
-      if (plano === "INICIANTE") {
-        router.replace("/inicio");
-        return;
-      }
-      const sub = await bff.post<Subscription>("/api/billing/subscribe", { plano });
+      // Todos os planos são pagos (homologação 18/07); o cartão vem no próximo passo.
+      // No Iniciante ele é obrigatório: ativa os 7 dias grátis (cobrança só depois).
+      setStep("cartao");
+      return Promise.resolve();
+    });
+
+  const assinarComCartao = (cartaoToken: string) =>
+    run(async () => {
+      if (!plano) throw new Error("Escolha um plano para continuar.");
+      const sub = await bff.post<Subscription>("/api/billing/subscribe", { plano, cartaoToken });
       setSubscription(sub);
       setStep("pagamento");
     });
@@ -418,7 +430,11 @@ function WhatsappSignup({ initialTipo = "PROFISSIONAL" }: { initialTipo?: UserTy
               <PlanCard
                 key={p.plano}
                 nome={p.nome}
-                preco={p.precoCentavos === 0 ? "Grátis" : `${formatCentavos(p.precoCentavos)}/mês`}
+                preco={
+                  p.trialDias
+                    ? `${p.trialDias} dias grátis · depois ${formatCentavos(p.precoCentavos)}/mês`
+                    : `${formatCentavos(p.precoCentavos)}/mês`
+                }
                 resumo={p.resumo}
                 beneficios={p.beneficios}
                 recomendado={p.recomendado}
@@ -427,27 +443,170 @@ function WhatsappSignup({ initialTipo = "PROFISSIONAL" }: { initialTipo?: UserTy
               />
             ))}
           </div>
-          <PrimaryAction loading={loading}>
-            {plano === "INICIANTE" ? "Começar grátis" : "Assinar"}
-          </PrimaryAction>
+          <PrimaryAction loading={loading}>Continuar para o cartão</PrimaryAction>
         </form>
+      )}
+
+      {step === "cartao" && plano && (
+        <CartaoStep
+          plano={plano}
+          loading={loading}
+          onConfirm={assinarComCartao}
+          onBack={() => setStep("plano")}
+        />
       )}
 
       {step === "pagamento" && subscription && (
         <div className="space-y-3 text-center">
-          <Badge tone="warning">Aguardando pagamento</Badge>
-          <h2 className="text-xl font-bold text-foreground">Assinatura criada 🎉</h2>
-          <p className="text-muted-foreground">
-            Geramos sua fatura de{" "}
-            <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
-            Pague via PIX para ativar — você tem alguns dias de cortesia até lá.
-          </p>
+          {plano === "INICIANTE" ? (
+            <>
+              <Badge tone="success">Teste grátis ativado</Badge>
+              <h2 className="text-xl font-bold text-foreground">Bem-vindo! 🎉</h2>
+              <p className="text-muted-foreground">
+                Seus <strong className="text-foreground">7 dias grátis</strong> começaram. Não há
+                cobrança durante o teste — cancele antes do fim e nenhum valor é cobrado. Depois, a
+                assinatura renova automaticamente por{" "}
+                <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
+              </p>
+            </>
+          ) : (
+            <>
+              <Badge tone="warning">Aguardando pagamento</Badge>
+              <h2 className="text-xl font-bold text-foreground">Assinatura criada 🎉</h2>
+              <p className="text-muted-foreground">
+                Geramos sua fatura de{" "}
+                <strong className="text-foreground">{formatCentavos(subscription.valorCentavos)}/mês</strong>.
+                Pague em Cobranças para ativar todos os recursos. A assinatura renova
+                automaticamente — cancele quando quiser.
+              </p>
+            </>
+          )}
           <Button className="w-full" onClick={() => router.replace("/inicio")}>
             Ir para o painel
           </Button>
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Passo do cartão de crédito (homologação 18/07): obrigatório para todos os
+ * planos — no Iniciante ele ativa os 7 dias grátis (cobrança só após o teste).
+ * Em sandbox o "token" é gerado localmente (produção: tokenização no gateway;
+ * o número nunca chega ao nosso backend).
+ */
+function CartaoStep({
+  plano,
+  loading,
+  onConfirm,
+  onBack,
+}: {
+  plano: ProfessionalPlan;
+  loading: boolean;
+  onConfirm: (cartaoToken: string) => void;
+  onBack: () => void;
+}) {
+  const [numero, setNumero] = useState("");
+  const [validade, setValidade] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [titular, setTitular] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const isTrial = plano === "INICIANTE";
+
+  const submit = () => {
+    const digits = numero.replace(/\D/g, "");
+    if (digits.length < 13 || digits.length > 16) return setFormError("Número do cartão inválido.");
+    const [mm] = validade.split("/");
+    if (validade.length < 5 || Number(mm) < 1 || Number(mm) > 12) {
+      return setFormError("Validade inválida (MM/AA).");
+    }
+    if (cvv.replace(/\D/g, "").length < 3) return setFormError("CVV inválido.");
+    if (titular.trim().length < 3) return setFormError("Informe o nome como está no cartão.");
+    setFormError(null);
+    onConfirm(`tok_${digits.slice(-4)}_${Date.now().toString(36)}`);
+  };
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <p className="text-sm text-muted-foreground">
+        {isTrial ? (
+          <>
+            Para ativar os <strong className="text-foreground">7 dias grátis</strong> é preciso
+            cadastrar um cartão. <strong className="text-foreground">Nada é cobrado durante o teste</strong>{" "}
+            — cancele antes do fim e nenhum valor é cobrado.
+          </>
+        ) : (
+          <>Cadastre o cartão da assinatura. A renovação é mensal e você cancela quando quiser.</>
+        )}
+      </p>
+      {formError && <ErrorBox message={formError} />}
+      <Field label="Número do cartão">
+        <Input
+          inputMode="numeric"
+          placeholder="0000 0000 0000 0000"
+          maxLength={19}
+          value={numero}
+          onChange={(e) => {
+            const d = e.target.value.replace(/\D/g, "").slice(0, 16);
+            setNumero(d.replace(/(.{4})/g, "$1 ").trim());
+          }}
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Validade">
+          <Input
+            inputMode="numeric"
+            placeholder="MM/AA"
+            maxLength={5}
+            value={validade}
+            onChange={(e) => {
+              const d = e.target.value.replace(/\D/g, "").slice(0, 4);
+              setValidade(d.length <= 2 ? d : `${d.slice(0, 2)}/${d.slice(2)}`);
+            }}
+          />
+        </Field>
+        <Field label="CVV">
+          <Input
+            inputMode="numeric"
+            placeholder="123"
+            maxLength={4}
+            value={cvv}
+            onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          />
+        </Field>
+      </div>
+      <Field label="Nome no cartão">
+        <Input
+          placeholder="NOME COMO NO CARTÃO"
+          value={titular}
+          onChange={(e) => setTitular(e.target.value.toUpperCase())}
+        />
+      </Field>
+      <p className="text-xs text-muted-foreground">
+        Assinatura com renovação automática mensal. Sem fidelidade nem multa — cancele quando quiser
+        pelo próprio app. Ao continuar você concorda com os{" "}
+        <a href="/termos" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+          termos de assinatura
+        </a>
+        .
+      </p>
+      <div className="flex gap-2">
+        <Button type="button" variant="secondary" className="flex-1" onClick={onBack} disabled={loading}>
+          ← Voltar
+        </Button>
+        <Button type="submit" className="flex-1" disabled={loading}>
+          {loading ? "Aguarde…" : isTrial ? "Ativar 7 dias grátis" : "Assinar"}
+        </Button>
+      </div>
+    </form>
   );
 }
 

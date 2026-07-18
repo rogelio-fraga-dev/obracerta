@@ -48,7 +48,7 @@ export function PublicFooter({ brandName, domain }: { brandName: string; domain:
     {
       title: "Institucional",
       links: [
-        { label: "Termos de uso", href: "#" },
+        { label: "Termos de uso", href: "/termos" },
         { label: "Privacidade (LGPD)", href: "#" },
         { label: "Falar com a gente", href: `mailto:${contato}` },
       ],

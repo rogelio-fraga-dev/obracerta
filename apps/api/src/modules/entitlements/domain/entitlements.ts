@@ -11,6 +11,7 @@ export const Feature = {
   FULL_PROFILE: "profile.full", // foto, nome completo, cidade e valores visíveis
   PORTFOLIO: "profile.portfolio", // galeria de obras
   RECEIVE_BOOKINGS: "booking.receive", // recebe pedidos de serviço
+  RESPOND_BOOKINGS: "booking.respond", // aceita pedidos (libera o contato do cliente)
   ANALYTICS: "profile.analytics", // analytics do perfil (visitas)
   TOP_SEARCH: "search.top", // destaque no topo das buscas
   PRO_TOOLS: "tools.documents", // ferramentas: orçamento + recibo (§8.5)
@@ -25,10 +26,11 @@ export type Plan = ProfessionalPlan | ContractorPlan;
 
 /**
  * Mapa plano → features liberadas (gating). Espelha os benefícios anunciados na
- * landing/planos (reprecificação Fase 8+): **receber pedidos é grátis** (todo
- * profissional, inclusive Iniciante); **lances saem a partir do Pro (R$49)**;
- * Especialista mantém o tier premium (ferramentas, topo, busca ilimitada).
- * Plano ausente = nada.
+ * landing/planos (homologação 18/07): **Iniciante** aparece na busca e recebe
+ * pedidos, mas **não responde** (sem `RESPOND_BOOKINGS` → sem contato do cliente)
+ * e não tem perfil completo; **Profissional** desbloqueia perfil completo,
+ * portfólio, analytics e resposta a pedidos; **lances são exclusivos do
+ * Especialista** (topo das buscas, ferramentas, busca ilimitada). Plano ausente = nada.
  */
 const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
   [ProfessionalPlan.INICIANTE]: [Feature.PUBLIC_PROFILE, Feature.RECEIVE_BOOKINGS],
@@ -37,15 +39,16 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
     Feature.FULL_PROFILE,
     Feature.PORTFOLIO,
     Feature.RECEIVE_BOOKINGS,
+    Feature.RESPOND_BOOKINGS,
     Feature.ANALYTICS,
     Feature.SEARCH_GEO,
-    Feature.SUBMIT_BID,
   ],
   [ProfessionalPlan.ESPECIALISTA]: [
     Feature.PUBLIC_PROFILE,
     Feature.FULL_PROFILE,
     Feature.PORTFOLIO,
     Feature.RECEIVE_BOOKINGS,
+    Feature.RESPOND_BOOKINGS,
     Feature.ANALYTICS,
     Feature.SEARCH_GEO,
     Feature.SUBMIT_BID,

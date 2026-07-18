@@ -4,6 +4,8 @@ export interface CreateSubscriptionParams {
   plano: string;
   valorCentavos: number;
   proximaCobranca: string; // ISO
+  /** Token do cartão no gateway (trial do Iniciante exige cartão; nunca o número em claro). */
+  cartaoToken?: string;
 }
 
 /** Parâmetros para criar uma cobrança avulsa no gateway. */

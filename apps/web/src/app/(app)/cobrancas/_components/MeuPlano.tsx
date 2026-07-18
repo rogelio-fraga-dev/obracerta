@@ -3,10 +3,10 @@
 import { useState } from "react";
 import {
   formatCentavos,
+  hiringPlanCatalogFor,
+  hiringPlansOrderedFor,
   professionalPlanCatalog,
   professionalPlansOrdered,
-  contractorPlanCatalog,
-  contractorPlansOrdered,
   type ProfessionalPlanInfo,
   type Subscription,
 } from "@obracerta/shared";
@@ -35,12 +35,15 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
   const [loadingCancel, setLoadingCancel] = useState(false);
 
   const featureUi = isProfissional ? FEATURE_UI : CONTRACTOR_FEATURE_UI;
+  // Empresa vê o catálogo com preço próprio (homologação 18/07).
+  const hiringCatalog = hiringPlanCatalogFor(tipo);
+  const hiringOrdered = hiringPlansOrderedFor(tipo);
   const atual = isProfissional
     ? (professionalPlanCatalog[plano as keyof typeof professionalPlanCatalog] ?? null)
-    : (contractorPlanCatalog[plano as keyof typeof contractorPlanCatalog] ?? null);
+    : (hiringCatalog[plano as keyof typeof hiringCatalog] ?? null);
 
   const precoAtual = atual?.precoCentavos ?? 0;
-  const ordered = isProfissional ? professionalPlansOrdered : contractorPlansOrdered;
+  const ordered = isProfissional ? professionalPlansOrdered : hiringOrdered;
   const superiores = ordered.filter((p) => p.precoCentavos > precoAtual);
 
   const planoAtualInfo = isProfissional
@@ -54,6 +57,22 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
     setLoadingCancel(true);
     try {
       const res = await fetch("/api/billing/cancel", { method: "POST" });
+      if (!res.ok) throw new Error("Erro ao processar cancelamento.");
+      window.location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erro desconhecido.");
+    } finally {
+      setLoadingCancel(false);
+    }
+  };
+
+  const handleCancelAcesso = async () => {
+    if (!confirm("Cancelar a renovação do seu plano de acesso? Você continua com acesso até o fim do período já pago.")) {
+      return;
+    }
+    setLoadingCancel(true);
+    try {
+      const res = await fetch("/api/billing/cancel-purchase", { method: "POST" });
       if (!res.ok) throw new Error("Erro ao processar cancelamento.");
       window.location.reload();
     } catch (err) {
@@ -137,11 +156,11 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
           </p>
         )
       ) : (
-        // Contratante/Empresa: comparação dos planos de acesso (compra avulsa, 30 dias).
+        // Contratante/Empresa: planos de acesso mensais (renovação automática).
         <div className="space-y-3 border-t border-border pt-4">
           <p className="text-sm font-bold text-foreground">Planos de acesso</p>
           <div className="grid gap-3 sm:grid-cols-3">
-            {contractorPlansOrdered.map((p) => {
+            {hiringOrdered.map((p) => {
               const ehAtual = atual?.plano === p.plano;
               return (
                 <div
@@ -153,7 +172,7 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
                     {ehAtual && <Badge tone="success">Atual</Badge>}
                   </div>
                   <div className="mt-0.5 text-sm font-bold text-primary">
-                    {formatCentavos(p.precoCentavos)} <span className="font-normal text-muted-foreground">/ 30 dias</span>
+                    {formatCentavos(p.precoCentavos)} <span className="font-normal text-muted-foreground">/mês</span>
                   </div>
                   <ul className="mt-2 space-y-1">
                     {p.beneficios.map((b) => (
@@ -165,8 +184,22 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
             })}
           </div>
           <p className="text-xs text-muted-foreground">
-            A compra/renovação de plano de acesso será habilitada com o pagamento real (Asaas). Sua vigência atual aparece acima.
+            Assinatura mensal com renovação automática — cancele quando quiser; o acesso continua
+            até o fim do período já pago.
           </p>
+          {atual && (
+            <div className="flex justify-end">
+              <Button
+                variant="secondary"
+                className="text-danger border border-danger/20 hover:bg-danger/5"
+                size="sm"
+                onClick={handleCancelAcesso}
+                disabled={loadingCancel}
+              >
+                {loadingCancel ? "Cancelando..." : "Cancelar renovação"}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

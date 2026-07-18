@@ -42,6 +42,10 @@ export const FEATURE_UI: Record<string, { label: string; desc: string }> = {
   "profile.full": { label: "Perfil completo", desc: "Foto, nome, cidade e valores visíveis." },
   "profile.portfolio": { label: "Portfólio de obras", desc: "Galeria de fotos dos seus trabalhos." },
   "booking.receive": { label: "Receber pedidos", desc: "Clientes solicitam agendamento com você." },
+  "booking.respond": {
+    label: "Responder pedidos",
+    desc: "Aceite pedidos e libere o contato do cliente.",
+  },
   "profile.analytics": { label: "Analytics do perfil", desc: "Veja quantas pessoas visitaram seu perfil." },
   "search.geo": { label: "Busca por proximidade", desc: "Encontre/seja encontrado por perto." },
   "search.unlimited": { label: "Busca ilimitada", desc: "Sem limite de resultados." },

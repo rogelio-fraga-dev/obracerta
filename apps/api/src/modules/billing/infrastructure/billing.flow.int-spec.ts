@@ -51,6 +51,7 @@ describe("BillingService (integração)", () => {
   const schedulerStub = {
     scheduleInvoiceDue: () => Promise.resolve(),
     schedulePurchaseExpiry: () => Promise.resolve(),
+    schedulePurchaseRenewal: () => Promise.resolve(),
     scheduleSubscriptionRenewal: () => Promise.resolve(),
     schedulePlanReminder: () => Promise.resolve(),
   } as unknown as BillingScheduler;
@@ -106,7 +107,7 @@ describe("BillingService (integração)", () => {
   it("assina (EM_GRACA + fatura PENDENTE), webhook confirma → PAGA + ATIVA, e é idempotente", async () => {
     const subscription = await billing.subscribe(profId, { plano: "PRO" });
     expect(subscription.status).toBe("EM_GRACA");
-    expect(subscription.valorCentavos).toBe(4900);
+    expect(subscription.valorCentavos).toBe(4990);
 
     const [invoice] = await invoiceRepo.listForUser(profId);
     expect(invoice?.status).toBe("PENDENTE");
@@ -139,7 +140,7 @@ describe("BillingService (integração)", () => {
   it("compra avulsa: webhook ativa a compra com expiração", async () => {
     const purchase = await billing.purchase(contratanteId, { plano: "COMPLETO" });
     expect(purchase.status).toBe("PENDENTE");
-    expect(purchase.valorCentavos).toBe(3900);
+    expect(purchase.valorCentavos).toBe(3990);
 
     const invoice = (await invoiceRepo.listForUser(contratanteId))[0];
     const chargeId = invoice!.gatewayId!;
@@ -177,7 +178,7 @@ describe("BillingService (integração)", () => {
     const invoice = (await invoiceRepo.listForUser(contratanteId)).find((i) => i.status === "PAGA");
     const refund = await billing.requestRefund(contratanteId, invoice!.id, "ARREPENDIMENTO");
     expect(refund.status).toBe("SOLICITADO");
-    expect(refund.valorCentavos).toBe(3900); // integral dentro de 7 dias
+    expect(refund.valorCentavos).toBe(3990); // integral dentro de 7 dias
 
     const concluido = await billing.resolveRefund(refund.id, true);
     expect(concluido.status).toBe("CONCLUIDO");

@@ -40,7 +40,12 @@ export const subscriptionSchema = z.object({
 });
 export type Subscription = z.infer<typeof subscriptionSchema>;
 
-/** Compra avulsa do contratante (BASICO/COMPLETO/LANCE) — sem recorrência. */
+/**
+ * Plano de acesso de contratante/empresa (BASICO/COMPLETO/LANCE). Assinatura
+ * mensal: perto do fim da vigência uma nova fatura é emitida e, paga, estende
+ * `expiraEm` por mais 30 dias; cancelar interrompe a renovação (acesso até o fim
+ * do período já pago).
+ */
 export const purchaseSchema = z.object({
   id: uuidSchema,
   userId: uuidSchema,
@@ -73,11 +78,18 @@ export const invoiceSchema = z.object({
 });
 export type Invoice = z.infer<typeof invoiceSchema>;
 
-/** Entrada para o profissional assinar um plano recorrente (INICIANTE é grátis). */
-export const createSubscriptionSchema = z.object({ plano: professionalPlanSchema });
+/**
+ * Entrada para o profissional assinar um plano recorrente. Todos os planos são
+ * pagos; o INICIANTE tem 7 dias de teste grátis e **exige cartão** (`cartaoToken`
+ * — token do cartão no gateway; nunca o número em claro).
+ */
+export const createSubscriptionSchema = z.object({
+  plano: professionalPlanSchema,
+  cartaoToken: z.string().trim().min(8).max(64).optional(),
+});
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
-/** Entrada para o contratante comprar um plano avulso. */
+/** Entrada para contratante/empresa assinar um plano de acesso mensal. */
 export const createPurchaseSchema = z.object({ plano: contractorPlanSchema });
 export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;
 

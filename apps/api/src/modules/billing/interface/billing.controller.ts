@@ -104,7 +104,7 @@ export class BillingController {
     return this.billing.getSubscription(user.sub);
   }
 
-  /** Contratante compra um plano avulso. */
+  /** Contratante/empresa assina um plano de acesso mensal. */
   @Post("purchases")
   @UseGuards(JwtAuthGuard)
   purchase(
@@ -112,6 +112,13 @@ export class BillingController {
     @Body(new ZodValidationPipe(createPurchaseSchema)) input: CreatePurchaseInput,
   ): Promise<Purchase> {
     return this.billing.purchase(user.sub, input);
+  }
+
+  /** Cancela a renovação do plano de acesso (vigência segue até o fim do período pago). */
+  @Post("purchases/cancel")
+  @UseGuards(JwtAuthGuard)
+  cancelPurchase(@CurrentUser() user: JwtClaims): Promise<Purchase> {
+    return this.billing.cancelPurchase(user.sub);
   }
 
   /** Faturas do usuário autenticado. */

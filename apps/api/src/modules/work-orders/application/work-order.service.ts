@@ -195,11 +195,11 @@ export class WorkOrderService {
     if (!user || user.tipo !== UserType.PROFISSIONAL) {
       throw new BadRequestException("Apenas profissionais enviam lances.");
     }
-    // Gating de plano: dar lances exige a feature SUBMIT_BID (planos pagos, Pro+).
+    // Gating de plano (homologação 18/07): dar lances é exclusivo do Especialista.
     // A trava real é aqui — a UI só esconde o botão.
     if (!(await this.billing.can(professionalId, Feature.SUBMIT_BID))) {
       throw new ForbiddenException(
-        "Dar lances em obras é dos planos pagos (Pro ou Especialista). Faça upgrade em Cobranças.",
+        "Dar lances em obras é exclusivo do plano Especialista. Faça upgrade em Cobranças.",
       );
     }
     const order = await this.getOrderOr404(workOrderId);

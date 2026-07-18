@@ -1,17 +1,23 @@
-import { ContractorPlan, ProfessionalPlan } from "./enums.js";
+import { ContractorPlan, ProfessionalPlan, UserType } from "./enums.js";
 
 /**
- * Catálogo de planos do profissional para **apresentação** (tela de escolha de
- * plano — roadmap §4.2). Fonte única do front; espelha os preços que a regra de
- * cobrança usa no backend (`billing-rules`): INICIANTE grátis, PRO R$49, ESP R$99.
- * O teste trava esses valores para flagrar qualquer divergência. Pós-reprecificação
- * (Fase 8+): receber pedidos é grátis; lances saem no Pro; ferramentas no Especialista.
+ * Catálogo de planos para **apresentação** (telas de escolha de plano). Fonte
+ * única do front; espelha os preços que a regra de cobrança usa no backend
+ * (`billing-rules`) — o teste trava esses valores para flagrar divergência.
+ *
+ * Homologação 18/07: todos os planos são pagos. Profissional: Iniciante
+ * R$ 19,90 (7 dias grátis com cartão), Profissional R$ 49,90, Especialista
+ * R$ 99,90. Contratante (assinatura mensal): Essencial R$ 19,90, Completo
+ * R$ 39,90, Lance R$ 69,90. Empresa (mesmos códigos de plano do contratante,
+ * preço próprio): Essencial R$ 49,90, Completo R$ 99,90, Empresa PRO R$ 149,90.
  */
 export interface ProfessionalPlanInfo {
   plano: ProfessionalPlan;
   nome: string;
-  /** Preço mensal em centavos (0 = grátis). */
+  /** Preço mensal em centavos. */
   precoCentavos: number;
+  /** Dias de teste grátis (cartão obrigatório; cobrança só após o período). */
+  trialDias?: number;
   /** Marca o plano sugerido (mitiga escolha errada, §4.2). */
   recomendado: boolean;
   resumo: string;
@@ -22,30 +28,46 @@ export const professionalPlanCatalog: Record<ProfessionalPlan, ProfessionalPlanI
   [ProfessionalPlan.INICIANTE]: {
     plano: ProfessionalPlan.INICIANTE,
     nome: "Iniciante",
-    precoCentavos: 0,
+    precoCentavos: 1990,
+    trialDias: 7,
     recomendado: false,
-    resumo: "Comece de graça",
-    beneficios: ["Perfil público", "Apareça nas buscas do seu bairro", "Receba pedidos de clientes"],
+    resumo: "Essencial — seja encontrado",
+    beneficios: [
+      "7 primeiros dias grátis",
+      "Perfil aparece nas buscas",
+      "Cidade e raio de atuação",
+      "Receber pedidos de orçamento",
+    ],
   },
   [ProfessionalPlan.PRO]: {
     plano: ProfessionalPlan.PRO,
-    nome: "Pro",
-    precoCentavos: 4900,
+    nome: "Profissional",
+    precoCentavos: 4990,
     recomendado: true,
-    resumo: "Mais visibilidade",
-    beneficios: ["Tudo do Iniciante", "Perfil completo", "Dê lances em obras", "Busca por proximidade"],
+    resumo: "Conquiste a confiança dos clientes",
+    beneficios: [
+      "Tudo do Iniciante",
+      "Perfil completo com foto e portfólio",
+      "Responder pedidos de orçamento",
+      "Contato do cliente liberado",
+    ],
   },
   [ProfessionalPlan.ESPECIALISTA]: {
     plano: ProfessionalPlan.ESPECIALISTA,
     nome: "Especialista",
-    precoCentavos: 9900,
+    precoCentavos: 9990,
     recomendado: false,
-    resumo: "Alcance máximo",
-    beneficios: ["Tudo do Pro", "Orçamentos e recibos", "Busca ilimitada", "Topo nos resultados"],
+    resumo: "Mais oportunidades, mais crescimento",
+    beneficios: [
+      "Tudo do Profissional",
+      "Dar lances em obras",
+      "Topo das buscas",
+      "Prioridade no suporte",
+    ],
   },
 };
 
-/** Planos na ordem de apresentação (do grátis ao premium). */
+/** Planos na ordem de apresentação (do essencial ao premium). */
 export const professionalPlansOrdered: ProfessionalPlanInfo[] = [
   professionalPlanCatalog[ProfessionalPlan.INICIANTE],
   professionalPlanCatalog[ProfessionalPlan.PRO],
@@ -53,13 +75,14 @@ export const professionalPlansOrdered: ProfessionalPlanInfo[] = [
 ];
 
 /**
- * Catálogo de planos avulsos do **contratante/empresa** (acesso por 30 dias).
- * Preços espelham `billing-rules` (BASICO R$19 · COMPLETO R$39 · LANCE R$69).
+ * Catálogo de planos de acesso de quem contrata (**assinatura mensal** com
+ * renovação automática — cancele quando quiser). Os mesmos códigos de plano
+ * servem contratante e empresa; nome e preço variam por tipo de conta.
  */
 export interface ContractorPlanInfo {
   plano: ContractorPlan;
   nome: string;
-  /** Preço do acesso (30 dias) em centavos. */
+  /** Preço mensal em centavos. */
   precoCentavos: number;
   recomendado: boolean;
   resumo: string;
@@ -69,27 +92,37 @@ export interface ContractorPlanInfo {
 export const contractorPlanCatalog: Record<ContractorPlan, ContractorPlanInfo> = {
   [ContractorPlan.BASICO]: {
     plano: ContractorPlan.BASICO,
-    nome: "Básico",
-    precoCentavos: 1900,
+    nome: "Essencial",
+    precoCentavos: 1990,
     recomendado: false,
-    resumo: "Explore a oferta",
-    beneficios: ["Ver todos os profissionais", "Filtro por profissão", "Disponibilidade geral"],
+    resumo: "Conheça a plataforma",
+    beneficios: ["Buscar profissionais", "Filtrar por profissão", "Visualizar disponibilidade", "Solicitar contato"],
   },
   [ContractorPlan.COMPLETO]: {
     plano: ContractorPlan.COMPLETO,
     nome: "Completo",
-    precoCentavos: 3900,
+    precoCentavos: 3990,
     recomendado: true,
-    resumo: "Contrate com segurança",
-    beneficios: ["Tudo do Básico", "Ranking e recomendados", "Agendar serviços", "Valores e agenda visíveis"],
+    resumo: "Contrate com confiança",
+    beneficios: [
+      "Tudo do Essencial",
+      "Foto, nome e avaliações dos profissionais",
+      "Agenda detalhada e agendamento",
+      "Contato liberado após aprovação",
+    ],
   },
   [ContractorPlan.LANCE]: {
     plano: ContractorPlan.LANCE,
     nome: "Lance",
-    precoCentavos: 6900,
+    precoCentavos: 6990,
     recomendado: false,
-    resumo: "Profissionais competem",
-    beneficios: ["Tudo do Completo", "Publicar obra para lances", "Receber propostas sigilosas"],
+    resumo: "Receba propostas pela sua obra",
+    beneficios: [
+      "Tudo do Completo",
+      "Publicar obras",
+      "Receber propostas de diversos profissionais",
+      "Comparar propostas lado a lado",
+    ],
   },
 };
 
@@ -100,7 +133,71 @@ export const contractorPlansOrdered: ContractorPlanInfo[] = [
   contractorPlanCatalog[ContractorPlan.LANCE],
 ];
 
-/** Formata centavos (inteiro) como moeda BRL: 4900 → "R$ 49,00". */
+/**
+ * Catálogo de planos da **empresa** — mesmos códigos (`ContractorPlan`), com
+ * nome, preço e benefícios próprios. O backend precifica pela combinação
+ * plano + tipo de conta (`contractorPriceCentavos`).
+ */
+export const companyPlanCatalog: Record<ContractorPlan, ContractorPlanInfo> = {
+  [ContractorPlan.BASICO]: {
+    plano: ContractorPlan.BASICO,
+    nome: "Essencial",
+    precoCentavos: 4990,
+    recomendado: false,
+    resumo: "Sua empresa na plataforma",
+    beneficios: [
+      "Cadastre sua empresa com CNPJ",
+      "Adicione pessoas da sua equipe",
+      "Busque profissionais por profissão e região",
+      "Solicite contato",
+    ],
+  },
+  [ContractorPlan.COMPLETO]: {
+    plano: ContractorPlan.COMPLETO,
+    nome: "Completo",
+    precoCentavos: 9990,
+    recomendado: true,
+    resumo: "Contrate com mais segurança",
+    beneficios: [
+      "Tudo do Essencial",
+      "Perfil completo dos profissionais",
+      "Publicar demandas de contratação",
+      "Comparar profissionais antes de contratar",
+    ],
+  },
+  [ContractorPlan.LANCE]: {
+    plano: ContractorPlan.LANCE,
+    nome: "Empresa PRO",
+    precoCentavos: 14990,
+    recomendado: false,
+    resumo: "Disputa de oportunidades e gestão",
+    beneficios: [
+      "Tudo do Completo",
+      "Receber lances de diversos profissionais",
+      "Comparar valores e prazos lado a lado",
+      "Relatórios e histórico de contratações",
+    ],
+  },
+};
+
+/** Planos da empresa na ordem de apresentação. */
+export const companyPlansOrdered: ContractorPlanInfo[] = [
+  companyPlanCatalog[ContractorPlan.BASICO],
+  companyPlanCatalog[ContractorPlan.COMPLETO],
+  companyPlanCatalog[ContractorPlan.LANCE],
+];
+
+/** Catálogo de planos de contratação conforme o tipo da conta (empresa tem preço próprio). */
+export function hiringPlanCatalogFor(tipo: UserType | string | undefined): Record<ContractorPlan, ContractorPlanInfo> {
+  return tipo === UserType.EMPRESA ? companyPlanCatalog : contractorPlanCatalog;
+}
+
+/** Planos de contratação ordenados conforme o tipo da conta. */
+export function hiringPlansOrderedFor(tipo: UserType | string | undefined): ContractorPlanInfo[] {
+  return tipo === UserType.EMPRESA ? companyPlansOrdered : contractorPlansOrdered;
+}
+
+/** Formata centavos (inteiro) como moeda BRL: 4990 → "R$ 49,90". */
 export function formatCentavos(centavos: number): string {
   return (centavos / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }

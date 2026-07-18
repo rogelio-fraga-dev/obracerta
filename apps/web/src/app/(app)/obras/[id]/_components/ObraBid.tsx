@@ -80,7 +80,7 @@ export function ObraBid({
         </h2>
         <p className="text-sm text-muted-foreground">
           Falha temporária ao verificar seus benefícios. Recarregue a página para tentar de novo —
-          se você é Pro ou Especialista, seu lance continua disponível.
+          se você é Especialista, seu lance continua disponível.
         </p>
       </Card>
     );
@@ -94,10 +94,10 @@ export function ObraBid({
           <Lock className="h-6 w-6" />
         </span>
         <h2 className="font-display text-lg font-black text-foreground">
-          Dar lances é dos planos pagos
+          Dar lances é exclusivo do Especialista
         </h2>
         <p className="text-sm text-muted-foreground">
-          Faça upgrade para o plano Pro ou Especialista e envie propostas sigilosas em obras abertas.
+          Faça upgrade para o plano Especialista e envie propostas sigilosas em obras abertas.
         </p>
         <Button asChild className="w-full">
           <Link href="/cobrancas">Fazer upgrade</Link>

@@ -9,16 +9,22 @@ export interface CreatePurchaseData {
   valorCentavos: number;
 }
 
-/** Porta de saída das compras avulsas. */
+/** Porta de saída dos planos de acesso (assinatura mensal de contratante/empresa). */
 export interface PurchaseRepository {
   create(data: CreatePurchaseData): Promise<Purchase>;
   findById(id: string): Promise<Purchase | null>;
-  /** Compra ATIVO mais recente do usuário (vigência por prazo avaliada no service). */
+  /**
+   * Plano vigente mais recente do usuário: ATIVO ou CANCELADO com vigência restante
+   * (cancelar interrompe a renovação, não o período já pago). O prazo (`expiraEm`)
+   * é avaliado no service.
+   */
   findActiveByUser(userId: string): Promise<Purchase | null>;
   /** Marca como ATIVO e define a expiração (após confirmação do pagamento). */
   activate(id: string, expiraEm: string): Promise<Purchase | null>;
   /** Expira a compra ATIVO → EXPIRADO (job de expiração / estorno). Guardado. */
   expire(id: string): Promise<Purchase | null>;
+  /** Cancela a renovação: ATIVO → CANCELADO (acesso segue até `expiraEm`). Guardado. */
+  cancel(id: string): Promise<Purchase | null>;
 }
 
 export const PURCHASE_REPOSITORY = Symbol("PURCHASE_REPOSITORY");

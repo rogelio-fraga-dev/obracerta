@@ -7,9 +7,10 @@ import type { UsersService } from "../../users/application/users.service.js";
 import { BillingService } from "./billing.service.js";
 
 /**
- * Plano vigente / gating (reprecificação Fase 8+): um profissional SEM assinatura
- * paga cai no tier gratuito INICIANTE (baseline) — então recebe pedidos e tem
- * perfil público de graça, mas não dá lances. Contratante sem compra → sem plano.
+ * Plano vigente / gating (homologação 18/07): um profissional SEM assinatura cai
+ * no baseline INICIANTE (transitório — perfil visível e recebe pedidos, mas não
+ * responde nem dá lances; responder exige Profissional, lances o Especialista).
+ * Contratante sem plano de acesso → sem plano.
  */
 describe("BillingService — plano baseline e gating", () => {
   function build(opts: {
@@ -43,7 +44,7 @@ describe("BillingService — plano baseline e gating", () => {
     return service;
   }
 
-  it("profissional sem assinatura → baseline INICIANTE (recebe pedidos, sem lance)", async () => {
+  it("profissional sem assinatura → baseline INICIANTE (recebe pedidos, não responde nem dá lance)", async () => {
     const service = build({ user: { tipo: UserType.PROFISSIONAL } });
 
     const ent = await service.getEntitlements("pro-sem-plano");
@@ -52,11 +53,23 @@ describe("BillingService — plano baseline e gating", () => {
     expect(ent.features).toContain(Feature.RECEIVE_BOOKINGS);
 
     expect(await service.can("pro-sem-plano", Feature.RECEIVE_BOOKINGS)).toBe(true);
+    expect(await service.can("pro-sem-plano", Feature.RESPOND_BOOKINGS)).toBe(false);
     expect(await service.can("pro-sem-plano", Feature.SUBMIT_BID)).toBe(false);
   });
 
-  it("profissional com assinatura PRO vigente → dá lances", async () => {
+  it("assinatura PRO vigente → responde pedidos; lances seguem exclusivos do Especialista", async () => {
     const sub = { plano: ProfessionalPlan.PRO, status: SubscriptionStatus.ATIVA } as Subscription;
+    const service = build({ activeSub: sub, user: { tipo: UserType.PROFISSIONAL } });
+
+    expect(await service.can("joana", Feature.RESPOND_BOOKINGS)).toBe(true);
+    expect(await service.can("joana", Feature.SUBMIT_BID)).toBe(false);
+  });
+
+  it("assinatura ESPECIALISTA vigente → dá lances", async () => {
+    const sub = {
+      plano: ProfessionalPlan.ESPECIALISTA,
+      status: SubscriptionStatus.ATIVA,
+    } as Subscription;
     const service = build({ activeSub: sub, user: { tipo: UserType.PROFISSIONAL } });
 
     expect(await service.can("joana", Feature.SUBMIT_BID)).toBe(true);

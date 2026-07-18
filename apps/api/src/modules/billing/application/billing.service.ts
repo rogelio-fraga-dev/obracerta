@@ -38,12 +38,15 @@ import {
   canRenew,
   canTransitionInvoice,
   contractorPriceCentavos,
+  firstInvoiceDue,
   graceUntil,
+  hasTrial,
   isPaymentConfirmed,
   nextCharge,
   planReminderDate,
   professionalPriceCentavos,
-  purchaseExpiry,
+  purchaseRenewalDate,
+  renewedPurchaseExpiry,
 } from "../domain/billing-rules.js";
 import { canRefundInvoice, computeRefundCentavos, type RefundReason } from "../domain/refund-rules.js";
 import { PAYMENT_GATEWAY, type PaymentGateway } from "../domain/ports/payment-gateway.js";
@@ -107,16 +110,20 @@ export class BillingService {
   ) {}
 
   /**
-   * Profissional assina um plano recorrente: cria a assinatura no gateway, abre
-   * a assinatura local (EM_GRACA por 7 dias) e emite a 1ª fatura (vence ao fim da graça).
+   * Profissional assina um plano recorrente (todos são pagos — homologação 18/07):
+   * cria a assinatura no gateway, abre a assinatura local (EM_GRACA) e emite a 1ª
+   * fatura. **Iniciante** tem 7 dias de teste grátis e exige cartão (a 1ª fatura
+   * vence no fim do teste); os demais planos vencem na janela curta de pagamento.
    */
   async subscribe(userId: string, input: CreateSubscriptionInput): Promise<Subscription> {
-    if (input.plano === ProfessionalPlan.INICIANTE) {
-      throw new BadRequestException("O plano Iniciante é gratuito — não requer assinatura.");
-    }
     const user = await this.users.findById(userId);
     if (!user || user.tipo !== UserType.PROFISSIONAL) {
       throw new BadRequestException("Apenas profissionais assinam planos recorrentes.");
+    }
+    if (hasTrial(input.plano) && !input.cartaoToken) {
+      throw new BadRequestException(
+        "O teste grátis de 7 dias exige um cartão de crédito. Cadastre o cartão para ativar — a cobrança só acontece após o teste.",
+      );
     }
     const existente = await this.subscriptions.findActiveByUser(userId);
     if (
@@ -130,13 +137,14 @@ export class BillingService {
 
     const now = new Date();
     const valorCentavos = professionalPriceCentavos(input.plano);
-    const venceEm = graceUntil(now).toISOString();
+    const venceEm = firstInvoiceDue(input.plano, now).toISOString();
 
     const sub = await this.gateway.createSubscription({
       userId,
       plano: input.plano,
       valorCentavos,
       proximaCobranca: venceEm,
+      cartaoToken: input.cartaoToken,
     });
     const subscription = await this.subscriptions.create({
       userId,
@@ -166,7 +174,7 @@ export class BillingService {
     await this.scheduler.scheduleInvoiceDue(invoice.id, venceEm);
 
     // a 1ª fatura é o 1º ciclo; a renovação recorrente começa no ciclo seguinte
-    const renovaEm = nextCharge(graceUntil(now)).toISOString();
+    const renovaEm = nextCharge(new Date(venceEm)).toISOString();
     await this.scheduler.scheduleSubscriptionRenewal(subscription.id, renovaEm);
     await this.scheduler.schedulePlanReminder(
       subscription.id,
@@ -194,7 +202,7 @@ export class BillingService {
   async changePlan(userId: string, input: CreateSubscriptionInput): Promise<Subscription> {
     if (input.plano === ProfessionalPlan.INICIANTE) {
       throw new BadRequestException(
-        "Iniciante é gratuito — para sair de um plano pago, cancele a assinatura.",
+        "Para voltar ao Iniciante, cancele o plano atual e assine o Iniciante ao fim da vigência.",
       );
     }
     const ativa = await this.subscriptions.findActiveByUser(userId);
@@ -314,24 +322,26 @@ export class BillingService {
   }
 
   /**
-   * Contratante compra um plano avulso: cria a cobrança no gateway, abre a compra
-   * (PENDENTE) e emite a fatura. Vigência só após o pagamento (webhook).
+   * Contratante/empresa assina um plano de acesso mensal: cria a cobrança no
+   * gateway, abre o ciclo (PENDENTE) e emite a fatura. Vigência só após o
+   * pagamento (webhook); a renovação automática é agendada na ativação.
+   * A empresa paga a tabela própria (`contractorPriceCentavos` por tipo).
    */
   async purchase(userId: string, input: CreatePurchaseInput): Promise<Purchase> {
     const user = await this.users.findById(userId);
     if (!user || !canHireServices(user.tipo)) {
-      throw new BadRequestException("Apenas contratantes e empresas compram planos avulsos.");
+      throw new BadRequestException("Apenas contratantes e empresas assinam planos de acesso.");
     }
 
     const now = new Date();
-    const valorCentavos = contractorPriceCentavos(input.plano);
-    const venceEm = nextCharge(now).toISOString(); // janela de pagamento do avulso
+    const valorCentavos = contractorPriceCentavos(input.plano, user.tipo);
+    const venceEm = nextCharge(now).toISOString(); // janela de pagamento da 1ª fatura
 
     const charge = await this.gateway.createCharge({
       userId,
       valorCentavos,
       vencimento: venceEm,
-      descricao: `Plano avulso ${input.plano}`,
+      descricao: `Assinatura mensal ${input.plano}`,
     });
     const purchase = await this.purchases.create({
       userId,
@@ -600,10 +610,87 @@ export class BillingService {
     return updated !== null;
   }
 
-  /** Job: expira a compra avulsa se ainda ATIVO (transição guardada). */
+  /**
+   * Job: expira o plano de acesso se ainda ATIVO **e** de fato vencido. A renovação
+   * paga estende `expiraEm` — um job agendado para a data antiga reagenda em vez de
+   * expirar acesso vigente.
+   */
   async expirePurchaseIfActive(purchaseId: string): Promise<boolean> {
+    const purchase = await this.purchases.findById(purchaseId);
+    if (!purchase) return false;
+    if (purchase.expiraEm && new Date(purchase.expiraEm).getTime() > Date.now()) {
+      await this.scheduler.schedulePurchaseExpiry(purchaseId, purchase.expiraEm);
+      return false;
+    }
     const updated = await this.purchases.expire(purchaseId);
     return updated !== null;
+  }
+
+  /**
+   * Job: renovação automática do plano de acesso (perto do fim da vigência). Se o
+   * ciclo segue ATIVO (não cancelado), emite a fatura do próximo mês vencendo no
+   * fim da vigência atual — paga, a vigência estende (webhook → activateOrigin).
+   */
+  async renewPurchaseIfDue(purchaseId: string): Promise<boolean> {
+    const purchase = await this.purchases.findById(purchaseId);
+    if (!purchase || purchase.status !== "ATIVO" || !purchase.expiraEm) return false;
+
+    const venceEm = purchase.expiraEm;
+    const charge = await this.gateway.createCharge({
+      userId: purchase.userId,
+      valorCentavos: purchase.valorCentavos,
+      vencimento: venceEm,
+      descricao: `Renovação do acesso ${purchase.plano}`,
+    });
+    const invoice = await this.invoices.create({
+      userId: purchase.userId,
+      subscriptionId: null,
+      purchaseId: purchase.id,
+      gateway: this.gateway.name,
+      gatewayId: charge.gatewayId,
+      valorCentavos: purchase.valorCentavos,
+      vencimentoEm: venceEm,
+    });
+    await this.scheduler.scheduleInvoiceDue(invoice.id, venceEm);
+
+    const user = await this.users.findById(purchase.userId);
+    if (user) {
+      await this.notifications.sendMessage(
+        user.whatsapp,
+        `Seu plano de acesso ${purchase.plano} renova em breve. A fatura do próximo mês já está disponível — cancele quando quiser.`,
+      );
+    }
+    await this.audit.record({
+      atorUserId: null,
+      acao: "ACESSO_RENOVACAO_EMITIDA",
+      entidade: "purchase",
+      entidadeId: purchase.id,
+      dados: { invoiceId: invoice.id, valorCentavos: purchase.valorCentavos },
+    });
+    return true;
+  }
+
+  /**
+   * Cancelamento voluntário do plano de acesso (contratante/empresa). Interrompe a
+   * renovação automática; o acesso continua até o fim do período já pago.
+   */
+  async cancelPurchase(userId: string): Promise<Purchase> {
+    const atual = await this.purchases.findActiveByUser(userId);
+    if (!atual || atual.status !== "ATIVO") {
+      throw new NotFoundException("Nenhum plano de acesso ativo encontrado.");
+    }
+    const cancelado = await this.purchases.cancel(atual.id);
+    if (!cancelado) {
+      throw new BadRequestException("Não foi possível cancelar o plano de acesso.");
+    }
+    await this.audit.record({
+      atorUserId: userId,
+      acao: "ACESSO_CANCELADO",
+      entidade: "purchase",
+      entidadeId: atual.id,
+      dados: null,
+    });
+    return cancelado;
   }
 
   /** Plano vigente do usuário + features liberadas (assinatura EM_GRACA/ATIVA ou avulso vigente). */
@@ -622,16 +709,28 @@ export class BillingService {
     return plano ? this.entitlements.can(plano, feature) : false;
   }
 
-  /** Ativa a origem da fatura paga: assinatura (ATIVA) ou compra (ATIVO + expiração). */
+  /**
+   * Ativa a origem da fatura paga: assinatura (ATIVA) ou plano de acesso (ATIVO +
+   * expiração). No acesso, pagar a renovação **estende** a vigência (+30d a partir
+   * do fim atual, sem comer dias já pagos) e reagenda expiração + próxima renovação.
+   */
   private async activateOrigin(invoice: Invoice): Promise<void> {
     if (invoice.subscriptionId) {
       const sub = await this.subscriptions.activate(invoice.subscriptionId);
       if (sub) await this.planSync.setProfessionalPlano(sub.userId, sub.plano);
     } else if (invoice.purchaseId) {
-      const expiraEm = purchaseExpiry(new Date()).toISOString();
+      const atual = await this.purchases.findById(invoice.purchaseId);
+      const expiraEm = renewedPurchaseExpiry(
+        atual?.expiraEm ? new Date(atual.expiraEm) : null,
+        new Date(),
+      ).toISOString();
       const purchase = await this.purchases.activate(invoice.purchaseId, expiraEm);
       if (purchase) await this.planSync.setContractorPlano(purchase.userId, purchase.plano, expiraEm);
       await this.scheduler.schedulePurchaseExpiry(invoice.purchaseId, expiraEm);
+      await this.scheduler.schedulePurchaseRenewal(
+        invoice.purchaseId,
+        purchaseRenewalDate(new Date(expiraEm)).toISOString(),
+      );
     }
   }
 
@@ -650,10 +749,12 @@ export class BillingService {
   }
 
   /**
-   * Plano efetivamente vigente do usuário. Assinatura vigente (EM_GRACA/ATIVA) ou
-   * compra avulsa vigente têm prioridade. Sem nenhuma delas, o **profissional** cai
-   * no tier gratuito **INICIANTE** (baseline — garante "receber pedidos grátis" e
-   * perfil público sem assinatura); contratante/empresa sem compra → `null`.
+   * Plano efetivamente vigente do usuário. Assinatura vigente (EM_GRACA/ATIVA,
+   * ou CANCELADA com vigência restante) e plano de acesso vigente (ATIVO ou
+   * CANCELADO com `expiraEm` no futuro — cancelar interrompe só a renovação) têm
+   * prioridade. Sem nenhum deles, o **profissional** cai no baseline **INICIANTE**
+   * (transitório: perfil visível e recebe pedidos, sem responder/lances — a
+   * monetização acontece no aceite); contratante/empresa sem plano → `null`.
    */
   private async activePlan(userId: string): Promise<Plan | null> {
     const sub = await this.subscriptions.findLastByUser(userId);

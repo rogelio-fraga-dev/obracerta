@@ -16,15 +16,21 @@ describe("planAllows", () => {
     expect(planAllows(ContractorPlan.COMPLETO, Feature.SUBMIT_BID)).toBe(false);
   });
 
-  it("receber pedidos é grátis: todo plano do profissional recebe (reprecificação)", () => {
+  it("todo plano do profissional recebe pedidos (Iniciante inclusive)", () => {
     expect(planAllows(ProfessionalPlan.INICIANTE, Feature.RECEIVE_BOOKINGS)).toBe(true);
     expect(planAllows(ProfessionalPlan.PRO, Feature.RECEIVE_BOOKINGS)).toBe(true);
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.RECEIVE_BOOKINGS)).toBe(true);
   });
 
-  it("dar lances sai a partir do Pro (Iniciante não; Pro e Especialista sim)", () => {
+  it("responder pedidos (e liberar contato) exige o Profissional (homologação 18/07)", () => {
+    expect(planAllows(ProfessionalPlan.INICIANTE, Feature.RESPOND_BOOKINGS)).toBe(false);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.RESPOND_BOOKINGS)).toBe(true);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.RESPOND_BOOKINGS)).toBe(true);
+  });
+
+  it("dar lances é exclusivo do Especialista (homologação 18/07)", () => {
     expect(planAllows(ProfessionalPlan.INICIANTE, Feature.SUBMIT_BID)).toBe(false);
-    expect(planAllows(ProfessionalPlan.PRO, Feature.SUBMIT_BID)).toBe(true);
+    expect(planAllows(ProfessionalPlan.PRO, Feature.SUBMIT_BID)).toBe(false);
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.SUBMIT_BID)).toBe(true);
   });
 

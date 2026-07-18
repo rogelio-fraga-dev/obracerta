@@ -176,17 +176,17 @@ async function main(): Promise<void> {
   const subMarcosId = randomUUID();
   const subRobertoId = randomUUID();
   await db.insert(schema.subscriptions).values([
-    { id: subJoanaId, userId: joanaId, plano: "PRO", status: "ATIVA", gateway: "ASAAS", valorCentavos: 4900, proximaCobranca: daysFromNow(20) },
-    { id: subMarcosId, userId: marcosId, plano: "ESPECIALISTA", status: "ATIVA", gateway: "ASAAS", valorCentavos: 9900, proximaCobranca: daysFromNow(10) },
-    { id: subRobertoId, userId: robertoId, plano: "PRO", status: "CANCELADA", gateway: "ASAAS", valorCentavos: 4900, canceladoEm: daysAgo(3) },
+    { id: subJoanaId, userId: joanaId, plano: "PRO", status: "ATIVA", gateway: "ASAAS", valorCentavos: 4990, proximaCobranca: daysFromNow(20) },
+    { id: subMarcosId, userId: marcosId, plano: "ESPECIALISTA", status: "ATIVA", gateway: "ASAAS", valorCentavos: 9990, proximaCobranca: daysFromNow(10) },
+    { id: subRobertoId, userId: robertoId, plano: "PRO", status: "CANCELADA", gateway: "ASAAS", valorCentavos: 4990, canceladoEm: daysAgo(3) },
   ]);
 
   console.log("Inserindo Compras avulsas (contratantes)...");
   const compraCarlosId = randomUUID();
   const compraAlineId = randomUUID();
   await db.insert(schema.purchases).values([
-    { id: compraCarlosId, userId: carlosId, plano: "LANCE", status: "ATIVO", gateway: "ASAAS", valorCentavos: 6900, expiraEm: daysFromNow(20) },
-    { id: compraAlineId, userId: alineId, plano: "COMPLETO", status: "ATIVO", gateway: "ASAAS", valorCentavos: 3900, expiraEm: daysFromNow(12) },
+    { id: compraCarlosId, userId: carlosId, plano: "LANCE", status: "ATIVO", gateway: "ASAAS", valorCentavos: 6990, expiraEm: daysFromNow(20) },
+    { id: compraAlineId, userId: alineId, plano: "COMPLETO", status: "ATIVO", gateway: "ASAAS", valorCentavos: 3990, expiraEm: daysFromNow(12) },
   ]);
 
   console.log("Inserindo Faturas (PAGA, PAGA, VENCIDA) e Reembolsos...");
@@ -195,14 +195,14 @@ async function main(): Promise<void> {
   const invMarcosVencidaId = randomUUID();
   const invCarlosId = randomUUID();
   await db.insert(schema.invoices).values([
-    { id: invJoanaId, userId: joanaId, subscriptionId: subJoanaId, gateway: "ASAAS", valorCentavos: 4900, status: "PAGA", metodo: "PIX", vencimentoEm: daysAgo(2), pagoEm: daysAgo(2) },
-    { id: invMarcosId, userId: marcosId, subscriptionId: subMarcosId, gateway: "ASAAS", valorCentavos: 9900, status: "PAGA", metodo: "CARTAO", vencimentoEm: daysAgo(5), pagoEm: daysAgo(5) },
-    { id: invMarcosVencidaId, userId: marcosId, subscriptionId: subMarcosId, gateway: "ASAAS", valorCentavos: 9900, status: "VENCIDA", vencimentoEm: daysAgo(1) },
-    { id: invCarlosId, userId: carlosId, purchaseId: compraCarlosId, gateway: "ASAAS", valorCentavos: 6900, status: "PAGA", metodo: "BOLETO", vencimentoEm: daysAgo(10), pagoEm: daysAgo(10) },
+    { id: invJoanaId, userId: joanaId, subscriptionId: subJoanaId, gateway: "ASAAS", valorCentavos: 4990, status: "PAGA", metodo: "PIX", vencimentoEm: daysAgo(2), pagoEm: daysAgo(2) },
+    { id: invMarcosId, userId: marcosId, subscriptionId: subMarcosId, gateway: "ASAAS", valorCentavos: 9990, status: "PAGA", metodo: "CARTAO", vencimentoEm: daysAgo(5), pagoEm: daysAgo(5) },
+    { id: invMarcosVencidaId, userId: marcosId, subscriptionId: subMarcosId, gateway: "ASAAS", valorCentavos: 9990, status: "VENCIDA", vencimentoEm: daysAgo(1) },
+    { id: invCarlosId, userId: carlosId, purchaseId: compraCarlosId, gateway: "ASAAS", valorCentavos: 6990, status: "PAGA", metodo: "BOLETO", vencimentoEm: daysAgo(10), pagoEm: daysAgo(10) },
   ]);
 
   await db.insert(schema.refunds).values([
-    { id: randomUUID(), invoiceId: invJoanaId, userId: joanaId, valorCentavos: 4900, motivo: "ARREPENDIMENTO" },
+    { id: randomUUID(), invoiceId: invJoanaId, userId: joanaId, valorCentavos: 4990, motivo: "ARREPENDIMENTO" },
     { id: randomUUID(), invoiceId: invCarlosId, userId: carlosId, valorCentavos: 3450, motivo: "CANCELAMENTO_PROPORCIONAL", status: "CONCLUIDO", gatewayId: "rfd_seed_1", processadoEm: daysAgo(1) },
   ]);
 

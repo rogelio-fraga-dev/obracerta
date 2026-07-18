@@ -6,10 +6,12 @@ import {
   BILLING_QUEUE,
   INVOICE_DUE_JOB,
   PURCHASE_EXPIRY_JOB,
+  PURCHASE_RENEW_JOB,
   SUBSCRIPTION_RENEW_JOB,
   PLAN_REMINDER_JOB,
   type InvoiceDueJobData,
   type PurchaseExpiryJobData,
+  type PurchaseRenewJobData,
   type SubscriptionRenewJobData,
   type PlanReminderJobData,
 } from "../application/billing.scheduler.js";
@@ -39,7 +41,14 @@ export class BillingJobsProcessor extends WorkerHost {
     if (job.name === PURCHASE_EXPIRY_JOB) {
       const { purchaseId } = job.data as PurchaseExpiryJobData;
       if (await this.billing.expirePurchaseIfActive(purchaseId)) {
-        this.logger.log(`Compra avulsa ${purchaseId} expirada (fim da vigência).`);
+        this.logger.log(`Plano de acesso ${purchaseId} expirado (fim da vigência).`);
+      }
+      return;
+    }
+    if (job.name === PURCHASE_RENEW_JOB) {
+      const { purchaseId } = job.data as PurchaseRenewJobData;
+      if (await this.billing.renewPurchaseIfDue(purchaseId)) {
+        this.logger.log(`Plano de acesso ${purchaseId} renovado (fatura do próximo ciclo emitida).`);
       }
       return;
     }

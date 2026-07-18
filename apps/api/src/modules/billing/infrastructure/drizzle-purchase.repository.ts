@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { ContractorPlan, Purchase, PurchaseStatus } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -51,10 +51,12 @@ export class DrizzlePurchaseRepository implements PurchaseRepository {
   }
 
   async findActiveByUser(userId: string): Promise<Purchase | null> {
+    // CANCELADO entra porque cancelar interrompe só a renovação — o acesso segue
+    // até `expiraEm` (o service filtra o prazo).
     const [row] = await this.db
       .select()
       .from(purchases)
-      .where(and(eq(purchases.userId, userId), eq(purchases.status, "ATIVO")))
+      .where(and(eq(purchases.userId, userId), inArray(purchases.status, ["ATIVO", "CANCELADO"])))
       .orderBy(desc(purchases.expiraEm))
       .limit(1);
     return row ? rowToPurchase(row) : null;
@@ -73,6 +75,15 @@ export class DrizzlePurchaseRepository implements PurchaseRepository {
     const [row] = await this.db
       .update(purchases)
       .set({ status: "EXPIRADO", atualizadoEm: new Date() })
+      .where(and(eq(purchases.id, id), eq(purchases.status, "ATIVO")))
+      .returning();
+    return row ? rowToPurchase(row) : null;
+  }
+
+  async cancel(id: string): Promise<Purchase | null> {
+    const [row] = await this.db
+      .update(purchases)
+      .set({ status: "CANCELADO", atualizadoEm: new Date() })
       .where(and(eq(purchases.id, id), eq(purchases.status, "ATIVO")))
       .returning();
     return row ? rowToPurchase(row) : null;
