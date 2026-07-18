@@ -145,12 +145,29 @@ export class DrizzleWorkOrderRepository implements WorkOrderRepository {
   }
 
   async listForContractor(contractorId: string): Promise<WorkOrder[]> {
+    // Mesmo enriquecimento da descoberta: a empresa vê o próprio destaque e a
+    // identidade nas obras dela (reassegura o valor do plano que ela paga).
+    const planoVigente = sql`${contractorProfiles.planoExpiraEm} is not null and ${contractorProfiles.planoExpiraEm} > now()`;
+    const destaque = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} = 'LANCE' and ${planoVigente})`;
+    const empresaVisivel = sql<boolean>`(${users.tipo} = 'EMPRESA' and ${contractorProfiles.plano} in ('COMPLETO','LANCE') and ${planoVigente})`;
     const rows = await this.db
-      .select()
+      .select({
+        wo: workOrders,
+        destaque,
+        empresaVisivel,
+        empresaNome: sql<string | null>`coalesce(${companyProfiles.nomeFantasia}, ${companyProfiles.razaoSocial})`,
+      })
       .from(workOrders)
+      .leftJoin(users, eq(users.id, workOrders.contractorId))
+      .leftJoin(contractorProfiles, eq(contractorProfiles.userId, workOrders.contractorId))
+      .leftJoin(companyProfiles, eq(companyProfiles.userId, workOrders.contractorId))
       .where(eq(workOrders.contractorId, contractorId))
       .orderBy(desc(workOrders.criadoEm));
-    return rows.map(rowToWorkOrder);
+    return rows.map((r) => ({
+      ...rowToWorkOrder(r.wo),
+      destaque: Boolean(r.destaque),
+      empresa: r.empresaVisivel && r.empresaNome ? { nome: r.empresaNome } : null,
+    }));
   }
 
   async listWonByProfessional(professionalId: string): Promise<WorkOrder[]> {

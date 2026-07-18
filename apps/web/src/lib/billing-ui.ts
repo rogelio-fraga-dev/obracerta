@@ -81,9 +81,18 @@ export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string
     label: "Publicar obra para lances",
     desc: "Publique uma obra e receba propostas sigilosas dos profissionais.",
   },
+};
+
+/**
+ * Rótulos na ótica da **empresa** (PJ): tudo do contratante + os recursos
+ * exclusivos de conta EMPRESA (identidade nas obras, destaque, relatórios).
+ * Mapa separado para o contratante PF não ver features que não se aplicam.
+ */
+export const COMPANY_FEATURE_UI: Record<string, { label: string; desc: string }> = {
+  ...CONTRACTOR_FEATURE_UI,
   "company.visibility": {
     label: "Identidade da empresa nas obras",
-    desc: "Suas obras carregam o nome da empresa (só contas PJ).",
+    desc: "Suas obras carregam o nome da empresa na descoberta.",
   },
   "workorder.featured": {
     label: "Destaque das obras",
@@ -91,6 +100,6 @@ export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string
   },
   "company.reports": {
     label: "Relatórios da operação",
-    desc: "Indicadores e histórico das contratações em Relatórios (só contas PJ).",
+    desc: "Indicadores e histórico das contratações em Relatórios.",
   },
 };

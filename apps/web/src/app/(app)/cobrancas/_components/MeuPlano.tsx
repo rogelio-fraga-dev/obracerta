@@ -11,7 +11,7 @@ import {
   type Subscription,
 } from "@obracerta/shared";
 import { Badge, Button, Card } from "@obracerta/ui";
-import { FEATURE_UI, CONTRACTOR_FEATURE_UI } from "@/lib/billing-ui";
+import { FEATURE_UI, CONTRACTOR_FEATURE_UI, COMPANY_FEATURE_UI } from "@/lib/billing-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { CheckoutDialog } from "./CheckoutDialog";
 
@@ -35,7 +35,11 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
   const [loadingCancel, setLoadingCancel] = useState(false);
   const [loadingAssinar, setLoadingAssinar] = useState<string | null>(null);
 
-  const featureUi = isProfissional ? FEATURE_UI : CONTRACTOR_FEATURE_UI;
+  const featureUi = isProfissional
+    ? FEATURE_UI
+    : tipo === "EMPRESA"
+      ? COMPANY_FEATURE_UI
+      : CONTRACTOR_FEATURE_UI;
   // Empresa vê o catálogo com preço próprio (homologação 18/07).
   const hiringCatalog = hiringPlanCatalogFor(tipo);
   const hiringOrdered = hiringPlansOrderedFor(tipo);
