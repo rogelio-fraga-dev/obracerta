@@ -1,0 +1,81 @@
+# Seed manual da nuvem (demo) — roda `pnpm db:seed` na EC2 via AWS SSM.
+#
+# ⚠️ DESTRUTIVO: o seed APAGA todos os dados atuais e recria o estado canônico
+# da demo. Só dispara manualmente (workflow_dispatch) e exige digitar a
+# confirmação exata `SEED-PROD` — não roda em push, não roda por acidente.
+#
+# Usa o MESMO caminho seguro do deploy (OIDC + SSM Run Command), sem abrir a
+# porta 22. O código na EC2 é atualizado (git reset) antes de semear, então o
+# seed reflete a versão mais recente de seed-completo.ts.
+
+name: Seed (nuvem/demo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: 'Digite SEED-PROD para confirmar (APAGA e recria os dados da demo)'
+        required: true
+        default: ''
+
+concurrency:
+  group: seed-prod
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirmar == 'SEED-PROD'
+    environment: production
+    permissions:
+      id-token: write # OIDC
+      contents: read
+    steps:
+      - name: Configura credenciais AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Roda o seed na EC2 via SSM
+        env:
+          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        run: |
+          set -euo pipefail
+          # Atualiza o código na EC2 e roda o seed num container one-off da API
+          # (mesma receita do migrate). Só aspas SIMPLES no comando interno para
+          # não colidir com o wrapping do runuser -c "$REMOTE". Seed usa as senhas
+          # padrão (admin@123 / senha@123) — credenciais conhecidas da demo.
+          REMOTE="cd ~/obracerta && git fetch origin master -q && git reset --hard FETCH_HEAD && docker compose --env-file infra/docker/.env.prod -f infra/docker/docker-compose.prod.yml run --rm api sh -lc 'pnpm db:seed'"
+          CMD="runuser -l ec2-user -c \"$REMOTE\""
+          jq -n --arg c "$CMD" '{commands:[$c]}' > ssm-params.json
+
+          echo "▶ Enviando comando de seed para $INSTANCE_ID…"
+          CID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "seed demo ${GITHUB_SHA::7}" \
+            --parameters file://ssm-params.json \
+            --query Command.CommandId --output text)
+          echo "CommandId=$CID"
+
+          echo "▶ Aguardando conclusão (até ~12min)…"
+          OK=0
+          for i in $(seq 1 72); do
+            STATUS=$(aws ssm get-command-invocation --command-id "$CID" --instance-id "$INSTANCE_ID" --query Status --output text 2>/dev/null || echo Pending)
+            echo "  [$i] status=$STATUS"
+            case "$STATUS" in
+              Success) OK=1; break ;;
+              Failed|Cancelled|TimedOut)
+                echo "::group::stderr do comando remoto"
+                aws ssm get-command-invocation --command-id "$CID" --instance-id "$INSTANCE_ID" --query StandardErrorContent --output text
+                echo "::endgroup::"
+                echo "::error::SSM terminou com status $STATUS"; exit 1 ;;
+            esac
+            sleep 10
+          done
+
+          echo "::group::Saída do seed"
+          aws ssm get-command-invocation --command-id "$CID" --instance-id "$INSTANCE_ID" --query StandardOutputContent --output text
+          echo "::endgroup::"
+          [ "$OK" = "1" ] || { echo "::error::timeout aguardando o SSM"; exit 1; }
