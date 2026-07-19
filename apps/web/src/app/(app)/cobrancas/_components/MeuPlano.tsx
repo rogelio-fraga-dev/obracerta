@@ -11,6 +11,7 @@ import {
   type Subscription,
 } from "@obracerta/shared";
 import { Badge, Button, Card } from "@obracerta/ui";
+import { AlertTriangle, PartyPopper } from "lucide-react";
 import { FEATURE_UI, CONTRACTOR_FEATURE_UI, COMPANY_FEATURE_UI } from "@/lib/billing-ui";
 import { formatDateTimeBR } from "@/lib/format";
 import { CheckoutDialog } from "./CheckoutDialog";
@@ -115,9 +116,12 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
       </div>
 
       {isProfissional && subscription?.status === "CANCELADA" && subscription.proximaCobranca && (
-        <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-warning-foreground">
-          ⚠️ Sua assinatura do plano <strong>{atual?.nome}</strong> foi cancelada.
-          Você continuará com acesso aos recursos premium até o dia <strong>{formatDateTimeBR(subscription.proximaCobranca)}</strong>.
+        <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-warning-foreground">
+          <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            Sua assinatura do plano <strong>{atual?.nome}</strong> foi cancelada.
+            Você continuará com acesso aos recursos premium até o dia <strong>{formatDateTimeBR(subscription.proximaCobranca)}</strong>.
+          </span>
         </div>
       )}
 
@@ -175,8 +179,8 @@ export function MeuPlano({ plano, features, subscription, tipo }: MeuPlanoProps)
             </p>
           </div>
         ) : (
-          <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-            Você está no plano máximo. 🎉
+          <p className="flex items-center gap-1.5 border-t border-border pt-4 text-sm text-muted-foreground">
+            <PartyPopper aria-hidden className="h-4 w-4 text-primary" /> Você está no plano máximo.
           </p>
         )
       ) : (

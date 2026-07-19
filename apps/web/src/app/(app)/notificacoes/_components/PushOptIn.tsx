@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { PushPublicKey } from "@obracerta/shared";
 import { Button } from "@obracerta/ui";
+import { Bell } from "lucide-react";
 import { bff } from "@/lib/client";
 
 type Estado = "verificando" | "indisponivel" | "desativado" | "ativado" | "negado";
@@ -100,7 +101,9 @@ export function PushOptIn() {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3">
       <div className="min-w-0">
-        <p className="text-sm font-bold text-foreground">🔔 Avisos no aparelho</p>
+        <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+          <Bell aria-hidden className="h-4 w-4 text-primary" /> Avisos no aparelho
+        </p>
         <p className="text-xs text-muted-foreground">
           {estado === "ativado"
             ? "Você recebe as notificações mesmo com o app fechado."

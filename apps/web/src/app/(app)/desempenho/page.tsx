@@ -5,6 +5,7 @@ import {
   type ProfessionalAnalytics,
 } from "@obracerta/shared";
 import { Badge, Button, Card, StatCard } from "@obracerta/ui";
+import { Inbox, Handshake, Flag, Star, Send, Trophy, Wallet, Lock } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BackLink } from "../_shell/BackLink";
@@ -55,7 +56,7 @@ export default async function DesempenhoPage() {
 
       {bloqueado || !analytics ? (
         <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-          <span aria-hidden className="text-3xl">🔒</span>
+          <Lock aria-hidden className="mx-auto h-8 w-8 text-primary" />
           <h2 className="font-display text-lg font-black text-foreground">
             Analytics é dos planos Profissional e Especialista
           </h2>
@@ -71,17 +72,17 @@ export default async function DesempenhoPage() {
         <>
           {/* KPIs base (Profissional+) */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <StatCard icon="📬" label="Pedidos recebidos" value={analytics.pedidos.total} detail={`${analytics.pedidos.ultimos30d} nos últimos 30 dias`} />
+            <StatCard icon={<Inbox className="h-5 w-5" />} label="Pedidos recebidos" value={analytics.pedidos.total} detail={`${analytics.pedidos.ultimos30d} nos últimos 30 dias`} />
             <StatCard
-              icon="🤝"
+              icon={<Handshake className="h-5 w-5" />}
               label="Taxa de aceitação"
               value={analytics.taxaAceitacao === null ? "—" : `${analytics.taxaAceitacao}%`}
               tone={analytics.taxaAceitacao !== null && analytics.taxaAceitacao >= 70 ? "success" : "default"}
               detail={`${analytics.pedidos.aprovados} aceitos · ${analytics.pedidos.recusados} recusados · ${analytics.pedidos.expirados} expirados`}
             />
-            <StatCard icon="🏁" label="Serviços concluídos" value={analytics.pedidos.concluidos} />
+            <StatCard icon={<Flag className="h-5 w-5" />} label="Serviços concluídos" value={analytics.pedidos.concluidos} />
             <StatCard
-              icon="⭐"
+              icon={<Star className="h-5 w-5" />}
               label="Avaliação média"
               value={analytics.avaliacoes.media === null ? "—" : analytics.avaliacoes.media.toFixed(1)}
               detail={`${analytics.avaliacoes.total} avaliações reveladas`}
@@ -100,12 +101,12 @@ export default async function DesempenhoPage() {
               </div>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                 <StatCard
-                  icon="📤"
+                  icon={<Send className="h-5 w-5" />}
                   label="Lances enviados"
                   value={analytics.avancado.lances.enviados}
                 />
                 <StatCard
-                  icon="🏆"
+                  icon={<Trophy className="h-5 w-5" />}
                   label="Lances aceitos"
                   value={analytics.avancado.lances.aceitos}
                   detail={
@@ -116,7 +117,7 @@ export default async function DesempenhoPage() {
                   tone="success"
                 />
                 <StatCard
-                  icon="💰"
+                  icon={<Wallet className="h-5 w-5" />}
                   label="Ganho via plataforma"
                   value={formatCentavos(analytics.avancado.ganhoEstimadoCentavos)}
                   detail="Soma dos lances aceitos"
@@ -154,13 +155,14 @@ export default async function DesempenhoPage() {
             </Card>
           ) : (
             <Card className="space-y-2 border-primary/30 bg-primary/[0.04]">
-              <p className="text-sm text-foreground">
-                <span aria-hidden>🔒</span> <strong>Analytics avançados</strong> (conversão de
+              <p className="flex items-start gap-2 text-sm text-foreground">
+                <Lock aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span><strong>Analytics avançados</strong> (conversão de
                 lances, ganho via plataforma e tendência mensal) são exclusivos do plano{" "}
                 <strong>Especialista</strong>.{" "}
                 <Link href="/cobrancas" className="font-semibold text-primary hover:underline">
                   Fazer upgrade →
-                </Link>
+                </Link></span>
               </p>
             </Card>
           )}

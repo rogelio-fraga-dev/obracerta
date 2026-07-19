@@ -1,5 +1,6 @@
 import { ApiEnvelopeError, type Report, type Suspension } from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
+import { PartyPopper } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { formatDateTimeBR } from "@/lib/format";
 import { BackLink } from "../../_shell/BackLink";
@@ -66,7 +67,9 @@ export default async function ModeracaoPage() {
             Denúncias abertas ({reports.length})
           </h2>
           {reports.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma denúncia pendente. 🎉</p>
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <PartyPopper aria-hidden className="h-4 w-4 text-success" /> Nenhuma denúncia pendente.
+            </p>
           ) : (
             <ul className="space-y-4">
               {reports.map((r) => (

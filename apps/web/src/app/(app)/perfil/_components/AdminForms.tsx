@@ -4,6 +4,7 @@ import { useState, useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, Button, Input, Label } from "@obracerta/ui";
+import { AlertTriangle } from "lucide-react";
 import { type User, updateProfileSchema, type UpdateProfileInput, updatePasswordSchema, type UpdatePasswordInput, createAdminSchema, type CreateAdminInput } from "@obracerta/shared";
 import { updateProfileAction, updatePasswordAction, createAdminAction, uploadFotoAction } from "../actions";
 
@@ -233,8 +234,8 @@ function CreateAdminForm() {
 
       {pendingAdmin ? (
         <div className="space-y-3 rounded-lg border border-danger/30 bg-danger/5 p-4">
-          <p className="text-sm font-bold text-danger">
-            <span aria-hidden>⚠ </span>Ação sensível: controle total do sistema
+          <p className="flex items-center gap-1.5 text-sm font-bold text-danger">
+            <AlertTriangle aria-hidden className="h-4 w-4 shrink-0" /> Ação sensível: controle total do sistema
           </p>
           <p className="text-sm text-foreground">
             Você vai criar um administrador com acesso a tudo:{" "}

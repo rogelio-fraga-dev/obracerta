@@ -6,6 +6,7 @@ import {
   type WorkOrdersPage,
 } from "@obracerta/shared";
 import { Badge, Button, Card, EmptyState } from "@obracerta/ui";
+import { Lock, Star, Building2 } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { WORK_ORDER_STATUS_UI, WORK_URGENCY_UI } from "@/lib/work-order-ui";
@@ -103,13 +104,15 @@ async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
 
       {!podePublicar && (
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/[0.04] p-5">
-          <p className="text-sm text-foreground">
-            <span aria-hidden>🔒</span>{" "}
-            <strong>Publicar obras para receber lances</strong> é exclusivo do plano{" "}
-            <strong>Lance</strong> (Empresa PRO para empresas).{" "}
-            <Link href="/cobrancas" className="font-semibold text-primary hover:underline">
-              Assinar em Cobranças →
-            </Link>
+          <p className="flex items-start gap-2 text-sm text-foreground">
+            <Lock aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <span>
+              <strong>Publicar obras para receber lances</strong> é exclusivo do plano{" "}
+              <strong>Lance</strong> (Empresa PRO para empresas).{" "}
+              <Link href="/cobrancas" className="font-semibold text-primary hover:underline">
+                Assinar em Cobranças →
+              </Link>
+            </span>
           </p>
         </div>
       )}
@@ -279,11 +282,14 @@ function ObraGrid({ items }: { items: WorkOrder[] }) {
                 {(o.destaque || o.empresa) && (
                   <div className="flex flex-wrap items-center gap-2">
                     {o.destaque && (
-                      <Badge tone="warning" size="sm">⭐ Destaque</Badge>
+                      <Badge tone="warning" size="sm">
+                        <Star aria-hidden className="mr-1 inline h-3 w-3 align-[-1px]" />
+                        Destaque
+                      </Badge>
                     )}
                     {o.empresa && (
                       <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
-                        <span aria-hidden>🏢</span> {o.empresa.nome}
+                        <Building2 aria-hidden className="h-3.5 w-3.5" /> {o.empresa.nome}
                       </span>
                     )}
                   </div>

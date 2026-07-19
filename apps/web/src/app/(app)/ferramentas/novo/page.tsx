@@ -10,6 +10,7 @@ import {
   formatCentavos,
 } from "@obracerta/shared";
 import { Button, Card, Field, Input } from "@obracerta/ui";
+import { X } from "lucide-react";
 import { bff } from "@/lib/client";
 import { BackLink } from "../../_shell/BackLink";
 
@@ -147,7 +148,7 @@ export default function NovoDocumentoPage() {
                 />
                 {itens.length > 1 && (
                   <Button type="button" size="sm" variant="ghost" onClick={() => removeItem(i)} aria-label="Remover item">
-                    ✕
+                    <X aria-hidden className="h-4 w-4" />
                   </Button>
                 )}
               </div>

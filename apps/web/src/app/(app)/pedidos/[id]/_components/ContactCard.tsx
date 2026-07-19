@@ -1,3 +1,4 @@
+import { LockOpen } from "lucide-react";
 import type { BookingContact } from "@obracerta/shared";
 
 function waLink(whatsapp: string, nome: string): string {
@@ -17,9 +18,7 @@ export function ContactCard({ contato, papel }: { contato: BookingContact; papel
   return (
     <div className="rounded-xl border border-primary/30 bg-primary/[0.04] p-4">
       <div className="flex items-center gap-2">
-        <span aria-hidden className="text-lg">
-          🔓
-        </span>
+        <LockOpen aria-hidden className="h-4 w-4 text-primary" />
         <p className="text-xs font-bold uppercase tracking-[2px] text-primary">
           Contato liberado · {papel}
         </p>

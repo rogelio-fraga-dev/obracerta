@@ -4,16 +4,17 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Notification, NotificationType } from "@obracerta/shared";
 import { Button, Card, EmptyState } from "@obracerta/ui";
+import { ArrowRight, Bell, Hammer, HardHat, Star, CreditCard, Megaphone, type LucideIcon } from "lucide-react";
 import { formatRelativeBR } from "@/lib/format";
 import { markAllNotificationsReadAction, markNotificationReadAction } from "../actions";
 
 /** Ícone por categoria — leitura rápida do que aconteceu. */
-const TIPO_ICON: Record<NotificationType, string> = {
-  PEDIDO: "🔨",
-  OBRA: "🏗️",
-  AVALIACAO: "⭐",
-  COBRANCA: "💳",
-  SISTEMA: "📣",
+const TIPO_ICON: Record<NotificationType, LucideIcon> = {
+  PEDIDO: Hammer,
+  OBRA: HardHat,
+  AVALIACAO: Star,
+  COBRANCA: CreditCard,
+  SISTEMA: Megaphone,
 };
 
 /**
@@ -46,7 +47,7 @@ export function NotificationList({ notificacoes }: { notificacoes: Notification[
   if (notificacoes.length === 0) {
     return (
       <EmptyState
-        icon="🔔"
+        icon={<Bell className="h-8 w-8" />}
         title="Nada por aqui ainda"
         description="Avisos sobre pedidos, obras, mensagens e avaliações aparecem nesta lista."
       />
@@ -80,9 +81,10 @@ export function NotificationList({ notificacoes }: { notificacoes: Notification[
                   n.lida ? "" : "border-primary/40 bg-primary/[0.04]"
                 }`}
               >
-                <span aria-hidden className="mt-0.5 text-xl">
-                  {TIPO_ICON[n.tipo]}
-                </span>
+                {(() => {
+                  const Icon = TIPO_ICON[n.tipo];
+                  return <Icon aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-primary" />;
+                })()}
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
                     <span className={`text-sm ${n.lida ? "font-semibold text-foreground/80" : "font-bold text-foreground"}`}>
@@ -99,7 +101,7 @@ export function NotificationList({ notificacoes }: { notificacoes: Notification[
                     {formatRelativeBR(n.criadoEm)}
                   </span>
                 </span>
-                {n.link && <span aria-hidden className="text-muted-foreground">→</span>}
+                {n.link && <ArrowRight aria-hidden className="h-4 w-4 shrink-0 text-muted-foreground" />}
               </Card>
             </button>
           </li>

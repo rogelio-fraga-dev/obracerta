@@ -116,7 +116,7 @@ export function NovaObraForm({ cities, enderecos = [] }: { cities: City[]; ender
             <option value="">Preencher manualmente</option>
             {enderecos.map((e) => (
               <option key={e.id} value={e.id}>
-                📍 {e.apelido} — {e.cidade}/{e.uf}
+                {e.apelido} — {e.cidade}/{e.uf}
               </option>
             ))}
           </Select>

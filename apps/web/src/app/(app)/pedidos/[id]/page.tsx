@@ -13,6 +13,7 @@ import {
   type UserType,
 } from "@obracerta/shared";
 import { Badge } from "@obracerta/ui";
+import { FileText, Lock } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BOOKING_STATUS_UI } from "@/lib/booking-ui";
@@ -111,9 +112,9 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
         {isBookingContactReleased(booking.status) && (
           <Link
             href={`/pedidos/${booking.id}/resumo`}
-            className="text-sm font-semibold text-primary hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
           >
-            📄 Exportar resumo do serviço
+            <FileText aria-hidden className="h-4 w-4" /> Exportar resumo do serviço
           </Link>
         )}
       </div>
@@ -193,7 +194,7 @@ export default async function PedidoDetailPage({ params }: { params: Promise<{ i
 
       {!podeResponder && (
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/[0.04] p-5 text-center">
-          <span aria-hidden className="text-2xl">🔒</span>
+          <Lock aria-hidden className="mx-auto h-7 w-7 text-primary" />
           <h2 className="mt-1 font-display text-lg font-black text-foreground">
             Aceitar pedidos é do plano Profissional
           </h2>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ApiEnvelopeError, type CompanyTeam } from "@obracerta/shared";
 import { Button, Card } from "@obracerta/ui";
+import { Lock } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BackLink } from "../_shell/BackLink";
@@ -50,7 +51,7 @@ export default async function EquipePage() {
 
       {bloqueado || !team ? (
         <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-          <span aria-hidden className="text-3xl">🔒</span>
+          <Lock aria-hidden className="mx-auto h-8 w-8 text-primary" />
           <h2 className="font-display text-lg font-black text-foreground">
             A gestão de equipe faz parte dos planos de empresa
           </h2>

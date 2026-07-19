@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check, Pencil, X } from "lucide-react";
 import { MAX_PORTFOLIO_PHOTOS, type PortfolioPhoto } from "@obracerta/shared";
 import { Button, ConfirmDialog, Field, Input } from "@obracerta/ui";
 import {
@@ -98,9 +99,9 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
                     onClick={() => salvarLegenda(f.id)}
                     disabled={pending}
                     aria-label="Salvar legenda"
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-success text-xs font-bold text-white"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-success text-white"
                   >
-                    ✓
+                    <Check aria-hidden className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ) : (
@@ -119,18 +120,18 @@ export function PortfolioManager({ fotos }: { fotos: PortfolioPhoto[] }) {
                   }}
                   disabled={pending}
                   aria-label="Editar legenda"
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-primary"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-primary"
                 >
-                  ✎
+                  <Pencil aria-hidden className="h-3.5 w-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setRemovendoId(f.id)}
                   disabled={pending}
                   aria-label="Remover foto"
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-xs font-bold text-white hover:bg-danger"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-danger"
                 >
-                  ✕
+                  <X aria-hidden className="h-3.5 w-3.5" />
                 </button>
               </div>
             </li>

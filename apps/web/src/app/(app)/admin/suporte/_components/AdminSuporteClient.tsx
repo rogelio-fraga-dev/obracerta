@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { AdminSupportTicket, SupportStatus } from "@obracerta/shared";
 import { Badge, Button, Card, EmptyState, Textarea, Field, Select, type BadgeTone } from "@obracerta/ui";
+import { LifeBuoy } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { formatDateTimeBR } from "@/lib/format";
 import { closeSupportTicketAction, respondSupportTicketAction } from "../actions";
@@ -73,7 +74,7 @@ export function AdminSuporteClient({ tickets }: { tickets: AdminSupportTicket[] 
   if (tickets.length === 0) {
     return (
       <EmptyState
-        icon="🛟"
+        icon={<LifeBuoy className="h-8 w-8" />}
         title="Fila limpa"
         description="Nenhum chamado de suporte no momento."
       />

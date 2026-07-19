@@ -1,5 +1,6 @@
 import { serverApi } from "@/lib/server-api";
 import { Badge, Card, Button } from "@obracerta/ui";
+import { Star } from "lucide-react";
 import type { User, ReputationSummary } from "@obracerta/shared";
 import { formatDateTimeBR } from "@/lib/format";
 import { BackLink } from "../../../_shell/BackLink";
@@ -70,8 +71,15 @@ export default async function AdminUsuarioDetalhePage({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Nota Média</span>
-                <span className="font-medium text-warning text-lg">
-                  {reputation.mediaNota != null ? `${reputation.mediaNota.toFixed(1)} ⭐` : "Sem avaliações"}
+                <span className="inline-flex items-center gap-1 font-medium text-warning text-lg">
+                  {reputation.mediaNota != null ? (
+                    <>
+                      {reputation.mediaNota.toFixed(1)}
+                      <Star aria-hidden className="h-4 w-4 fill-current" />
+                    </>
+                  ) : (
+                    "Sem avaliações"
+                  )}
                 </span>
               </div>
               <div className="flex justify-between">

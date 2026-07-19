@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MessageCircle, Mail } from "lucide-react";
 import { Badge, Card } from "@obracerta/ui";
 import { formatCentavos, type Invoice, type Refund, type Subscription } from "@obracerta/shared";
 import { INVOICE_STATUS_UI, PAYMENT_METHOD_LABEL, REFUND_STATUS_UI } from "@/lib/billing-ui";
@@ -218,13 +219,13 @@ export function CobrancasClient({ invoices, refunds, plano, features, subscripti
                     rel="noopener noreferrer"
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] transition-all px-4 py-3 font-semibold text-white shadow-sm"
                   >
-                    <span>💬 Falar no WhatsApp</span>
+                    <MessageCircle aria-hidden className="h-4 w-4" /> Falar no WhatsApp
                   </a>
                   <a
                     href="mailto:suporte@obracerta.com.br"
                     className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-border hover:bg-muted transition-all px-4 py-3 font-semibold text-foreground"
                   >
-                    <span>✉ Enviar E-mail</span>
+                    <Mail aria-hidden className="h-4 w-4" /> Enviar E-mail
                   </a>
                 </div>
               </Card>

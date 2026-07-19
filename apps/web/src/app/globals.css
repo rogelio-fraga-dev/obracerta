@@ -214,3 +214,16 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Logo ciente do tema: a variante escura (texto em creme) aparece só no dark
+   mode; a padrão fica escondida. Troca por CSS = sem flash, funciona em Server
+   Component. As duas imgs coexistem no DOM; só uma é exibida por vez. */
+.brand-logo-dark {
+  display: none;
+}
+:root[data-theme="dark"] .brand-logo-light {
+  display: none;
+}
+:root[data-theme="dark"] .brand-logo-dark {
+  display: block;
+}

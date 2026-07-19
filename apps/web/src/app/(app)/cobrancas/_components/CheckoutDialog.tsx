@@ -7,6 +7,14 @@ import {
   type ProfessionalPlanInfo,
 } from "@obracerta/shared";
 import { Badge, Button } from "@obracerta/ui";
+import {
+  Check,
+  CircleCheck,
+  ClipboardList,
+  CreditCard,
+  PartyPopper,
+  type LucideIcon,
+} from "lucide-react";
 import { bff } from "@/lib/client";
 
 /* ──────────────────────── Types ──────────────────────── */
@@ -72,10 +80,10 @@ function formatarValidade(v: string): string {
 
 /* ──────────────────── Stepper ──────────────────── */
 
-const STEPS: { label: string; icon: string }[] = [
-  { label: "Resumo", icon: "📋" },
-  { label: "Pagamento", icon: "💳" },
-  { label: "Confirmação", icon: "✅" },
+const STEPS: { label: string; Icon: LucideIcon }[] = [
+  { label: "Resumo", Icon: ClipboardList },
+  { label: "Pagamento", Icon: CreditCard },
+  { label: "Confirmação", Icon: CircleCheck },
 ];
 
 function Stepper({ current }: { current: Step }) {
@@ -104,7 +112,7 @@ function Stepper({ current }: { current: Step }) {
                       : "bg-muted text-muted-foreground"
                 }`}
               >
-                {isDone ? "✓" : s.icon}
+                {isDone ? <Check aria-hidden className="h-4 w-4" /> : <s.Icon aria-hidden className="h-4 w-4" />}
               </span>
               <span
                 className={`text-[10px] font-semibold transition-colors sm:text-xs ${
@@ -160,7 +168,7 @@ function StepResumo({
         <ul className="space-y-1.5">
           {plano.beneficios.map((b) => (
             <li key={b} className="flex items-center gap-2 text-sm">
-              <span className="text-success">✓</span>
+              <Check aria-hidden className="h-4 w-4 shrink-0 text-success" />
               <span className="text-foreground">{b}</span>
             </li>
           ))}
@@ -263,7 +271,7 @@ function StepPagamento({
                 usarSalvo ? "border-primary bg-primary text-white" : "border-border"
               }`}
             >
-              {usarSalvo && "✓"}
+              {usarSalvo && <Check aria-hidden className="h-3 w-3" />}
             </span>
             <div className="flex-1">
               <p className="text-sm font-bold text-foreground">
@@ -273,7 +281,7 @@ function StepPagamento({
                 {cartaoSalvo.titular} · Validade {cartaoSalvo.validade}
               </p>
             </div>
-            <span className="text-lg">💳</span>
+            <CreditCard aria-hidden className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>
       )}
@@ -293,7 +301,7 @@ function StepPagamento({
               !usarSalvo ? "border-primary bg-primary text-white" : "border-border"
             }`}
           >
-            {!usarSalvo && "✓"}
+            {!usarSalvo && <Check aria-hidden className="h-3 w-3" />}
           </span>
           <p className="text-sm font-bold text-foreground">Novo cartão de crédito</p>
         </div>
@@ -413,8 +421,8 @@ function StepConfirmacao({
   if (sucesso) {
     return (
       <div className="space-y-4 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/15 text-3xl">
-          🎉
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/15 text-success">
+          <PartyPopper aria-hidden className="h-8 w-8" />
         </div>
         <h3 className="font-display text-xl font-black text-foreground">Upgrade realizado!</h3>
         <p className="text-sm text-muted-foreground">
@@ -445,7 +453,7 @@ function StepConfirmacao({
       <div className="rounded-xl border border-border bg-muted/20 p-3 sm:p-4">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pagamento</p>
         <div className="mt-1 flex items-center gap-2">
-          <span className="text-lg">💳</span>
+          <CreditCard aria-hidden className="h-5 w-5 text-muted-foreground" />
           <div>
             <p className="text-sm font-bold text-foreground">
               {cartao.bandeira} •••• {cartao.ultimos4}

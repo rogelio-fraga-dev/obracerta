@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Heart } from "lucide-react";
 import { bff } from "@/lib/client";
 import { useToast } from "@/components/Toast";
 
@@ -27,7 +28,7 @@ export function FavoriteButton({
     setBusy(true);
     try {
       await bff.post("/api/favorites", { professionalId, favoritar: next });
-      toast.success(next ? "Salvo nos favoritos ♥" : "Removido dos favoritos");
+      toast.success(next ? "Salvo nos favoritos" : "Removido dos favoritos");
     } catch {
       setFavorited(!next); // rollback
       toast.error("Não foi possível atualizar os favoritos. Tente de novo.");
@@ -43,13 +44,13 @@ export function FavoriteButton({
       aria-pressed={favorited}
       aria-label={favorited ? "Remover dos favoritos" : "Salvar nos favoritos"}
       title={favorited ? "Remover dos favoritos" : "Salvar nos favoritos"}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-lg transition-all ${
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all ${
         favorited
           ? "border-danger/30 bg-danger/10 text-danger"
           : "border-border bg-background text-muted-foreground hover:border-danger/30 hover:text-danger"
       }`}
     >
-      {favorited ? "♥" : "♡"}
+      <Heart aria-hidden className="h-[18px] w-[18px]" fill={favorited ? "currentColor" : "none"} />
     </button>
   );
 }

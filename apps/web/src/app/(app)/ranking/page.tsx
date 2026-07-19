@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { RankingEntry } from "@obracerta/shared";
 import { serverApi } from "@/lib/server-api";
 import { Avatar, Badge, Card } from "@obracerta/ui";
+import { Medal, Trophy } from "lucide-react";
 import { BackLink } from "../_shell/BackLink";
 
 export const revalidate = 60; // Cache por 1 minuto
@@ -27,21 +28,21 @@ export default async function RankingPage() {
   const PODIUM_STYLES = [
     {
       place: 2,
-      medal: "🥈",
+      medalColor: "text-zinc-400",
       height: "h-36",
       bg: "bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50",
       text: "text-zinc-500",
     },
     {
       place: 1,
-      medal: "🥇",
+      medalColor: "text-amber-400",
       height: "h-44",
       bg: "bg-amber-100 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30",
       text: "text-amber-500 font-extrabold",
     },
     {
       place: 3,
-      medal: "🥉",
+      medalColor: "text-orange-500",
       height: "h-32",
       bg: "bg-orange-100 dark:bg-orange-950/10 border-orange-200 dark:border-orange-900/20",
       text: "text-orange-600",
@@ -52,8 +53,9 @@ export default async function RankingPage() {
     <section aria-labelledby="ranking-heading" className="space-y-6 max-w-4xl mx-auto">
       <BackLink href="/buscar" label="Voltar para busca" />
       <header className="text-center space-y-2">
-        <h1 id="ranking-heading" className="font-display text-3xl font-black text-foreground">
-          Ranking de Profissionais 🏆
+        <h1 id="ranking-heading" className="flex items-center justify-center gap-2 font-display text-3xl font-black text-foreground">
+          Ranking de Profissionais
+          <Trophy aria-hidden className="h-7 w-7 text-primary" />
         </h1>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
           Os profissionais que mais se destacam no ObraCerta, classificados por volume de obras finalizadas e avaliações.
@@ -77,8 +79,8 @@ export default async function RankingPage() {
                       size="xl"
                       className="border-4 border-background ring-4 ring-primary/20 group-hover:scale-105 transition-transform"
                     />
-                    <span className="absolute -top-2 -right-2 text-2xl animate-bounce-slow">
-                      {style.medal}
+                    <span className="absolute -top-2 -right-2 animate-bounce-slow">
+                      <Medal aria-hidden className={`h-7 w-7 ${style.medalColor}`} />
                     </span>
                   </div>
                   <p className="mt-2 font-display text-sm font-bold text-foreground truncate max-w-[120px] group-hover:underline">

@@ -7,6 +7,7 @@ import { X, ArrowRight, Bell } from "lucide-react";
 import { Avatar, cn } from "@obracerta/ui";
 import { firstName } from "@/lib/format";
 import { ThemeButton } from "@/components/ThemeButton";
+import { BrandLogo } from "@/components/BrandLogo";
 import { isNavActive, navForTipo, tipoLabel, ADMIN_NAV, type NavItem } from "./nav-items";
 import { LogoutButton } from "./LogoutButton";
 
@@ -183,13 +184,7 @@ export function MobileHeader({
           {/* Drawer Header */}
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <Link href={isAdmin ? "/admin" : "/inicio"} className="flex shrink-0 items-center" onClick={() => setIsOpen(false)}>
-              <img
-                src="/brand/obracerta-logo.png"
-                alt={brandName}
-                width={1120}
-                height={305}
-                className="h-8 w-auto"
-              />
+              <BrandLogo alt={brandName} className="h-8 w-auto" />
             </Link>
             <button
               type="button"

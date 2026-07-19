@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Share } from "lucide-react";
 import { Button } from "@obracerta/ui";
+import { BrandLogo } from "@/components/BrandLogo";
 
 /** Evento `beforeinstallprompt` (não tipado no lib.dom padrão). */
 interface BeforeInstallPromptEvent extends Event {
@@ -82,13 +84,13 @@ export function InstallPrompt() {
       className="fixed inset-x-3 bottom-20 z-40 mx-auto flex max-w-md items-center gap-3 rounded-xl border border-border bg-background p-3.5 shadow-[var(--shadow-xl)] lg:bottom-6"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted">
-        <img src="/brand/obracerta-mark.png" alt="" className="h-7 w-auto" />
+        <BrandLogo variant="mark" alt="" className="h-7 w-auto" />
       </span>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-bold text-foreground">Instalar o app</div>
         {iosHint ? (
           <p className="text-xs text-muted-foreground">
-            Toque em <span aria-hidden>⎋</span> Compartilhar e depois em “Adicionar à Tela de Início”.
+            Toque em <Share aria-hidden className="inline h-3.5 w-3.5 align-[-2px]" /> Compartilhar e depois em “Adicionar à Tela de Início”.
           </p>
         ) : (
           <p className="text-xs text-muted-foreground">Acesso rápido na tela inicial, como um app.</p>

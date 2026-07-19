@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Trophy, Lightbulb } from "lucide-react";
 import {
   formatCentavos,
   professionalPlanCatalog,
@@ -103,8 +103,8 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
       {/* Faixa de preço de referência (agregado anônimo de lances) — dor "quanto custa?". */}
       {faixaPreco && (
         <div className="rounded-xl border border-info/25 bg-info/5 px-4 py-3 text-sm">
-          <span className="font-bold text-foreground">
-            💡 Faixa de preço em {faixaPreco.especialidade}:
+          <span className="inline-flex items-center gap-1.5 font-bold text-foreground">
+            <Lightbulb aria-hidden className="h-4 w-4 text-info" /> Faixa de preço em {faixaPreco.especialidade}:
           </span>{" "}
           <span className="text-foreground">
             {formatCentavos(faixaPreco.minCentavos)} a {formatCentavos(faixaPreco.maxCentavos)}

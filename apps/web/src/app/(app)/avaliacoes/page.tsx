@@ -1,5 +1,6 @@
 import type { ReceivedReview } from "@obracerta/shared";
 import { Card, EmptyState } from "@obracerta/ui";
+import { Star } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { formatRelativeBR } from "@/lib/format";
 import { BackLink } from "../_shell/BackLink";
@@ -86,7 +87,7 @@ export default async function AvaliacoesPage() {
 
         {reviews.length === 0 ? (
           <EmptyState
-            icon="⭐"
+            icon={<Star className="h-8 w-8" />}
             title="Ainda sem avaliações"
             description="As avaliações recebidas de seus serviços concluídos aparecerão aqui."
           />

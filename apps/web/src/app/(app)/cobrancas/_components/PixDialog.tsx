@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
+import { CircleCheck } from "lucide-react";
 import { formatCentavos, type PixCharge } from "@obracerta/shared";
 import { Badge, Button } from "@obracerta/ui";
 import { bff } from "@/lib/client";
@@ -107,7 +108,7 @@ function PixDialog({ invoiceId, onClose }: { invoiceId: string; onClose: () => v
 
         {paid ? (
           <div className="mt-4 space-y-3 text-center">
-            <span className="text-4xl">✅</span>
+            <CircleCheck aria-hidden className="mx-auto h-10 w-10 text-success" />
             <p className="font-bold text-foreground">Pagamento confirmado!</p>
             <p className="text-sm text-muted-foreground">
               Sua fatura foi marcada como paga e o plano ativado.

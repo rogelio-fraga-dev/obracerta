@@ -5,6 +5,7 @@ import {
   type SearchResult,
 } from "@obracerta/shared";
 import { Avatar, Badge, Button, Card, EmptyState, type BadgeTone } from "@obracerta/ui";
+import { Heart } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { BackLink } from "../_shell/BackLink";
 import { FavoriteButton } from "../buscar/_components/FavoriteButton";
@@ -36,7 +37,7 @@ export default async function FavoritosPage() {
 
       {items.length === 0 ? (
         <EmptyState
-          icon="♡"
+          icon={<Heart className="h-8 w-8" />}
           title="Nenhum favorito ainda"
           description="Toque no coração de um profissional na busca para salvá-lo aqui."
           action={

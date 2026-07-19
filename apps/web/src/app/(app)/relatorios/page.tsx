@@ -1,6 +1,17 @@
 import Link from "next/link";
 import { ApiEnvelopeError, formatCentavos, type CompanyReport } from "@obracerta/shared";
 import { Button, Card, StatCard } from "@obracerta/ui";
+import {
+  Lock,
+  Building2,
+  Megaphone,
+  Construction,
+  CircleCheck,
+  Handshake,
+  Wallet,
+  BarChart3,
+  Timer,
+} from "lucide-react";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
 import { BackLink } from "../_shell/BackLink";
@@ -51,7 +62,7 @@ export default async function RelatoriosPage() {
 
       {bloqueado || !report ? (
         <Card className="space-y-3 border-primary/30 bg-primary/[0.04] text-center">
-          <span aria-hidden className="text-3xl">🔒</span>
+          <Lock aria-hidden className="mx-auto h-8 w-8 text-primary" />
           <h2 className="font-display text-lg font-black text-foreground">
             Relatórios são exclusivos do Empresa PRO
           </h2>
@@ -70,10 +81,10 @@ export default async function RelatoriosPage() {
               Obras publicadas
             </h2>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <StatCard icon="🏗️" label="Total de obras" value={report.obras.total} />
-              <StatCard icon="📢" label="Abertas" value={report.obras.abertas} tone="primary" />
-              <StatCard icon="🚧" label="Em andamento" value={report.obras.emAndamento} />
-              <StatCard icon="✅" label="Concluídas" value={report.obras.concluidas} tone="success" />
+              <StatCard icon={<Building2 className="h-5 w-5" />} label="Total de obras" value={report.obras.total} />
+              <StatCard icon={<Megaphone className="h-5 w-5" />} label="Abertas" value={report.obras.abertas} tone="primary" />
+              <StatCard icon={<Construction className="h-5 w-5" />} label="Em andamento" value={report.obras.emAndamento} />
+              <StatCard icon={<CircleCheck className="h-5 w-5" />} label="Concluídas" value={report.obras.concluidas} tone="success" />
             </div>
           </div>
 
@@ -82,20 +93,20 @@ export default async function RelatoriosPage() {
               Contratações
             </h2>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <StatCard icon="🤝" label="Contratações" value={report.contratacoes.total} />
+              <StatCard icon={<Handshake className="h-5 w-5" />} label="Contratações" value={report.contratacoes.total} />
               <StatCard
-                icon="💰"
+                icon={<Wallet className="h-5 w-5" />}
                 label="Valor contratado"
                 value={formatCentavos(report.contratacoes.valorTotalCentavos)}
                 tone="primary"
               />
               <StatCard
-                icon="📊"
+                icon={<BarChart3 className="h-5 w-5" />}
                 label="Ticket médio"
                 value={formatCentavos(report.contratacoes.valorMedioCentavos)}
               />
               <StatCard
-                icon="⏱️"
+                icon={<Timer className="h-5 w-5" />}
                 label="Tempo até contratar"
                 value={
                   report.contratacoes.tempoMedioAteContratarHoras === null

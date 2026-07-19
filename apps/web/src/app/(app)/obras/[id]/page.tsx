@@ -10,6 +10,7 @@ import {
   type WorkOrderPhoto,
 } from "@obracerta/shared";
 import { Badge } from "@obracerta/ui";
+import { Star, Building2 } from "lucide-react";
 import { ChatCard } from "@/components/ChatCard";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
@@ -87,10 +88,15 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Badge tone={urg.tone}>{urg.label}</Badge>
-          {obra.destaque && <Badge tone="warning">⭐ Destaque</Badge>}
+          {obra.destaque && (
+            <Badge tone="warning">
+              <Star aria-hidden className="mr-1 inline h-3 w-3 align-[-1px]" />
+              Destaque
+            </Badge>
+          )}
           {obra.empresa && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-semibold text-foreground">
-              <span aria-hidden>🏢</span> {obra.empresa.nome}
+              <Building2 aria-hidden className="h-4 w-4" /> {obra.empresa.nome}
             </span>
           )}
           {obra.pisoCentavos !== null && (
