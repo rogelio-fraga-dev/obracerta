@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ObraCerta — Documento Técnico do Sistema</title>
+<style>
+  :root {
+    --ink: #1a1712;
+    --muted: #5c5750;
+    --line: #d8d2c8;
+    --brand: #c44408;
+    --brand-soft: #fbeee6;
+    --ok: #1a7a4c;
+    --warn: #9a6a00;
+    --gap: #a12c2c;
+    --bg-soft: #f7f4ee;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+  .doc { max-width: 190mm; margin: 0 auto; padding: 16mm 12mm; }
+  h1 { font-size: 22pt; margin: 0 0 2mm; letter-spacing: -0.3px; }
+  h2 {
+    font-size: 14pt; margin: 9mm 0 3mm; padding-bottom: 1.5mm;
+    border-bottom: 2px solid var(--brand); color: var(--brand);
+  }
+  h3 { font-size: 11.5pt; margin: 6mm 0 2mm; color: var(--ink); }
+  h4 { font-size: 10.5pt; margin: 4mm 0 1mm; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  p { margin: 0 0 2.5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  a { color: var(--brand); text-decoration: none; }
+  code { font-family: "SF Mono", Consolas, monospace; font-size: 9pt; background: var(--bg-soft); padding: 0 3px; border-radius: 3px; }
+  strong { color: var(--ink); }
+  .muted { color: var(--muted); }
+  .lead { font-size: 11.5pt; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.5pt; }
+  th, td { text-align: left; vertical-align: top; padding: 2mm 2.5mm; border: 1px solid var(--line); }
+  th { background: var(--brand-soft); font-weight: 700; color: var(--ink); }
+  tbody tr:nth-child(even) td { background: #faf8f4; }
+  .tag { display: inline-block; font-size: 8pt; font-weight: 700; padding: 0.5mm 2mm; border-radius: 3px; white-space: nowrap; }
+  .t-ok { background: #e2f2e8; color: var(--ok); }
+  .t-chg { background: #fdeede; color: var(--warn); }
+  .t-gap { background: #f8e4e4; color: var(--gap); }
+  .t-fut { background: #eee; color: var(--muted); }
+  .card { border: 1px solid var(--line); border-radius: 6px; padding: 4mm; margin: 0 0 3mm; background: #fff; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .kv { display: grid; grid-template-columns: 42mm 1fr; gap: 1mm 4mm; font-size: 9.5pt; }
+  .kv dt { color: var(--muted); font-weight: 600; }
+  .kv dd { margin: 0; }
+  .cover { min-height: 235mm; display: flex; flex-direction: column; justify-content: center; }
+  .cover .eyebrow { color: var(--brand); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; font-size: 10pt; }
+  .cover .sub { font-size: 13pt; color: var(--muted); margin-top: 3mm; }
+  .cover .meta { margin-top: 14mm; border-top: 1px solid var(--line); padding-top: 5mm; }
+  .flow { counter-reset: step; }
+  .flow .step { display: flex; gap: 3mm; margin-bottom: 2.5mm; align-items: baseline; }
+  .flow .step::before {
+    counter-increment: step; content: counter(step);
+    flex: 0 0 6mm; height: 6mm; background: var(--brand); color: #fff; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: 700;
+  }
+  .legend { display: flex; gap: 5mm; flex-wrap: wrap; font-size: 9pt; margin: 2mm 0 4mm; }
+  .note { background: var(--bg-soft); border-left: 3px solid var(--brand); padding: 3mm 4mm; border-radius: 0 4px 4px 0; margin: 0 0 3mm; font-size: 9.5pt; }
+  .page-break { break-before: page; }
+  .avoid-break { break-inside: avoid; }
+  table, tr, .card { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  footer { margin-top: 10mm; border-top: 1px solid var(--line); padding-top: 3mm; color: var(--muted); font-size: 8.5pt; text-align: center; }
+  @page { size: A4; margin: 14mm; }
+  @media print { .doc { padding: 0; max-width: none; } body { font-size: 10pt; } }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- ══════════ CAPA ══════════ -->
+  <section class="cover">
+    <div class="eyebrow">Documento Técnico</div>
+    <h1>ObraCerta / QuemFaz</h1>
+    <div class="sub">Marketplace vertical de profissionais da construção civil.<br />
+    Visão do sistema, fluxos, e comparação Proposta de Valor / PRD × Construído.</div>
+    <div class="meta kv">
+      <dt>Estado</dt><dd>MVP navegável ponta a ponta, no ar (demo pública). Fases 0–12 concluídas.</dd>
+      <dt>Base documental</dt><dd>Proposta de Valor v0.2 · PRD v0.1 (27 seções) · Roadmap v2.2 · Homologação 18/07</dd>
+      <dt>Arquitetura</dt><dd>Monorepo Turborepo · Next.js 15 (BFF) · NestJS (hexagonal/DDD) · PostgreSQL 16 + PostGIS · Redis/BullMQ</dd>
+      <dt>Marca</dt><dd>Nome de trabalho — desacoplado em config/tokens (troca sem refatorar). <code>ObraCerta</code> é placeholder.</dd>
+      <dt>Gerado em</dt><dd>Julho de 2026 · Confidencial</dd>
+    </div>
+    <p class="muted" style="margin-top:12mm; font-size:9pt;">Para gerar PDF: abra este arquivo no navegador e use <strong>Ctrl/Cmd + P</strong> → destino "Salvar como PDF", tamanho A4.</p>
+  </section>
+
+  <!-- ══════════ 1. SUMÁRIO EXECUTIVO ══════════ -->
+  <section class="page-break">
+  <h2>1. Sumário executivo</h2>
+  <p class="lead">O ObraCerta conecta quem precisa de serviços de obra a profissionais autônomos e empresas, com <strong>reputação verificada</strong>, <strong>agenda transparente</strong>, <strong>avaliação dupla-cega</strong> e <strong>lances sigilosos</strong>. Inspirado no Airbnb: a plataforma conecta as partes, mas não é parte do contrato de serviço.</p>
+
+  <div class="grid2">
+    <div class="card avoid-break">
+      <h4>O que está pronto</h4>
+      <ul style="margin-bottom:0">
+        <li>Identidade e 3 personas (profissional, contratante, empresa)</li>
+        <li>Busca (texto + geo) e perfil público compartilhável</li>
+        <li>Agendamento com contato double-blind e termos bilaterais</li>
+        <li>Reputação dupla-cega, badges, moderação e suspensão</li>
+        <li>Obras com lances sigilosos e piso de dignidade</li>
+        <li>Monetização por assinatura (3 personas) com gating por plano</li>
+        <li>Empresa multi-usuário + diretório público de empresas</li>
+        <li>PWA instalável, offline de leitura, Web Push, dark mode</li>
+      </ul>
+    </div>
+    <div class="card avoid-break">
+      <h4>O que depende de insumo externo</h4>
+      <ul style="margin-bottom:0">
+        <li><strong>Nome + domínio final</strong> (destrava a cadeia abaixo)</li>
+        <li><strong>Asaas real</strong> — cobrança de cartão/Pix de verdade (hoje sandbox/fake)</li>
+        <li><strong>WhatsApp Cloud API + SMS</strong> — OTP e notificações reais</li>
+        <li><strong>Google OAuth real</strong> — hoje botão "em breve"</li>
+        <li><strong>WhatsApp do suporte</strong> — falta o número</li>
+        <li>SEO (pós-marca) · seeding de oferta na cidade-piloto (operacional)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note"><strong>North Star Metric:</strong> número de <strong>obras concluídas e avaliadas bilateralmente</strong>. Só sobe quando o cliente encontrou, o profissional aceitou, a obra aconteceu e ambos avaliaram — captura qualidade de ponta a ponta. O sistema mede isso no painel admin.</div>
+  </section>
+
+  <!-- ══════════ 2. ARQUITETURA ══════════ -->
+  <section>
+  <h2>2. Arquitetura técnica</h2>
+  <p>Monorepo com type-safety end-to-end: os contratos (schemas Zod + tipos) vivem em <code>packages/shared</code> e são consumidos pelo backend <em>e</em> pelo frontend — uma mudança de contrato quebra os dois lados em tempo de compilação.</p>
+
+  <table>
+    <thead><tr><th style="width:34mm">Camada</th><th>Tecnologia</th><th>Papel</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>Next.js 15 (App Router, RSC)</td><td>Rotas públicas SSR/SSG (landing, perfil público) + área logada (PWA). Padrão <strong>BFF</strong>: o token vive só em cookie httpOnly, o browser nunca o vê.</td></tr>
+      <tr><td>Backend</td><td>NestJS (Node 22 / TypeScript)</td><td>API REST, <strong>monolito modular + hexagonal/DDD</strong>. Domínio puro (sem framework); providers externos atrás de portas/adapters.</td></tr>
+      <tr><td>Banco</td><td>PostgreSQL 16 + PostGIS + pg_trgm</td><td>Transacional + geoespacial (raio/bairro) + busca PT-BR tolerante a acento/erro. ORM <strong>Drizzle</strong> (SQL-first, migrations versionadas).</td></tr>
+      <tr><td>Filas / cache</td><td>Redis + BullMQ</td><td>Jobs duráveis (expiração 24h, renovação de cobrança, lembretes, onboarding) com retry e idempotência; cache/sessão/OTP.</td></tr>
+      <tr><td>Storage</td><td>MinIO (dev) / Cloudflare R2 (prod)</td><td>Fotos de perfil, portfólio e obras (S3-compatível).</td></tr>
+      <tr><td>Deploy</td><td>EC2 (São Paulo) via CI</td><td>Push no <code>master</code> → GitHub Actions → imagem no GHCR → EC2 puxa via AWS SSM/OIDC; migrações automáticas. Backup diário do Postgres.</td></tr>
+      <tr><td>Integrações</td><td>Asaas · WhatsApp · SMS · Google</td><td>Todas atrás de portas — em dev/demo rodam adapters fake/console. Trocar por real = trocar o adapter, sem mexer no domínio.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Domínios do backend (módulos)</h3>
+  <p class="muted" style="font-size:9.5pt">Cada módulo com fronteira explícita (controller/application/domain/infrastructure) e testes próprios:</p>
+  <p style="font-size:9.5pt"><code>auth</code> · <code>users</code> · <code>onboarding</code> · <code>profiles</code> · <code>public-profile</code> · <code>availability</code> · <code>booking</code> · <code>decline-penalty</code> · <code>terms</code> · <code>reputation</code> · <code>moderation</code> · <code>billing</code> · <code>entitlements</code> · <code>search</code> · <code>work-orders</code> · <code>cities</code> · <code>professional-tools</code> · <code>company</code> · <code>storage</code> · <code>notifications</code> · <code>admin</code> · <code>audit</code> · <code>observability</code> · <code>health</code></p>
+
+  <div class="note"><strong>Qualidade:</strong> ~224 testes unitários + 44 de integração (contra Postgres real) + E2E Playwright dos fluxos críticos + auditoria WCAG AA. CI: lint → typecheck → test → build a cada push.</div>
+  </section>
+
+  <!-- ══════════ 3. FLUXO DO SISTEMA ══════════ -->
+  <section class="page-break">
+  <h2>3. Fluxo do sistema (jornadas ponta a ponta)</h2>
+
+  <h3>3.1 Profissional</h3>
+  <div class="flow">
+    <div class="step">Cadastra-se (e-mail+senha, WhatsApp-OTP ou Google), escolhe um plano e <strong>cadastra cartão</strong> (Iniciante ativa 7 dias grátis).</div>
+    <div class="step">Monta o perfil: profissões do catálogo fixo, fotos do portfólio, agenda semanal (projeta 6 meses), bairro e raio.</div>
+    <div class="step">Aparece nas buscas da cidade (ranqueado por plano e reputação) e recebe pedidos de agendamento.</div>
+    <div class="step">Aceita em até 24h → o contato do cliente é liberado (double-blind); combina fora e executa.</div>
+    <div class="step">Avalia o cliente (dupla-cega); cada obra vira reputação e badges. No Especialista, dá lances sigilosos em obras abertas.</div>
+  </div>
+
+  <h3>3.2 Contratante</h3>
+  <div class="flow">
+    <div class="step">Assina um plano de acesso (mensal) e busca profissionais por profissão, cidade, nota e proximidade.</div>
+    <div class="step">Vê o perfil público (dados conforme o plano do profissional), escolhe um horário livre e envia o pedido com mensagem/foto.</div>
+    <div class="step">Aguarda o aceite (24h); liberado o contato, combina valor/data/escopo diretamente.</div>
+    <div class="step">Publica obra (plano Lance) para receber <strong>propostas sigilosas</strong> e compara lado a lado; adjudica a melhor.</div>
+    <div class="step">Avalia ao fim (dupla-cega). Central de ajuda, favoritos e endereços com CEP apoiam a jornada.</div>
+  </div>
+
+  <h3>3.3 Empresa (PJ)</h3>
+  <div class="flow">
+    <div class="step">Cadastra a empresa (CNPJ, razão social) — conta com <strong>1 administrador</strong> e plano próprio.</div>
+    <div class="step">Adiciona <strong>membros</strong> por e-mail (acesso delegado) que publicam e gerenciam obras <em>em nome da empresa</em>.</div>
+    <div class="step">Vincula <strong>profissionais</strong> à equipe; cada um confirma (opt-in) e passa a aparecer no perfil público da empresa.</div>
+    <div class="step">Publica obras (Empresa PRO), recebe lances, contrata e acompanha <strong>relatórios da operação</strong>.</div>
+    <div class="step">Ganha presença pública: perfil <code>/empresa/[slug]</code> e diretório <code>/empresas</code> — porta de descoberta para a equipe.</div>
+  </div>
+
+  <div class="note"><strong>Trava anti-desintermediação (§24 do PRD):</strong> contato só após o aceite; foto/valores/agenda escondidos sem login; nome parcial no plano base; termos de ciência bilaterais com registro imutável (hash-chain no <code>audit_log</code>).</div>
+  </section>
+
+  <!-- ══════════ 4. MODELO DE PLANOS ══════════ -->
+  <section>
+  <h2>4. Modelo de planos e gating (homologação 18/07)</h2>
+  <p>Todos os planos são <strong>pagos e recorrentes</strong>. O gating é <strong>dado</strong> (um mapa plano → features), não código espalhado — mudar regra comercial é editar o mapa.</p>
+
+  <div class="grid2">
+    <table>
+      <thead><tr><th>Profissional</th><th>Preço</th></tr></thead>
+      <tbody>
+        <tr><td>Iniciante</td><td>R$ 19,90/mês <span class="muted">(7 dias grátis, cartão)</span></td></tr>
+        <tr><td>Profissional</td><td>R$ 49,90/mês</td></tr>
+        <tr><td>Especialista</td><td>R$ 99,90/mês</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>Contratante (mensal)</th><th>Preço</th></tr></thead>
+      <tbody>
+        <tr><td>Essencial</td><td>R$ 19,90/mês</td></tr>
+        <tr><td>Completo</td><td>R$ 39,90/mês</td></tr>
+        <tr><td>Lance</td><td>R$ 69,90/mês</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <table>
+    <thead><tr><th style="width:40mm">Empresa (mensal)</th><th>Preço</th><th>Destaque</th></tr></thead>
+    <tbody>
+      <tr><td>Essencial</td><td>R$ 49,90/mês</td><td>Cadastro, equipe e busca de profissionais</td></tr>
+      <tr><td>Completo</td><td>R$ 99,90/mês</td><td>+ dados completos, publicar demandas, identidade nas obras</td></tr>
+      <tr><td>Empresa PRO</td><td>R$ 149,90/mês</td><td>+ lances, destaque das obras, relatórios da operação</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Regras de gating relevantes</h4>
+  <ul>
+    <li><strong>Iniciante</strong> aparece na busca e recebe pedidos, mas <strong>não responde</strong> (o aceite, que libera o contato, exige o Profissional) — mostra só o primeiro nome, sem foto.</li>
+    <li><strong>Lances</strong> (dar/publicar obra) são exclusivos do <strong>Especialista</strong> / <strong>Empresa PRO / plano Lance</strong>.</li>
+    <li><strong>Agendar</strong> exige plano de acesso vigente do contratante/empresa (gating dos dois lados).</li>
+    <li><strong>Trial com cartão:</strong> o Iniciante cadastra cartão; nada é cobrado nos 7 dias; depois renova a R$ 19,90 (a renovação de todos os planos é automática, cancele quando quiser).</li>
+  </ul>
+  </section>
+
+  <!-- ══════════ 5. PROPOSTA/PRD vs CONSTRUÍDO ══════════ -->
+  <section class="page-break">
+  <h2>5. Proposta de Valor / PRD × Construído</h2>
+  <div class="legend">
+    <span><span class="tag t-ok">Entregue</span> construído e no ar</span>
+    <span><span class="tag t-chg">Mudou</span> entregue diferente do planejado (decisão)</span>
+    <span><span class="tag t-gap">Parcial</span> base pronta, falta insumo/UI</span>
+    <span><span class="tag t-fut">Fora do MVP</span> adiado por decisão</span>
+  </div>
+
+  <h3>5.1 Proposta de Valor — promessas ao usuário</h3>
+  <table>
+    <thead><tr><th style="width:70mm">Promessa</th><th style="width:22mm">Status</th><th>Como ficou no produto</th></tr></thead>
+    <tbody>
+      <tr><td>Perfis com avaliações reais verificadas</td><td><span class="tag t-ok">Entregue</span></td><td>Reputação dupla-cega; só avaliações reveladas contam na média; badges automáticos.</td></tr>
+      <tr><td>Agenda transparente (dias livres antes do contato)</td><td><span class="tag t-ok">Entregue</span></td><td>Grade semanal projeta 6 meses; bloqueio bilateral no aceite.</td></tr>
+      <tr><td>Avaliação dupla e cega (o pro também avalia)</td><td><span class="tag t-ok">Entregue</span></td><td>Nota nasce oculta; revela no par ou por janela de 7 dias.</td></tr>
+      <tr><td>Comparação de propostas com valores sigilosos</td><td><span class="tag t-ok">Entregue</span></td><td>Obras + lances sigilosos + piso de dignidade (anti-leilão).</td></tr>
+      <tr><td>Perfil profissional visível 24h na cidade</td><td><span class="tag t-ok">Entregue</span></td><td>Busca (texto + geo) + perfil público SSR compartilhável.</td></tr>
+      <tr><td>Gestão de agenda sem conflito de datas</td><td><span class="tag t-ok">Entregue</span></td><td>EXCLUDE constraint no banco garante zero sobreposição.</td></tr>
+      <tr><td>Acesso a obras maiores (além do boca a boca)</td><td><span class="tag t-ok">Entregue</span></td><td>Feed de obras + "oportunidades em primeira mão" (Especialista).</td></tr>
+      <tr><td>Empreiteiras com equipe própria (plano Especialista)</td><td><span class="tag t-chg">Mudou</span></td><td>Virou uma <strong>persona EMPRESA</strong> dedicada (planos próprios + equipe multi-usuário + diretório), em vez de um plano do profissional.</td></tr>
+      <tr><td>"Pintor" e afins no catálogo de profissões</td><td><span class="tag t-chg">Mudou</span></td><td>Catálogo <strong>fixo</strong> de 16 ofícios de obra civil (decisão do fundador; "Pintor" removido do foco).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 PRD — funcionalidades por seção</h3>
+  <table>
+    <thead><tr><th style="width:52mm">Seção do PRD</th><th style="width:22mm">Status</th><th>Observação</th></tr></thead>
+    <tbody>
+      <tr><td>§2 Dois perfis + tela de entrada</td><td><span class="tag t-chg">Mudou</span></td><td>São <strong>três</strong> perfis (+ Empresa). Seletor de persona por toggle na landing.</td></tr>
+      <tr><td>§3/§5 Monetização (Pro mensal + avulso 30d do contratante)</td><td><span class="tag t-chg">Mudou</span></td><td>Contratante e empresa passaram a <strong>assinatura mensal recorrente</strong>; Iniciante deixou de ser grátis (trial com cartão). Ver §6 abaixo.</td></tr>
+      <tr><td>§4/§6 Cadastro 4 passos + completude gamificada</td><td><span class="tag t-ok">Entregue</span></td><td>Multi-método (e-mail, WhatsApp-OTP, Google visual); barra de completude.</td></tr>
+      <tr><td>§5/§7 Onboarding (tour, checklist, D1/D3/D5/D7)</td><td><span class="tag t-ok">Entregue</span></td><td>Checklist de ativação + jobs de onboarding (BullMQ).</td></tr>
+      <tr><td>§6 Login / autenticação (sem senha, OTP)</td><td><span class="tag t-chg">Mudou</span></td><td>Adicionado login por <strong>e-mail + senha</strong> (além do OTP), por decisão do fundador.</td></tr>
+      <tr><td>§7/§9 Agendamento completo + termo bilateral</td><td><span class="tag t-ok">Entregue</span></td><td>Máquina de estados; contato pós-aceite; aceite append-only auditado.</td></tr>
+      <tr><td>§8 Recusa e penalidades / taxa de aceitação</td><td><span class="tag t-ok">Entregue</span></td><td>Motivos válidos/penalizáveis, escala por reincidência. Iniciante isento (não pode aceitar).</td></tr>
+      <tr><td>§9 Cancelamento pós-aprovação</td><td><span class="tag t-ok">Entregue</span></td><td>Reagendamento bilateral com contraproposta.</td></tr>
+      <tr><td>§10/§11 Agenda 6 meses + limite 2 pedidos/especialidade</td><td><span class="tag t-ok">Entregue</span></td><td>Projeção em código; anti-spam por especialidade.</td></tr>
+      <tr><td>§12/§13 Reputação dupla-cega + moderação/suspensão</td><td><span class="tag t-ok">Entregue</span></td><td>Denúncia → ocultar 48h; suspensão automática por strikes + apelação.</td></tr>
+      <tr><td>§14 Referências do profissional (máx. 2)</td><td><span class="tag t-gap">Parcial</span></td><td>Substituído/reforçado por <strong>portfólio de fotos</strong> + avaliações reais; referências declaradas não viraram UI dedicada.</td></tr>
+      <tr><td>§15 Formação e profissões regulamentadas</td><td><span class="tag t-gap">Parcial</span></td><td>Catálogo fixo entregue; validação de conselho (CREA etc.) fora do MVP.</td></tr>
+      <tr><td>§16 Obras e lances sigilosos + piso de dignidade</td><td><span class="tag t-ok">Entregue</span></td><td>Urgência define expiração; sigilo real; adjudicação atômica.</td></tr>
+      <tr><td>§17/§18 Busca + filtros + perfil público</td><td><span class="tag t-ok">Entregue</span></td><td>pg_trgm + PostGIS; perfil SSR com dados limitados por plano.</td></tr>
+      <tr><td>§19/§20/§21 Plano, faturas e reembolso (CDC)</td><td><span class="tag t-ok">Entregue</span></td><td>4 cenários de reembolso CDC; faturas; fila do financeiro no admin.</td></tr>
+      <tr><td>§22 Notificações (WhatsApp/SMS)</td><td><span class="tag t-gap">Parcial</span></td><td>Inbox in-app + Web Push (VAPID) reais; WhatsApp/SMS atrás de adapter fake (falta conta).</td></tr>
+      <tr><td>§23 Suporte, privacidade, termos</td><td><span class="tag t-ok">Entregue</span></td><td>Central de ajuda + tickets; página <code>/termos</code>; LGPD (nome parcial, CPF nunca público).</td></tr>
+      <tr><td>§24 Travas anti-desintermediação</td><td><span class="tag t-ok">Entregue</span></td><td>Contato só pós-aceite; sem chat prévio; termos punem compartilhamento.</td></tr>
+    </tbody>
+  </table>
+  </section>
+
+  <!-- ══════════ 6. O QUE MUDOU E POR QUÊ ══════════ -->
+  <section class="page-break">
+  <h2>6. O que mudou em relação ao plano — e por quê</h2>
+
+  <div class="card avoid-break">
+    <h4>6.1 Monetização: de "avulso + grátis" para "tudo assinatura"</h4>
+    <p><strong>Antes (PRD):</strong> profissional com plano mensal (Iniciante grátis), contratante com compra avulsa de 30 dias sem renovação.</p>
+    <p><strong>Agora (homologação 18/07):</strong> todos os planos pagos e recorrentes. Iniciante R$ 19,90 com 7 dias grátis e <strong>cartão obrigatório</strong>; contratante e empresa em assinatura mensal com renovação automática.</p>
+    <p class="muted" style="margin-bottom:0"><strong>Por quê:</strong> pedido do fundador na homologação. Receita previsível (MRR) e menos fricção de "recomprar" para o contratante. A infraestrutura reaproveitou o mecanismo de "graça" que já existia (o trial é o período EM_GRACA); a recorrência do acesso foi montada sobre a tabela existente, sem migração destrutiva.</p>
+  </div>
+
+  <div class="card avoid-break">
+    <h4>6.2 Empresa: de "plano do profissional" para persona própria multi-usuário</h4>
+    <p><strong>Antes:</strong> empreiteira seria só o plano Especialista do profissional.</p>
+    <p><strong>Agora:</strong> persona <strong>EMPRESA</strong> com planos próprios, <strong>equipe multi-usuário</strong> (membros com acesso delegado agem pela empresa nas obras/relatórios) e <strong>diretório público</strong> (o roster vira descoberta pública com consentimento opt-in do profissional).</p>
+    <p class="muted" style="margin-bottom:0"><strong>Por quê:</strong> uma empresa opera diferente de um autônomo — publica obras em escala e tem várias pessoas gerenciando. O modelo "1 admin + gestores" foi construído de forma consciente (agendamento/termos/avaliação seguem 1:1, não se delegam, para manter autoria jurídica clara).</p>
+  </div>
+
+  <div class="card avoid-break">
+    <h4>6.3 Sem pagamento do serviço pela plataforma (reafirmado)</h4>
+    <p class="muted" style="margin-bottom:0">O PRD já apontava; o fundador reverteu qualquer ideia de intermediar pagamento. A receita é <strong>só a mensalidade</strong>; valor da obra é combinado e pago direto entre as partes. A ObraCerta conecta, não é parte do contrato. Comissão por transação fica fora do MVP (§27 do PRD, "quando o volume justificar").</p>
+  </div>
+
+  <div class="card avoid-break">
+    <h4>6.4 Decisões de execução</h4>
+    <ul style="margin-bottom:0">
+      <li><strong>Backend-first:</strong> todo o backend (Fases 2–6) foi construído e provado como API antes do frontend consolidado (Fase 7). Contratos estáveis evitaram retrabalho.</li>
+      <li><strong>Sem chat interno:</strong> apenas mensagem na proposta + contato liberado; depois, um chat simples no pedido/obra foi adicionado no pacote de evolução.</li>
+      <li><strong>Login por senha</strong> saiu de "fora do escopo" e foi construído (decisão do fundador).</li>
+      <li><strong>Google/WhatsApp/SMS/Asaas</strong> rodam atrás de adapters fake até haver contas/deploy — o código do fluxo já existe.</li>
+    </ul>
+  </div>
+  </section>
+
+  <!-- ══════════ 7. O QUE OFERECE HOJE ══════════ -->
+  <section>
+  <h2>7. O que o sistema oferece hoje (por área)</h2>
+  <table>
+    <thead><tr><th style="width:40mm">Área</th><th>Recursos no ar</th></tr></thead>
+    <tbody>
+      <tr><td>Identidade & perfil</td><td>Cadastro multi-método, completude gamificada, foto/portfólio, slug público, edição de perfil.</td></tr>
+      <tr><td>Descoberta</td><td>Busca por texto + geo + nota + plano; ranking; faixa de preço anônima; perfil público; favoritos; diretório de empresas.</td></tr>
+      <tr><td>Agendamento</td><td>Pedido com mensagem/foto; máquina de estados; contato double-blind; reagendamento; termos bilaterais; resumo exportável ("contrato").</td></tr>
+      <tr><td>Reputação</td><td>Avaliação dupla-cega, direito de resposta, badges, denúncia, moderação, suspensão + apelação.</td></tr>
+      <tr><td>Obras & lances</td><td>Publicar obra, lances sigilosos, piso de dignidade, adjudicação, destaque de obras (Empresa PRO), mapa de obras.</td></tr>
+      <tr><td>Monetização</td><td>3 tabelas de plano, trial com cartão, faturas, Pix (sandbox), reembolso CDC, upgrade no app, cancelamento.</td></tr>
+      <tr><td>Ferramentas do pro</td><td>Orçamentos e recibos (Especialista); analytics do perfil (básico + avançado).</td></tr>
+      <tr><td>Empresa</td><td>Cadastro PJ, equipe (membros + roster), acesso delegado, relatórios da operação, identidade nas obras, perfil e diretório públicos.</td></tr>
+      <tr><td>Plataforma</td><td>PWA instalável, offline de leitura, Web Push, notificações in-app, endereços com CEP, dark mode, central de ajuda.</td></tr>
+      <tr><td>Admin</td><td>Dashboard de saúde (North Star, MRR, churn, funil), gestão de usuários/obras/pedidos, filas de moderação e financeiro, analytics estratégico.</td></tr>
+      <tr><td>Observabilidade</td><td><code>/metrics</code> Prometheus, logs estruturados com correlation-id, auditoria imutável (hash-chain), backup diário.</td></tr>
+    </tbody>
+  </table>
+  </section>
+
+  <!-- ══════════ 8. O QUE FALTA ══════════ -->
+  <section class="page-break">
+  <h2>8. O que falta / próximos passos</h2>
+
+  <h3>8.1 Depende de decisão ou insumo externo (não é código)</h3>
+  <table>
+    <thead><tr><th style="width:48mm">Item</th><th>Bloqueio</th><th>Impacto</th></tr></thead>
+    <tbody>
+      <tr><td>Nome + domínio final</td><td>Decisão do fundador</td><td>Destrava Google OAuth, e-mail transacional, SEO, materiais. Arquitetura já desacoplada (troca é config).</td></tr>
+      <tr><td>Asaas real</td><td>Conta/CNPJ + chaves</td><td>Cobrança de cartão e Pix de verdade + renovação automática. UI e webhook prontos; falta trocar o adapter.</td></tr>
+      <tr><td>WhatsApp Cloud API + SMS</td><td>Contas dos provedores</td><td>OTP e notificações reais (hoje console/fake).</td></tr>
+      <tr><td>Google OAuth</td><td>Domínio (tela de consentimento)</td><td>Botão "em breve" vira funcional; fluxo já alterna sozinho.</td></tr>
+      <tr><td>WhatsApp do suporte</td><td>Número da empresa</td><td>Link direto no FAQ/landing (item 13 da homologação, pendente).</td></tr>
+      <tr><td>Seeding de oferta (cidade-piloto)</td><td>Operacional</td><td>50 profissionais por especialidade antes de abrir para contratantes (resolve "ovo e galinha").</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 Fora do escopo do MVP (decisão — Fases futuras)</h3>
+  <p><span class="tag t-fut">Fora do MVP</span> Comissão por transação (8–12%) · verificação de antecedentes · app nativo iOS/Android · escrow/pagamento da obra · geração de contrato jurídico · verificação automática de referências/conselhos. Entram "quando o volume justificar a infraestrutura" (§27 do PRD / proposta §7.2).</p>
+
+  <h3>8.3 Refinamentos técnicos na fila (não bloqueiam piloto)</h3>
+  <ul>
+    <li>Paginação real na API das listas "minhas" (hoje revelação incremental no cliente).</li>
+    <li>Referências declaradas do profissional como UI dedicada (§14 do PRD).</li>
+    <li>Cache Redis da busca/perfil público; <code>unaccent</code> no índice de busca.</li>
+    <li>QA visual do dark mode tela a tela; monitoramento (Grafana/uptime) plugado ao <code>/metrics</code>.</li>
+    <li>Rodada de review multi-agente (security/react/database) antes do piloto.</li>
+  </ul>
+  </section>
+
+  <!-- ══════════ 9. CONCLUSÃO ══════════ -->
+  <section>
+  <h2>9. Conclusão</h2>
+  <p>O produto está <strong>navegável ponta a ponta e no ar</strong>: as promessas centrais da Proposta de Valor (reputação verificada, agenda transparente, avaliação dupla-cega, lances sigilosos) e a grande maioria das 27 seções do PRD estão construídas e verificadas. As mudanças em relação ao plano original foram <strong>decisões deliberadas</strong> (modelo comercial de assinatura, persona de empresa multi-usuário, catálogo fixo) — cada uma documentada no roadmap com o motivo.</p>
+  <p>O que resta para o piloto não é, em sua maior parte, <strong>código</strong>: é a definição de <strong>nome/domínio</strong> (que destrava a cadeia de provedores reais) e o <strong>seeding operacional</strong> de oferta na cidade-piloto. Os provedores externos (pagamento, mensageria, login social) já têm o fluxo pronto atrás de portas — ligá-los é trocar adapters, não reescrever o sistema.</p>
+  <div class="note" style="margin-top:4mm"><strong>Em uma frase:</strong> o código deixou de ser o gargalo. O caminho para o piloto passa por marca, contas de provedor e recrutamento dos primeiros profissionais — não por construção de produto.</div>
+  </section>
+
+  <footer>
+    ObraCerta / QuemFaz · Documento técnico gerado a partir do código, do roadmap e dos documentos de produto (Proposta de Valor v0.2, PRD v0.1). Confidencial.
+  </footer>
+
+</div>
+</body>
+</html>
