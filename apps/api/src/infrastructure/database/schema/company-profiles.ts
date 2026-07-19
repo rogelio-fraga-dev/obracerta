@@ -16,9 +16,12 @@ export const companyProfiles = pgTable(
     cnpj: varchar("cnpj", { length: 14 }),
     razaoSocial: varchar("razao_social", { length: 160 }),
     nomeFantasia: varchar("nome_fantasia", { length: 160 }),
+    // Slug público (diretório de empresas) — gerado no cadastro; único quando presente.
+    slug: varchar("slug", { length: 90 }),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     uniqueIndex("company_cnpj_unique_idx").on(t.cnpj).where(sql`${t.cnpj} is not null`),
+    uniqueIndex("company_slug_unique_idx").on(t.slug).where(sql`${t.slug} is not null`),
   ],
 );

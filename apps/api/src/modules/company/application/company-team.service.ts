@@ -10,9 +10,12 @@ import {
   UserStatus,
   type AddCompanyMemberInput,
   type AddCompanyProfessionalInput,
+  type CompanyDirectoryItem,
+  type CompanyInvite,
   type CompanyMember,
   type CompanyProfessional,
   type CompanyTeam,
+  type PublicCompanyProfile,
 } from "@obracerta/shared";
 import { AuditService } from "../../audit/application/audit.service.js";
 import { BillingService } from "../../billing/application/billing.service.js";
@@ -24,6 +27,9 @@ import {
   COMPANY_TEAM_REPOSITORY,
   type CompanyTeamRepository,
 } from "../domain/ports/company-team.repository.js";
+
+/** Teto de resultados do diretório público de empresas. */
+const DIRECTORY_LIMIT = 60;
 
 /**
  * Equipe da empresa (homologação 18/07 — evolução do modelo 1-admin). Só o
@@ -129,8 +135,17 @@ export class CompanyTeamService {
       acao: "EQUIPE_PROFISSIONAL_VINCULADO",
       entidade: "company_professional",
       entidadeId: link.id,
-      dados: { professionalId: input.professionalId },
+      dados: { professionalId: input.professionalId, confirmado: link.confirmado },
     });
+    // Convite: o profissional confirma para aparecer no perfil público da empresa
+    // (opt-in). Vínculos já confirmados (re-add) não geram novo convite.
+    if (!link.confirmado) {
+      const company = await this.users.findById(companyId);
+      await this.inbox.record(input.professionalId, "SISTEMA", "Convite de equipe 🏢", {
+        corpo: `${company?.nomeCompleto ?? "Uma empresa"} quer listar você na equipe pública dela. Confirme no seu perfil para aparecer.`,
+        link: "/perfil",
+      });
+    }
     return link;
   }
 
@@ -146,6 +161,52 @@ export class CompanyTeamService {
       entidadeId: linkId,
       dados: null,
     });
+  }
+
+  /** Convites de empresa pendentes que o profissional recebeu. */
+  pendingInvites(professionalId: string): Promise<CompanyInvite[]> {
+    return this.repo.listPendingInvites(professionalId);
+  }
+
+  /**
+   * Profissional confirma o vínculo com uma empresa (opt-in público). Só o dono
+   * do vínculo confirma — o repositório escopa por `professionalId`.
+   */
+  async confirmInvite(professionalId: string, linkId: string): Promise<void> {
+    const ok = await this.repo.confirmInvite(professionalId, linkId);
+    if (!ok) throw new NotFoundException("Convite não encontrado.");
+    await this.audit.record({
+      atorUserId: professionalId,
+      acao: "EQUIPE_VINCULO_CONFIRMADO",
+      entidade: "company_professional",
+      entidadeId: linkId,
+      dados: null,
+    });
+  }
+
+  /** Profissional recusa (remove) um convite pendente. */
+  async rejectInvite(professionalId: string, linkId: string): Promise<void> {
+    const ok = await this.repo.rejectInvite(professionalId, linkId);
+    if (!ok) throw new NotFoundException("Convite não encontrado.");
+    await this.audit.record({
+      atorUserId: professionalId,
+      acao: "EQUIPE_VINCULO_RECUSADO",
+      entidade: "company_professional",
+      entidadeId: linkId,
+      dados: null,
+    });
+  }
+
+  /** Diretório público de empresas (busca por nome/cidade). Sem login. */
+  directory(q: string | null, cidadeId: string | null): Promise<CompanyDirectoryItem[]> {
+    return this.repo.directory(q, cidadeId, DIRECTORY_LIMIT);
+  }
+
+  /** Perfil público de uma empresa por slug (só profissionais confirmados). */
+  async publicProfile(slug: string): Promise<PublicCompanyProfile> {
+    const profile = await this.repo.publicProfile(slug);
+    if (!profile) throw new NotFoundException("Empresa não encontrada.");
+    return profile;
   }
 
   /**

@@ -66,6 +66,19 @@ export class ProfilesService {
     return `${base}-${randomUUID().slice(0, 8)}`;
   }
 
+  /** Slug único de empresa (namespace próprio — diretório de empresas). */
+  async generateUniqueCompanySlug(nome: string): Promise<string> {
+    const base = slugify(nome);
+    for (let n = 1; n <= MAX_SLUG_ATTEMPTS; n++) {
+      const candidate = slugWithSuffix(base, n);
+      if (!(await this.profiles.companySlugExists(candidate))) {
+        return candidate;
+      }
+    }
+    const { randomUUID } = await import("node:crypto");
+    return `${base}-${randomUUID().slice(0, 8)}`;
+  }
+
   /** Recomputa a completude na leitura (self-heal: a foto pode ter sido espelhada da conta). */
   async getProfessional(userId: string): Promise<ProfessionalProfile | null> {
     const profile = await this.profiles.findProfessionalByUserId(userId);

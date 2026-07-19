@@ -1,13 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import {
   addCompanyMemberSchema,
   addCompanyProfessionalSchema,
   type AddCompanyMemberInput,
   type AddCompanyProfessionalInput,
+  type CompanyDirectoryItem,
+  type CompanyInvite,
   type CompanyMember,
   type CompanyProfessional,
   type CompanyTeam,
   type JwtClaims,
+  type PublicCompanyProfile,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
@@ -64,5 +67,58 @@ export class CompanyController {
   @Delete("professionals/:id")
   removeProfessional(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<void> {
     return this.team.removeProfessional(user.sub, id);
+  }
+}
+
+/**
+ * Convites de empresa do **profissional** (opt-in para aparecer no diretório).
+ * Rotas separadas porque o ator aqui é o profissional, não a empresa.
+ */
+@Controller("professionals/me/company-invites")
+@UseGuards(JwtAuthGuard)
+export class CompanyInvitesController {
+  constructor(private readonly team: CompanyTeamService) {}
+
+  /** Convites pendentes recebidos. */
+  @Get()
+  pending(@CurrentUser() user: JwtClaims): Promise<CompanyInvite[]> {
+    return this.team.pendingInvites(user.sub);
+  }
+
+  /** Confirma um convite (passa a aparecer no perfil público da empresa). */
+  @Post(":id/confirm")
+  confirm(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<void> {
+    return this.team.confirmInvite(user.sub, id);
+  }
+
+  /** Recusa (remove) um convite pendente. */
+  @Post(":id/reject")
+  reject(@CurrentUser() user: JwtClaims, @Param("id") id: string): Promise<void> {
+    return this.team.rejectInvite(user.sub, id);
+  }
+}
+
+/**
+ * Diretório público de empresas (sem login) — os profissionais querem ser
+ * encontrados via a empresa. Só empresas com slug e ao menos 1 profissional
+ * confirmado aparecem; o perfil lista apenas a equipe que consentiu.
+ */
+@Controller("public/companies")
+export class PublicCompanyController {
+  constructor(private readonly team: CompanyTeamService) {}
+
+  /** Lista/busca empresas por nome e cidade. */
+  @Get()
+  directory(
+    @Query("q") q?: string,
+    @Query("cidadeId") cidadeId?: string,
+  ): Promise<CompanyDirectoryItem[]> {
+    return this.team.directory(q?.trim() || null, cidadeId?.trim() || null);
+  }
+
+  /** Perfil público de uma empresa por slug. */
+  @Get(":slug")
+  profile(@Param("slug") slug: string): Promise<PublicCompanyProfile> {
+    return this.team.publicProfile(slug);
   }
 }

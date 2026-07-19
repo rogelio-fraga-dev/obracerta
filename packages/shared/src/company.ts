@@ -55,6 +55,8 @@ export const companyProfileSchema = z.object({
   cnpj: z.string().nullable(),
   razaoSocial: z.string().nullable(),
   nomeFantasia: z.string().nullable(),
+  /** Slug público (link do perfil no diretório de empresas). */
+  slug: z.string().nullable(),
   criadoEm: isoTimestampSchema,
 });
 export type CompanyProfile = z.infer<typeof companyProfileSchema>;
@@ -112,14 +114,22 @@ export const addCompanyMemberSchema = z.object({
 });
 export type AddCompanyMemberInput = z.infer<typeof addCompanyMemberSchema>;
 
-/** Profissional da plataforma vinculado à equipe da empresa (roster interno). */
+/**
+ * Profissional da plataforma vinculado à equipe da empresa (roster). O vínculo
+ * nasce **pendente** e só aparece no perfil público da empresa depois que o
+ * profissional **confirma** (opt-in — os profissionais querem ser encontrados
+ * via a empresa, mas o consentimento é dele, não da empresa).
+ */
 export const companyProfessionalSchema = z.object({
   id: uuidSchema,
   companyId: uuidSchema,
   professionalId: uuidSchema,
-  /** Dados de exibição resolvidos na leitura (nome/especialidades do perfil). */
+  /** Dados de exibição resolvidos na leitura (nome/especialidades/slug do perfil). */
   nome: z.string(),
   especialidades: z.array(z.string()),
+  slug: z.string().nullable(),
+  fotoUrl: z.string().nullable(),
+  confirmado: z.boolean(),
   criadoEm: isoTimestampSchema,
 });
 export type CompanyProfessional = z.infer<typeof companyProfessionalSchema>;
@@ -134,3 +144,43 @@ export const companyTeamSchema = z.object({
   profissionais: z.array(companyProfessionalSchema),
 });
 export type CompanyTeam = z.infer<typeof companyTeamSchema>;
+
+/**
+ * Convite de vínculo que um profissional recebe de uma empresa (pendente). O
+ * profissional confirma para aparecer no perfil público da empresa, ou recusa.
+ */
+export const companyInviteSchema = z.object({
+  id: uuidSchema,
+  empresaNome: z.string(),
+  criadoEm: isoTimestampSchema,
+});
+export type CompanyInvite = z.infer<typeof companyInviteSchema>;
+
+/** Item do diretório público de empresas (listagem/busca). */
+export const companyDirectoryItemSchema = z.object({
+  slug: z.string(),
+  nome: z.string(),
+  cidade: z.string().nullable(),
+  uf: z.string().nullable(),
+  totalProfissionais: z.number().int().min(0),
+  obrasConcluidas: z.number().int().min(0),
+});
+export type CompanyDirectoryItem = z.infer<typeof companyDirectoryItemSchema>;
+
+/** Perfil público de uma empresa (SSR, sem login) — inclui a equipe confirmada. */
+export const publicCompanyProfileSchema = z.object({
+  slug: z.string(),
+  nome: z.string(),
+  cidade: z.string().nullable(),
+  uf: z.string().nullable(),
+  obrasConcluidas: z.number().int().min(0),
+  profissionais: z.array(
+    z.object({
+      slug: z.string().nullable(),
+      nome: z.string(),
+      especialidades: z.array(z.string()),
+      fotoUrl: z.string().nullable(),
+    }),
+  ),
+});
+export type PublicCompanyProfile = z.infer<typeof publicCompanyProfileSchema>;

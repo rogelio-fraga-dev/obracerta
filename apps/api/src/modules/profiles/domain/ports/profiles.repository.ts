@@ -10,11 +10,15 @@ export interface CompanyInfo {
   cnpj: string | null;
   razaoSocial: string | null;
   nomeFantasia: string | null;
+  /** Slug público — gerado uma vez no cadastro; não sobrescrito na edição se ausente. */
+  slug?: string | null;
 }
 
 /** Porta de saída para persistência de perfis (profissional/contratante/empresa). */
 export interface ProfilesRepository {
   slugExists(slug: string): Promise<boolean>;
+  /** Um slug de empresa já existe? (namespace separado do profissional). */
+  companySlugExists(slug: string): Promise<boolean>;
   createProfessional(userId: string, slugPublico: string): Promise<ProfessionalProfile>;
   createContractor(userId: string): Promise<ContractorProfile>;
   createCompany(userId: string): Promise<CompanyProfile>;

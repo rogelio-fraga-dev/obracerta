@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Lock } from "lucide-react";
 import type {
+  CompanyInvite,
   CompanyProfile,
   JwtClaims,
   Penalty,
@@ -20,6 +21,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { AppealForm } from "./_components/AppealForm";
 import { PortfolioManager } from "./_components/PortfolioManager";
 import { ProfileQrCard } from "./_components/ProfileQrCard";
+import { CompanyInvites } from "./_components/CompanyInvites";
 import { ShieldIcon } from "../_shell/icons";
 import { AdminForms } from "./_components/AdminForms";
 import { ProfileEditCard } from "./_components/ProfileEditCard";
@@ -119,6 +121,12 @@ export default async function PerfilPage() {
 
       {!isAdmin && isProfissional && (
         <Suspense fallback={null}>
+          <CompanyInvitesPanel />
+        </Suspense>
+      )}
+
+      {!isAdmin && isProfissional && (
+        <Suspense fallback={null}>
           <QrPanel />
         </Suspense>
       )}
@@ -143,6 +151,15 @@ function PanelSkeleton() {
   return <div className="animate-skeleton h-32 rounded-2xl bg-muted" />;
 }
 
+/** Convites de empresa pendentes (opt-in do diretório público) — só profissional. */
+async function CompanyInvitesPanel() {
+  const invites = await serverApi<CompanyInvite[]>(
+    "GET",
+    "/professionals/me/company-invites",
+  ).catch(() => [] as CompanyInvite[]);
+  return <CompanyInvites invites={invites} />;
+}
+
 async function EmpresaPanel() {
   let company: CompanyProfile | null = null;
   try {
@@ -159,8 +176,17 @@ async function EmpresaPanel() {
         <CompanyField label="Nome fantasia" value={company?.nomeFantasia} />
         <CompanyField label="CNPJ" value={formatCnpj(company?.cnpj)} />
       </Card>
+      {company?.slug && (
+        <Link
+          href={`/empresa/${company.slug}`}
+          className="inline-flex items-center gap-1.5 px-1 text-sm font-semibold text-primary hover:underline"
+        >
+          Ver perfil público da empresa →
+        </Link>
+      )}
       <p className="px-1 text-xs text-muted-foreground">
-        A empresa contrata e publica obras como contratante. A edição destes dados será habilitada em breve.
+        A empresa contrata e publica obras como contratante. Os profissionais que confirmam o
+        vínculo aparecem no seu perfil público (gerencie em Equipe).
       </p>
     </div>
   );

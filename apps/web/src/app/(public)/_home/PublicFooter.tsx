@@ -33,6 +33,7 @@ export function PublicFooter({ brandName, domain }: { brandName: string; domain:
       links: [
         { label: "Como funciona", href: "/#como-funciona" },
         { label: "Planos e preços", href: "/#planos" },
+        { label: "Empresas", href: "/empresas" },
         { label: "Dúvidas frequentes", href: "/#faq" },
       ],
     },

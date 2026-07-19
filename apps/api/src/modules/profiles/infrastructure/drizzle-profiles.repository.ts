@@ -47,6 +47,7 @@ export function rowToCompanyProfile(row: CompanyRow): CompanyProfile {
     cnpj: row.cnpj,
     razaoSocial: row.razaoSocial,
     nomeFantasia: row.nomeFantasia,
+    slug: row.slug,
     criadoEm: row.criadoEm.toISOString(),
   };
 }
@@ -60,6 +61,15 @@ export class DrizzleProfilesRepository implements ProfilesRepository {
       .select({ slug: professionalProfiles.slugPublico })
       .from(professionalProfiles)
       .where(eq(professionalProfiles.slugPublico, slug))
+      .limit(1);
+    return Boolean(row);
+  }
+
+  async companySlugExists(slug: string): Promise<boolean> {
+    const [row] = await this.db
+      .select({ slug: companyProfiles.slug })
+      .from(companyProfiles)
+      .where(eq(companyProfiles.slug, slug))
       .limit(1);
     return Boolean(row);
   }
@@ -88,7 +98,13 @@ export class DrizzleProfilesRepository implements ProfilesRepository {
   async setCompanyInfo(userId: string, info: CompanyInfo): Promise<CompanyProfile | null> {
     const [row] = await this.db
       .update(companyProfiles)
-      .set({ cnpj: info.cnpj, razaoSocial: info.razaoSocial, nomeFantasia: info.nomeFantasia })
+      .set({
+        cnpj: info.cnpj,
+        razaoSocial: info.razaoSocial,
+        nomeFantasia: info.nomeFantasia,
+        // slug só é gravado quando fornecido (gerado no cadastro; a edição não o mexe).
+        ...(info.slug !== undefined && info.slug !== null ? { slug: info.slug } : {}),
+      })
       .where(eq(companyProfiles.userId, userId))
       .returning();
     return row ? rowToCompanyProfile(row) : null;

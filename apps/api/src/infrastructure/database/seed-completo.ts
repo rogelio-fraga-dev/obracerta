@@ -168,7 +168,15 @@ async function main(): Promise<void> {
   ]);
 
   await db.insert(schema.companyProfiles).values([
-    { userId: empresaId, cnpj: "11444777000161", razaoSocial: "Construtora Forte Engenharia LTDA", nomeFantasia: "Construtora Forte" },
+    { userId: empresaId, cnpj: "11444777000161", razaoSocial: "Construtora Forte Engenharia LTDA", nomeFantasia: "Construtora Forte", slug: "construtora-forte" },
+  ]);
+
+  // Equipe pública da empresa: Joana e Marcos já CONFIRMARAM (aparecem no diretório);
+  // Pedro está pendente (demonstra o estado "aguardando confirmação").
+  await db.insert(schema.companyProfessionals).values([
+    { companyId: empresaId, professionalId: joanaId, confirmado: true, confirmadoEm: daysAgo(5) },
+    { companyId: empresaId, professionalId: marcosId, confirmado: true, confirmadoEm: daysAgo(3) },
+    { companyId: empresaId, professionalId: pedroId, confirmado: false },
   ]);
 
   console.log("Inserindo Assinaturas (profissionais) — ATIVA, ATIVA, CANCELADA...");

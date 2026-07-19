@@ -1,4 +1,10 @@
-import type { CompanyMember, CompanyProfessional } from "@obracerta/shared";
+import type {
+  CompanyDirectoryItem,
+  CompanyInvite,
+  CompanyMember,
+  CompanyProfessional,
+  PublicCompanyProfile,
+} from "@obracerta/shared";
 
 /** Dados para registrar/atualizar um membro (upsert por empresa+e-mail). */
 export interface UpsertMemberData {
@@ -29,6 +35,18 @@ export interface CompanyTeamRepository {
   listProfessionals(companyId: string): Promise<CompanyProfessional[]>;
   addProfessional(companyId: string, professionalId: string): Promise<CompanyProfessional>;
   removeProfessional(companyId: string, linkId: string): Promise<boolean>;
+
+  /** Convites pendentes (não confirmados) que um profissional recebeu. */
+  listPendingInvites(professionalId: string): Promise<CompanyInvite[]>;
+  /** Profissional confirma o vínculo (passa a aparecer no perfil público da empresa). */
+  confirmInvite(professionalId: string, linkId: string): Promise<boolean>;
+  /** Profissional recusa (remove) o vínculo pendente. */
+  rejectInvite(professionalId: string, linkId: string): Promise<boolean>;
+
+  /** Diretório público: empresas com pelo menos 1 profissional confirmado, filtrado. */
+  directory(q: string | null, cidadeId: string | null, limit: number): Promise<CompanyDirectoryItem[]>;
+  /** Perfil público da empresa por slug (só profissionais confirmados). `null` se não achar. */
+  publicProfile(slug: string): Promise<PublicCompanyProfile | null>;
 }
 
 export const COMPANY_TEAM_REPOSITORY = Symbol("COMPANY_TEAM_REPOSITORY");

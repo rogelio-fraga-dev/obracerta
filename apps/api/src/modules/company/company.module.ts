@@ -7,7 +7,11 @@ import { UsersModule } from "../users/users.module.js";
 import { CompanyTeamService } from "./application/company-team.service.js";
 import { COMPANY_TEAM_REPOSITORY } from "./domain/ports/company-team.repository.js";
 import { DrizzleCompanyTeamRepository } from "./infrastructure/drizzle-company-team.repository.js";
-import { CompanyController } from "./interface/company.controller.js";
+import {
+  CompanyController,
+  CompanyInvitesController,
+  PublicCompanyController,
+} from "./interface/company.controller.js";
 
 /**
  * Equipe da empresa (homologação 18/07 — evolução do modelo 1-admin): membros
@@ -16,7 +20,7 @@ import { CompanyController } from "./interface/company.controller.js";
  */
 @Module({
   imports: [AuthModule, UsersModule, BillingModule, AuditModule, NotificationsModule],
-  controllers: [CompanyController],
+  controllers: [CompanyController, CompanyInvitesController, PublicCompanyController],
   providers: [
     CompanyTeamService,
     { provide: COMPANY_TEAM_REPOSITORY, useClass: DrizzleCompanyTeamRepository },

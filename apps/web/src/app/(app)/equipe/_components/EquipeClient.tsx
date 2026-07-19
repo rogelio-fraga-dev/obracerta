@@ -148,8 +148,9 @@ export function EquipeClient({ team }: { team: CompanyTeam }) {
             Profissionais da equipe
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Vincule os profissionais da plataforma que fazem parte da sua operação. O roster é
-            interno — só a sua empresa vê.
+            Vincule os profissionais da plataforma que fazem parte da sua operação. Cada um recebe
+            um convite e, ao <strong>confirmar</strong>, passa a aparecer no perfil público da sua
+            empresa — as pessoas encontram você pela sua equipe.
           </p>
         </div>
 
@@ -167,6 +168,9 @@ export function EquipeClient({ team }: { team: CompanyTeam }) {
                     {p.especialidades.join(", ") || "Sem especialidades"}
                   </p>
                 </div>
+                <Badge tone={p.confirmado ? "success" : "warning"} size="sm">
+                  {p.confirmado ? "Confirmado" : "Aguardando confirmação"}
+                </Badge>
                 <Button
                   variant="secondary"
                   size="sm"

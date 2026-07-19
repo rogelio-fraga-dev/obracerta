@@ -78,10 +78,14 @@ export class CadastroService {
       senhaHash,
     });
     await this.profiles.createForUser(user);
+    const slug = await this.profiles.generateUniqueCompanySlug(
+      input.nomeFantasia ?? input.razaoSocial,
+    );
     await this.profiles.setCompanyInfo(user.id, {
       cnpj: input.cnpj,
       razaoSocial: input.razaoSocial,
       nomeFantasia: input.nomeFantasia ?? null,
+      slug,
     });
     await this.onboarding.scheduleSequence(user.id, user.whatsapp);
     const tokens = await this.auth.login(user);
