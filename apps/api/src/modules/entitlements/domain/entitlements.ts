@@ -19,6 +19,7 @@ export const Feature = {
   PRO_TOOLS: "tools.documents", // ferramentas: orçamento + recibo (§8.5)
   // Contratante/empresa
   REQUEST_BOOKING: "booking.request", // solicitar contato/agendamento com profissional
+  COMPANY_TEAM: "company.team", // equipe: membros com acesso + roster de profissionais
   COMPANY_VISIBILITY: "company.visibility", // identidade da empresa visível nas obras
   COMPANY_REPORTS: "company.reports", // relatórios da operação + indicadores
   FEATURED_ORDERS: "workorder.featured", // destaque das obras publicadas na listagem
@@ -67,11 +68,12 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
   ],
   // Empresa usa os mesmos códigos com preço próprio; as features company.* só têm
   // efeito para contas EMPRESA (o enforcement também checa o tipo).
-  [ContractorPlan.BASICO]: [Feature.SEARCH_GEO, Feature.REQUEST_BOOKING],
+  [ContractorPlan.BASICO]: [Feature.SEARCH_GEO, Feature.REQUEST_BOOKING, Feature.COMPANY_TEAM],
   [ContractorPlan.COMPLETO]: [
     Feature.SEARCH_GEO,
     Feature.SEARCH_UNLIMITED,
     Feature.REQUEST_BOOKING,
+    Feature.COMPANY_TEAM,
     Feature.COMPANY_VISIBILITY,
   ],
   [ContractorPlan.LANCE]: [
@@ -79,6 +81,7 @@ const ENTITLEMENTS: Partial<Record<Plan, readonly Feature[]>> = {
     Feature.SEARCH_UNLIMITED,
     Feature.REQUEST_BOOKING,
     Feature.SUBMIT_BID,
+    Feature.COMPANY_TEAM,
     Feature.COMPANY_VISIBILITY,
     Feature.COMPANY_REPORTS,
     Feature.FEATURED_ORDERS,

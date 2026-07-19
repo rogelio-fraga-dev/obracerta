@@ -58,6 +58,13 @@ describe("planAllows", () => {
     expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.EARLY_OPPORTUNITIES)).toBe(true);
   });
 
+  it("equipe da empresa em todos os planos de acesso (Essencial+)", () => {
+    expect(planAllows(ContractorPlan.BASICO, Feature.COMPANY_TEAM)).toBe(true);
+    expect(planAllows(ContractorPlan.COMPLETO, Feature.COMPANY_TEAM)).toBe(true);
+    expect(planAllows(ContractorPlan.LANCE, Feature.COMPANY_TEAM)).toBe(true);
+    expect(planAllows(ProfessionalPlan.ESPECIALISTA, Feature.COMPANY_TEAM)).toBe(false);
+  });
+
   it("empresa: visibilidade no Completo+; relatórios e destaque só no PRO (LANCE)", () => {
     expect(planAllows(ContractorPlan.BASICO, Feature.COMPANY_VISIBILITY)).toBe(false);
     expect(planAllows(ContractorPlan.COMPLETO, Feature.COMPANY_VISIBILITY)).toBe(true);

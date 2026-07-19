@@ -48,6 +48,10 @@ describe("WorkOrderService (integração)", () => {
     listForWorkOrder: () => Promise.resolve([]),
     countForWorkOrder: () => Promise.resolve(0),
   } as unknown as import("../domain/ports/work-order-photos.repository.js").WorkOrderPhotosRepository;
+  // Sem equipe neste fluxo: cada um age por si (acesso delegado testado à parte).
+  const companyTeamStub = {
+    companyActingAs: () => Promise.resolve(null),
+  } as unknown as import("../../company/application/company-team.service.js").CompanyTeamService;
   const service = new WorkOrderService(
     orderRepo,
     proposalRepo,
@@ -58,6 +62,7 @@ describe("WorkOrderService (integração)", () => {
     storageStub,
     photosStub,
     inboxStub,
+    companyTeamStub,
   );
 
   const sufixo = Date.now().toString().slice(-9);

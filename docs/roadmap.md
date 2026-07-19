@@ -495,6 +495,25 @@ seeding de oferta por cidade-piloto (operacional).
   - Entitlements: 5 features novas no mapa; rótulos no Meu Plano; navegação (Desempenho no
     profissional, Relatórios na empresa). Sem migração de banco (tudo agregado read-only).
 
+- [x] **9.5 — Equipe da empresa (modelo multi-usuário)** _(jul/2026 — evolui a decisão "1 admin"
+  da §8.6; fecha as duas últimas promessas da vitrine PJ)_: novo módulo **`company`**
+  (hexagonal; migração `0022`: `company_members` + `company_professionals`).
+  - **Membros com acesso** (`POST/DELETE /company/me/members`): o administrador convida por
+    e-mail; conta existente → vínculo imediato (+ aviso no inbox); sem conta → **vínculo
+    preguiçoso** quando a pessoa se cadastrar com o e-mail. Membro vinculado **age pela
+    empresa** nas obras: publica (com o plano DA empresa), vê as obras/propostas como dono,
+    adjudica e acessa o relatório (`effectiveOwner` no work-orders). Trava de integridade:
+    membro-profissional **não dá lance** em obra da própria empresa (veria os lances como
+    dono — quebraria o sigilo §16).
+  - **Profissionais da equipe** (`POST/DELETE /company/me/professionals`): roster interno
+    (privado — exibição pública exigiria consentimento; evolução) via autocomplete da busca.
+  - Feature `company.team` (todos os planos de acesso, Essencial+); página **/equipe** (nav
+    da empresa); tudo auditado. **Validado ao vivo**: convite→vínculo imediato; gestora sem
+    plano próprio publica pela empresa (obra nasce da empresa, com destaque/identidade dela),
+    vê as 4 obras e o relatório; /equipe 200 com membro "Acesso ativo" + roster.
+  - _v1 consciente: chat da obra segue com o admin; papel único GESTOR (catálogo evolui sem
+    migração); membro não gerencia a equipe (só o admin)._
+
 **Backlog Fase 9+ (restante):**
 - **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.
 - **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o

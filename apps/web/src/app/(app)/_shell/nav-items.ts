@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bell,
+  UsersRound,
   Home,
   ClipboardList,
   HardHat,
@@ -48,6 +49,7 @@ const NOTIFICACOES: NavItem = { href: "/notificacoes", label: "Notificações", 
 const AJUDA: NavItem = { href: "/ajuda", label: "Ajuda e suporte", shortLabel: "Ajuda", Icon: LifeBuoy };
 const DESEMPENHO: NavItem = { href: "/desempenho", label: "Desempenho", shortLabel: "KPIs", Icon: BarChart3 };
 const RELATORIOS: NavItem = { href: "/relatorios", label: "Relatórios", shortLabel: "Relat.", Icon: BarChart3 };
+const EQUIPE: NavItem = { href: "/equipe", label: "Equipe", Icon: UsersRound };
 
 /** Grupo do menu secundário (header de seção no drawer/sidebar — padrão Notion). */
 export interface NavGroup {
@@ -91,7 +93,7 @@ const NAV_CONTRATANTE: NavSet = {
 const NAV_EMPRESA: NavSet = {
   primary: [INICIO, BUSCAR, OBRAS, PEDIDOS, PERFIL],
   secondary: [
-    { label: "Trabalho", items: [ORCAMENTOS, FAVORITOS, AVALIACOES, RELATORIOS] },
+    { label: "Trabalho", items: [ORCAMENTOS, FAVORITOS, AVALIACOES, RELATORIOS, EQUIPE] },
     GRUPO_CONTA,
     GRUPO_SUPORTE,
   ],

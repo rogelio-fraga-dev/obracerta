@@ -90,6 +90,10 @@ export const CONTRACTOR_FEATURE_UI: Record<string, { label: string; desc: string
  */
 export const COMPANY_FEATURE_UI: Record<string, { label: string; desc: string }> = {
   ...CONTRACTOR_FEATURE_UI,
+  "company.team": {
+    label: "Equipe da empresa",
+    desc: "Membros com acesso à conta e roster de profissionais em Equipe.",
+  },
   "company.visibility": {
     label: "Identidade da empresa nas obras",
     desc: "Suas obras carregam o nome da empresa na descoberta.",

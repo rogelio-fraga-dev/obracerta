@@ -73,3 +73,64 @@ export const registerCompanySchema = z.object({
   nomeFantasia: z.string().trim().max(160).optional(),
 });
 export type RegisterCompanyInput = z.infer<typeof registerCompanySchema>;
+
+/**
+ * Equipe da empresa (homologação 18/07 — evolução do modelo 1-admin). Duas
+ * relações distintas:
+ * - **Membros** (`company_members`): pessoas convidadas por e-mail que acessam
+ *   e gerenciam a conta — um membro vinculado (e-mail casa com um usuário) age
+ *   pela empresa nas obras e relatórios.
+ * - **Profissionais da equipe** (`company_professionals`): roster interno de
+ *   profissionais da plataforma vinculados à empresa.
+ */
+
+/** Papel do membro na conta da empresa. */
+export const CompanyMemberRole = {
+  GESTOR: "GESTOR",
+} as const;
+export const companyMemberRoleSchema = z.nativeEnum(CompanyMemberRole);
+export type CompanyMemberRole = z.infer<typeof companyMemberRoleSchema>;
+
+/** Membro da equipe com acesso à conta da empresa. */
+export const companyMemberSchema = z.object({
+  id: uuidSchema,
+  companyId: uuidSchema,
+  nome: z.string().min(2).max(120),
+  email: emailSchema,
+  papel: companyMemberRoleSchema,
+  /** Usuário da plataforma vinculado por e-mail (null = ainda sem conta). */
+  userId: uuidSchema.nullable(),
+  criadoEm: isoTimestampSchema,
+});
+export type CompanyMember = z.infer<typeof companyMemberSchema>;
+
+/** Convite/registro de um membro pelo administrador da empresa. */
+export const addCompanyMemberSchema = z.object({
+  nome: z.string().trim().min(2, "Informe o nome").max(120),
+  email: emailSchema,
+  papel: companyMemberRoleSchema.default(CompanyMemberRole.GESTOR),
+});
+export type AddCompanyMemberInput = z.infer<typeof addCompanyMemberSchema>;
+
+/** Profissional da plataforma vinculado à equipe da empresa (roster interno). */
+export const companyProfessionalSchema = z.object({
+  id: uuidSchema,
+  companyId: uuidSchema,
+  professionalId: uuidSchema,
+  /** Dados de exibição resolvidos na leitura (nome/especialidades do perfil). */
+  nome: z.string(),
+  especialidades: z.array(z.string()),
+  criadoEm: isoTimestampSchema,
+});
+export type CompanyProfessional = z.infer<typeof companyProfessionalSchema>;
+
+/** Vínculo de um profissional à equipe (pelo id vindo da busca). */
+export const addCompanyProfessionalSchema = z.object({ professionalId: uuidSchema });
+export type AddCompanyProfessionalInput = z.infer<typeof addCompanyProfessionalSchema>;
+
+/** Visão da equipe da empresa (membros + profissionais). */
+export const companyTeamSchema = z.object({
+  membros: z.array(companyMemberSchema),
+  profissionais: z.array(companyProfessionalSchema),
+});
+export type CompanyTeam = z.infer<typeof companyTeamSchema>;

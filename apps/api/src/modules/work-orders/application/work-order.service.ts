@@ -50,6 +50,7 @@ import {
   type WorkOrderPhotosRepository,
 } from "../domain/ports/work-order-photos.repository.js";
 import { WorkOrderScheduler } from "./work-order.scheduler.js";
+import { CompanyTeamService } from "../../company/application/company-team.service.js";
 
 import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
 
@@ -68,16 +69,33 @@ export class WorkOrderService {
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
     @Inject(WORK_ORDER_PHOTOS_REPOSITORY) private readonly photos: WorkOrderPhotosRepository,
     private readonly inbox: InboxService,
+    private readonly companyTeam: CompanyTeamService,
   ) {}
 
-  /** Contratante abre uma obra; a urgência define a expiração (job BullMQ). */
-  async openWorkOrder(contractorId: string, input: CreateWorkOrderInput): Promise<WorkOrder> {
-    const user = await this.users.findById(contractorId);
-    if (!user || !canHireServices(user.tipo)) {
-      throw new BadRequestException("Apenas contratantes e empresas abrem obras.");
+  /**
+   * Dono efetivo das ações de obra: a empresa pela qual o usuário age (membro
+   * da equipe — homologação 18/07) ou ele mesmo. Centraliza o acesso delegado.
+   */
+  private async effectiveOwner(userId: string): Promise<string> {
+    return (await this.companyTeam.companyActingAs(userId)) ?? userId;
+  }
+
+  /**
+   * Contratante/empresa abre uma obra; a urgência define a expiração (job
+   * BullMQ). Um **membro da equipe** publica em nome da empresa (a obra nasce
+   * da empresa; plano e identidade são os dela).
+   */
+  async openWorkOrder(userId: string, input: CreateWorkOrderInput): Promise<WorkOrder> {
+    const contractorId = await this.effectiveOwner(userId);
+    if (contractorId === userId) {
+      const user = await this.users.findById(userId);
+      if (!user || !canHireServices(user.tipo)) {
+        throw new BadRequestException("Apenas contratantes e empresas abrem obras.");
+      }
     }
     // Gating de plano (homologação 18/07): publicar obra para receber lances é
-    // exclusivo do plano Lance (contratante) / Empresa PRO (empresa).
+    // exclusivo do plano Lance (contratante) / Empresa PRO (empresa). No acesso
+    // delegado, vale o plano DA EMPRESA.
     if (!(await this.billing.can(contractorId, Feature.SUBMIT_BID))) {
       throw new ForbiddenException(
         "Publicar obras é exclusivo do plano Lance (Empresa PRO para empresas). Assine em Cobranças.",
@@ -97,11 +115,15 @@ export class WorkOrderService {
     });
     await this.scheduler.scheduleExpiry(order.id, expiraEm);
     await this.audit.record({
-      atorUserId: contractorId,
+      atorUserId: userId,
       acao: "OBRA_ABERTA",
       entidade: "work_order",
       entidadeId: order.id,
-      dados: { especialidade: input.especialidade, urgencia: input.urgencia },
+      dados: {
+        especialidade: input.especialidade,
+        urgencia: input.urgencia,
+        ...(contractorId !== userId ? { pelaEmpresa: contractorId } : {}),
+      },
     });
     // "Oportunidades em primeira mão" (homologação 18/07): Especialistas da
     // cidade que atendem a especialidade sabem da obra na hora (inbox + push).
@@ -135,12 +157,12 @@ export class WorkOrderService {
    * (`work_orders.foto_url`, thumbnail da lista).
    */
   async uploadFoto(
-    contractorId: string,
+    userId: string,
     id: string,
     file: { buffer: Buffer; mimetype: string },
   ): Promise<WorkOrder> {
     const order = await this.getOrderOr404(id);
-    if (order.contractorId !== contractorId) {
+    if (order.contractorId !== (await this.effectiveOwner(userId))) {
       throw new ForbiddenException("Esta obra não é sua.");
     }
     if (order.status !== WorkOrderStatus.ABERTA) {
@@ -172,9 +194,12 @@ export class WorkOrderService {
     return this.photos.listForWorkOrder(workOrderId);
   }
 
-  /** Obras do contratante autenticado (todos os status), mais recentes primeiro. */
-  listMine(contractorId: string): Promise<WorkOrder[]> {
-    return this.orders.listForContractor(contractorId);
+  /**
+   * Obras do contratante autenticado (todos os status), mais recentes primeiro.
+   * Membro de equipe vê as obras **da empresa** (acesso delegado).
+   */
+  async listMine(userId: string): Promise<WorkOrder[]> {
+    return this.orders.listForContractor(await this.effectiveOwner(userId));
   }
 
   /** Obras que o profissional autenticado venceu (lance ACEITA) — em andamento. */
@@ -187,7 +212,9 @@ export class WorkOrderService {
    * propostas, contratações e indicadores. Exige conta EMPRESA + plano com a
    * feature `company.reports` (Empresa PRO).
    */
-  async companyReport(contractorId: string): Promise<CompanyReport> {
+  async companyReport(userId: string): Promise<CompanyReport> {
+    // Acesso delegado: membro da equipe consulta o relatório DA EMPRESA.
+    const contractorId = await this.effectiveOwner(userId);
     const user = await this.users.findById(contractorId);
     if (!user || user.tipo !== UserType.EMPRESA) {
       throw new ForbiddenException("Relatórios da operação são exclusivos de contas de empresa.");
@@ -255,8 +282,10 @@ export class WorkOrderService {
       );
     }
     const order = await this.getOrderOr404(workOrderId);
-    if (order.contractorId === professionalId) {
-      throw new ForbiddenException("Você não pode dar lance na própria obra.");
+    // Inclui o acesso delegado: membro da equipe da empresa dona veria TODOS os
+    // lances como dono — dar lance também quebraria o sigilo (§16).
+    if (order.contractorId === (await this.effectiveOwner(professionalId))) {
+      throw new ForbiddenException("Você não pode dar lance em obra da sua própria conta/empresa.");
     }
     if (!canSubmitProposal(order.status)) {
       throw new ConflictException("Esta obra não está aberta a lances.");
@@ -293,22 +322,27 @@ export class WorkOrderService {
     return proposal;
   }
 
-  /** Lances visíveis ao solicitante: o dono vê todos; o profissional, só o seu (sigilo §16). */
+  /**
+   * Lances visíveis ao solicitante: o dono vê todos; o profissional, só o seu
+   * (sigilo §16). Membro da equipe da empresa dona enxerga como dono.
+   */
   async listProposals(userId: string, workOrderId: string): Promise<Proposal[]> {
     const order = await this.getOrderOr404(workOrderId);
     const all = await this.proposals.listForWorkOrder(workOrderId);
-    return visibleProposals(userId, order.contractorId, all);
+    const viewer =
+      (await this.effectiveOwner(userId)) === order.contractorId ? order.contractorId : userId;
+    return visibleProposals(viewer, order.contractorId, all);
   }
 
   /**
    * Contratante adjudica a obra a um lance: obra ABERTA → ADJUDICADA, o lance vira
    * ACEITA e os demais ENVIADA são RECUSADA.
    */
-  async acceptProposal(contractorId: string, proposalId: string): Promise<Proposal> {
+  async acceptProposal(userId: string, proposalId: string): Promise<Proposal> {
     const proposal = await this.proposals.findById(proposalId);
     if (!proposal) throw new NotFoundException("Lance não encontrado.");
     const order = await this.getOrderOr404(proposal.workOrderId);
-    if (order.contractorId !== contractorId) {
+    if (order.contractorId !== (await this.effectiveOwner(userId))) {
       throw new ForbiddenException("Esta obra não é sua.");
     }
     if (!canAcceptWorkOrder(order.status)) {
@@ -322,7 +356,7 @@ export class WorkOrderService {
     const aceita = resultado.proposal;
 
     await this.audit.record({
-      atorUserId: contractorId,
+      atorUserId: userId,
       acao: "OBRA_ADJUDICADA",
       entidade: "work_order",
       entidadeId: order.id,

@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module.js";
 import { AuthModule } from "../auth/auth.module.js";
 import { BillingModule } from "../billing/billing.module.js";
+import { CompanyModule } from "../company/company.module.js";
 import { UsersModule } from "../users/users.module.js";
 import {
   WorkOrderScheduler,
@@ -29,6 +30,7 @@ import { WorkOrderController } from "./interface/work-order.controller.js";
     UsersModule,
     AuditModule,
     BillingModule,
+    CompanyModule,
     BullModule.registerQueue({ name: WORK_ORDER_EXPIRY_QUEUE }),
   ],
   controllers: [WorkOrderController],
