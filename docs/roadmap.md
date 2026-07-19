@@ -525,6 +525,25 @@ seeding de oferta por cidade-piloto (operacional).
     migração); membro não gerencia a equipe (só o admin); um membro age por **uma** empresa (a
     mais recente que o vinculou); agendamento direto não delegado (acima)._
 
+- [x] **9.6 — Polimento de UI (jul/2026): modo escuro da logo, toggle e ícones** _(pedidos do
+  fundador sobre a demo)_:
+  - **Logo do modo escuro**: no dark a logo original (texto grafite) sumia no fundo escuro.
+    Script `scripts/logo-dark-variant.cjs` (sharp) recolore só os pixels **neutros** (grafite→
+    creme por inversão de luminância) preservando o laranja e a transparência → `*-dark.png`.
+    Componente **`BrandLogo`** troca a variante por **CSS** (`:root[data-theme="dark"]` no
+    globals) — sem flash, funciona em Server Component (duas `<img>`, só a do tema ativo é
+    exibida). Aplicado em Sidebar/MobileHeader/InstallPrompt.
+  - **Fix do toggle de tema no mobile**: o `Switch` do DS vazava a bolinha para fora da trilha
+    quando ativo. O knob tinha o tamanho exato do trilho (`box-content` + ajuste no fio, frágil
+    a 1px). Reescrito com o padrão robusto: trilho `relative` + bolinha `absolute` posicionada
+    por `left` com **3px de folga garantida** nos dois estados — impossível escapar.
+  - **Emojis → ícones lucide**: todos os emojis pictóricos (🔒💳🏆🏢🔨🔔🤝🎉 medalhas etc.) do
+    sistema interno (`(app)`, ~30 telas) trocados por ícones **lucide** no padrão do projeto —
+    em props `icon` de `StatCard`/`EmptyState`, spans e mapas de tipo (notificações/ranking).
+    Mantidos como **tipografia** (não são emoji): estrelas de rating `★`, check de lista `✓`,
+    setas de botão `→`/`←`. **Verificado**: sem emoji pictórico no HTML renderizado; SVGs
+    lucide presentes; logo dark e switch ok.
+
 **Backlog Fase 9+ (restante):**
 - **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.
 - **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o
