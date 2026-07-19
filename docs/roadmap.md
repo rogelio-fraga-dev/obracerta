@@ -544,12 +544,29 @@ seeding de oferta por cidade-piloto (operacional).
     setas de botão `→`/`←`. **Verificado**: sem emoji pictórico no HTML renderizado; SVGs
     lucide presentes; logo dark e switch ok.
 
+- [x] **9.7 — Diretório público de empresas + perfil público com equipe opt-in** _(jul/2026 —
+  "os profissionais querem ser encontrados via a empresa")_: o roster interno (§9.5) vira
+  **descoberta pública consentida**.
+  - **Consentimento (opt-in):** o vínculo do roster nasce **pendente** (`confirmado=false`);
+    a empresa vincula → o profissional recebe um **convite no sino** e **confirma** (ou recusa)
+    no /perfil; **só confirmados** aparecem no perfil público. O consentimento é do profissional,
+    não da empresa.
+  - **Perfil público** `/empresa/[slug]` (SSR, sem login, compartilhável): nome, cidade, obras
+    concluídas e a equipe confirmada — cada profissional linka o próprio perfil público
+    (`/[slug]`), então a empresa vira uma **porta de descoberta** para a equipe dela.
+  - **Diretório** `/empresas` (SSR, busca por nome via URL) — só empresas com slug e ≥1
+    profissional confirmado; link no footer.
+  - **Slug da empresa** (namespace próprio, migração `0023`) gerado no cadastro PJ + backfill das
+    existentes (via `translate()`, **sem depender de `unaccent`** em prod). /equipe mostra o
+    status (Confirmado/Aguardando); /perfil da empresa linka o perfil público.
+  - Endpoints: `GET /public/companies[/:slug]`, `GET /professionals/me/company-invites`
+    (+`/confirm|/reject`). **Validado ao vivo**: diretório lista a Construtora Forte (2
+    confirmados), o perfil exclui o pendente, e confirmar o convite faz o profissional aparecer.
+
 **Backlog Fase 9+ (restante):**
 - **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.
 - **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o
   fluxo é fake/sandbox: token local + Pix simulado).
-- **Diretório público de empresas** (evolução da visibilidade PJ) — hoje a identidade aparece
-  nas obras; um diretório/busca de empresas fica para quando houver demanda.
 
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).
