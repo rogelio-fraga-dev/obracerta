@@ -63,11 +63,18 @@ export default async function ObrasPage({ searchParams }: { searchParams: Search
 async function OwnerObras({ filtroKey }: { filtroKey: string | undefined }) {
   const filtro = OWNER_FILTERS.find((f) => f.key === filtroKey) ?? OWNER_FILTERS[0]!;
   // Gating (homologação 18/07): publicar obra é do plano Lance / Empresa PRO.
-  const [all, ent] = await Promise.all([
+  // Membro de equipe publica PELA empresa — vale o plano dela (acting).
+  const [all, ent, acting] = await Promise.all([
     serverApi<WorkOrder[]>("GET", "/work-orders/me"),
     serverApi<{ features: string[] }>("GET", "/me/entitlements").catch(() => null),
+    serverApi<{ companyId: string | null; features: string[] }>(
+      "GET",
+      "/company/me/acting",
+    ).catch(() => null),
   ]);
-  const podePublicar = ent?.features.includes("bid.submit") ?? true;
+  const podePublicar =
+    (ent?.features.includes("bid.submit") ?? true) ||
+    (acting?.features.includes("bid.submit") ?? false);
   const visiveis = filtro.statuses ? all.filter((o) => filtro.statuses!.includes(o.status)) : all;
   const tabs: FilterTab[] = OWNER_FILTERS.map((f) => ({
     key: f.key,

@@ -511,8 +511,19 @@ seeding de oferta por cidade-piloto (operacional).
     da empresa); tudo auditado. **Validado ao vivo**: convite→vínculo imediato; gestora sem
     plano próprio publica pela empresa (obra nasce da empresa, com destaque/identidade dela),
     vê as 4 obras e o relatório; /equipe 200 com membro "Acesso ativo" + roster.
+  - **Contexto de delegação na UI** (`GET /company/me/acting`): a página resolve as features do
+    plano DA empresa para o membro (ex.: o botão "Nova obra" e o acesso a /relatorios de um
+    gestor dependem do plano da empresa, não do plano pessoal dele). _Fecha 2 discrepâncias de
+    UI encontradas no pente-fino: gestor sem plano próprio via o cadeado de publicar/relatório
+    mesmo agindo por uma empresa Empresa PRO._
+  - **Fronteira de delegação (decisão consciente):** o membro age pela empresa nas **obras**
+    (atividade coletiva — "publica em escala") e nos **relatórios**. O **agendamento direto**
+    (`booking`/"Solicitar contato") é uma relação 1:1 que pertence a quem a inicia — o membro
+    agenda sob a própria identidade/plano; o admin agenda pela empresa. Não se delega aceite de
+    termos (append-only, jurídico) nem avaliação (dupla-cega) — isso mantém a autoria clara.
   - _v1 consciente: chat da obra segue com o admin; papel único GESTOR (catálogo evolui sem
-    migração); membro não gerencia a equipe (só o admin)._
+    migração); membro não gerencia a equipe (só o admin); um membro age por **uma** empresa (a
+    mais recente que o vinculou); agendamento direto não delegado (acima)._
 
 **Backlog Fase 9+ (restante):**
 - **WhatsApp do suporte** (item 13 da homologação) — link no FAQ/landing quando houver número.

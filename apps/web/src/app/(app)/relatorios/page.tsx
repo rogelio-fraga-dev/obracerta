@@ -11,20 +11,9 @@ import { BackLink } from "../_shell/BackLink";
  * (`company.reports`, 403 → cadeado de upgrade aqui).
  */
 export default async function RelatoriosPage() {
+  // A API decide quem vê (empresa OU membro da equipe agindo por ela) — a
+  // página tenta primeiro e só então diferencia a mensagem do 403.
   const hint = await getProfileHint();
-  if (hint?.tipo !== "EMPRESA") {
-    return (
-      <section className="space-y-4">
-        <BackLink href="/inicio" label="Início" />
-        <Card>
-          <p className="text-sm text-muted-foreground">
-            Os relatórios da operação são exclusivos de contas de empresa.
-          </p>
-        </Card>
-      </section>
-    );
-  }
-
   let report: CompanyReport | null = null;
   let bloqueado = false;
   try {
@@ -32,6 +21,20 @@ export default async function RelatoriosPage() {
   } catch (e) {
     if (e instanceof ApiEnvelopeError && e.status === 403) bloqueado = true;
     else throw e;
+  }
+
+  if (bloqueado && hint?.tipo !== "EMPRESA") {
+    return (
+      <section className="space-y-4">
+        <BackLink href="/inicio" label="Início" />
+        <Card>
+          <p className="text-sm text-muted-foreground">
+            Os relatórios da operação são exclusivos de contas de empresa (e de membros da equipe
+            de uma empresa com plano Empresa PRO).
+          </p>
+        </Card>
+      </section>
+    );
   }
 
   return (

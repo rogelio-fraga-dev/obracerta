@@ -30,6 +30,12 @@ export class CompanyController {
     return this.team.team(user.sub);
   }
 
+  /** Por qual empresa eu ajo (membro da equipe) + features do plano dela. */
+  @Get("acting")
+  acting(@CurrentUser() user: JwtClaims): Promise<{ companyId: string | null; features: string[] }> {
+    return this.team.actingContext(user.sub);
+  }
+
   /** Convida/registra um membro por e-mail (vínculo imediato se a conta existir). */
   @Post("members")
   addMember(

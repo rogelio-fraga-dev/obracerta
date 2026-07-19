@@ -164,6 +164,18 @@ export class CompanyTeamService {
     return this.repo.linkMemberByEmail(normalizeInviteEmail(user.email), userId);
   }
 
+  /**
+   * Contexto de delegação para a UI: por qual empresa o usuário age e quais
+   * features o plano DELA libera (ex.: o botão "Nova obra" de um gestor depende
+   * do `bid.submit` da empresa, não do plano pessoal dele).
+   */
+  async actingContext(userId: string): Promise<{ companyId: string | null; features: string[] }> {
+    const companyId = await this.companyActingAs(userId);
+    if (!companyId) return { companyId: null, features: [] };
+    const ent = await this.billing.getEntitlements(companyId);
+    return { companyId, features: [...ent.features] };
+  }
+
   /** Garante conta EMPRESA com plano de acesso que inclui a equipe. */
   private async requireCompanyWithTeam(companyId: string): Promise<void> {
     const user = await this.users.findById(companyId);
