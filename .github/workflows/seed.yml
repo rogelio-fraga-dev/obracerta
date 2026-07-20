@@ -1,4 +1,4 @@
-# Seed manual da nuvem (demo) — roda `pnpm db:seed` na EC2 via AWS SSM.
+# Seed manual da nuvem (demo) — roda `pnpm db:seed:completo` na EC2 via AWS SSM.
 #
 # ⚠️ DESTRUTIVO: o seed APAGA todos os dados atuais e recria o estado canônico
 # da demo. Só dispara manualmente (workflow_dispatch) e exige digitar a
@@ -46,7 +46,7 @@ jobs:
           # (mesma receita do migrate). Só aspas SIMPLES no comando interno para
           # não colidir com o wrapping do runuser -c "$REMOTE". Seed usa as senhas
           # padrão (admin@123 / senha@123) — credenciais conhecidas da demo.
-          REMOTE="cd ~/obracerta && git fetch origin master -q && git reset --hard FETCH_HEAD && docker compose --env-file infra/docker/.env.prod -f infra/docker/docker-compose.prod.yml run --rm api sh -lc 'pnpm db:seed'"
+          REMOTE="cd ~/obracerta && git fetch origin master -q && git reset --hard FETCH_HEAD && docker compose --env-file infra/docker/.env.prod -f infra/docker/docker-compose.prod.yml run --rm api sh -lc 'pnpm db:seed:completo'"
           CMD="runuser -l ec2-user -c \"$REMOTE\""
           jq -n --arg c "$CMD" '{commands:[$c]}' > ssm-params.json
 
