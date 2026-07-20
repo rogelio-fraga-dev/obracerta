@@ -25,6 +25,11 @@ export const professionalProfiles = pgTable(
     completudePct: integer("completude_pct").notNull().default(0),
     plano: professionalPlanEnum("plano").notNull().default("INICIANTE"),
     slugPublico: varchar("slug_publico", { length: 80 }).notNull().unique(),
+    // Verificação por foto (selfie): NAO_ENVIADO → EM_ANALISE → VERIFICADO/RECUSADO.
+    // O selo "Verificado" aparece no perfil/busca; a foto vai pro storage (privada).
+    verificacaoStatus: varchar("verificacao_status", { length: 20 }).notNull().default("NAO_ENVIADO"),
+    verificacaoFotoUrl: varchar("verificacao_foto_url", { length: 500 }),
+    verificadoEm: timestamp("verificado_em", { withTimezone: true }),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

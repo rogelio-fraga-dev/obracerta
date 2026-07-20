@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { cities } from "./cities.js";
 import { userTipoEnum, userStatusEnum } from "./enums.js";
@@ -29,7 +29,14 @@ export const users = pgTable(
     status: userStatusEnum("status").notNull().default("ATIVO"),
     // papéis administrativos (Fase 6); vazio = usuário comum. Catálogo no shared (UserRole).
     roles: text("roles").array().notNull().default([]),
+    // Programa de indicação: código próprio p/ compartilhar + quem indicou este usuário.
+    codigoIndicacao: varchar("codigo_indicacao", { length: 12 }),
+    indicadoPor: uuid("indicado_por"),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("users_nome_trgm_idx").using("gin", sql`${t.nomeCompleto} gin_trgm_ops`)],
+  (t) => [
+    index("users_nome_trgm_idx").using("gin", sql`${t.nomeCompleto} gin_trgm_ops`),
+    uniqueIndex("users_codigo_indicacao_idx").on(t.codigoIndicacao).where(sql`${t.codigoIndicacao} is not null`),
+    index("users_indicado_por_idx").on(t.indicadoPor),
+  ],
 );

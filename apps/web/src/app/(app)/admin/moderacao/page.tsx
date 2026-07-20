@@ -1,4 +1,9 @@
-import { ApiEnvelopeError, type Report, type Suspension } from "@obracerta/shared";
+import {
+  ApiEnvelopeError,
+  type PendingVerification,
+  type Report,
+  type Suspension,
+} from "@obracerta/shared";
 import { Badge, Card } from "@obracerta/ui";
 import { PartyPopper } from "lucide-react";
 import { serverApi } from "@/lib/server-api";
@@ -32,10 +37,14 @@ function Restrito() {
 export default async function ModeracaoPage() {
   let reports: DetailedReport[];
   let appeals: DetailedSuspension[];
+  let verificacoes: PendingVerification[];
   try {
-    [reports, appeals] = await Promise.all([
+    [reports, appeals, verificacoes] = await Promise.all([
       serverApi<DetailedReport[]>("GET", "/reports/open"),
       serverApi<DetailedSuspension[]>("GET", "/suspensions/appealed"),
+      serverApi<PendingVerification[]>("GET", "/profiles/verificacoes/pendentes").catch(
+        () => [] as PendingVerification[],
+      ),
     ]);
   } catch (e) {
     if (e instanceof ApiEnvelopeError) {
@@ -192,6 +201,56 @@ export default async function ModeracaoPage() {
           )}
         </Card>
       </div>
+
+      <Card className="space-y-3">
+        <h2 className="font-display text-lg font-black text-foreground">
+          Verificações de identidade ({verificacoes.length})
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Compare a selfie com o nome cadastrado. Aprove se conferir; recuse fotos ilegíveis ou
+          incompatíveis. Só aprovadas ganham o selo Verificado.
+        </p>
+        {verificacoes.length === 0 ? (
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <PartyPopper aria-hidden className="h-4 w-4 text-success" /> Nenhuma verificação pendente.
+          </p>
+        ) : (
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {verificacoes.map((v) => (
+              <li
+                key={v.userId}
+                className="space-y-3 rounded-xl border border-border p-3"
+              >
+                {v.fotoUrl ? (
+                  <img
+                    src={v.fotoUrl}
+                    alt={`Selfie de ${v.nome}`}
+                    className="aspect-square w-full rounded-lg border border-border object-cover"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
+                    Sem foto
+                  </div>
+                )}
+                <div>
+                  <p className="font-bold text-foreground">{v.nome}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Enviado em {formatDateTimeBR(v.enviadoEm)}
+                  </p>
+                </div>
+                <Resolver
+                  action="/api/moderation/verification-resolve"
+                  payloadBase={{ userId: v.userId }}
+                  options={[
+                    { label: "Aprovar", body: { aprovar: true } },
+                    { label: "Recusar", body: { aprovar: false }, variant: "secondary" },
+                  ]}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </section>
   );
 }

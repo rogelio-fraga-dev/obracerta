@@ -39,6 +39,8 @@ import {
   type ReputationEventRepository,
 } from "../domain/ports/reputation-event.repository.js";
 import { ReputationScheduler } from "./reputation.scheduler.js";
+import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
+import { IMAGE_MIME, sniffImageExt } from "../../../common/uploads/image-upload.js";
 
 @Injectable()
 export class ReputationService {
@@ -50,7 +52,26 @@ export class ReputationService {
     private readonly bookings: BookingService,
     private readonly scheduler: ReputationScheduler,
     private readonly audit: AuditService,
+    @Inject(STORAGE_PORT) private readonly storage: StoragePort,
   ) {}
+
+  /**
+   * Anexa a foto do serviço concluído à avaliação do próprio autor (prova
+   * social). A nota/comentário são imutáveis; a foto é metadado adicional.
+   */
+  async attachReviewPhoto(
+    authorId: string,
+    reviewId: string,
+    file: { buffer: Buffer; mimetype: string },
+  ): Promise<Review> {
+    const ext = sniffImageExt(file.buffer);
+    if (!ext) throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
+    const key = `reviews/${reviewId}/servico-${Date.now()}.${ext}`;
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
+    const updated = await this.repo.setFoto(reviewId, authorId, url);
+    if (!updated) throw new NotFoundException("Avaliação não encontrada.");
+    return updated;
+  }
 
   /**
    * Registra a avaliação do autor sobre a contraparte de um pedido CONCLUIDO.
@@ -80,6 +101,7 @@ export class ReputationService {
       papelAutor: participant.papelAutor,
       nota: input.nota,
       comentario: input.comentario ?? null,
+      fotoUrl: null,
       prazoEm,
     });
 

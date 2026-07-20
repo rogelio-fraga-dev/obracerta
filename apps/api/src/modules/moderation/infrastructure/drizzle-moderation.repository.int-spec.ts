@@ -71,6 +71,7 @@ describe("Moderação — reports e suspensões (integração)", () => {
       papelAutor: "CONTRATANTE",
       nota: 1,
       comentario: "comentário ofensivo",
+      fotoUrl: null,
       prazoEm: reviewDeadline(new Date()).toISOString(),
     });
     await reviewRepo.revealPending(b.id);

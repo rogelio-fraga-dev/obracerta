@@ -19,6 +19,7 @@ interface SearchRow {
   plano: string;
   anos_experiencia: number | null;
   foto_url: string | null;
+  verificacao_status: string | null;
   media_nota: string | number | null;
   total_avaliacoes: string | number | null;
   distancia_km: string | number | null;
@@ -81,6 +82,7 @@ export class DrizzleSearchRepository implements SearchRepository {
       select u.id as user_id, u.nome_completo as nome, pp.slug_publico as slug,
              pp.especialidades, pp.bairro, pp.plano, pp.anos_experiencia,
              coalesce(pp.foto_url, u.foto_url) as foto_url,
+             pp.verificacao_status as verificacao_status,
              coalesce(r.media, 0) as media_nota, coalesce(r.total, 0) as total_avaliacoes,
              ${distancia} as distancia_km
       from professional_profiles pp
@@ -144,6 +146,7 @@ function rowToSearchResult(row: SearchRow): SearchResult {
     plano: row.plano as ProfessionalPlan,
     anosExperiencia: row.anos_experiencia,
     fotoUrl: row.foto_url,
+    verificado: row.verificacao_status === "VERIFICADO",
     mediaNota: Number(row.media_nota ?? 0),
     totalAvaliacoes: Number(row.total_avaliacoes ?? 0),
     distanciaKm: row.distancia_km === null ? null : Number(row.distancia_km),

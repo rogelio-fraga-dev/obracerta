@@ -5,6 +5,7 @@ export interface CreateWorkOrderData {
   contractorId: string;
   cidadeId: string;
   especialidade: string;
+  subServico: string | null;
   titulo: string;
   descricao: string | null;
   urgencia: string;

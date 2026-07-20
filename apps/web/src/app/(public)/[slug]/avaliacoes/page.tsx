@@ -9,6 +9,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 interface ReviewItem {
   nota: number;
   comentario: string | null;
+  fotoUrl: string | null;
   criadoEm: string;
   autorNome: string;
   resposta: string | null;
@@ -131,6 +132,13 @@ export default async function AvaliacoesPage({
                   </div>
                   {av.comentario && (
                     <p className="text-sm leading-relaxed text-foreground">“{av.comentario}”</p>
+                  )}
+                  {av.fotoUrl && (
+                    <img
+                      src={av.fotoUrl}
+                      alt="Foto do serviço concluído"
+                      className="max-h-64 w-full rounded-lg border border-border object-cover"
+                    />
                   )}
                   {av.resposta && (
                     <div className="rounded-lg border border-border bg-muted/40 p-3">

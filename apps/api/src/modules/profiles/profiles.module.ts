@@ -1,7 +1,9 @@
 import { Module } from "@nestjs/common";
 import { AuthModule } from "../auth/auth.module.js";
 import { BillingModule } from "../billing/billing.module.js";
+import { NotificationsModule } from "../notifications/notifications.module.js";
 import { OnboardingModule } from "../onboarding/onboarding.module.js";
+import { PromotionsModule } from "../promotions/promotions.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { CadastroService } from "./application/cadastro.service.js";
 import { PortfolioService } from "./application/portfolio.service.js";
@@ -22,7 +24,7 @@ import { ProfilesController } from "./interface/profiles.controller.js";
  * (gating do portfólio). JwtAuthGuard vem do AuthModule.
  */
 @Module({
-  imports: [AuthModule, UsersModule, OnboardingModule, BillingModule],
+  imports: [AuthModule, UsersModule, OnboardingModule, BillingModule, NotificationsModule, PromotionsModule],
   controllers: [CadastroController, ProfilesController],
   providers: [
     CadastroService,

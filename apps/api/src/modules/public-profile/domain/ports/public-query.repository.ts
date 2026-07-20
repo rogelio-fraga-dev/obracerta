@@ -7,6 +7,7 @@ import type { RankingEntry } from "@obracerta/shared";
 export interface ReviewRow {
   nota: number;
   comentario: string | null;
+  fotoUrl: string | null;
   criadoEm: string;
   autorNome: string;
   resposta: string | null;

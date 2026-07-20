@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import {
   createReviewSchema,
   createReviewResponseSchema,
@@ -13,9 +24,16 @@ import {
   type ReviewResponse,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
+import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
 import { ReputationService } from "../application/reputation.service.js";
+
+/** Subconjunto do arquivo multipart usado (evita @types/multer global). */
+interface MultipartFile {
+  buffer: Buffer;
+  mimetype: string;
+}
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -29,6 +47,21 @@ export class ReputationController {
     @Body(new ZodValidationPipe(createReviewSchema)) input: CreateReviewInput,
   ): Promise<Review> {
     return this.reputation.createReview(user.sub, input);
+  }
+
+  /** Anexa a foto do serviço concluído à própria avaliação (multipart, campo `file`). */
+  @Post("reviews/:id/foto")
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
+  attachFoto(
+    @CurrentUser() user: JwtClaims,
+    @Param("id") id: string,
+    @UploadedFile() file: MultipartFile | undefined,
+  ): Promise<Review> {
+    if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
+    return this.reputation.attachReviewPhoto(user.sub, id, {
+      buffer: file.buffer,
+      mimetype: file.mimetype,
+    });
   }
 
   /** Avaliações reveladas recebidas pelo usuário autenticado (alvo), com a resposta (se houver). */

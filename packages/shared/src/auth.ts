@@ -87,6 +87,8 @@ export const registerSchema = z.object({
   password: passwordSchema,
   whatsapp: whatsappSchema,
   tipo: userTypeSchema,
+  /** Código de indicação (opcional): dá recompensa a quem indicou e ao novo usuário. */
+  codigoIndicacao: z.string().trim().min(4).max(12).optional(),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 

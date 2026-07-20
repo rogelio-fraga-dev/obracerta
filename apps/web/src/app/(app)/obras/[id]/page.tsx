@@ -110,7 +110,7 @@ export default async function ObraDetailPage({ params }: { params: Promise<{ id:
 
       <div className="rounded-xl border border-border bg-background p-4">
         <Fact icon={<TagIcon className="h-5 w-5" />} label="Especialidade">
-          {obra.especialidade}
+          {obra.subServico ? `${obra.especialidade} · ${obra.subServico}` : obra.especialidade}
         </Fact>
         {obra.bairro && (
           <Fact icon={<MapPinIcon className="h-5 w-5" />} label="Bairro">

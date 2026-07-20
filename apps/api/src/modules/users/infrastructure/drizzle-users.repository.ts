@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, count, inArray, sql } from "drizzle-orm";
+import { and, eq, count, inArray, isNull, sql } from "drizzle-orm";
 import type { User } from "@obracerta/shared";
 import { DRIZZLE } from "../../../infrastructure/database/database.tokens.js";
 import type { Database } from "../../../infrastructure/database/drizzle.js";
@@ -150,5 +150,38 @@ export class DrizzleUsersRepository implements UsersRepository {
       .from(users)
       .where(sql`'ADMIN' = any(${users.roles})`);
     return rows.map(rowToUser);
+  }
+
+  async findByCodigoIndicacao(codigo: string): Promise<{ id: string } | null> {
+    const [row] = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.codigoIndicacao, codigo))
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getCodigoIndicacao(id: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ codigo: users.codigoIndicacao })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    return row?.codigo ?? null;
+  }
+
+  async setCodigoIndicacao(id: string, codigo: string): Promise<void> {
+    // Só grava se ainda não houver código (idempotente, evita corrida de geração).
+    await this.db
+      .update(users)
+      .set({ codigoIndicacao: codigo })
+      .where(and(eq(users.id, id), isNull(users.codigoIndicacao)));
+  }
+
+  async setIndicadoPor(id: string, referrerId: string): Promise<void> {
+    await this.db
+      .update(users)
+      .set({ indicadoPor: referrerId })
+      .where(and(eq(users.id, id), isNull(users.indicadoPor)));
   }
 }

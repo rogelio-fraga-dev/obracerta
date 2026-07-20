@@ -42,6 +42,7 @@ export const workOrders = pgTable(
     fotoUrl: text("foto_url"),
     geo: geometry("geo", { type: "point", mode: "xy", srid: 4326 }),
     pisoCentavos: integer("piso_centavos"),
+    subServico: varchar("sub_servico", { length: 80 }),
     status: workOrderStatusEnum("status").notNull().default("ABERTA"),
     expiraEm: timestamp("expira_em", { withTimezone: true }).notNull(),
     criadoEm: timestamp("criado_em", { withTimezone: true }).notNull().defaultNow(),

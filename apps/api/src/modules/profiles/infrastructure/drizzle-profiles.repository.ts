@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type {
   ProfessionalProfile,
   ContractorProfile,
@@ -11,6 +11,7 @@ import type { Database } from "../../../infrastructure/database/drizzle.js";
 import { professionalProfiles } from "../../../infrastructure/database/schema/professional-profiles.js";
 import { contractorProfiles } from "../../../infrastructure/database/schema/contractor-profiles.js";
 import { companyProfiles } from "../../../infrastructure/database/schema/company-profiles.js";
+import { users } from "../../../infrastructure/database/schema/users.js";
 import type { CompanyInfo, ProfilesRepository } from "../domain/ports/profiles.repository.js";
 
 type ProRow = typeof professionalProfiles.$inferSelect;
@@ -30,6 +31,7 @@ export function rowToProfessionalProfile(row: ProRow): ProfessionalProfile {
     completudePct: row.completudePct,
     plano: row.plano as ProfessionalProfile["plano"],
     slugPublico: row.slugPublico,
+    verificado: row.verificacaoStatus === "VERIFICADO",
   };
 }
 
@@ -163,5 +165,71 @@ export class DrizzleProfilesRepository implements ProfilesRepository {
       .update(professionalProfiles)
       .set({ completudePct: pct })
       .where(eq(professionalProfiles.userId, userId));
+  }
+
+  async setVerificationPhoto(userId: string, url: string): Promise<void> {
+    await this.db
+      .update(professionalProfiles)
+      .set({ verificacaoStatus: "EM_ANALISE", verificacaoFotoUrl: url, verificadoEm: null })
+      .where(eq(professionalProfiles.userId, userId));
+  }
+
+  async getVerification(
+    userId: string,
+  ): Promise<{ status: string; fotoUrl: string | null; verificadoEm: string | null } | null> {
+    const [row] = await this.db
+      .select({
+        status: professionalProfiles.verificacaoStatus,
+        fotoUrl: professionalProfiles.verificacaoFotoUrl,
+        verificadoEm: professionalProfiles.verificadoEm,
+      })
+      .from(professionalProfiles)
+      .where(eq(professionalProfiles.userId, userId))
+      .limit(1);
+    if (!row) return null;
+    return {
+      status: row.status,
+      fotoUrl: row.fotoUrl,
+      verificadoEm: row.verificadoEm ? row.verificadoEm.toISOString() : null,
+    };
+  }
+
+  async listPendingVerifications(): Promise<
+    { userId: string; nome: string; fotoUrl: string | null; enviadoEm: string }[]
+  > {
+    const rows = await this.db
+      .select({
+        userId: professionalProfiles.userId,
+        nome: users.nomeCompleto,
+        fotoUrl: professionalProfiles.verificacaoFotoUrl,
+        enviadoEm: professionalProfiles.criadoEm,
+      })
+      .from(professionalProfiles)
+      .innerJoin(users, eq(users.id, professionalProfiles.userId))
+      .where(eq(professionalProfiles.verificacaoStatus, "EM_ANALISE"))
+      .orderBy(desc(professionalProfiles.criadoEm));
+    return rows.map((r) => ({
+      userId: r.userId,
+      nome: r.nome,
+      fotoUrl: r.fotoUrl,
+      enviadoEm: r.enviadoEm.toISOString(),
+    }));
+  }
+
+  async resolveVerification(userId: string, aprovar: boolean): Promise<boolean> {
+    const [row] = await this.db
+      .update(professionalProfiles)
+      .set({
+        verificacaoStatus: aprovar ? "VERIFICADO" : "RECUSADO",
+        verificadoEm: aprovar ? new Date() : null,
+      })
+      .where(
+        and(
+          eq(professionalProfiles.userId, userId),
+          eq(professionalProfiles.verificacaoStatus, "EM_ANALISE"),
+        ),
+      )
+      .returning({ userId: professionalProfiles.userId });
+    return row !== undefined;
   }
 }

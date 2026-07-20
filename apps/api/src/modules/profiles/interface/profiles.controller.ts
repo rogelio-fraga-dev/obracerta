@@ -17,17 +17,24 @@ import { IMAGE_UPLOAD_OPTIONS } from "../../../common/uploads/image-upload.js";
 import {
   type CompanyProfile,
   type JwtClaims,
+  type MyVerification,
+  type PendingVerification,
   type PortfolioPhoto,
   type ProfessionalAnalytics,
   type ProfessionalProfile,
+  type ResolveVerificationInput,
+  resolveVerificationSchema,
   type UpdatePortfolioPhotoInput,
   updatePortfolioPhotoSchema,
   type UpdateProfessionalProfileInput,
   updateProfessionalProfileSchema,
+  UserRole,
 } from "@obracerta/shared";
 import { ZodValidationPipe } from "../../../common/pipes/zod-validation.pipe.js";
 import { CurrentUser } from "../../auth/interface/current-user.decorator.js";
 import { JwtAuthGuard } from "../../auth/interface/jwt-auth.guard.js";
+import { Roles } from "../../auth/interface/roles.decorator.js";
+import { RolesGuard } from "../../auth/interface/roles.guard.js";
 import { PortfolioService } from "../application/portfolio.service.js";
 import { ProfileAnalyticsService } from "../application/profile-analytics.service.js";
 import { ProfilesService } from "../application/profiles.service.js";
@@ -99,6 +106,48 @@ export class ProfilesController {
     });
     if (!updated) throw new NotFoundException("Perfil profissional não encontrado.");
     return updated;
+  }
+
+  /** Estado da verificação por foto do profissional autenticado. */
+  @Get("professional/me/verificacao")
+  @UseGuards(JwtAuthGuard)
+  myVerification(@CurrentUser() user: JwtClaims): Promise<MyVerification> {
+    return this.profiles.myVerification(user.sub);
+  }
+
+  /** Envia a selfie de verificação (multipart, campo `file`). Vai para análise. */
+  @Post("professional/me/verificacao")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor("file", IMAGE_UPLOAD_OPTIONS))
+  submitVerification(
+    @CurrentUser() user: JwtClaims,
+    @UploadedFile() file: MultipartFile | undefined,
+  ): Promise<MyVerification> {
+    if (!file) throw new BadRequestException("Arquivo ausente (campo 'file').");
+    return this.profiles.submitVerification(user.sub, {
+      buffer: file.buffer,
+      mimetype: file.mimetype,
+    });
+  }
+
+  /** Fila da moderação: verificações pendentes (MODERADOR/ADMIN). */
+  @Get("verificacoes/pendentes")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  pendingVerifications(): Promise<PendingVerification[]> {
+    return this.profiles.listPendingVerifications();
+  }
+
+  /** Aprova/recusa uma verificação (MODERADOR/ADMIN). */
+  @Post("verificacoes/:userId/resolver")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERADOR, UserRole.ADMIN)
+  async resolveVerification(
+    @Param("userId") userId: string,
+    @Body(new ZodValidationPipe(resolveVerificationSchema)) body: ResolveVerificationInput,
+  ): Promise<{ ok: true }> {
+    await this.profiles.resolveVerification(userId, body.aprovar);
+    return { ok: true };
   }
 
   /** Portfólio de obras do profissional autenticado. */

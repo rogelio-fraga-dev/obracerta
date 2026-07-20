@@ -30,6 +30,7 @@ import { AuditService } from "../../audit/application/audit.service.js";
 import { EntitlementsService } from "../../entitlements/application/entitlements.service.js";
 import type { Feature, Plan } from "../../entitlements/domain/entitlements.js";
 import { UsersService } from "../../users/application/users.service.js";
+import { PromotionsService } from "../../promotions/application/promotions.service.js";
 import {
   NOTIFICATION_PROVIDER,
   type NotificationProvider,
@@ -107,6 +108,7 @@ export class BillingService {
     private readonly users: UsersService,
     private readonly audit: AuditService,
     @Inject(NOTIFICATION_PROVIDER) private readonly notifications: NotificationProvider,
+    private readonly promotions: PromotionsService,
   ) {}
 
   /**
@@ -136,8 +138,22 @@ export class BillingService {
     // INADIMPLENTE não bloqueia: permite reassinar para regularizar o acesso.
 
     const now = new Date();
+    // Preço cheio da recorrência; o cupom desconta só a 1ª fatura (valorPrimeira).
     const valorCentavos = professionalPriceCentavos(input.plano);
-    const venceEm = firstInvoiceDue(input.plano, now).toISOString();
+    const dueBase = firstInvoiceDue(input.plano, now);
+
+    // Cupom opcional: resgata (atômico) e aplica desconto / dias grátis à 1ª fatura.
+    let valorPrimeira = valorCentavos;
+    let cupomCodigo: string | null = null;
+    if (input.cupom) {
+      const resgate = await this.promotions.redeemForSubscription(userId, input.cupom, valorCentavos);
+      valorPrimeira = resgate.valorCentavos;
+      cupomCodigo = resgate.codigo;
+      if (resgate.diasGratis > 0) {
+        dueBase.setDate(dueBase.getDate() + resgate.diasGratis);
+      }
+    }
+    const venceEm = dueBase.toISOString();
 
     const sub = await this.gateway.createSubscription({
       userId,
@@ -158,9 +174,11 @@ export class BillingService {
 
     const charge = await this.gateway.createCharge({
       userId,
-      valorCentavos,
+      valorCentavos: valorPrimeira,
       vencimento: venceEm,
-      descricao: `Assinatura ${input.plano}`,
+      descricao: cupomCodigo
+        ? `Assinatura ${input.plano} (cupom ${cupomCodigo})`
+        : `Assinatura ${input.plano}`,
     });
     const invoice = await this.invoices.create({
       userId,
@@ -168,7 +186,7 @@ export class BillingService {
       purchaseId: null,
       gateway: this.gateway.name,
       gatewayId: charge.gatewayId,
-      valorCentavos,
+      valorCentavos: valorPrimeira,
       vencimentoEm: venceEm,
     });
     await this.scheduler.scheduleInvoiceDue(invoice.id, venceEm);

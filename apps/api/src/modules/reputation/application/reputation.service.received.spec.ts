@@ -30,6 +30,7 @@ describe("ReputationService — recebidas com resposta e checagem por pedido", (
       {} as never, // bookings
       {} as never, // scheduler
       {} as never, // audit
+      {} as never, // storage
     );
     return { service, responses };
   }

@@ -18,6 +18,8 @@ export const searchResultSchema = z.object({
   plano: professionalPlanSchema,
   anosExperiencia: z.number().int().nullable(),
   fotoUrl: z.string().nullable(),
+  /** Identidade verificada por foto (selo). */
+  verificado: z.boolean().default(false),
   /** Reputação (avaliações reveladas): média 0–5 e total. 0/0 quando ainda não avaliado. */
   mediaNota: z.number().min(0).max(5),
   totalAvaliacoes: z.number().int().min(0),

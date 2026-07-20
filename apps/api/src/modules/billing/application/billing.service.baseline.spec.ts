@@ -40,6 +40,7 @@ describe("BillingService — plano baseline e gating", () => {
       users,
       {} as never, // audit
       {} as never, // notifications
+      {} as never, // promotions
     );
     return service;
   }

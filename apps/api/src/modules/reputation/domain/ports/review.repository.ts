@@ -8,6 +8,7 @@ export interface CreateReviewData {
   papelAutor: UserType;
   nota: number;
   comentario: string | null;
+  fotoUrl: string | null;
   prazoEm: string; // ISO
 }
 
@@ -20,6 +21,8 @@ export interface ReviewRepository {
   create(data: CreateReviewData): Promise<Review>;
   findById(id: string): Promise<Review | null>;
   findByBookingAndAuthor(bookingId: string, autorId: string): Promise<Review | null>;
+  /** Anexa a foto do serviço à avaliação do próprio autor. `null` se não for dele. */
+  setFoto(reviewId: string, autorId: string, url: string): Promise<Review | null>;
   /** Nº de avaliações já registradas no pedido (1 ou 2). */
   countForBooking(bookingId: string): Promise<number>;
   /** Revela as avaliações PENDENTE de um pedido; devolve os alvoIds revelados. Idempotente. */

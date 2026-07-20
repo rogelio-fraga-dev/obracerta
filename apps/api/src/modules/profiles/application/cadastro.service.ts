@@ -10,6 +10,7 @@ import { AuthService } from "../../auth/application/auth.service.js";
 import { OtpService } from "../../auth/application/otp.service.js";
 import { hashPassword } from "../../auth/domain/password.js";
 import { OnboardingScheduler } from "../../onboarding/application/onboarding.scheduler.js";
+import { PromotionsService } from "../../promotions/application/promotions.service.js";
 import { UsersService } from "../../users/application/users.service.js";
 import { ProfilesService } from "./profiles.service.js";
 
@@ -27,6 +28,7 @@ export class CadastroService {
     private readonly profiles: ProfilesService,
     private readonly auth: AuthService,
     private readonly onboarding: OnboardingScheduler,
+    private readonly promotions: PromotionsService,
   ) {}
 
   async register(input: CadastroInput): Promise<CadastroResult> {
@@ -58,6 +60,8 @@ export class CadastroService {
       senhaHash,
     });
     await this.profiles.createForUser(user);
+    // Programa de indicação (best-effort): emite os cupons e vincula o par.
+    await this.promotions.processReferral(user.id, input.codigoIndicacao);
     await this.onboarding.scheduleSequence(user.id, user.whatsapp);
     const tokens = await this.auth.login(user);
 

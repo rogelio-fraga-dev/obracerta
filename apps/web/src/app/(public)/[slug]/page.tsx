@@ -8,6 +8,7 @@ import { config } from "@/lib/config";
 import { formatRelativeBR } from "@/lib/format";
 import { getSession } from "@/lib/session";
 import { BackButton } from "@/components/BackButton";
+import { BadgeCheck } from "lucide-react";
 import { ShareButton } from "./ShareButton";
 
 interface PageProps {
@@ -80,9 +81,19 @@ export default async function PublicProfilePage({ params }: PageProps) {
             )}
           </div>
           <div className="min-w-0">
-            <h1 id="profile-heading" className="font-display text-3xl font-black sm:text-4xl">
-              {nome}
-            </h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 id="profile-heading" className="font-display text-3xl font-black sm:text-4xl">
+                {nome}
+              </h1>
+              {profile.verificado && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-xs font-bold text-white"
+                  title="Identidade verificada"
+                >
+                  <BadgeCheck aria-hidden className="h-4 w-4" /> Verificado
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-white/80">{profile.especialidades.join(" · ")}</p>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/90">
               <span className="inline-flex items-center gap-1.5">
@@ -173,6 +184,13 @@ export default async function PublicProfilePage({ params }: PageProps) {
                         </div>
                         {av.comentario && (
                           <p className="text-sm leading-relaxed text-foreground">“{av.comentario}”</p>
+                        )}
+                        {av.fotoUrl && (
+                          <img
+                            src={av.fotoUrl}
+                            alt="Foto do serviço concluído"
+                            className="max-h-56 w-full rounded-lg border border-border object-cover"
+                          />
                         )}
                         {av.resposta && (
                           <div className="rounded-lg border border-border bg-muted/40 p-3">

@@ -17,6 +17,8 @@ export const workOrderSchema = z.object({
   contractorId: uuidSchema,
   cidadeId: uuidSchema,
   especialidade: z.string().trim().min(2).max(60),
+  /** Sub-serviço do catálogo guiado (ex.: "Troca de chuveiro") — opcional. */
+  subServico: z.string().trim().max(80).nullable(),
   titulo: z.string().trim().min(3).max(140),
   descricao: z.string().trim().max(2000).nullable(),
   urgencia: workUrgencySchema,
@@ -69,6 +71,8 @@ export type CompanyReport = z.infer<typeof companyReportSchema>;
 export const createWorkOrderSchema = z.object({
   cidadeId: uuidSchema,
   especialidade: z.string().trim().min(2).max(60),
+  /** Sub-serviço do catálogo guiado (pedido guiado) — opcional. */
+  subServico: z.string().trim().min(2).max(80).optional(),
   titulo: z.string().trim().min(3).max(140),
   descricao: z.string().trim().max(2000).optional(),
   urgencia: workUrgencySchema,

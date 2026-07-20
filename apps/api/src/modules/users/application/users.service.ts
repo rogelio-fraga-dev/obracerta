@@ -152,4 +152,21 @@ export class UsersService {
   listAdmins(): Promise<User[]> {
     return this.users.findAdmins();
   }
+
+  /** Programa de indicação: dono de um código (null se não existir). */
+  findByCodigoIndicacao(codigo: string): Promise<{ id: string } | null> {
+    return this.users.findByCodigoIndicacao(codigo);
+  }
+
+  getCodigoIndicacao(id: string): Promise<string | null> {
+    return this.users.getCodigoIndicacao(id);
+  }
+
+  setCodigoIndicacao(id: string, codigo: string): Promise<void> {
+    return this.users.setCodigoIndicacao(id, codigo);
+  }
+
+  setIndicadoPor(id: string, referrerId: string): Promise<void> {
+    return this.users.setIndicadoPor(id, referrerId);
+  }
 }

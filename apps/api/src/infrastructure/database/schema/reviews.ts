@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, text, timestamp, index, unique, check } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, text, varchar, timestamp, index, unique, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { users } from "./users.js";
 import { bookingRequests } from "./booking-requests.js";
@@ -31,6 +31,8 @@ export const reviews = pgTable(
     papelAutor: userTipoEnum("papel_autor").notNull(),
     nota: integer("nota").notNull(),
     comentario: text("comentario"),
+    // Foto do serviço concluído anexada à avaliação (prova social). Opcional.
+    fotoUrl: varchar("foto_url", { length: 500 }),
     status: reviewStatusEnum("status").notNull().default("PENDENTE"),
     prazoEm: timestamp("prazo_em", { withTimezone: true }).notNull(),
     reveladaEm: timestamp("revelada_em", { withTimezone: true }),

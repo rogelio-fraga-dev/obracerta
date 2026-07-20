@@ -34,6 +34,8 @@ export const professionalProfileSchema = z.object({
   completudePct: z.number().int().min(0).max(100),
   plano: professionalPlanSchema,
   slugPublico: slugSchema,
+  /** Identidade verificada por foto (selfie aprovada). */
+  verificado: z.boolean().default(false),
 });
 export type ProfessionalProfile = z.infer<typeof professionalProfileSchema>;
 

@@ -66,6 +66,7 @@ export class DrizzlePublicQueryRepository implements PublicQueryRepository {
       select
         r.nota,
         r.comentario,
+        r.foto_url as "fotoUrl",
         r.criado_em as "criadoEm",
         u.nome_completo as "autorNome",
         resp.texto as "resposta"
@@ -90,6 +91,7 @@ export class DrizzlePublicQueryRepository implements PublicQueryRepository {
       const r = row as {
         nota: number;
         comentario: string | null;
+        fotoUrl: string | null;
         criadoEm: string | Date;
         autorNome: string;
         resposta: string | null;
@@ -97,6 +99,7 @@ export class DrizzlePublicQueryRepository implements PublicQueryRepository {
       return {
         nota: r.nota,
         comentario: r.comentario,
+        fotoUrl: r.fotoUrl ?? null,
         criadoEm:
           r.criadoEm instanceof Date ? r.criadoEm.toISOString() : new Date(r.criadoEm).toISOString(),
         autorNome: r.autorNome,

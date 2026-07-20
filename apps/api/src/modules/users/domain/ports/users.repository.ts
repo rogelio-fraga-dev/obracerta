@@ -36,6 +36,14 @@ export interface UsersRepository {
   updatePasswordHash(id: string, hash: string): Promise<void>;
   /** Busca todos os usuários com papel ADMIN. */
   findAdmins(): Promise<User[]>;
+  /** Programa de indicação: acha o dono de um código de indicação. */
+  findByCodigoIndicacao(codigo: string): Promise<{ id: string } | null>;
+  /** Código de indicação do usuário (null se ainda não gerado). */
+  getCodigoIndicacao(id: string): Promise<string | null>;
+  /** Grava o código de indicação (idempotente — só se ainda não houver). */
+  setCodigoIndicacao(id: string, codigo: string): Promise<void>;
+  /** Marca quem indicou este usuário (só na 1ª vez). */
+  setIndicadoPor(id: string, referrerId: string): Promise<void>;
 }
 
 /** Token de DI para a porta (a interface some no runtime; o Symbol não). */

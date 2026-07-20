@@ -17,6 +17,7 @@ export function rowToReview(row: ReviewRow): Review {
     papelAutor: row.papelAutor as UserType,
     nota: row.nota,
     comentario: row.comentario,
+    fotoUrl: row.fotoUrl,
     status: row.status as Review["status"],
     prazoEm: row.prazoEm.toISOString(),
     reveladaEm: row.reveladaEm ? row.reveladaEm.toISOString() : null,
@@ -38,11 +39,21 @@ export class DrizzleReviewRepository implements ReviewRepository {
         papelAutor: data.papelAutor,
         nota: data.nota,
         comentario: data.comentario,
+        fotoUrl: data.fotoUrl,
         prazoEm: new Date(data.prazoEm),
       })
       .returning();
     if (!row) throw new Error("Falha ao registrar a avaliação.");
     return rowToReview(row);
+  }
+
+  async setFoto(reviewId: string, autorId: string, url: string): Promise<Review | null> {
+    const [row] = await this.db
+      .update(reviews)
+      .set({ fotoUrl: url })
+      .where(and(eq(reviews.id, reviewId), eq(reviews.autorId, autorId)))
+      .returning();
+    return row ? rowToReview(row) : null;
   }
 
   async findById(id: string): Promise<Review | null> {

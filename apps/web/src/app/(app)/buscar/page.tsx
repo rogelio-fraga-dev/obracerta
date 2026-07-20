@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Trophy, Lightbulb } from "lucide-react";
+import { Trophy, Lightbulb, BadgeCheck } from "lucide-react";
 import {
   formatCentavos,
   professionalPlanCatalog,
@@ -91,6 +91,17 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
         </Button>
       </div>
 
+      {/* Atalho para o fluxo guiado (concierge) — quem não sabe por onde começar. */}
+      <Link
+        href="/pedidos/guiado"
+        className="block rounded-xl border border-primary/25 bg-primary/[0.04] px-4 py-3 text-sm transition-colors hover:bg-primary/[0.08]"
+      >
+        <span className="font-bold text-primary">Não sabe por onde começar?</span>{" "}
+        <span className="text-foreground">
+          Use o pedido guiado — 3 passos e a gente encontra o profissional certo. →
+        </span>
+      </Link>
+
       <Suspense fallback={<div className="text-sm text-muted-foreground">Carregando filtros…</div>}>
         <SearchFilters />
       </Suspense>
@@ -137,6 +148,11 @@ export default async function BuscarPage({ searchParams }: { searchParams: Searc
                           {p.nome}
                         </Link>
                         <Badge tone={PLANO_TONE[p.plano]}>{professionalPlanCatalog[p.plano].nome}</Badge>
+                        {p.verificado && (
+                          <span className="inline-flex items-center gap-1 text-xs font-bold text-success" title="Identidade verificada">
+                            <BadgeCheck aria-hidden className="h-4 w-4" /> Verificado
+                          </span>
+                        )}
                       </div>
                       <p className="truncate text-sm text-muted-foreground">
                         {p.especialidades.join(" · ")}

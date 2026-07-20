@@ -86,6 +86,8 @@ export type Invoice = z.infer<typeof invoiceSchema>;
 export const createSubscriptionSchema = z.object({
   plano: professionalPlanSchema,
   cartaoToken: z.string().trim().min(8).max(64).optional(),
+  /** Cupom de desconto opcional aplicado à 1ª fatura da assinatura. */
+  cupom: z.string().trim().min(3).max(24).optional(),
 });
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 

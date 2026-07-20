@@ -90,6 +90,7 @@ describe("DrizzleReviewRepository (integração)", () => {
       papelAutor: "CONTRATANTE",
       nota: 5,
       comentario: "Ótimo serviço",
+      fotoUrl: null,
       prazoEm: prazo,
     });
     expect(r.status).toBe("PENDENTE");
@@ -107,6 +108,7 @@ describe("DrizzleReviewRepository (integração)", () => {
       papelAutor: "PROFISSIONAL",
       nota: 4,
       comentario: null,
+      fotoUrl: null,
       prazoEm: prazo,
     });
     expect(await repo.countForBooking(bookingPar)).toBe(2);
@@ -130,6 +132,7 @@ describe("DrizzleReviewRepository (integração)", () => {
       papelAutor: "CONTRATANTE",
       nota: 3,
       comentario: "Ok",
+      fotoUrl: null,
       prazoEm: prazo,
     });
     // janela fechou: revela o que houver (1 avaliação → 1 alvo: o profissional)

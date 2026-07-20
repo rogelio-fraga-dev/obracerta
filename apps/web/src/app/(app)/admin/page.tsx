@@ -3,7 +3,7 @@ import { ApiEnvelopeError, formatCentavos, type HealthSnapshot } from "@obracert
 import { Badge, Card } from "@obracerta/ui";
 import { serverApi } from "@/lib/server-api";
 import { getProfileHint } from "@/lib/session";
-import { AnalyticsIcon, MoneyIcon, ShieldIcon } from "../_shell/icons";
+import { AnalyticsIcon, MoneyIcon, ShieldIcon, TagIcon } from "../_shell/icons";
 import { AdminCharts } from "./_components/AdminCharts";
 
 function pct(taxa: number): string {
@@ -120,6 +120,12 @@ export default async function AdminPage() {
           title="Fila do financeiro"
           desc="Reembolsos pendentes para aprovar"
           Icon={MoneyIcon}
+        />
+        <ShortcutCard
+          href="/admin/cupons"
+          title="Cupons e promoções"
+          desc="Crie e gerencie cupons de desconto"
+          Icon={TagIcon}
         />
       </div>
 

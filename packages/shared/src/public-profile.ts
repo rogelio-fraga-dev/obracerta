@@ -10,6 +10,8 @@ export const publicReviewSchema = z.object({
   autorNome: z.string(),
   nota: z.number().int().min(1).max(5),
   comentario: z.string().nullable(),
+  /** Foto do serviço concluído anexada à avaliação (prova social), se houver. */
+  fotoUrl: z.string().nullable(),
   criadoEm: isoTimestampSchema,
   /** Resposta pública do profissional (direito de resposta), se houver. */
   resposta: z.string().nullable(),
@@ -33,6 +35,8 @@ export const publicProfileSchema = z.object({
   plano: professionalPlanSchema,
   /** Foto pública; `null` no plano Iniciante. */
   fotoUrl: z.string().nullable(),
+  /** Identidade verificada por foto (selfie aprovada pela moderação). */
+  verificado: z.boolean().default(false),
   /** Galeria de obras (vazia se o plano não inclui portfólio). */
   portfolio: z.array(publicPortfolioPhotoSchema),
   reputacao: reputationSummarySchema,

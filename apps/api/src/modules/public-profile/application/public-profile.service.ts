@@ -60,6 +60,7 @@ export class PublicProfileService {
       anosExperiencia: profile.anosExperiencia,
       plano: profile.plano,
       fotoUrl: publicFoto(profile.fotoUrl ?? user.fotoUrl ?? null, profile.plano),
+      verificado: profile.verificado,
       portfolio: await this.publicPortfolio(profile.userId, profile.plano),
       reputacao,
       avaliacoes,
@@ -80,6 +81,7 @@ export class PublicProfileService {
       autorNome: autores[i] ? nomeParcial(autores[i]!.nomeCompleto) : "Contratante",
       nota: r.nota,
       comentario: r.comentario,
+      fotoUrl: r.fotoUrl,
       criadoEm: r.criadoEm,
       resposta: r.resposta,
     }));
@@ -136,6 +138,7 @@ export class PublicProfileService {
       items: items.map((r) => ({
         nota: r.nota,
         comentario: r.comentario,
+        fotoUrl: r.fotoUrl,
         criadoEm: r.criadoEm,
         autorNome: nomeParcial(r.autorNome),
         resposta: r.resposta,

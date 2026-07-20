@@ -32,6 +32,19 @@ export interface ProfilesRepository {
   ): Promise<ProfessionalProfile | null>;
   setFotoUrl(userId: string, url: string): Promise<ProfessionalProfile | null>;
   setCompletude(userId: string, pct: number): Promise<void>;
+
+  /** Verificação por foto — grava a foto e coloca EM_ANALISE. */
+  setVerificationPhoto(userId: string, url: string): Promise<void>;
+  /** Estado + foto da verificação do profissional. */
+  getVerification(
+    userId: string,
+  ): Promise<{ status: string; fotoUrl: string | null; verificadoEm: string | null } | null>;
+  /** Fila da moderação: profissionais EM_ANALISE (foto + nome). */
+  listPendingVerifications(): Promise<
+    { userId: string; nome: string; fotoUrl: string | null; enviadoEm: string }[]
+  >;
+  /** Aprova/recusa uma verificação (VERIFICADO/RECUSADO). Guardado por status EM_ANALISE. */
+  resolveVerification(userId: string, aprovar: boolean): Promise<boolean>;
 }
 
 export const PROFILES_REPOSITORY = Symbol("PROFILES_REPOSITORY");

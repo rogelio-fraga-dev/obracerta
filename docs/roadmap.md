@@ -568,6 +568,55 @@ seeding de oferta por cidade-piloto (operacional).
 - **Asaas real** — tokenização de cartão de verdade e cobrança automática na renovação (hoje o
   fluxo é fake/sandbox: token local + Pix simulado).
 
+### Fase 10 — Confiança + Crescimento (jul/2026) ✅ _(verificação por foto, foto na avaliação, indicação, cupons, pedido guiado/concierge)_
+
+> Origem: análise competitiva ("o que falta vs. outros apps do segmento"). Decisão do fundador:
+> **verificação só por foto da pessoa** (checagem de antecedentes ficou de fora); WhatsApp segue
+> em aberto no projeto. Migração `0024`; tudo validado ao vivo em localhost.
+
+- [x] **10.1 — Verificação de identidade por selfie (selo "Verificado")**: fluxo
+  `NAO_ENVIADO → EM_ANALISE → VERIFICADO/RECUSADO` em `professional_profiles`
+  (`verificacao_status/foto/verificado_em`). O profissional envia a selfie no /perfil
+  (multipart, magic-bytes, storage privado — só a moderação vê); a fila da moderação
+  (`GET /profiles/verificacoes/pendentes`, MODERADOR/ADMIN) aprova/recusa com notificação
+  no sino. **Selo público**: `verificado` no perfil público, na busca e nos favoritos
+  (`verificacao_status === 'VERIFICADO'` — nunca expõe o status cru). UI: `VerificationCard`
+  no /perfil (4 estados) + seção "Verificações de identidade" em /admin/moderacao + selo
+  `BadgeCheck` na busca e no hero do `/[slug]`.
+- [x] **10.2 — Avaliação com foto do serviço concluído**: `reviews.foto_url`; upload multipart
+  (`POST /reviews/:id/foto`, só o autor, best-effort — falha da foto não invalida a nota);
+  exibida no perfil público (recentes + página paginada), nas avaliações recebidas e como
+  prova social. `ReviewForm` ganhou o campo opcional de foto.
+- [x] **10.3 — Programa de indicação (indique e ganhe)**: `users.codigo_indicacao` (único, 8
+  chars sem ambiguidade) + `referrals` (par indicador→indicado, único por indicado). Código
+  opcional no cadastro; ao usar, **ambos ganham cupons automáticos** (indicador: 20% na
+  próxima fatura; indicado: 15 dias grátis) — processamento best-effort (nunca derruba o
+  cadastro; ignora auto-indicação/re-indicação). Painel "Indique e ganhe" no /perfil
+  (código + copiar + total + cupons disponíveis; `GET /promotions/me/indicacao`).
+- [x] **10.4 — Cupons e promoções**: módulo `promotions` (hexagonal: `coupons` +
+  `coupon_redemptions` com resgate atômico via índice único + incremento atômico).
+  Tipos: `PERCENTUAL` / `FIXO` (centavos) / `DIAS_GRATIS` (estende o vencimento da 1ª
+  fatura). Admin cria/lista/ativa-desativa em `/admin/cupons`; usuário valida na prévia
+  (`POST /promotions/cupons/preview` com motivo claro: inativo/expirado/esgotado/já usado);
+  **integração no billing**: `subscribe` aceita `cupom`, desconta só a 1ª fatura (recorrência
+  mantém o preço cheio) e registra o resgate. Campo de cupom no checkout do cadastro.
+  Regras puras testadas (`promotions-rules.spec`, 14 casos).
+- [x] **10.5 — Pedido guiado + match concierge**: catálogo `subServicesByProfession` no shared
+  (15 profissões × sub-serviços comuns) + `work_orders.sub_servico`. Wizard em 4 passos
+  (`/pedidos/guiado`): profissão → sub-serviço → detalhes (endereço salvo/cidade/urgência)
+  → **match** (top profissionais da especialidade por reputação/plano, com selo Verificado)
+  com dupla saída: **"Chamar direto"** (pré-preenche `/pedidos/novo`) ou **"Publicar para
+  lances"** (cria a obra com `subServico`). Atalhos no /inicio (1ª ação do contratante) e
+  no /buscar; o detalhe da obra exibe "Especialidade · Sub-serviço".
+- [x] **Seed atualizado**: Marcos VERIFICADO / Joana EM_ANALISE (fila demo) / Pedro não enviado;
+  avaliação do Carlos com foto do serviço; Carlos indicou a Aline (cupons IND-CARLOS1 e
+  BEM-ALINE01); campanha BEMVINDO (20%, 100 usos) + PROMO10 expirado; obras com sub-serviço.
+- [x] **Qualidade**: 238 unit + 44 int (API) + 36 shared, typecheck/lint limpos; smoke E2E em
+  localhost cobrindo os 5 recursos (API e páginas autenticadas).
+
+**Fora desta fase (decisão explícita do fundador):** checagem de antecedentes (retirada);
+WhatsApp real segue no backlog (Fase 9+).
+
 ### Pré-lançamento (paralelo, não-código)
 - Validação com usuários reais (10 entrevistas/perfil) + MVP manual (Wizard of Oz).
 - Consulta jurídica (LGPD, termos, CDC). **Decisão final de nome + domínio.**

@@ -81,6 +81,7 @@ describe("ReviewReminderProcessor (integração)", () => {
       papelAutor: "PROFISSIONAL",
       nota: 5,
       comentario: null,
+      fotoUrl: null,
       prazoEm: reviewDeadline(new Date()).toISOString(),
     });
   });

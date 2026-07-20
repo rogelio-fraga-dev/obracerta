@@ -118,6 +118,14 @@ export default async function AvaliacoesPage() {
                     </p>
                   )}
 
+                  {r.fotoUrl && (
+                    <img
+                      src={r.fotoUrl}
+                      alt="Foto do serviço concluído"
+                      className="max-h-64 w-full rounded-xl border border-border object-cover"
+                    />
+                  )}
+
                   {r.resposta && (
                     <div className="rounded-xl border border-border bg-muted/40 p-4">
                       <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">

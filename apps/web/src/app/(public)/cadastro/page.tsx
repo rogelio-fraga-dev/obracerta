@@ -120,10 +120,12 @@ function EmailSignup({
   initialEmail = "",
   initialNome = "",
   initialTipo = "PROFISSIONAL",
+  initialCodigoIndicacao = "",
 }: {
   initialEmail?: string;
   initialNome?: string;
   initialTipo?: UserType;
+  initialCodigoIndicacao?: string;
 }) {
   const router = useRouter();
   const [fase, setFase] = useState<"dados" | "plano" | "cartao" | "pronto">("dados");
@@ -135,6 +137,8 @@ function EmailSignup({
   const [cnpj, setCnpj] = useState("");
   const [razaoSocial, setRazaoSocial] = useState("");
   const [plano, setPlano] = useState<ProfessionalPlan | null>(null);
+  const [cupom, setCupom] = useState("");
+  const [codigoIndicacao, setCodigoIndicacao] = useState(initialCodigoIndicacao);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const { error, loading, run } = useAsyncAction();
 
@@ -154,7 +158,14 @@ function EmailSignup({
         if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
         await bff.post<{ user: User }>("/api/auth/register-company", parsed.data);
       } else {
-        const parsed = registerSchema.safeParse({ nomeCompleto, email, password, whatsapp, tipo });
+        const parsed = registerSchema.safeParse({
+          nomeCompleto,
+          email,
+          password,
+          whatsapp,
+          tipo,
+          codigoIndicacao: codigoIndicacao.trim() || undefined,
+        });
         if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Dados inválidos.");
         await bff.post<{ user: User }>("/api/auth/register", parsed.data);
       }
@@ -165,7 +176,11 @@ function EmailSignup({
   const assinarComCartao = (cartaoToken: string) =>
     run(async () => {
       if (!plano) throw new Error("Escolha um plano para continuar.");
-      const sub = await bff.post<Subscription>("/api/billing/subscribe", { plano, cartaoToken });
+      const sub = await bff.post<Subscription>("/api/billing/subscribe", {
+        plano,
+        cartaoToken,
+        cupom: cupom.trim() || undefined,
+      });
       setSubscription(sub);
       setFase("pronto");
     });
@@ -202,6 +217,14 @@ function EmailSignup({
             />
           ))}
         </div>
+        <Field label="Cupom de desconto" hint="Opcional — aplicado na primeira fatura.">
+          <Input
+            placeholder="Ex.: BEMVINDO"
+            value={cupom}
+            onChange={(e) => setCupom(e.target.value.toUpperCase())}
+            maxLength={24}
+          />
+        </Field>
         <PrimaryAction loading={loading}>Continuar para o cartão</PrimaryAction>
       </form>
     );
@@ -318,6 +341,14 @@ function EmailSignup({
       </Field>
       <Field label="WhatsApp" hint="Só DDD e número — fica escondido até você aceitar um pedido.">
         <WhatsappInput value={whatsapp} onValueChange={setWhatsapp} />
+      </Field>
+      <Field label="Código de indicação" hint="Opcional — se um amigo te indicou, informe o código dele.">
+        <Input
+          placeholder="Ex.: ABCD2345"
+          value={codigoIndicacao}
+          onChange={(e) => setCodigoIndicacao(e.target.value.toUpperCase())}
+          maxLength={12}
+        />
       </Field>
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Criando conta…" : "Criar conta"}

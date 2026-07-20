@@ -87,7 +87,7 @@
     <div class="sub">Marketplace vertical de profissionais da construção civil.<br />
     Visão do sistema, fluxos, e comparação Proposta de Valor / PRD × Construído.</div>
     <div class="meta kv">
-      <dt>Estado</dt><dd>MVP navegável ponta a ponta, no ar (demo pública). Fases 0–12 concluídas.</dd>
+      <dt>Estado</dt><dd>MVP navegável ponta a ponta, no ar (demo pública). Fases 0–13 concluídas (Fase 13 — confiança + crescimento — validada em localhost, deploy pendente).</dd>
       <dt>Base documental</dt><dd>Proposta de Valor v0.2 · PRD v0.1 (27 seções) · Roadmap v2.2 · Homologação 18/07</dd>
       <dt>Arquitetura</dt><dd>Monorepo Turborepo · Next.js 15 (BFF) · NestJS (hexagonal/DDD) · PostgreSQL 16 + PostGIS · Redis/BullMQ</dd>
       <dt>Marca</dt><dd>Nome de trabalho — desacoplado em config/tokens (troca sem refatorar). <code>ObraCerta</code> é placeholder.</dd>
@@ -307,7 +307,14 @@
   </div>
 
   <div class="card avoid-break">
-    <h4>6.4 Decisões de execução</h4>
+    <h4>6.4 Confiança e crescimento (Fase 13): selfie em vez de antecedentes</h4>
+    <p><strong>Antes (PRD/proposta):</strong> "verificação de antecedentes" listada como diferencial futuro.</p>
+    <p><strong>Agora:</strong> <strong>verificação de identidade por selfie</strong> revisada pela moderação (selo público "Verificado"), <strong>foto do serviço concluído na avaliação</strong> (prova social), <strong>programa de indicação</strong> com recompensa em cupom para os dois lados, <strong>cupons/promoções</strong> integrados à assinatura e <strong>pedido guiado com match concierge</strong> por sub-serviço.</p>
+    <p class="muted" style="margin-bottom:0"><strong>Por quê:</strong> análise competitiva (jul/2026) apontou as lacunas vs. apps do segmento; o fundador escolheu os 5 recursos e <strong>retirou a checagem de antecedentes</strong> — custo e fricção não se justificam no piloto, e selfie + reputação dupla-cega cobrem a confiança. A recompensa da indicação reusa o mecanismo de cupons (uso único, resgate atômico) em vez de criar uma contabilidade de créditos.</p>
+  </div>
+
+  <div class="card avoid-break">
+    <h4>6.5 Decisões de execução</h4>
     <ul style="margin-bottom:0">
       <li><strong>Backend-first:</strong> todo o backend (Fases 2–6) foi construído e provado como API antes do frontend consolidado (Fase 7). Contratos estáveis evitaram retrabalho.</li>
       <li><strong>Sem chat interno:</strong> apenas mensagem na proposta + contato liberado; depois, um chat simples no pedido/obra foi adicionado no pacote de evolução.</li>
@@ -326,7 +333,10 @@
       <tr><td>Identidade & perfil</td><td>Cadastro multi-método, completude gamificada, foto/portfólio, slug público, edição de perfil.</td></tr>
       <tr><td>Descoberta</td><td>Busca por texto + geo + nota + plano; ranking; faixa de preço anônima; perfil público; favoritos; diretório de empresas.</td></tr>
       <tr><td>Agendamento</td><td>Pedido com mensagem/foto; máquina de estados; contato double-blind; reagendamento; termos bilaterais; resumo exportável ("contrato").</td></tr>
-      <tr><td>Reputação</td><td>Avaliação dupla-cega, direito de resposta, badges, denúncia, moderação, suspensão + apelação.</td></tr>
+      <tr><td>Reputação</td><td>Avaliação dupla-cega <strong>com foto do serviço concluído</strong>, direito de resposta, badges, denúncia, moderação, suspensão + apelação.</td></tr>
+      <tr><td>Confiança</td><td><strong>Verificação de identidade por selfie</strong> (fila da moderação; selo "Verificado" na busca, no perfil público, nos favoritos e no match do concierge — a foto é privada, só a moderação vê).</td></tr>
+      <tr><td>Crescimento</td><td><strong>Programa de indicação</strong> (código no cadastro; indicador e indicado ganham cupons automáticos) + <strong>cupons/promoções</strong> (percentual, valor fixo ou dias grátis; desconto na 1ª fatura da assinatura; gestão em /admin/cupons).</td></tr>
+      <tr><td>Pedido guiado</td><td><strong>Wizard concierge em 4 passos</strong> (profissão → sub-serviço → detalhes → match por reputação/plano) com dupla saída: chamar o profissional direto ou publicar a obra para lances; catálogo de sub-serviços por profissão.</td></tr>
       <tr><td>Obras & lances</td><td>Publicar obra, lances sigilosos, piso de dignidade, adjudicação, destaque de obras (Empresa PRO), mapa de obras.</td></tr>
       <tr><td>Monetização</td><td>3 tabelas de plano, trial com cartão, faturas, Pix (sandbox), reembolso CDC, upgrade no app, cancelamento.</td></tr>
       <tr><td>Ferramentas do pro</td><td>Orçamentos e recibos (Especialista); analytics do perfil (básico + avançado).</td></tr>
@@ -356,7 +366,7 @@
   </table>
 
   <h3>8.2 Fora do escopo do MVP (decisão — Fases futuras)</h3>
-  <p><span class="tag t-fut">Fora do MVP</span> Comissão por transação (8–12%) · verificação de antecedentes · app nativo iOS/Android · escrow/pagamento da obra · geração de contrato jurídico · verificação automática de referências/conselhos. Entram "quando o volume justificar a infraestrutura" (§27 do PRD / proposta §7.2).</p>
+  <p><span class="tag t-fut">Fora do MVP</span> Comissão por transação (8–12%) · <strong>checagem de antecedentes</strong> (decisão do fundador, jul/2026: a confiança no piloto é coberta pela <em>verificação por selfie</em> + reputação dupla-cega) · app nativo iOS/Android · escrow/pagamento da obra · geração de contrato jurídico · verificação automática de referências/conselhos. Entram "quando o volume justificar a infraestrutura" (§27 do PRD / proposta §7.2).</p>
 
   <h3>8.3 Refinamentos técnicos na fila (não bloqueiam piloto)</h3>
   <ul>

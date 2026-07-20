@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module.js";
 import { AuthModule } from "../auth/auth.module.js";
 import { EntitlementsModule } from "../entitlements/entitlements.module.js";
+import { PromotionsModule } from "../promotions/promotions.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { BillingScheduler, BILLING_QUEUE } from "./application/billing.scheduler.js";
 import { BillingService } from "./application/billing.service.js";
@@ -34,6 +35,7 @@ import { BillingController } from "./interface/billing.controller.js";
     UsersModule,
     AuditModule,
     EntitlementsModule,
+    PromotionsModule,
     BullModule.registerQueue({ name: BILLING_QUEUE }),
   ],
   controllers: [BillingController],

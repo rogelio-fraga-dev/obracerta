@@ -37,6 +37,9 @@ async function main(): Promise<void> {
 
   console.log("Limpando banco de dados para seed completo...");
   // Ordem reversa de dependência (FKs). Em dev, apagamos tudo sem medo.
+  await db.delete(schema.referrals);
+  await db.delete(schema.couponRedemptions);
+  await db.delete(schema.coupons);
   await db.delete(schema.supportTickets);
   await db.delete(schema.notifications);
   await db.delete(schema.pushSubscriptions);
@@ -122,8 +125,9 @@ async function main(): Promise<void> {
   const foto = (n: number) => `https://i.pravatar.cc/300?img=${n}`;
 
   await db.insert(schema.users).values([
-    { id: carlosId, nomeCompleto: "Carlos Contratante", whatsapp: "+5511999990001", email: "carlos@example.com", senhaHash: hashUsuario, cidadeId, tipo: "CONTRATANTE", status: "ATIVO", fotoUrl: foto(12) },
-    { id: alineId, nomeCompleto: "Aline Ribeiro", whatsapp: "+5511999990002", email: "aline@example.com", senhaHash: hashUsuario, cidadeId, tipo: "CONTRATANTE", status: "ATIVO", fotoUrl: foto(47) },
+    // Indicação: Carlos indicou a Aline (codigo CARLOS23) — painel "Indique e ganhe" com dados.
+    { id: carlosId, nomeCompleto: "Carlos Contratante", whatsapp: "+5511999990001", email: "carlos@example.com", senhaHash: hashUsuario, cidadeId, tipo: "CONTRATANTE", status: "ATIVO", fotoUrl: foto(12), codigoIndicacao: "CARLOS23" },
+    { id: alineId, nomeCompleto: "Aline Ribeiro", whatsapp: "+5511999990002", email: "aline@example.com", senhaHash: hashUsuario, cidadeId, tipo: "CONTRATANTE", status: "ATIVO", fotoUrl: foto(47), codigoIndicacao: "ALINE234", indicadoPor: carlosId },
     { id: joanaId, nomeCompleto: "Joana Andrade Silva", whatsapp: "+5511999990003", email: "joana@example.com", senhaHash: hashUsuario, cidadeId, tipo: "PROFISSIONAL", status: "ATIVO", fotoUrl: foto(31) },
     { id: pedroId, nomeCompleto: "Pedro Pereira", whatsapp: "+5511999990004", email: "pedro@example.com", senhaHash: hashUsuario, cidadeId, tipo: "PROFISSIONAL", status: "ATIVO", fotoUrl: foto(59) },
     { id: marcosId, nomeCompleto: "Marcos Eletricista", whatsapp: "+5511999990005", email: "marcos@example.com", senhaHash: hashUsuario, cidadeId, tipo: "PROFISSIONAL", status: "ATIVO", fotoUrl: foto(53) },
@@ -140,9 +144,10 @@ async function main(): Promise<void> {
   ]);
 
   await db.insert(schema.professionalProfiles).values([
-    { userId: joanaId, especialidades: ["Gesseiro", "Azulejista"], anosExperiencia: 8, bairro: "Pinheiros", raioAtendimentoKm: 15, valores: "Diária a partir de R$ 280", formacaoDeclarada: "Curso técnico SENAI", completudePct: 100, plano: "PRO", slugPublico: "joana-gesseira-silva", fotoUrl: foto(31) },
+    // Verificação por foto: Joana EM_ANALISE (aparece na fila da moderação); Marcos VERIFICADO (selo público); Pedro NAO_ENVIADO.
+    { userId: joanaId, especialidades: ["Gesseiro", "Azulejista"], anosExperiencia: 8, bairro: "Pinheiros", raioAtendimentoKm: 15, valores: "Diária a partir de R$ 280", formacaoDeclarada: "Curso técnico SENAI", completudePct: 100, plano: "PRO", slugPublico: "joana-gesseira-silva", fotoUrl: foto(31), verificacaoStatus: "EM_ANALISE", verificacaoFotoUrl: foto(31) },
     { userId: pedroId, especialidades: ["Pedreiro", "Alvenaria"], anosExperiencia: 2, bairro: "Itaquera", raioAtendimentoKm: 5, completudePct: 50, plano: "INICIANTE", slugPublico: "pedro-pereira", fotoUrl: foto(59) },
-    { userId: marcosId, especialidades: ["Eletricista", "Encanador"], anosExperiencia: 12, bairro: "Moema", raioAtendimentoKm: 25, valores: "Visita técnica R$ 150 + orçamento", formacaoDeclarada: "Eletrotécnico (NR-10)", completudePct: 100, plano: "ESPECIALISTA", slugPublico: "marcos-eletricista", fotoUrl: foto(53) },
+    { userId: marcosId, especialidades: ["Eletricista", "Encanador"], anosExperiencia: 12, bairro: "Moema", raioAtendimentoKm: 25, valores: "Visita técnica R$ 150 + orçamento", formacaoDeclarada: "Eletrotécnico (NR-10)", completudePct: 100, plano: "ESPECIALISTA", slugPublico: "marcos-eletricista", fotoUrl: foto(53), verificacaoStatus: "VERIFICADO", verificacaoFotoUrl: foto(53), verificadoEm: daysAgo(15) },
     { userId: robertoId, especialidades: ["Serralheiro"], anosExperiencia: 4, bairro: "Santo Amaro", raioAtendimentoKm: 10, completudePct: 70, plano: "PRO", slugPublico: "roberto-lima-serralheiro" },
   ]);
 
@@ -214,6 +219,25 @@ async function main(): Promise<void> {
     { id: randomUUID(), invoiceId: invCarlosId, userId: carlosId, valorCentavos: 3450, motivo: "CANCELAMENTO_PROPORCIONAL", status: "CONCLUIDO", gatewayId: "rfd_seed_1", processadoEm: daysAgo(1) },
   ]);
 
+  console.log("Inserindo Cupons (campanha + recompensas de indicação) e Indicação...");
+  const cupomCampanhaId = randomUUID();
+  const cupomEsgotadoId = randomUUID();
+  const cupomIndicadorId = randomUUID(); // recompensa do Carlos (indicou a Aline)
+  const cupomIndicadoId = randomUUID(); // boas-vindas da Aline (foi indicada)
+  await db.insert(schema.coupons).values([
+    // Campanha aberta criada pelo admin (aparece em /admin/cupons e funciona no checkout)
+    { id: cupomCampanhaId, codigo: "BEMVINDO", descricao: "Campanha de lançamento — 20% na 1ª fatura", tipo: "PERCENTUAL", valor: 20, usosMax: 100, usosCount: 3, ativo: true },
+    // Cupom esgotado (demonstra o estado de bloqueio na prévia)
+    { id: cupomEsgotadoId, codigo: "PROMO10", descricao: "Promoção antiga — encerrada", tipo: "FIXO", valor: 1000, usosMax: 1, usosCount: 1, ativo: true, validoAte: daysAgo(1) },
+    // Recompensas do programa de indicação (uso único, pessoais)
+    { id: cupomIndicadorId, codigo: "IND-CARLOS1", descricao: "Recompensa por indicar um amigo", tipo: "PERCENTUAL", valor: 20, usosMax: 1, usosCount: 0, ativo: true },
+    { id: cupomIndicadoId, codigo: "BEM-ALINE01", descricao: "Bônus de boas-vindas por indicação", tipo: "DIAS_GRATIS", valor: 15, usosMax: 1, usosCount: 0, ativo: true },
+  ]);
+
+  await db.insert(schema.referrals).values([
+    { id: randomUUID(), referrerId: carlosId, referredId: alineId, status: "RECOMPENSADO", cupomIndicadorId, cupomIndicadoId, criadoEm: daysAgo(30) },
+  ]);
+
   console.log("Inserindo Obras (todos os status) + Galeria de fotos...");
   const obraAbertaId = randomUUID();
   const obraAdjudicadaId = randomUUID();
@@ -227,8 +251,8 @@ async function main(): Promise<void> {
   const obraFoto = (seedName: string) => `https://picsum.photos/seed/${seedName}/800/520`;
 
   await db.insert(schema.workOrders).values([
-    { id: obraAbertaId, contractorId: carlosId, cidadeId, especialidade: "Gesseiro", titulo: "Forro de gesso em apartamento 60m²", descricao: "Instalar forro de gesso em toda a área social (sala + 2 quartos).\nPé-direito 2,70m, sanca aberta na sala.\nMaterial por conta do profissional — detalhar no lance.", bairro: "Pinheiros", urgencia: "FLEXIVEL", status: "ABERTA", pisoCentavos: 120000, expiraEm: daysFromNow(7), fotoUrl: obraFoto("obra-gesso-1") },
-    { id: obraAberta2Id, contractorId: alineId, cidadeId, especialidade: "Eletricista", titulo: "Troca de fiação em casa dos anos 70", descricao: "Casa de 120m² com fiação original. Trocar tudo, incluir DR e aterramento. Laudo ao final.", bairro: "Perdizes", urgencia: "NORMAL", status: "ABERTA", expiraEm: daysFromNow(6), fotoUrl: obraFoto("obra-fiacao-1") },
+    { id: obraAbertaId, contractorId: carlosId, cidadeId, especialidade: "Gesseiro", subServico: "Forro de gesso", titulo: "Forro de gesso em apartamento 60m²", descricao: "Instalar forro de gesso em toda a área social (sala + 2 quartos).\nPé-direito 2,70m, sanca aberta na sala.\nMaterial por conta do profissional — detalhar no lance.", bairro: "Pinheiros", urgencia: "FLEXIVEL", status: "ABERTA", pisoCentavos: 120000, expiraEm: daysFromNow(7), fotoUrl: obraFoto("obra-gesso-1") },
+    { id: obraAberta2Id, contractorId: alineId, cidadeId, especialidade: "Eletricista", subServico: "Trocar fiação", titulo: "Troca de fiação em casa dos anos 70", descricao: "Casa de 120m² com fiação original. Trocar tudo, incluir DR e aterramento. Laudo ao final.", bairro: "Perdizes", urgencia: "NORMAL", status: "ABERTA", expiraEm: daysFromNow(6), fotoUrl: obraFoto("obra-fiacao-1") },
     { id: obraAberta3Id, contractorId: empresaId, cidadeId, especialidade: "Encanador", titulo: "Instalação hidráulica de 4 banheiros", descricao: "Prédio comercial em reforma — 4 banheiros novos, tubulação completa (água fria/quente + esgoto).", bairro: "Vila Olímpia", urgencia: "URGENTE", status: "ABERTA", expiraEm: daysFromNow(2) },
     { id: obraAdjudicadaId, contractorId: carlosId, cidadeId, especialidade: "Pedreiro", titulo: "Construção de muro de 12m", descricao: "Muro de divisa, blocos de concreto, com fundação.", bairro: "Itaquera", urgencia: "NORMAL", status: "ADJUDICADA", expiraEm: daysFromNow(3), fotoUrl: obraFoto("obra-muro-1") },
     { id: obraConcluidaId, contractorId: carlosId, cidadeId, especialidade: "Eletricista", titulo: "Troca de quadro elétrico", descricao: "Modernização do quadro de distribuição.", bairro: "Moema", urgencia: "URGENTE", status: "CONCLUIDA", expiraEm: daysAgo(10) },
@@ -330,8 +354,8 @@ async function main(): Promise<void> {
 
   const reviewCarlosId = randomUUID();
   await db.insert(schema.reviews).values([
-    // Pedido concluído — avaliação bilateral revelada
-    { id: reviewCarlosId, bookingId: bkConcluidoId, autorId: carlosId, alvoId: joanaId, papelAutor: "CONTRATANTE", nota: 5, comentario: "Excelente serviço, caprichada e pontual!", status: "REVELADA", prazoEm: daysAgo(5), reveladaEm: daysAgo(5) },
+    // Pedido concluído — avaliação bilateral revelada (com foto do serviço concluído)
+    { id: reviewCarlosId, bookingId: bkConcluidoId, autorId: carlosId, alvoId: joanaId, papelAutor: "CONTRATANTE", nota: 5, comentario: "Excelente serviço, caprichada e pontual!", fotoUrl: "https://picsum.photos/seed/servico-piso-varanda/800/520", status: "REVELADA", prazoEm: daysAgo(5), reveladaEm: daysAgo(5) },
     { id: randomUUID(), bookingId: bkConcluidoId, autorId: joanaId, alvoId: carlosId, papelAutor: "PROFISSIONAL", nota: 5, comentario: "Cliente ótimo, pagou em dia.", status: "REVELADA", prazoEm: daysAgo(5), reveladaEm: daysAgo(5) },
     // Marcos (Especialista) — avaliações reveladas sem denúncia → estrela na busca (média 4.5)
     { id: randomUUID(), bookingId: bkMarcos1Id, autorId: carlosId, alvoId: marcosId, papelAutor: "CONTRATANTE", nota: 5, comentario: "Resolveu o quadro elétrico com segurança e rapidez.", status: "REVELADA", prazoEm: daysAgo(9), reveladaEm: daysAgo(9) },

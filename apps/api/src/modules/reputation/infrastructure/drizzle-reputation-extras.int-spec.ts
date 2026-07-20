@@ -70,6 +70,7 @@ describe("Reputação — badges e respostas (integração)", () => {
       papelAutor: "CONTRATANTE",
       nota: 5,
       comentario: "Excelente",
+      fotoUrl: null,
       prazoEm: reviewDeadline(new Date()).toISOString(),
     });
     await reviewRepo.revealPending(b.id);

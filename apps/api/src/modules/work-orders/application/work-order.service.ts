@@ -106,6 +106,7 @@ export class WorkOrderService {
       contractorId,
       cidadeId: input.cidadeId,
       especialidade: input.especialidade,
+      subServico: input.subServico ?? null,
       titulo: input.titulo,
       descricao: input.descricao ?? null,
       urgencia: input.urgencia,

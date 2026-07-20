@@ -5,9 +5,11 @@ import type {
   CompanyInvite,
   CompanyProfile,
   JwtClaims,
+  MyVerification,
   Penalty,
   PenaltySummary,
   PortfolioPhoto,
+  ReferralSummary,
   Suspension,
 } from "@obracerta/shared";
 import { Badge, Card, Avatar, ProgressRing, StatCard, EmptyState } from "@obracerta/ui";
@@ -25,6 +27,8 @@ import { CompanyInvites } from "./_components/CompanyInvites";
 import { ShieldIcon } from "../_shell/icons";
 import { AdminForms } from "./_components/AdminForms";
 import { ProfileEditCard } from "./_components/ProfileEditCard";
+import { VerificationCard } from "./_components/VerificationCard";
+import { ReferralCard } from "./_components/ReferralCard";
 import type { User } from "@obracerta/shared";
 
 /**
@@ -120,6 +124,18 @@ export default async function PerfilPage() {
       )}
 
       {!isAdmin && isProfissional && (
+        <Suspense fallback={<PanelSkeleton />}>
+          <VerificationPanel />
+        </Suspense>
+      )}
+
+      {!isAdmin && (
+        <Suspense fallback={<PanelSkeleton />}>
+          <ReferralPanel />
+        </Suspense>
+      )}
+
+      {!isAdmin && isProfissional && (
         <Suspense fallback={null}>
           <CompanyInvitesPanel />
         </Suspense>
@@ -149,6 +165,25 @@ export default async function PerfilPage() {
 /** Placeholder de painel enquanto a seção carrega em streaming. */
 function PanelSkeleton() {
   return <div className="animate-skeleton h-32 rounded-2xl bg-muted" />;
+}
+
+/** Verificação de identidade por foto (selfie) — só profissional. */
+async function VerificationPanel() {
+  const verificacao = await serverApi<MyVerification>(
+    "GET",
+    "/profiles/professional/me/verificacao",
+  ).catch(() => null);
+  if (!verificacao) return null;
+  return <VerificationCard verificacao={verificacao} />;
+}
+
+/** Programa de indicação — disponível para qualquer conta (não-admin). */
+async function ReferralPanel() {
+  const resumo = await serverApi<ReferralSummary>("GET", "/promotions/me/indicacao").catch(
+    () => null,
+  );
+  if (!resumo) return null;
+  return <ReferralCard resumo={resumo} />;
 }
 
 /** Convites de empresa pendentes (opt-in do diretório público) — só profissional. */

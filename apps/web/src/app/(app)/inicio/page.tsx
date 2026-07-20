@@ -79,10 +79,10 @@ const ACOES_PROFISSIONAL: Acao[] = [
 ];
 
 const ACOES_CONTRATANTE: Acao[] = [
+  { href: "/pedidos/guiado", titulo: "Pedido guiado", desc: "3 passos e a gente acha o profissional certo", Icon: SearchIcon },
   { href: "/buscar", titulo: "Encontrar profissional", desc: "Por especialidade ou perto de você", Icon: SearchIcon },
   { href: "/obras/nova", titulo: "Publicar obra", desc: "Receba lances de vários profissionais", Icon: PlusIcon },
   { href: "/pedidos", titulo: "Meus pedidos", desc: "Acompanhe seus agendamentos", Icon: PedidosIcon },
-  { href: "/cobrancas", titulo: "Cobranças", desc: "Faturas e reembolsos", Icon: PlanoIcon },
 ];
 
 /**

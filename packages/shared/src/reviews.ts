@@ -23,6 +23,8 @@ export const reviewSchema = z.object({
   papelAutor: userTypeSchema,
   nota: reviewRatingSchema,
   comentario: z.string().trim().max(1000).nullable(),
+  /** Foto do serviço concluído anexada pelo autor (prova social). Opcional. */
+  fotoUrl: z.string().url().nullable(),
   status: reviewStatusSchema,
   prazoEm: isoTimestampSchema,
   reveladaEm: isoTimestampSchema.nullable(),

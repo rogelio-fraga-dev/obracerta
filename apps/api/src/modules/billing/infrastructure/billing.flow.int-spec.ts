@@ -69,6 +69,7 @@ describe("BillingService (integração)", () => {
     usersStub,
     auditStub,
     notifyStub,
+    {} as never, // promotions (sem cupom nestes fluxos)
   );
 
   const sufixo = Date.now().toString().slice(-9);

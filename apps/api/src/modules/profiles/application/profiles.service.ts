@@ -1,13 +1,16 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type {
   User,
   ProfessionalProfile,
   ContractorProfile,
   CompanyProfile,
+  MyVerification,
+  PendingVerification,
   UpdateProfessionalProfileInput,
 } from "@obracerta/shared";
-import { UserType } from "@obracerta/shared";
+import { UserType, VerificationStatus } from "@obracerta/shared";
 import { STORAGE_PORT, type StoragePort } from "../../storage/domain/storage.port.js";
+import { InboxService } from "../../notifications/application/inbox.service.js";
 import { buildChecklist, type ChecklistItem } from "../../onboarding/domain/onboarding.js";
 import { slugify, slugWithSuffix } from "../domain/slug.js";
 import { computeProfessionalCompletude } from "../domain/completude.js";
@@ -26,7 +29,53 @@ export class ProfilesService {
   constructor(
     @Inject(PROFILES_REPOSITORY) private readonly profiles: ProfilesRepository,
     @Inject(STORAGE_PORT) private readonly storage: StoragePort,
+    private readonly inbox: InboxService,
   ) {}
+
+  /**
+   * Verificação por foto (selfie): o profissional envia uma foto e o perfil vai
+   * para EM_ANALISE. A moderação aprova/recusa; só VERIFICADO exibe o selo. A
+   * foto fica no storage (privada — só a moderação a vê pela fila).
+   */
+  async submitVerification(
+    userId: string,
+    file: { buffer: Buffer; mimetype: string },
+  ): Promise<MyVerification> {
+    const ext = sniffImageExt(file.buffer);
+    if (!ext) throw new BadRequestException("Formato inválido. Use JPEG, PNG ou WebP.");
+    const key = `verificacao/${userId}/selfie-${Date.now()}.${ext}`;
+    const url = await this.storage.putObject(key, file.buffer, IMAGE_MIME[ext]);
+    await this.profiles.setVerificationPhoto(userId, url);
+    return { status: VerificationStatus.EM_ANALISE, verificadoEm: null };
+  }
+
+  async myVerification(userId: string): Promise<MyVerification> {
+    const v = await this.profiles.getVerification(userId);
+    if (!v) throw new NotFoundException("Perfil profissional não encontrado.");
+    return { status: v.status as MyVerification["status"], verificadoEm: v.verificadoEm };
+  }
+
+  /** Fila da moderação: verificações pendentes (foto + nome). */
+  listPendingVerifications(): Promise<PendingVerification[]> {
+    return this.profiles.listPendingVerifications();
+  }
+
+  /** A moderação aprova/recusa; notifica o profissional do resultado. */
+  async resolveVerification(userId: string, aprovar: boolean): Promise<void> {
+    const ok = await this.profiles.resolveVerification(userId, aprovar);
+    if (!ok) throw new NotFoundException("Verificação não encontrada ou já resolvida.");
+    await this.inbox.record(
+      userId,
+      "SISTEMA",
+      aprovar ? "Perfil verificado ✔" : "Verificação não aprovada",
+      {
+        corpo: aprovar
+          ? "Seu selo de verificação já aparece no seu perfil e nas buscas."
+          : "A foto enviada não pôde ser validada. Reenvie uma selfie nítida pelo seu perfil.",
+        link: "/perfil",
+      },
+    );
+  }
 
   /** Cria o perfil correspondente ao tipo do usuário (chamado no cadastro). */
   async createForUser(
