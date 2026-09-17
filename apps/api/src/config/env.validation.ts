@@ -1,6 +1,15 @@
 import { z } from "zod";
 
 /**
+ * Campo de texto opcional que trata string vazia como ausente. Necessário porque
+ * o compose de produção interpola variáveis não definidas como `${VAR:-}`
+ * (string vazia), não como env ausente — sem isso, `.string().min(1).optional()`
+ * rejeita a string vazia e derruba o boot mesmo com a env "opcional" de fato ausente.
+ */
+const optionalNonEmpty = (): z.ZodOptional<z.ZodString> =>
+  z.preprocess((value) => (value === "" ? undefined : value), z.string().min(1).optional()) as unknown as z.ZodOptional<z.ZodString>;
+
+/**
  * Environment schema — validated at boot (fail fast, plan §2.5 / nestjs-patterns).
  * Zod is used here too so validation is consistent front↔back↔config.
  */
@@ -27,8 +36,8 @@ export const envSchema = z.object({
   OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 
   // Login com Google (opcional — sem as credenciais, o adapter fake simula o fluxo)
-  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
-  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  GOOGLE_CLIENT_ID: optionalNonEmpty(),
+  GOOGLE_CLIENT_SECRET: optionalNonEmpty(),
 
   // Object storage S3-compatível (roadmap §4.2)
   S3_ENDPOINT: z.string().url().default("http://localhost:9000"),
@@ -43,8 +52,8 @@ export const envSchema = z.object({
 
   // Web Push (PWA). Sem as chaves VAPID, o push fica desabilitado (in-app segue).
   // Gerar par: npx web-push generate-vapid-keys
-  VAPID_PUBLIC_KEY: z.string().min(1).optional(),
-  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  VAPID_PUBLIC_KEY: optionalNonEmpty(),
+  VAPID_PRIVATE_KEY: optionalNonEmpty(),
   VAPID_SUBJECT: z.string().default("mailto:produtoobra@gmail.com"),
 
   // Billing (roadmap §7.1). Segredo HMAC dos webhooks do gateway de pagamento.

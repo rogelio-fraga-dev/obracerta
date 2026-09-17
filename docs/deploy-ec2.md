@@ -118,7 +118,7 @@ mkdir -p ~/obracerta && tar -xzf ~/obracerta-src.tgz -C ~/obracerta && cd ~/obra
    ```bash
    docker compose --env-file infra/docker/.env.prod \
      -f infra/docker/docker-compose.prod.yml \
-     run --rm api sh -lc "pnpm db:migrate && pnpm db:seed"
+     run --rm api sh -lc "pnpm db:migrate && pnpm db:seed:completo"
    ```
 
 4. Acompanhe até o Caddy emitir o certificado (~30–60s na 1ª vez):

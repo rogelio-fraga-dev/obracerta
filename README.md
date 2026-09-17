@@ -17,7 +17,7 @@ O produto já vai **muito além da fundação**. As Fases 0–7 estão concluíd
 - **Fase 7 — Frontend completo (área logada / PWA)** ✅ — área logada navegável, instalável (PWA), E2E (Playwright) + acessibilidade (WCAG AA).
 - **Fase 8 — Evolução pós-auditoria** 🚧 — catálogo fixo de profissões, landing nova, gating + upgrade no app, mensagem+contato pós-aceite (double-blind), ferramentas do profissional (orçamento/recibo), conta PJ/Empresa, portfólio de fotos, analytics estratégico do admin, reprecificação de planos, e correções da auditoria técnica (multi-agente). **Resta apenas perf/deploy** (não bloqueia demo).
 
-> **Integrações reais ainda não cabladas** (dependem de contas/deploy): WhatsApp Cloud API, SMS, Asaas (cobrança), push VAPID e Google OAuth rodam com adapters fake/console em local. **Google = botão "em breve" (visual)**. Sem deploy por enquanto — tudo validado em localhost. Ver `docs/roadmap.md` §8.
+> **Integrações reais ainda não cabladas** (dependem de contas): WhatsApp Cloud API, SMS, Asaas (cobrança), push VAPID e Google OAuth rodam com adapters fake/console tanto em local quanto na demo na nuvem. **Google = botão "em breve" (visual)**. Ver `docs/roadmap.md` §8 e `docs/deploy-ec2.md` para o deploy de demo.
 
 ## Personas e planos
 
@@ -94,7 +94,7 @@ pnpm docker:up
 
 # 4. Aplicar migrations e popular dados de demo
 pnpm --filter @obracerta/api db:migrate
-pnpm --filter @obracerta/api db:seed
+pnpm --filter @obracerta/api db:seed:completo
 
 # 5. Rodar tudo em dev (web + api)
 pnpm dev
@@ -129,7 +129,8 @@ pnpm dev
 | `db:migrate` | Aplica migrations |
 | `db:push` | Sincroniza schema sem migration (dev) |
 | `db:studio` | Drizzle Studio |
-| `db:seed` | Popula dados de demo |
+| `db:seed` | Popula só as cidades (leve, idempotente) |
+| `db:seed:completo` | Popula dados de demo completos (usuários, obras, avaliações etc. — **apaga o banco antes**) |
 | `test` | Unit (Jest) |
 | `test:int` | Integração contra Postgres real |
 

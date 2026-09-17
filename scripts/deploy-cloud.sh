@@ -67,7 +67,7 @@ if [ "$SEED" = "1" ]; then
   echo "▶ Rodando seed (SEED=1)…"
   # shellcheck disable=SC2086
   docker compose --env-file "$ENV_FILE" -f infra/docker/docker-compose.prod.yml \
-    run --rm $SEED_ENV api sh -lc "pnpm db:seed"
+    run --rm $SEED_ENV api sh -lc "pnpm db:seed:completo"
 fi
 REMOTE
 

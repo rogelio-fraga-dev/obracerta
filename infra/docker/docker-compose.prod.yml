@@ -52,7 +52,8 @@ services:
   minio:
     # Storage S3 das fotos. Servido publicamente via Caddy (FILES_HOST) com HTTPS.
     # Se a RAM apertar no free tier, dá pra comentar este serviço (sem upload de foto).
-    image: minio/minio:latest
+    # minio/minio saiu do Docker Hub — só publicado no quay.io agora.
+    image: quay.io/minio/minio:latest
     restart: unless-stopped
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
